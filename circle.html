@@ -1,0 +1,107 @@
+<canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
+<script>
+var canvas = document.getElementById('myCanvas');
+var context = canvas.getContext('2d');
+const NOTES = ['D','e','E','F','g','G','a','A','b','B','C','d'];
+const CENTER_X = canvas.width / 2;
+const CENTER_Y = canvas.height / 2;
+const CIRCLE_DEPTH = 60;
+const NUM_OF_CIRCLES = 6;
+const NUM_OF_SECTORS = 12;
+const SEGMENT_WIDTH = 360 / NUM_OF_SECTORS;
+const HALF_SECTOR_ANGLE = SEGMENT_WIDTH/2;
+var Circle = class {
+    constructor(id, color, noteScheme){
+        this.id = id;
+        this.color = color;
+        this.noteScheme = noteScheme;
+    }
+}
+var circles = [
+    new Circle(0, 'Gold',       [1,0,1,0,1,0,1,0,1,0,1,0]),
+    new Circle(1, 'YellowGreen',[1,0,1,0,0,1,0,1,0,0,1,0]),
+    new Circle(2, 'DimGray',    [0,1,1,0,1,1,0,1,1,0,1,1]),
+    new Circle(3, 'FireBrick',  [1,1,0,0,1,1,0,1,1,0,0,1]),
+    new Circle(4, 'DodgerBlue', [1,0,1,0,1,1,0,1,1,0,1,0]),
+    new Circle(5, 'Linen',      [1,0,1,1,0,1,0,1,0,1,1,0]),
+];
+var circleOrder =  [0,1,2,3,4,5];
+var selectedCircle = 5;
+var startAngle = 0+ HALF_SECTOR_ANGLE + 180;
+var endAngle = (SEGMENT_WIDTH + HALF_SECTOR_ANGLE) +180;
+
+
+function init(){
+    document.addEventListener('keydown', (event) => {
+        const keyName = event.key;
+        //alert('keydown event\n\n' + 'key: ' + keyName);
+        if(keyName == 'ArrowDown'){
+            selectedCircle++;
+        }else if(keyName == 'ArrowUp'){
+            selectedCircle--;
+            if(selectedCircle < 0)selectedCircle= 5;
+        }else if(keyName == 'ArrowLeft'){
+            startAngle+=30;
+            endAngle+=30;
+        }else if(keyName == 'ArrowRight'){
+            startAngle-=30;
+            endAngle-=30;
+        }
+        selectedCircle %=6;
+        refresh();
+    });
+    refresh();
+}
+function refresh(){
+    context.clearRect(0,0,1000,1000);
+    for(var i=0; i < NUM_OF_CIRCLES; i++) {
+        drawSegments(i);
+        printLabels(i);
+    } 
+}
+function printLabels(numCircle){
+    var circle = circles[circleOrder[numCircle]];
+
+    var labelX = CENTER_X;
+    var labelY = CENTER_Y;
+    angle = 360/NUM_OF_SECTORS;
+    
+    var startSector = 6;
+    var scheme = circle.noteScheme;
+    for(var sector=0; sector<NUM_OF_SECTORS; sector++) {
+        labelX = CENTER_X + (CIRCLE_DEPTH*(numCircle+1)) * Math.sin(angle*(startSector+ sector)*Math.PI/180) 
+        labelY = CENTER_Y - (CIRCLE_DEPTH*(numCircle+1)) * Math.cos(angle*(startSector+sector)*Math.PI/180)
+        if(scheme[sector] == 1){
+            context.beginPath();
+            context.arc(labelX, labelY, 15, 0, Math.PI*2, false); 
+            context.fillStyle = 'white';
+            context.fill();
+            context.fillStyle = 'black';
+            context.font = '15pt Calibri';
+            context.fillText(NOTES[sector], labelX-5, labelY+5);
+        }
+    }
+}
+function drawSegments(numCircle) {   
+    var circle = circles[circleOrder[numCircle]];
+    var radius = (1+numCircle)*CIRCLE_DEPTH;
+    context.strokeStyle = circle.color;
+    for(var i = 0; i < NUM_OF_SECTORS; i++){
+      context.beginPath();
+      context.arc(CENTER_X, CENTER_Y, radius, (startAngle * Math.PI / 180), (endAngle * Math.PI / 180), false);
+      if(numCircle == selectedCircle){
+        context.lineWidth = CIRCLE_DEPTH;
+        context.stroke();
+      }else{
+        context.lineWidth = 10;//CIRCLE_DEPTH/2;
+        context.stroke();
+     }
+
+
+      startAngle += SEGMENT_WIDTH;
+      endAngle += SEGMENT_WIDTH;
+    }
+}
+ 
+init();
+</script>
