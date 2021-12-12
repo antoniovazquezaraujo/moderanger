@@ -137,8 +137,7 @@
             drawNotes(i);
             drawChordNotes(i);
         }
-        playClic();
-    }
+     }
 
     function moveCircleIn() {
         moveCircle(selectedCircle, selectedCircle + 1);
@@ -192,6 +191,9 @@
                 } else if (keyName == 'Delete') {
                     removeChordNote();
                 }
+            }
+            if(keyName != ' '){
+                playClic();
             }
             refresh();
         });
