@@ -2,6 +2,9 @@
 <script src="JZZ.js"></script>
 <script src="JZZ.synth.Tiny.js"></script>
 <script>
+    JZZ.synth.Tiny.register('Synth');
+    var sound = JZZ().openMidiOut().or(function () { alert('Cannot open MIDI port!'); });
+
     var canvas = document.getElementById('myCanvas');
     var context = canvas.getContext('2d');
     const NOTES = ['D', 'e', 'E', 'F', 'g', 'G', 'a', 'A', 'b', 'B', 'C', 'd'];
@@ -12,6 +15,12 @@
     const NUM_OF_SECTORS = 12;
     const SEGMENT_WIDTH = 360 / NUM_OF_SECTORS;
     const HALF_SECTOR_ANGLE = SEGMENT_WIDTH / 2;
+    var Chord = class {
+        constructor(rootPosition, numNotes) {
+            this.rootPosition = rootPosition;
+            this.numNotes = numNotes;
+        }
+    }
     var Circle = class {
         constructor(id, name, color, startSector, startNote, noteScheme) {
             this.id = id;
@@ -20,6 +29,7 @@
             this.startSector = startSector;
             this.startNote = startNote;
             this.noteScheme = noteScheme;
+            this.chord = new Chord(0, 0);
         }
     }
     var circles = [
@@ -47,11 +57,11 @@
         playClic();
     }
 
-    function moveCircleIn(numCircle) {
-        moveCircle(numCircle, numCircle + 1);
+    function moveCircleIn() {
+        moveCircle(selectedCircle, selectedCircle + 1);
     }
-    function moveCircleOut(numCircle) {
-        moveCircle(numCircle, numCircle - 1);
+    function moveCircleOut() {
+        moveCircle(selectedCircle, selectedCircle - 1);
     }
     function moveCircle(from, to) {
         if (to < 0) to = 5;
@@ -67,41 +77,79 @@
     function init() {
         document.addEventListener('keydown', (event) => {
             const keyName = event.key;
-            //alert('keydown event\n\n' + 'key: ' + keyName);
-            if (event.shiftKey) {
-                if (keyName == 'ArrowDown') {
-                    moveCircleIn(selectedCircle);
-                } else if (keyName == 'ArrowUp') {
-                    moveCircleOut(selectedCircle);
-                } else if (keyName == 'ArrowLeft') {
-                    circles[circleOrder[selectedCircle]].startNote--;
-                    if (circles[circleOrder[selectedCircle]].startNote < 0) {
-                        circles[circleOrder[selectedCircle]].startNote = 11;
-                    }
+            if (event.ctrlKey) {
+                if (keyName == 'ArrowLeft') {
+                    decChordStartNote();
                 } else if (keyName == 'ArrowRight') {
-                    circles[circleOrder[selectedCircle]].startNote++;
-                    if (circles[circleOrder[selectedCircle]].startNote > 11) {
-                        circles[circleOrder[selectedCircle]].startNote = 0;
-                    }
+                    incChordStartNote();
+                }
+            } else if (event.shiftKey) {
+                if (keyName == 'ArrowDown') {
+                    moveCircleIn();
+                } else if (keyName == 'ArrowUp') {
+                    moveCircleOut();
+                } else if (keyName == 'ArrowLeft') {
+                    decCircleStartNote();
+                } else if (keyName == 'ArrowRight') {
+                    incCircleStartNote();
                 }
             } else {
                 if (keyName == 'ArrowDown') {
-                    selectedCircle++;
+                    selectNextCircle();
                 } else if (keyName == 'ArrowUp') {
-                    selectedCircle--;
-                    if (selectedCircle < 0) selectedCircle = 5;
+                    selectPrevCircle();
                 } else if (keyName == 'ArrowLeft') {
-                    circles[circleOrder[selectedCircle]].startSector--;
+                    decCircleStartSector();
                 } else if (keyName == 'ArrowRight') {
-                    circles[circleOrder[selectedCircle]].startSector++;
+                    incCircleStartSector();
                 } else if (keyName == 'Home') {
-                    circles.forEach(t => t.startSector = 6);
+                    resetStartSector();
+                } else if (keyName == 'Insert') {
+                    addChordNote();
+                } else if (keyName == 'Delete') {
+                    removeChordNote();
                 }
+
             }
-            selectedCircle %= 6;
+
             refresh();
         });
         refresh();
+    }
+    function addChordNote(){
+
+    }
+    function removeChordNote(){
+
+    }
+    function resetStartSector() {
+        circles.forEach(t => t.startSector = 6);
+    }
+    function selectNextCircle() {
+        selectedCircle++;
+        selectedCircle %= 6;
+    }
+    function selectPrevCircle() {
+        selectedCircle--;
+        if (selectedCircle < 0) selectedCircle = 5;
+    }
+    function decCircleStartSector() {
+        circles[circleOrder[selectedCircle]].startSector--;
+    }
+    function incCircleStartSector() {
+        circles[circleOrder[selectedCircle]].startSector++;
+    }
+    function decCircleStartNote() {
+        circles[circleOrder[selectedCircle]].startNote--;
+        if (circles[circleOrder[selectedCircle]].startNote < 0) {
+            circles[circleOrder[selectedCircle]].startNote = 11;
+        }
+    }
+    function incCircleStartNote() {
+        circles[circleOrder[selectedCircle]].startNote++;
+        if (circles[circleOrder[selectedCircle]].startNote > 11) {
+            circles[circleOrder[selectedCircle]].startNote = 0;
+        }
     }
 
     function drawNotes(numCircle) {
@@ -148,15 +196,14 @@
 
     function drawBackgroundCircle() {
         var radius = 7 * CIRCLE_DEPTH;
-        context.fillStyle = 'DarkGray';
+        context.fillStyle = 'Silver';
         context.beginPath();
         context.arc(CENTER_X, CENTER_Y, radius, 0, Math.PI * 2, true);
         context.lineWidth = CIRCLE_DEPTH;
         context.fill();
     }
     function playClic() {
-        var piano = JZZ.synth.Tiny();
-        piano.noteOn(9, 80, 50)
+        sound.noteOn(9, 80, 50)
             .wait(100)
             .noteOff(9, 80);
     }
