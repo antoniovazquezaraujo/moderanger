@@ -15,7 +15,8 @@
         var sound = JZZ().openMidiOut().or(function () { alert('Cannot open MIDI port!'); });
 
         const NOTES = ['D', 'e', 'E', 'F', 'g', 'G', 'a', 'A', 'b', 'B', 'C', 'd'];
-        const MIDI_NOTES = ['D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B', 'C', 'Db'];
+        //const MIDI_NOTES = ['D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B', 'C', 'Db'];
+        const MIDI_NOTES = [20,21,22,23,24,25,26,26,28,29,30,31];
 
         function playChords() {
             playChord([MIDI_NOTES[Math.floor(Math.random() * 12)], MIDI_NOTES[Math.floor(Math.random() * 12)], MIDI_NOTES[Math.floor(Math.random() * 12)]]);
@@ -30,9 +31,9 @@
         function playChord(chord) {
             chord.forEach(note => {
                 sound
-                    .noteOn(0, note + '4')
+                    .noteOn(0, note)
                     .wait(1000)
-                    .noteOff(0, note + '4');
+                    .noteOff(0, note );
             });
 
         }

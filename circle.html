@@ -328,8 +328,14 @@
     function playChord() {
         var notes = getSelectedCircle().getChordNotes();
         console.log(notes);
-        var midiNotes = getMidiNotes(notes, getSelectedCircle().chord.rootPosition);
-        midiNotes.forEach(note => {
+        var lastNote = notes[0];
+        var offset = 50 + getSelectedCircle().startNote;
+        notes.forEach(note => {
+            if(note < lastNote){
+                offset+=12;
+            }
+            lastNote = note;
+            note+=offset;
             sound.noteOn(0, note, 50)
                 .wait(100)
                 .noteOff(0, note);
