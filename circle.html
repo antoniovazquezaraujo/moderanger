@@ -8,6 +8,7 @@
     var canvas = document.getElementById('myCanvas');
     var context = canvas.getContext('2d');
     const NOTES = ['D', 'e', 'E', 'F', 'g', 'G', 'a', 'A', 'b', 'B', 'C', 'd'];
+    const MIDI_NOTES = ['D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B', 'C', 'Db'];
     const CENTER_X = canvas.width / 2;
     const CENTER_Y = canvas.height / 2;
     const CIRCLE_DEPTH = 60;
@@ -31,6 +32,86 @@
             this.noteScheme = noteScheme;
             this.chord = new Chord(0, 0);
         }
+
+        incChordStartNote() {
+            this.chord.rootPosition = this.getNextScalePosition();
+        }
+        decChordStartNote() {
+            this.chord.rootPosition = this.getPrevScalePosition();
+        }
+        getChordNotes() {
+            var notes = [];
+            var position = this.chord.rootPosition;
+            if (this.chord.numNotes > 0) {
+                notes.push(position);
+            }
+            for (var i = 1; i < this.chord.numNotes; i++) {
+                position = this.getNextChordPosition(position);
+                notes.push(position);
+            }
+            return notes;
+        }
+        getNextChordPosition(position) {
+            var firstPosition = this.getNextInterleavedScalePosition(position);
+            return this.getNextInterleavedScalePosition(firstPosition);
+        }
+        getNextInterleavedScalePosition(position) {
+            do {
+                position++;
+                if (position >= this.noteScheme.length) {
+                    position = 0;
+                }
+            } while (this.noteScheme[position] == 0);
+            return position;
+        }
+        getPrevChordPosition(position) {
+            var firstPosition = this.getPrevInterleavedScalePosition(position);
+            return this.getPrevInterleavedScalePosition(firstPosition);
+        }
+
+        getPrevInterleavedScalePosition(position) {
+            do {
+                position--;
+                if (position < 0) {
+                    position = this.noteScheme.length - 1;
+                }
+            } while (this.noteScheme[position] == 0);
+            return position;
+        }
+        getNextScalePosition() {
+            var i = this.chord.rootPosition;
+            do {
+                i++;
+                if (i >= this.noteScheme.length) {
+                    i = 0;
+                }
+            } while (this.noteScheme[i] == 0);
+            return i;
+        }
+        getPrevScalePosition() {
+            var i = this.chord.rootPosition;
+            do {
+                i--;
+                if (i < 0) {
+                    i = this.noteScheme.length - 1;
+                }
+            } while (this.noteScheme[i] == 0);
+            return i;
+        }
+        getNumScaleNotes() {
+            return this.noteScheme.filter(t => t == 1).length;
+        }
+        addChordNote() {
+            if (this.chord.numNotes < this.getNumScaleNotes()) {
+                this.chord.numNotes++;
+            }
+        }
+        removeChordNote() {
+            if (this.chord.numNotes > 0) {
+                this.chord.numNotes--;
+            }
+        }
+
     }
     var circles = [
         new Circle(0, 'tones', 'Gold', 6, 0, [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
@@ -47,12 +128,14 @@
     var startSector = 0;
     var startNote = 0;
 
+
     function refresh() {
         context.clearRect(0, 0, 1000, 1000);
         drawBackgroundCircle();
         for (var i = 0; i < NUM_OF_CIRCLES; i++) {
             drawCircle(i);
             drawNotes(i);
+            drawChordNotes(i);
         }
         playClic();
     }
@@ -71,8 +154,6 @@
         circleOrder[from] = newPosition;
         circleOrder[to] = oldPosition;
         selectedCircle = to;
-
-        //        console.log('order:' + circleOrder + ' selected circle:' + selectedCircle);
     }
     function init() {
         document.addEventListener('keydown', (event) => {
@@ -94,7 +175,9 @@
                     incCircleStartNote();
                 }
             } else {
-                if (keyName == 'ArrowDown') {
+                if (keyName == ' ') {
+                    playChord();
+                } if (keyName == 'ArrowDown') {
                     selectNextCircle();
                 } else if (keyName == 'ArrowUp') {
                     selectPrevCircle();
@@ -109,17 +192,24 @@
                 } else if (keyName == 'Delete') {
                     removeChordNote();
                 }
-
             }
-
             refresh();
         });
         refresh();
     }
-    function addChordNote(){
-
+    function incChordStartNote() {
+        getSelectedCircle().incChordStartNote();
     }
-    function removeChordNote(){
+    function decChordStartNote() {
+        getSelectedCircle().decChordStartNote();
+    }
+
+    function addChordNote() {
+        getSelectedCircle().addChordNote();
+    }
+
+    function removeChordNote() {
+        getSelectedCircle().removeChordNote();
 
     }
     function resetStartSector() {
@@ -133,27 +223,33 @@
         selectedCircle--;
         if (selectedCircle < 0) selectedCircle = 5;
     }
+    function getSelectedCircle() {
+        return circles[circleOrder[selectedCircle]];
+    }
+    function getCircle(numCircle) {
+        return circles[circleOrder[numCircle]];
+    }
     function decCircleStartSector() {
-        circles[circleOrder[selectedCircle]].startSector--;
+        getSelectedCircle().startSector--;
     }
     function incCircleStartSector() {
-        circles[circleOrder[selectedCircle]].startSector++;
+        getSelectedCircle().startSector++;
     }
     function decCircleStartNote() {
-        circles[circleOrder[selectedCircle]].startNote--;
-        if (circles[circleOrder[selectedCircle]].startNote < 0) {
-            circles[circleOrder[selectedCircle]].startNote = 11;
+        getSelectedCircle().startNote--;
+        if (getSelectedCircle().startNote < 0) {
+            getSelectedCircle().startNote = 11;
         }
     }
     function incCircleStartNote() {
-        circles[circleOrder[selectedCircle]].startNote++;
-        if (circles[circleOrder[selectedCircle]].startNote > 11) {
-            circles[circleOrder[selectedCircle]].startNote = 0;
+        getSelectedCircle().startNote++;
+        if (getSelectedCircle().startNote > 11) {
+            getSelectedCircle().startNote = 0;
         }
     }
 
     function drawNotes(numCircle) {
-        var circle = circles[circleOrder[numCircle]];
+        var circle = getCircle(numCircle);
         var scheme = circle.noteScheme;
         var labelX = CENTER_X;
         var labelY = CENTER_Y;
@@ -176,9 +272,31 @@
         }
     }
 
-
+    function drawChordNotes(numCircle) {
+        var circle = getCircle(numCircle);
+        if (circle.chord.numNotes == 0) {
+            return
+        }
+        notes = circle.getChordNotes();
+        var scheme = circle.noteScheme;
+        var labelX = CENTER_X;
+        var labelY = CENTER_Y;
+        var angle = 360 / NUM_OF_SECTORS;
+        for (var note = 0; note < circle.chord.numNotes; note++) {
+            labelX = CENTER_X + (CIRCLE_DEPTH * (numCircle + 1)) * Math.sin(angle * (circle.startSector + notes[note]) * Math.PI / 180)
+            labelY = CENTER_Y - (CIRCLE_DEPTH * (numCircle + 1)) * Math.cos(angle * (circle.startSector + notes[note]) * Math.PI / 180)
+            context.beginPath();
+            context.arc(labelX, labelY, 5, 0, Math.PI * 2, true);
+            if (note == 0) {
+                context.strokeStyle = 'Red';
+            } else {
+                context.strokeStyle = 'Green';
+            }
+            context.stroke();
+        }
+    }
     function drawCircle(numCircle) {
-        var circle = circles[circleOrder[numCircle]];
+        var circle = getCircle(numCircle);
         var radius = (1 + numCircle) * CIRCLE_DEPTH;
         context.strokeStyle = circle.color;
         for (var i = 0; i < NUM_OF_SECTORS; i++) {
@@ -206,6 +324,36 @@
         sound.noteOn(9, 80, 50)
             .wait(100)
             .noteOff(9, 80);
+    }
+    function playChord() {
+        var notes = getSelectedCircle().getChordNotes();
+        console.log(notes);
+        var midiNotes = getMidiNotes(notes, getSelectedCircle().chord.rootPosition);
+        midiNotes.forEach(note => {
+            sound.noteOn(0, note, 50)
+                .wait(100)
+                .noteOff(0, note);
+        });
+    }
+    function getMidiNotes(notes, startPosition) {
+        var midiNotes = [];
+        var lastNote = notes[0];
+        var octave = 4;
+        notes.forEach(note => {
+            var octavedNote = startPosition + note;
+            if(note >= 10){
+                octave++;
+            }
+            if (octavedNote >= 12) {
+                octavedNote = octavedNote % 12;
+            }
+            if(octavedNote < lastNote ){
+                octave++;
+            }
+            lastNote = octavedNote;
+            midiNotes.push(MIDI_NOTES[octavedNote] + octave  );
+        });
+        return midiNotes;
     }
     init();
 </script>
