@@ -11,20 +11,21 @@
     const SEGMENT_WIDTH = 360 / NUM_OF_SECTORS;
     const HALF_SECTOR_ANGLE = SEGMENT_WIDTH / 2;
     var Circle = class {
-        constructor(id, color, startSector, noteScheme) {
+        constructor(id, name, color, startSector, noteScheme) {
             this.id = id;
+            this.name = name
             this.color = color;
             this.startSector = startSector;
             this.noteScheme = noteScheme;
         }
     }
     var circles = [
-        new Circle(0, 'Gold', 6, [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
-        new Circle(1, 'YellowGreen', 6, [1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0]),
-        new Circle(2, 'Black', 6, [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]),
-        new Circle(3, 'FireBrick', 6, [1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1]),
-        new Circle(4, 'DodgerBlue', 6, [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0]),
-        new Circle(5, 'Linen', 6, [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0]),
+        new Circle(0, 'tones', 'Gold', 6, [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
+        new Circle(1, 'penta', 'YellowGreen', 6, [1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0]),
+        new Circle(2, 'black', 'Black', 6, [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]),
+        new Circle(3, 'red', 'FireBrick', 6, [1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1]),
+        new Circle(4, 'blue', 'DodgerBlue', 6, [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0]),
+        new Circle(5, 'white', 'Linen', 6, [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0]),
     ];
     var circleOrder = [0, 1, 2, 3, 4, 5];
     var selectedCircle = 5;
@@ -32,23 +33,32 @@
     var endAngle = (SEGMENT_WIDTH + HALF_SECTOR_ANGLE) + 180;
     var startSector = 0;
 
-    function moveCircleIn(numCircle){
-        moveCircle(numCircle, numCircle+1);
+    function refresh() {
+        context.clearRect(0, 0, 1000, 1000);
+        drawBackgroundCircle();
+        for (var i = 0; i < NUM_OF_CIRCLES; i++) {
+            drawCircle(i);
+            printLabels(i);
+         }
+    }    
+
+    function moveCircleIn(numCircle) {
+        moveCircle(numCircle, numCircle + 1);
     }
-    function moveCircleOut(numCircle){
-        moveCircle(numCircle, numCircle-1);
+    function moveCircleOut(numCircle) {
+        moveCircle(numCircle, numCircle - 1);
     }
-    function moveCircle(from, to){
-        if(from < 0) from = 6;
-        if(from > 6) from = 0;
-        if(to < 0) to = 6;
-        if(to > 6) to = 0;
+    function moveCircle(from, to) {
+        if (from < 0) from = 6;
+        if (from > 6) from = 0;
+        if (to < 0) to = 6;
+        if (to > 6) to = 0;
         var oldPosition = circleOrder[from];
         var newPosition = circleOrder[to];
         circleOrder[from] = newPosition;
         circleOrder[to] = oldPosition;
         selectedCircle = circleOrder[from];
-        console.log('order:'+ circleOrder+ ' selected circle:'+ selectedCircle);
+        console.log('order:' + circleOrder + ' selected circle:' + selectedCircle);
     }
     function init() {
         document.addEventListener('keydown', (event) => {
@@ -56,7 +66,7 @@
             //alert('keydown event\n\n' + 'key: ' + keyName);
             if (event.shiftKey) {
                 if (keyName == 'ArrowDown') {
-                    moveCircleIn(selectedCircle);       
+                    moveCircleIn(selectedCircle);
                 } else if (keyName == 'ArrowUp') {
                     moveCircleOut(selectedCircle);
                 }
@@ -79,14 +89,7 @@
         });
         refresh();
     }
-    function refresh() {
-        context.clearRect(0, 0, 1000, 1000);
-        drawBackgroundCircle();
-        for (var i = 0; i < NUM_OF_CIRCLES; i++) {
-            drawSegments(i);
-            printLabels(i);
-        }
-    }
+
     function printLabels(numCircle) {
         var circle = circles[circleOrder[numCircle]];
 
@@ -110,13 +113,15 @@
             }
         }
     }
-    function drawSegments(numCircle) {
+ 
+
+    function drawCircle(numCircle) {
         var circle = circles[circleOrder[numCircle]];
         var radius = (1 + numCircle) * CIRCLE_DEPTH;
         context.strokeStyle = circle.color;
         for (var i = 0; i < NUM_OF_SECTORS; i++) {
             context.beginPath();
-            context.arc(CENTER_X, CENTER_Y, radius, (startAngle * Math.PI / 180), (endAngle * Math.PI / 180), false);
+            context.arc(CENTER_X, CENTER_Y, radius, 0, Math.PI*2, false);
             if (numCircle == selectedCircle) {
                 context.lineWidth = CIRCLE_DEPTH;
                 context.stroke();
@@ -124,10 +129,6 @@
                 context.lineWidth = 5;
                 context.stroke();
             }
-
-
-            startAngle += SEGMENT_WIDTH;
-            endAngle += SEGMENT_WIDTH;
         }
     }
 
