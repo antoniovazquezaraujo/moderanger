@@ -156,6 +156,58 @@ function moveCircle(from, to) {
     circleOrder[to] = oldPosition;
     selectedCircle = to;
 }
+var PlayMode;
+(function (PlayMode) {
+    PlayMode[PlayMode["Chord"] = 0] = "Chord";
+    PlayMode[PlayMode["Arpeggio"] = 1] = "Arpeggio";
+})(PlayMode || (PlayMode = {}));
+var Status = /** @class */ (function () {
+    /**
+     *
+     */
+    function Status() {
+    }
+    return Status;
+}());
+/*
+* Mode selector: [chord,arpeggio] - .
+* Note selector: F1-F12
+* Grade shifting: up-down
+* Tonality selector: shift+ F1-F12
+* Density selector: 1-7 (qwertyu)
+* Octave selector: 1-7 (asdfghj)
+* Circle selector: 1-6 (zxcvbn)
+*/
+function keyboardManager() {
+    document.addEventListener('keydown', function (event) {
+        var keyName = event.key;
+        if (keyName.match('F\d')) {
+            if (event.shiftKey) {
+                playNote(keyName.charAt(1));
+            }
+            else {
+                setTonality(keyName.charAt(1));
+            }
+        }
+        else {
+            if (keyName.match('[qwertyuiop]')) {
+                setNodeDensity(keyName);
+            }
+            else if (keyName.match('[asdfghjklñ]')) {
+                setOctave(keyName);
+            }
+            else if (keyName.match('[zxcvbn]')) {
+                setModeSelected(keyName);
+            }
+            else if (keyName === '.') {
+                setArpeggioMode();
+            }
+            else if (keyName === '-') {
+                setChordMode();
+            }
+        }
+    });
+}
 function init() {
     document.addEventListener('keydown', function (event) {
         var keyName = event.key;
@@ -357,3 +409,24 @@ function playChord() {
     });
 }
 init();
+function playNote(arg0) {
+    throw new Error('Function not implemented.');
+}
+function setTonality(arg0) {
+    throw new Error('Function not implemented.');
+}
+function setChordMode() {
+    throw new Error('Function not implemented.');
+}
+function setArpeggioMode() {
+    throw new Error('Function not implemented.');
+}
+function setNodeDensity(keyName) {
+    throw new Error('Function not implemented.');
+}
+function setOctave(keyName) {
+    throw new Error('Function not implemented.');
+}
+function setModeSelected(keyName) {
+    throw new Error('Function not implemented.');
+}
