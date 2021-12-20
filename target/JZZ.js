@@ -93,8 +93,11 @@
         this._push(_wait, [ret, delay]);
         return ret._thenable();
     };
-    function _kick(obj) { if (this._bad)
-        obj._break(this._err()); obj._resume(); }
+    function _kick(obj) {
+        if (this._bad)
+            obj._break(this._err());
+        obj._resume();
+    }
     function _rechain(self, obj, name) {
         self[name] = function () {
             var arg = arguments;
@@ -437,8 +440,10 @@
         return msg;
     };
     _M.prototype._receive = function (msg) { this._emit(this._filter(msg)); };
-    function _receive(msg) { if (!this._bad)
-        this._receive(msg); }
+    function _receive(msg) {
+        if (!this._bad)
+            this._receive(msg);
+    }
     _M.prototype.send = function () {
         this._push(_receive, [MIDI.apply(null, arguments)]);
         return this._thenable();
@@ -752,8 +757,10 @@
             document.dispatchEvent(new Event('jazz-midi'));
         }
         catch (err) { }
-        _schedule(function () { if (!inst)
-            self._crash(); });
+        _schedule(function () {
+            if (!inst)
+                self._crash();
+        });
     }
     /* istanbul ignore next */
     function _zeroBreak() {
@@ -876,8 +883,10 @@
                     },
                     _close: function (port) { _engine._closeOut(port); },
                     _closeAll: _closeAll,
-                    _receive: function (a) { if (a.length)
-                        this.plugin.MidiOutRaw(a.slice()); }
+                    _receive: function (a) {
+                        if (a.length)
+                            this.plugin.MidiOutRaw(a.slice());
+                    }
                 };
                 var plugin = _engine._pool[_engine._outArr.length];
                 impl.plugin = plugin;
@@ -1044,8 +1053,10 @@
                     },
                     _close: function (port) { _engine._closeOut(port); },
                     _closeAll: _closeAll,
-                    _receive: function (a) { if (impl.dev && a.length)
-                        this.dev.send(a.slice()); }
+                    _receive: function (a) {
+                        if (impl.dev && a.length)
+                            this.dev.send(a.slice());
+                    }
                 };
             }
             var found;
@@ -1217,11 +1228,13 @@
                     _start: function () { document.dispatchEvent(new CustomEvent('jazz-midi', { detail: ['openout', plugin.id, name] })); },
                     _close: function (port) { _engine._closeOut(port); },
                     _closeAll: _closeAll,
-                    _receive: function (a) { if (a.length) {
-                        var v = a.slice();
-                        v.splice(0, 0, 'play', plugin.id);
-                        document.dispatchEvent(new CustomEvent('jazz-midi', { detail: v }));
-                    } }
+                    _receive: function (a) {
+                        if (a.length) {
+                            var v = a.slice();
+                            v.splice(0, 0, 'play', plugin.id);
+                            document.dispatchEvent(new CustomEvent('jazz-midi', { detail: v }));
+                        }
+                    }
                 };
                 impl.plugin = plugin;
                 plugin.output = impl;
@@ -1462,8 +1475,10 @@
         this.setQuarter(arr[5]);
         return this;
     };
-    function _fixDropFrame() { if (this.type == 29.97 && !this.second && this.frame < 2 && this.minute % 10)
-        this.frame = 2; }
+    function _fixDropFrame() {
+        if (this.type == 29.97 && !this.second && this.frame < 2 && this.minute % 10)
+            this.frame = 2;
+    }
     SMPTE.prototype.isFullFrame = function () { return this.quarter == 0 || this.quarter == 4; };
     SMPTE.prototype.getType = function () { return this.type; };
     SMPTE.prototype.getHour = function () { return this.hour; };
@@ -1700,8 +1715,10 @@
         var i;
         if (arg instanceof MIDI) {
             self._from = arg._from.slice();
-            _for(arg, function (i) { if (i != '_from')
-                self[i] = arg[i]; });
+            _for(arg, function (i) {
+                if (i != '_from')
+                    self[i] = arg[i];
+            });
             return self;
         }
         else
@@ -1742,8 +1759,10 @@
             n = _7bn(n);
         return (a * Math.pow(2, (n - 69.0) / 12.0));
     };
-    function _float(x) { if (x != parseFloat(x))
-        throw TypeError('Not a number: ' + x); }
+    function _float(x) {
+        if (x != parseFloat(x))
+            throw TypeError('Not a number: ' + x);
+    }
     MIDI.shift = function (f, f0) {
         if (typeof f0 == 'undefined')
             f0 = 440;
@@ -1827,22 +1846,41 @@
     function _bad(x) { throw TypeError('Invalid value: ' + x); }
     function _oor(x) { throw RangeError('Out of range: ' + x); }
     function _ch(c) { _validateChannel(c); return parseInt(c); }
-    function _7b(n, m) { if (n != parseInt(n) || n < 0 || n > 0x7f)
-        _throw(typeof m == 'undefined' ? n : m); return parseInt(n); }
-    function _8b(n) { if (n != parseInt(n) || n < 0 || n > 0xff)
-        _throw(n); return parseInt(n); }
-    function _14b(n) { if (n != parseInt(n) || n < 0 || n > 0x3fff)
-        _throw(n); return parseInt(n); }
-    function _16b(n) { if (n != parseInt(n) || n < 0 || n > 0xffff)
-        throw RangeError('Expected a 16-bit value: ' + n); return parseInt(n); }
-    function _21b(n) { if (n != parseInt(n) || n < 0 || n > 0x1fffff)
-        _throw(n); return parseInt(n); }
+    function _7b(n, m) {
+        if (n != parseInt(n) || n < 0 || n > 0x7f)
+            _throw(typeof m == 'undefined' ? n : m);
+        return parseInt(n);
+    }
+    function _8b(n) {
+        if (n != parseInt(n) || n < 0 || n > 0xff)
+            _throw(n);
+        return parseInt(n);
+    }
+    function _14b(n) {
+        if (n != parseInt(n) || n < 0 || n > 0x3fff)
+            _throw(n);
+        return parseInt(n);
+    }
+    function _16b(n) {
+        if (n != parseInt(n) || n < 0 || n > 0xffff)
+            throw RangeError('Expected a 16-bit value: ' + n);
+        return parseInt(n);
+    }
+    function _21b(n) {
+        if (n != parseInt(n) || n < 0 || n > 0x1fffff)
+            _throw(n);
+        return parseInt(n);
+    }
     function _7bn(n) { return _7b(MIDI.noteValue(n), n); }
     function _lsb(n) { return _14b(n) & 0x7f; }
     function _msb(n) { return _14b(n) >> 7; }
-    function _8bs(s) { s = '' + s; for (var i = 0; i < s.length; i++)
-        if (s.charCodeAt(i) > 255)
-            _throw(s[i]); return s; }
+    function _8bs(s) {
+        s = '' + s;
+        for (var i = 0; i < s.length; i++)
+            if (s.charCodeAt(i) > 255)
+                _throw(s[i]);
+        return s;
+    }
     function _to777(n) { return [n >> 14, (n >> 7) & 0x7f, n & 0x7f]; }
     function _01(x, y) {
         if (x != parseFloat(x))
@@ -1899,10 +1937,16 @@
         return out;
     }
     var _helperMPE = {
-        noteOff: function (c, n, v) { if (typeof v == 'undefined')
-            v = 64; return [0x80 + _ch(c), _7bn(n), _7b(v)]; },
-        noteOn: function (c, n, v) { if (typeof v == 'undefined')
-            v = 127; return [0x90 + _ch(c), _7bn(n), _7b(v)]; },
+        noteOff: function (c, n, v) {
+            if (typeof v == 'undefined')
+                v = 64;
+            return [0x80 + _ch(c), _7bn(n), _7b(v)];
+        },
+        noteOn: function (c, n, v) {
+            if (typeof v == 'undefined')
+                v = 127;
+            return [0x90 + _ch(c), _7bn(n), _7b(v)];
+        },
         aftertouch: function (c, n, v) { return [0xA0 + _ch(c), _7bn(n), _7b(v)]; },
     };
     var _helperCH = {
@@ -1931,18 +1975,36 @@
         panLSB: function (c, n) { return [0xB0 + _ch(c), 0x2A, _7b(n)]; },
         expressionMSB: function (c, n) { return [0xB0 + _ch(c), 0x0B, _7b(n)]; },
         expressionLSB: function (c, n) { return [0xB0 + _ch(c), 0x2B, _7b(n)]; },
-        damper: function (c, b) { if (typeof b == 'undefined')
-            b = true; return [0xB0 + _ch(c), 0x40, b ? 127 : 0]; },
-        portamento: function (c, b) { if (typeof b == 'undefined')
-            b = true; return [0xB0 + _ch(c), 0x41, b ? 127 : 0]; },
-        sostenuto: function (c, b) { if (typeof b == 'undefined')
-            b = true; return [0xB0 + _ch(c), 0x42, b ? 127 : 0]; },
-        soft: function (c, b) { if (typeof b == 'undefined')
-            b = true; return [0xB0 + _ch(c), 0x43, b ? 127 : 0]; },
-        legato: function (c, b) { if (typeof b == 'undefined')
-            b = true; return [0xB0 + _ch(c), 0x44, b ? 127 : 0]; },
-        hold2: function (c, b) { if (typeof b == 'undefined')
-            b = true; return [0xB0 + _ch(c), 0x45, b ? 127 : 0]; },
+        damper: function (c, b) {
+            if (typeof b == 'undefined')
+                b = true;
+            return [0xB0 + _ch(c), 0x40, b ? 127 : 0];
+        },
+        portamento: function (c, b) {
+            if (typeof b == 'undefined')
+                b = true;
+            return [0xB0 + _ch(c), 0x41, b ? 127 : 0];
+        },
+        sostenuto: function (c, b) {
+            if (typeof b == 'undefined')
+                b = true;
+            return [0xB0 + _ch(c), 0x42, b ? 127 : 0];
+        },
+        soft: function (c, b) {
+            if (typeof b == 'undefined')
+                b = true;
+            return [0xB0 + _ch(c), 0x43, b ? 127 : 0];
+        },
+        legato: function (c, b) {
+            if (typeof b == 'undefined')
+                b = true;
+            return [0xB0 + _ch(c), 0x44, b ? 127 : 0];
+        },
+        hold2: function (c, b) {
+            if (typeof b == 'undefined')
+                b = true;
+            return [0xB0 + _ch(c), 0x45, b ? 127 : 0];
+        },
         soundVariation: function (c, n) { return [0xB0 + _ch(c), 0x46, _7bn(n)]; },
         filterResonance: function (c, n) { return [0xB0 + _ch(c), 0x47, _7bn(n)]; },
         releaseTime: function (c, n) { return [0xB0 + _ch(c), 0x48, _7bn(n)]; },
@@ -1961,13 +2023,22 @@
         rpnMSB: function (c, n) { return [0xB0 + _ch(c), 0x65, _7b(n)]; },
         allSoundOff: function (c) { return [0xB0 + _ch(c), 0x78, 0]; },
         resetAllControllers: function (c) { return [0xB0 + _ch(c), 0x79, 0]; },
-        localControl: function (c, b) { if (typeof b == 'undefined')
-            b = true; return [0xB0 + _ch(c), 0x7a, b ? 127 : 0]; },
+        localControl: function (c, b) {
+            if (typeof b == 'undefined')
+                b = true;
+            return [0xB0 + _ch(c), 0x7a, b ? 127 : 0];
+        },
         allNotesOff: function (c) { return [0xB0 + _ch(c), 0x7b, 0]; },
-        omni: function (c, b) { if (typeof b == 'undefined')
-            b = true; return [0xB0 + _ch(c), b ? 0x7d : 0x7c, 0]; },
-        mono: function (c, n) { if (typeof n == 'undefined')
-            n = 1; return [0xB0 + _ch(c), 0x7e, _7b(n)]; },
+        omni: function (c, b) {
+            if (typeof b == 'undefined')
+                b = true;
+            return [0xB0 + _ch(c), b ? 0x7d : 0x7c, 0];
+        },
+        mono: function (c, n) {
+            if (typeof n == 'undefined')
+                n = 1;
+            return [0xB0 + _ch(c), 0x7e, _7b(n)];
+        },
         poly: function (c) { return [0xB0 + _ch(c), 0x7f, 0]; },
     };
     function _splitMasterTuning(a, b, c, d) {
@@ -2056,8 +2127,11 @@
             }
             return _helperNC.sxScaleTuning2.call(this, a, v, c);
         },
-        sxGM: function (gm) { if (typeof gm == 'undefined')
-            gm = 1; return [0xF0, 0x7E, this._sxid, 0x09, gm ? gm == 2 ? 3 : 1 : 2, 0xf7]; },
+        sxGM: function (gm) {
+            if (typeof gm == 'undefined')
+                gm = 1;
+            return [0xF0, 0x7E, this._sxid, 0x09, gm ? gm == 2 ? 3 : 1 : 2, 0xf7];
+        },
         sxGS: function (arg) {
             var arr = typeof arg == 'undefined' ? [0x40, 0, 0x7F, 0] : arg instanceof Array ? arg : arguments;
             var c = 0;
@@ -3190,8 +3264,10 @@
         if (a[1] != parseInt(a[1]) || a[1] < 0 || a[0] + a[1] > 15)
             throw RangeError('Bad zone size value: ' + a[1]);
     };
-    MPE.prototype.reset = function () { for (var n = 0; n < 16; n++)
-        this[n] = { band: 0, master: n }; };
+    MPE.prototype.reset = function () {
+        for (var n = 0; n < 16; n++)
+            this[n] = { band: 0, master: n };
+    };
     MPE.prototype.setup = function (m, n) {
         MPE.validate(m, n);
         var k;
@@ -4116,7 +4192,9 @@
     };
     if (typeof navigator !== 'undefined' && !navigator.requestMIDIAccess)
         navigator.requestMIDIAccess = JZZ.requestMIDIAccess;
-    JZZ.close = function () { if (_engine._close)
-        _engine._close(); };
+    JZZ.close = function () {
+        if (_engine._close)
+            _engine._close();
+    };
     return JZZ;
 });

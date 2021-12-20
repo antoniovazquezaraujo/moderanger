@@ -165,7 +165,13 @@ var Status = /** @class */ (function () {
     /**
      *
      */
-    function Status() {
+    function Status(note, tonality, density, octave, circle, playMode) {
+        this.note = note;
+        this.tonality = tonality;
+        this.density = density;
+        this.octave = octave;
+        this.circle = circle;
+        this.playMode = playMode;
     }
     return Status;
 }());

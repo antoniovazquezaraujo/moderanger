@@ -599,8 +599,12 @@
                         o[i].start(t);
                         if (this.rhythm[ch]) {
                             // difference between '()=>' and 'function()': need to pack parameters
-                            o[i].onended = function (a, b) { return function () { if (b)
-                                a.disconnect(b); }; }(this.chmod[ch], o[i].detune);
+                            o[i].onended = function (a, b) {
+                                return function () {
+                                    if (b)
+                                        a.disconnect(b);
+                                };
+                            }(this.chmod[ch], o[i].detune);
                             o[i].stop(t + p[0].d * this.releaseRatio);
                         }
                     }

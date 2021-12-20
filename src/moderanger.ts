@@ -159,7 +159,7 @@ function refresh() {
         drawChordNotes(i);
     }
 }
-
+  
 function moveCircleIn() {
     moveCircle(selectedCircle, selectedCircle + 1);
 }
@@ -176,25 +176,36 @@ function moveCircle(from: number, to: number) {
     selectedCircle = to;
 }
 
-enum PlayMode{
+enum PlayMode {
     Chord,
     Arpeggio
 }
-class Status{
+class Status {
     note: number;
-    tonality:number;
-    density:number;
+    tonality: number;
+    density: number;
     octave: number;
     circle: number;
     playMode: PlayMode;
     /**
      *
      */
-    constructor() {
-        
+    constructor(note: number,
+        tonality: number,
+        density: number,
+        octave: number,
+        circle: number,
+        playMode: PlayMode) {
+        this.note = note;
+        this.tonality = tonality;
+        this.density = density;
+        this.octave = octave;
+        this.circle = circle;
+        this.playMode = playMode;
     }
-
 }
+
+
 
 
 /*
