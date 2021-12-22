@@ -40,16 +40,25 @@ class Circle {
     color: string;
     startSector: number;
     startNote: number;
+    octave: number;
     noteScheme: number[];
     chord: Chord;
-    constructor(id: number, name: string, color: string, startSector: number, startNote: number, noteScheme: number[]) {
+    constructor(id: number, name: string, color: string, startSector: number, startNote: number, noteScheme: number[], octave:number) {
         this.id = id;
         this.name = name
         this.color = color;
         this.startSector = startSector;
         this.startNote = startNote;
         this.noteScheme = noteScheme;
+        this.octave = octave;
         this.chord = new Chord(0, 0, 0);
+    } 
+    setChordStartNote(note: number) :void{
+        this.chord.rootPosition = 0;
+        for (var n = 0; n< note-1; n++){
+            this.chord.rootPosition = this.getNextScalePosition();
+        }
+//        this.chord.rootPosition = this.getExactScalePosition(note);
     }
 
     incChordStartNote() {
@@ -97,7 +106,7 @@ class Circle {
         } while (this.noteScheme[Math.abs(position) % this.noteScheme.length] == 0);
         return position;
     }
-    getNextScalePosition() {
+    getNextScalePosition() :number{
         var i = this.chord.rootPosition;
         do {
             i++;
@@ -108,6 +117,19 @@ class Circle {
         } while (this.noteScheme[Math.abs(i) % this.noteScheme.length] == 0);
         return i;
     }
+    getExactScalePosition(pos:number):number{
+        return this.getIndex(this.noteScheme.join(),   pos-1);
+    }
+    getIndex(str:string,   n:number) {
+        var times:number = 0;
+        var index:number = 0;
+     
+        while (times < n && index !== -1) {
+           index = str.indexOf('1', index + 1);
+           times++;
+        }
+        return index;
+     }
     getPrevScalePosition() {
         var i = this.chord.rootPosition;
         do {
@@ -127,6 +149,9 @@ class Circle {
             this.chord.numNotes++;
         }
     }
+    setChordNotes(numNotes:number):void{
+        this.chord.numNotes = numNotes;
+    }
     removeChordNote() {
         if (this.chord.numNotes > 0) {
             this.chord.numNotes--;
@@ -135,12 +160,12 @@ class Circle {
 
 }
 var circles = [
-    new Circle(0, 'tones', 'Gold', 6, 0, [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
-    new Circle(1, 'penta', 'YellowGreen', 6, 0, [1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0]),
-    new Circle(2, 'black', 'Black', 6, 0, [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]),
-    new Circle(3, 'red', 'FireBrick', 6, 0, [1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1]),
-    new Circle(4, 'blue', 'DodgerBlue', 6, 0, [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0]),
-    new Circle(5, 'white', 'Linen', 6, 0, [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0]),
+    new Circle(0, 'tones', 'Gold', 6, 0, [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], 0),
+    new Circle(1, 'penta', 'YellowGreen', 6, 0, [1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0], 0),
+    new Circle(2, 'black', 'Black', 6, 0, [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1], 0),
+    new Circle(3, 'red', 'FireBrick', 6, 0, [1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1], 0),
+    new Circle(4, 'blue', 'DodgerBlue', 6, 0, [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0], 0),
+    new Circle(5, 'white', 'Linen', 6, 0, [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0], 0),
 ];
 var circleOrder = [0, 1, 2, 3, 4, 5];
 var selectedCircle = 5;
@@ -159,7 +184,7 @@ function refresh() {
         drawChordNotes(i);
     }
 }
-  
+
 function moveCircleIn() {
     moveCircle(selectedCircle, selectedCircle + 1);
 }
@@ -176,44 +201,35 @@ function moveCircle(from: number, to: number) {
     selectedCircle = to;
 }
 
-enum PlayMode {
-    Chord,
-    Arpeggio
-}
+
 class Status {
     note: number;
     tonality: number;
     density: number;
     octave: number;
     circle: number;
-    playMode: PlayMode;
-    /**
-     *
-     */
-    constructor(note: number,
+
+    constructor(
+        note: number,
         tonality: number,
         density: number,
         octave: number,
-        circle: number,
-        playMode: PlayMode) {
+        circle: number) {
         this.note = note;
         this.tonality = tonality;
         this.density = density;
         this.octave = octave;
         this.circle = circle;
-        this.playMode = playMode;
     }
 }
 
-
-
+var status: Status = new Status(0, 0, 0, 0, 0);
 
 /*
-* Mode selector: [chord,arpeggio] - . 
-* Note selector: F1-F12 
-* Grade shifting: up-down
-* Tonality selector: shift+ F1-F12
-* Density selector: 1-7 (qwertyu)
+* Note : F1-F12 
+* Tonality: shift+F1-F12
+* Density: ctrl+F1-F12
+* //Grade shifting: up-down
 * Octave selector: 1-7 (asdfghj)
 * Circle selector: 1-6 (zxcvbn)
 */
@@ -222,69 +238,99 @@ function keyboardManager(): void {
     document.addEventListener('keydown', (event) => {
         const keyName = event.key;
         if (keyName.match('F\d')) {
-            if (event.shiftKey) {
-                playNote(keyName.charAt(1));
-            } else {
+            if (!event.shiftKey) {
                 setTonality(keyName.charAt(1));
+            } else if (!event.ctrlKey) {
+                setNodeDensity(keyName.charAt(1));
+            } else {
+                playNote(keyName.charAt(1));
             }
-        } else {
-            if (keyName.match('[qwertyuiop]')) {
-                setNodeDensity(keyName);
-            } else if (keyName.match('[asdfghjklñ]')) {
-                setOctave(keyName);
-            } else if (keyName.match('[zxcvbn]')) {
-                setModeSelected(keyName);
-            } else if (keyName === '.') {
-                setArpeggioMode();
-            } else if (keyName === '-') {
-                setChordMode();
+        } else if (keyName.match('[123456]')) {
+            if (!event.shiftKey) {
+//                setOctave(keyName);
+            } else {
+//                setCircleSelected(keyName);
             }
         }
     });
 }
 
+function playNote(noteAsString: string): void {
+    var note: number = Number(noteAsString);
+    sound.noteOn(0, note, 50)
+        .wait(100)
+        .noteOff(0, note);
+}
+
+function setTonality(note: string): void {
+    getSelectedCircle().startNote = Number(note)-1;
+
+}
+
+
+function setNodeDensity(keyName: string): void {
+    getSelectedCircle().getChordNotes
+}
+
+
 
 function init(): void {
     document.addEventListener('keydown', (event) => {
         const keyName = event.key;
-        if (event.ctrlKey) {
-            if (keyName == 'ArrowLeft') {
-                decCircleStartSector();
-            } else if (keyName == 'ArrowRight') {
-                incCircleStartSector();
-            }
-        } else if (event.shiftKey) {
-            if (keyName == 'ArrowDown') {
-                moveCircleIn();
-            } else if (keyName == 'ArrowUp') {
-                moveCircleOut();
-            } else if (keyName == 'ArrowLeft') {
-                decCircleStartNote();
-            } else if (keyName == 'ArrowRight') {
-                incCircleStartNote();
+        if (keyName.match('F\\d')) {
+            if (event.shiftKey) {
+                setTonality(keyName.substring(1));
+            } else if (event.ctrlKey) {
+                setChordNotes(keyName.charAt(1));
+            } else {
+                setChordStartNote(keyName.substring(1));
+                playChord();
             }
         } else {
-            if (keyName == ' ') {
-                playChord();
-            } if (keyName == 'ArrowDown') {
-                selectNextCircle();
-            } else if (keyName == 'ArrowUp') {
-                selectPrevCircle();
-            } else if (keyName == 'ArrowLeft') {
-                decChordStartNote();
-            } else if (keyName == 'ArrowRight') {
-                incChordStartNote();
-            } else if (keyName == 'Home') {
-                resetStartSector();
-            } else if (keyName == 'Insert') {
-                addChordNote();
-            } else if (keyName == 'Delete') {
-                removeChordNote();
+            if (event.ctrlKey) {
+                if (keyName == 'ArrowLeft') {
+                    decCircleStartSector();
+                } else if (keyName == 'ArrowRight') {
+                    incCircleStartSector();
+                } else if (keyName == 'ArrowDown') {
+                    selectPrevOctave();
+                } else if (keyName == 'ArrowUp') {
+                    selectNextOctave();
+                }
+            } else if (event.shiftKey) {
+                if (keyName == 'ArrowDown') {
+                    moveCircleIn();
+                } else if (keyName == 'ArrowUp') {
+                    moveCircleOut();
+                } else if (keyName == 'ArrowLeft') {
+                    decCircleStartNote();
+                } else if (keyName == 'ArrowRight') {
+                    incCircleStartNote();
+                }
+            } else {
+                if (keyName == ' ') {
+                    playChord();
+                } else if (keyName == 'ArrowDown') {
+                    selectNextCircle();
+                } else if (keyName == 'ArrowUp') {
+                    selectPrevCircle();
+                } else if (keyName == 'ArrowLeft') {
+                    decChordStartNote();
+                } else if (keyName == 'ArrowRight') {
+                    incChordStartNote();
+                } else if (keyName == 'Home') {
+                    resetStartSector();
+                } else if (keyName == 'Insert') {
+                    addChordNote();
+                } else if (keyName == 'Delete') {
+                    removeChordNote();
+                }
+            }
+            if (keyName != ' ') {
+                playClic();
             }
         }
-        if (keyName != ' ') {
-            playClic();
-        }
+        event.preventDefault();
         refresh();
     });
     refresh();
@@ -295,15 +341,26 @@ function incChordStartNote(): void {
 function decChordStartNote(): void {
     getSelectedCircle().decChordStartNote();
 }
-
+function setChordStartNote(note: string):void{
+    getSelectedCircle().setChordStartNote(Number(note));
+}
+function setChordNotes(numNotes:string):void{
+    getSelectedCircle().setChordNotes(Number(numNotes));
+}
 function addChordNote(): void {
     getSelectedCircle().addChordNote();
 }
 
 function removeChordNote(): void {
     getSelectedCircle().removeChordNote();
-
 }
+function selectNextOctave() {
+    getSelectedCircle().octave++;
+}
+function selectPrevOctave() {
+    getSelectedCircle().octave--;
+}
+
 function resetStartSector(): void {
     circles.forEach(t => t.startSector = 6);
 }
@@ -420,7 +477,7 @@ function playClic(): void {
 function playChord(): void {
     var notes = getSelectedCircle().getChordNotes();
     var lastNote = notes[0];
-    var offset = CENTRAL_NOTE + (getSelectedCircle().chord.octave * NUM_OF_SECTORS) + getSelectedCircle().startNote;
+    var offset = CENTRAL_NOTE + (getSelectedCircle().chord.octave * NUM_OF_SECTORS) + getSelectedCircle().startNote + (getSelectedCircle().octave * 12);
     notes.forEach(note => {
         if (note < lastNote) {
             //       getSelectedCircle().chord.octave++;
@@ -433,32 +490,3 @@ function playChord(): void {
     });
 }
 init();
-
-function playNote(arg0: string): void {
-    throw new Error('Function not implemented.');
-}
-
-function setTonality(arg0: string): void {
-    throw new Error('Function not implemented.');
-}
-
-function setChordMode(): void {
-    throw new Error('Function not implemented.');
-}
-
-function setArpeggioMode(): void {
-    throw new Error('Function not implemented.');
-}
-
-function setNodeDensity(keyName: string): void {
-    throw new Error('Function not implemented.');
-}
-
-function setOctave(keyName: string): void {
-    throw new Error('Function not implemented.');
-}
-
-function setModeSelected(keyName: string): void {
-    throw new Error('Function not implemented.');
-}
-
