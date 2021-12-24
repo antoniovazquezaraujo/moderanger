@@ -1,4 +1,6 @@
 ideas.adoc
-target/moderanger.js
+target/*.js
 target/musica-de-particulas.html
 node_modules/**
+yarn.lock
+coverage/**
