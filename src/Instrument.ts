@@ -1,6 +1,6 @@
 import { Scale } from "./Scale";
 
-
+ 
 
 export class Instrument {
     scale: number = 1;        //Escala usada (1-6)
@@ -8,3 +8,4 @@ export class Instrument {
     timbre: number = 1;       //El sonido seleccionado para ese círculo
     notes: number[] = [];      //Notas seleccionadas para tocar por un player
 }
+ 

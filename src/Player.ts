@@ -1,6 +1,6 @@
-import { Instrument } from "./Intrument";
+import { Instrument } from "./Instrument";
 import { getScaleByNum } from "./Scale";
-
+ 
 export class Player{
     selectedNote: number = 0; //Nota que está seleccionada para sonar
     density: number = 0;      //Densidad de notas, mono o acordes de x notas (0-6)
