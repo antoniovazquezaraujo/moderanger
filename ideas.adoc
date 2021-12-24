@@ -79,3 +79,137 @@ Nuevos controles:
 * Octave selector: 1-7 (asdfghj)
 * Circle selector: 1-6 (zxcvbn)
 
+Nueva idea:
+Los círculos dejan de ser exactamente 6 y pasan a ser infinitos, es decir, en pantalla se pueden ver por ejemplo 3 concentricos siempre, pero si avanzamos o retrocedemos, aparecen otros nuevos que van sustituyendo a esos tres, cada uno programado con su escala, modo, nota, densidad, acorde, etc. De esta forma se pueden tener muchos círculos e ir cambiando durante una canción de círculo, incluso automáticamente, y seguir tocando.
+
+Luego el "estado" general del artefacto, deberá contar con las siguientes propiedades:
+
+    note: nota seleccionada
+    tonality: tonalidad
+    density: cantidad de notas que suenan simultaneamente (de la escala o del arpegio)
+    octave: octava
+    circle: círculo seleccionado
+    playMode: modo arpegio o acorde
+
+Pero claro, tenemos también el círculo seleccionado. Habrá que diferenciar qué es del círculo y qué es general:
+Estoy pensando que podríamos tener un programa de notas o acordes sonando en un círculo, formando una base de acompañamiento, y el usuario podría estar tocando notas en otro círculo, con otro modo, tono, octava, etc.
+Quizá eso nos ayude a crear cosas más complejas. De modo que:
+Creo que retiramos el playMode. Solo tenemos densidad, o una nota o varias, más simple.
+Ranger:
+    Circle:
+        -Tonality: En qué tonalidad está el círculo
+        -Density: Densidad de notas, mono o acordes de x notas
+        -Octave: En qué octava está
+        -Orientation: Posición visual del círculo
+
+Podemos tener varios círculos seleccionados a la vez, más adelante, pero de momento solo habrá uno.
+Las notas que hagamos sonar dependerán del círculo seleccionado.
+Cada círculo, cuando esté haciendo sonar notas, tendrá que iluminarlas, diferenciando al menos la raiz.
+Qué hacer con las inversiones?
+Con densidad distinta de uno, podríamos entender que coloquen como raiz del acorde a otra nota, pero qué hacer con una sola nota? Bueno, puede hacer simplemente lo mismo. Considera que es la raiz de un acorde y se desplaza a su tercera, quinta, séptima, etc, según la densidad seleccionada. Quizá modificando inversión muchas veces, puedan crearse melodías atractivas.
+El selector de inversión sería un simple número de 1 a 7, que indicaría cuál es la nota más baja del acorde. 1 sería la raíz, 2 la tercera, 3 la quinta, 4 la septima, etc, etc.  Parece bueno.
+Luego:
+
+Ranger:
+    Circle:
+        -Tonality: En qué tonalidad está el círculo
+        -Density: Densidad de notas, mono o acordes de x notas
+        -Octave: En qué octava está
+        -Orientation: Posición visual del círculo
+        -Inversion: 1-7 Nota más baja del acorde que suena (1,3,5,7, etc)
+        -PlayNotes: Notas que están seleccionadas para sonar de este círculo
+
+Un círculo puede tener notas seleccionadas para sonar debido a la interacción del usuario o a un programa interno que las irá cambiando automáticamente. Quizá grabado anteriormente, o escrito.
+O sea, los eventos de selección de notas se envían a un círculo determinado, que tiene un setting concreto, así que las mismas notas pueden sonar diferentemente en diferentes círculos.
+Como el usuario puede pulsar varias teclas a la vez, podría ser que un evento enviase muchas notas para que sonaran, y el círculo, debido a su densidad de notas, podría agregarle más. Así que las notas deseadas son una cosa y las que sonarán son otras, probablemente. Entre otras cosas, porque lo que el usuario selecciona no son notas, sino teclas, que luego el círculo decidirá a qué notas pertenecen. Llamaremos a lo que el usuario envía frets, como los trastes de la guitarra, que dependiendo de la cuerda donde pulses, hacen sonar distintas notas. Puede ser una buena analogía.
+
+Otra idea: cada círculo puede tener un sonido (un timbre) distinto.
+
+Volviendo a los frets, podría ser que con densidad 2 el usuario pulsara 3 teclas, es decir, enviara 3 frets. Eso se convertiría en 6 notas, por ejemplo:
+Enviando C y F sonaría C E F A, enviando C y D sonaría C D E G. Puede ser muy interesante eso.
+
+Así que tenemos dos elementos: los círculos, que están configurados de una determinada forma y los eventos que se envían a cada uno.
+Habrá que hacer como un director o manager para los eventos, donde se tomen de distintas fuentes, como eventos de usuario o secuencias programadas y se envíen a distintos círculos. Las secuencias se deberían poder aplicar a todos los controles, es decir, que mediante una secuencia programable se pueda cambiar la octava de un círculo, o su densidad, etc. Veremos eso.
+
+Así que un ranger sería algo como:
+Ranger:
+    Circle:
+        -Tonality: En qué tonalidad está el círculo
+        -Density: Densidad de notas, mono o acordes de x notas
+        -Octave: En qué octava está
+        -Orientation: Posición visual del círculo
+        -Inversion: 1-7 Nota más baja del acorde que suena (1,3,5,7, etc)
+        -PlayNotes: Notas que están seleccionadas para sonar de este círculo
+        -Timbre: El sonido seleccionado para ese círculo
+
+
+Vale, no podemos complicarlo tanto en un principio, hay que bajar las espectativas, así que de momento, en esta vuelta solamente vamos a cambiar que en vez de tocar como está ahora, se pueda tocar con las teclas de función propuestas. Nada más de momento. Ya veremos luego.
+
+Vale, aún para hacerlo simple hay que pensar. Vamos despacio:
+
+El sistema actual funciona bien, pero queremos cambiar la forma como se tocan las notas. Ahora mismo se selecciona una nota y una densidad, es decir, se agregan o se eliminan notas del acorde y cuando se pulsa espacio se hacen sonar. Se puede mover la tonalidad o el grado en la escala, y la nota se moverá junto con las notas del acorde. Bien.
+Ahora se trata de enviar desde el teclado las notas, no tomar las del acorde del círculo.
+Podríamos empezar por agregar simplemente esta funcionalidad a lo que ya tenemos para ir viendo cómo actúa. Es decir, aunque el círculo tenga un acorde seleccionado, con las teclas de función, simplemente seleccionamos otro. Y con las de densidad agregamos o eliminamos notas al propio acorde. Esto sería lo más básico de momento.
+
+Vale, tenemos lo básico. Se puede tocar con las teclas de función. Queda práctico y se pueden probar muchas cosas.
+Ahora el código está totalmente desorganizado y convendría separar las clases un poco para continuar. Vamos con ello.
+
+
+Vamos a estructurar las clases entonces:
+
+Chord: Notas de un acorde, podemos integrarlo en Circle me parece.
+Circle: Setting para seleccionar notas que tocar. Tiene una view donde se muestran
+Sound: Conexión con midi
+View: Vista de un Circle, representa la orientación de la escala, su posición, tonalidad y notas que suenan
+ModeRanger: Programa principal.
+
+Un Circle no es un buen nombre para ese objeto. Representa un "instrumento" musical, que está afinado en un tono determinado, con un timbre, una escala, una densidad de notas, etc. Debemos separar esto de su aspecto circular. Sacaremos todo lo visual fuera de ahí:
+
+Instrument: Representa a un instrumento, sería el antiguo círculo.
+InstrumentView: Representa la vista de un instrumento, en el caso por defecto, un círculo con notas en 12 sectores.
+
+Podríamos crear vistas más pequeñas, como por ejemplo la vista en forma de simple rectángulo, para usar en los textos.
+Quizá puede tener las mismas funciones musicales, pero el aspecto es totalmente distinto.
+
+También necesitaremos un "player", un objeto que se encargue de enviar las notas al instrumento. Puede ser disparado por el teclado, por un programa automático, o incluso desde un verdadero instrumento midi.
+
+Inicialmente tendremos solamente el player de teclado. Pero se debe crear uno programable cuanto antes, para poder hacer experimentos.
+
+En resumen:
+Sound: Conexión con midi
+ModeRanger: Programa principal.
+Instrument: Representa el elemento que recibe los eventos y que envía las notas finales al sound
+InstrumentView: Vista de un Instrument, representa la orientación de la escala, su posición, tonalidad y notas que suenan
+Player: Recibe eventos de usuario o programables y los envía al instrument.
+
+Una escena estaría entonces compuesta de un Sound, un grupo de Instruments con sus InstrumentViews respectivas y sus Players.
+Quizá un grupo de instrumentos tenga también su vista, tambien, para poder seleccionar uno u otro, cambiarlos de posición, etc.
+
+Un InstrumentGroup sería un grupo de instrumentos, simplemente. Un InstrumentGroupView sería una vista capaz de mostrar este grupo y recibir los eventos necesarios para organizarlos correctamente.
+
+Scene:
+    sound: Sound
+    combo: Combo
+    comboView: ComboView
+    players: Player[]
+
+Combo:
+    instruments: Instrument
+
+Instrument:
+    scale: number        Escala usada (1-6)
+    tonality: number     En qué tonalidad está el círculo (1-12)
+    timbre: number       El sonido seleccionado para ese círculo
+
+Player:
+    selectedNote: number Nota que están seleccionadas para sonar de este círculo
+    density: number      Densidad de notas, mono o acordes de x notas (1-7)
+    inversion: number    1-7 Nota más baja del acorde que suena (1,3,5,7, etc)
+    octave: number       En qué octava está (1-7)
+
+InstrumentView:    
+    orientation: number  Posición visual del círculo
+
+Respecto a las notas:
+Estamos usando los patrones de escala como conjuntos de unos y ceros, cuando realmente sería más práctico anotar el desplazamiento de cada nota de la escala, es decir:
+'01010110' sería '1356', más corto, más claro y más facil de saber el desplazamiento de cada nota. Vamos a cambiar esto.

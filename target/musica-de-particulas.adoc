@@ -1,63 +1,11 @@
 ++++
-<p>
-Content in a passthrough block is passed to the output unprocessed.
-That means you can include raw HTML, like this embedded Gist:
-</p>
 
-<script src="http://gist.github.com/mojavelinux/5333524.js">
-<script src="JZZ.js"></script>
-<script src="JZZ.synth.Tiny.js"></script>
-
-    <h1>Hello MIDI!</h1>
-<script>
-        JZZ.synth.Tiny.register('Synth');
-        var sound = JZZ().openMidiOut().or(function () { alert('Cannot open MIDI port!'); });
-
-        const NOTES = ['D', 'e', 'E', 'F', 'g', 'G', 'a', 'A', 'b', 'B', 'C', 'd'];
-        const MIDI_NOTES = ['D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B', 'C', 'Db'];
-
-        function playChords() {
-            playChord([MIDI_NOTES[Math.floor(Math.random() * 12)], MIDI_NOTES[Math.floor(Math.random() * 12)], MIDI_NOTES[Math.floor(Math.random() * 12)]]);
-        }
-        function playClic() {
-            var piano = JZZ.synth.Tiny();
-            piano
-                .noteOn(9, 80, 50)
-                .wait(100)
-                .noteOff(9, 80);
-        }
-        function playChord(chord) {
-            chord.forEach(note => {
-                sound
-                    .noteOn(0, note + '4')
-                    .wait(1000)
-                    .noteOff(0, note + '4');
-            });
-
-        }
-
-        function playScale() {
-            MIDI_NOTES.forEach(note => {
-                JZZ.synth.Tiny()
-                    .noteOn(0, note + '5', 127)
-                    .wait(10000)
-                    .noteOff(0, note + '5');
-            });
-        }
-        function play() {
-            JZZ.synth.Tiny()
-                .noteOn(0, 'C#5', 127)
-                .noteOn(0, 'Eb5', 127)
-                .noteOn(0, 'G5', 127)
-                .wait(1000)
-                .noteOff(0, 'C#5')
-                .noteOff(0, 'Eb5')
-                .noteOff(0, 'G5');
-
-        }
-</script>
-
-<button onmousedown='playChords();' onmouseup='stop();'> Press to play... </button>
+  <div class="wrapper">
+    <h1>Moderanger</h1>
+    </ul>
+  </div>
+  <canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
+   <script type = "module"  src='moderanger.js'></script>
 
 ++++
 
@@ -75,7 +23,8 @@ La música es armonía matemática (sus reglas no pueden cambiarse), no es un ar
 
 == Simplificación
 En general, el estudio de la música se realiza mediante una serie de conceptos, palabras, símbolos y notaciones que proceden de hace varios siglos. Las reglas se han ido superponiendo según cada compositor iba rompiendo las anteriores. Todo lo que se usa es un poco farragoso y falto de un método científico. Intentaremos simplificarlo un poco, creando una notación más simple, una teoría más clara y sobre todo, que explique de verdad qué es lo que estamos escuchando, sin recurrir nunca a explicaciones caprichosas.
-Reglas matemáticas
+
+== Reglas matemáticas
 En la música todo tiene una razón. Insisto: no es un invento del ser humano, es un descubrimiento. Tiene reglas matemáticas y no podemos cambiarlas.
 Es importante no utilizar conceptos como “suena bien” o “suena mal”. Esos conceptos nos llevarían por el camino equivocado al analizar, por ejemplo, la escala como un conjunto de notas que comienza y termina en una nota por la única curiosa razón de que esa nota nos produce a nosotros una impresión de descanso o estabilidad. 
 
@@ -85,16 +34,18 @@ Si los números pudiesen expresar la belleza que esconden, podríamos hablar de 
 Dicho de otro modo, la música nos permite emular conceptos que son externos a su propia estructura, por simple parecido a las estructuras de dichos conceptos. Igual que con un lápiz podemos dibujar un gato, mejor dicho, realizar un trazado que a un humano le sugiera, de forma inequívoca y fácilmente analizable, el concepto de “gato”, con música podemos realizar combinaciones de notas que nos sugieran conceptos como “alegría”, “dolor”, “vértigo”, “esperanza”, aunque de forma más abstracta, es decir, que nos resulta dificil explicar por qué experimentamos esas percepciones, simplemente nos quedamos en que la música realmente nos sugiere eso. Pero lo hace por simple parecido, igual que el dibujo del gato: hay algo en común entre la estructura interna del concepto de “alegría” por ejemplo, y una música determinada.
 
 En el universo que habitamos hay algunas reglas establecidas que solemos dar por supuestas, aunque podrían no estar ahí. Recordemos unas cuantas reglas de sentido común:
-Las cosas tienen una masa y un volumen. 
-Las cosas grandes pesan más que las pequeñas
-Las cosas pequeñas se mueven más fácilmente que las grandes
-Las cosas grandes suelen estar abajo, las pequeñas arriba
-Las cosas pequeñas suelen ser frágiles, las grandes fuertes
-Los seres vivos son frágiles
-La luz suele estar arriba, la oscuridad abajo
-Los cuerpos muertos suelen estar abajo
-etc, etc.
-Todas estas ideas están en nuestro cerebro durante toda nuestra vida, y nos sirven para sobrevivir a la realidad. Así que las utilizamos, casi siempre de forma inconsciente para interpretar lo que vemos, rechazar lo que tememos, jugar al tenis o beber un vaso de agua. Lógicamente, forman parte de nuestro lenguaje musical, y además no se necesita ningún traductor: todos los seres humanos las conocen. Por eso la música es un lenguaje universal, porque utiliza palabras que cualquier habitante del mundo real puede reconocer.
+
+* Las cosas tienen una masa y un volumen. 
+* Las cosas grandes pesan más que las pequeñas
+* Las cosas pequeñas se mueven más fácilmente que las grandes
+* Las cosas grandes suelen estar abajo, las pequeñas arriba
+* Las cosas pequeñas suelen ser frágiles, las grandes fuertes
+* Los seres vivos son frágiles
+* La luz suele estar arriba, la oscuridad abajo
+* Los cuerpos muertos suelen estar abajo
+* etc, etc.
+
+Todas estas ideas están en nuestro cerebro durante toda nuestra vida, y nos sirven para sobrevivir a la realidad. Así que las utilizamos, casi siempre de forma inconsciente para interpretar lo que vemos, rechazar lo que tememos, jugar al tenis o beber un vaso de agua. Lógicamente, forman parte de nuestro lenguaje musical, y además no se necesita ningún traductor: todos los seres humanos las conocen. Por eso la música es un lenguaje universal, porque utiliza _palabras_ que cualquier habitante del mundo real puede reconocer.
 
 == Escala
 Las ondas de sonido proceden de elementos físicos que vibran. Cuerdas, campanas, tubos, etc. Casi ningún elemento vibra de una forma perfecta, formando una onda senoidal, sino que tienen lo que se dice un timbre determinado, es decir, una forma de onda propia. La forma de una onda depende de la cantidad de armónicos que se superpongan a la vibración principal, es decir, de vibraciones simultaneas a velocidades múltiplos de la velocidad base. Así diferenciamos el sonido de un violín del de un saxo, porque tienen diferentes armónicos. Si una onda vibra a una velocidad múltiplo de otra, se combinan formando un sonido uniforme y reconocible, así que decimos que forman armonía. Hay varias mezclas posibles que resultan armónicas, basándose en la proporción matemática entre ellas. Por ejemplo, si una nota vibra 440 veces por segundo y otra 880 forman una armonía perfecta. Pero no ocurre lo mismo con 440 y 457, por ejemplo. El oido separa las dos y detecta que no forman una proporción matemática reconocible. Podríamos calificar de armónicas las proporciones justas, es decir, el doble, el triple, el cuádruple, etc. 
@@ -128,22 +79,19 @@ Se trata de dos entidades diferentes. Una es más grande que la otra, y la más 
 Esos acordes están presentes en el 99 % de la música, e incluso, cuando no estan presentes, el oyente intenta imaginarlos, como cuando faltan trazos en una imagen y nuestra imaginación completa los que faltan basándose en el sentido común. Cuando escuchamos una tríada mayor o menor admitimos esas ideas por sistema, y, a partir de ellas, intentamos entender qué nos está contando la música, además de orientarnos en el mapa que forman. 
 En fin, estas son las ideas que sugieren automáticamente esas tres simples notas:
 
-Tríada menor
-Tríada mayor
-Injusticia
-Justicia
-Tristeza
-Alegría
-Fracaso
-Triunfo
-Muerte
-Vida
-Opresión
-Solidaridad
-
+[cols="1,1"]
+|===
+|Tríada menor  |Tríada mayor
+|Injusticia    |Justicia
+|Tristeza      |Alegría
+|Fracaso       |Triunfo
+|Muerte        |Vida
+|Opresión      |Solidaridad
+|===
 
 
 == Tríadas orientativas
+
 El formato de una tríada, nos permite suponer en qué grado de la escala estamos. En una escala hay algunas tríadas mayores y otras menores. Se obtienen simplemente agregando a cada grado de la escala las dos siguientes notas alternas. Según el caracter de la tríada que oímos, podemos suponer en qué grado de la escala podemos estar ( como cuando al ver un monumento en un mapa de pronto nos orientamos correctamente ). Como hay varias tríadas de cada tipo, todavía hay lugar para el engaño.
 
 == Tritono
@@ -240,7 +188,8 @@ Esta sería la representación de la escala BLUE de LA, es decir de A. Observamo
 
 == Tríadas de PENTA
 La escala PENTA tiene tríadas como las demás. Si se toman como en la notación estandar, parece que en lugar de terceras, están formadas por cuartas, así que se habla de acordes por cuartas, o armonía cuartal. Es totalmente absurdo. Lo que ocurre es que en esa escala no hay esas notas. Solo son las terceras de esa escala. No hay por que hacer excepciones. La diferencia con las tríadas de una escala que contenga tritonos es que estas no llevan a ninguna parte, funcionan todas igual de bien. Son todas igual de estables y no hay que alejarse de ningún punto. 
-Tríadas no orientativas
+
+== Tríadas no orientativas
 Un acorde puede usarse para marcar el grado o no. Así, se puede tocar con acordes por encima del mismo grado sin desorientar al oyente, generalmente sugiriendo, por ejemplo con el ritmo, que no se está variando de grado, solo es una melodía hecha de tríadas. Así, los músicos de jazz, suelen improvisar usando acordes por cuartas (quartal harmony) sin acentuarlos  demasiado para no confundir al oyente, marcando los tiempos débiles o realizando dibujos rítmicos irregulares, más propios de una melodía que de una báse armónica. Incluso el bajo puede hacer lo mismo, improvisar sobre una estructura armónica sin cambiar su carácter, simplemente dejando claro que no es lo que desea hacer, bien mediante el esquema rítmico, el sonido usado, o cualquier otro truco. De lo que se trata es de que el oyente diferencie claramente en qué grado está la escala en cada momento, para que que pueda analizar y asimilar todo lo que oiga por encima.
 
 
