@@ -23,14 +23,15 @@ test('getChordNotes is working', () => {
     expect(scale.getChordNotes(3,1)).toStrictEqual([5,9]);
     expect(scale.getChordNotes(4,1)).toStrictEqual([7,10]);
     expect(scale.getChordNotes(5,1)).toStrictEqual([9,12]);
-    expect(scale.getChordNotes(6,1)).toStrictEqual([10,12]);
+    expect(scale.getChordNotes(6,1)).toStrictEqual([10,14]);
 
     // Add three notes to the root
     expect(scale.getChordNotes(0,3)).toStrictEqual([0,3,7,10])
     expect(scale.getChordNotes(1,3)).toStrictEqual([2,5,9,12])
-    expect(scale.getChordNotes(2,3)).toStrictEqual([3,7,10,12])
+    expect(scale.getChordNotes(2,3)).toStrictEqual([3,7,10,14])
     expect(scale.getChordNotes(3,3)).toStrictEqual([5,9,12,15])
-    expect(scale.getChordNotes(4,3)).toStrictEqual([7,10,12,15])
+    expect(scale.getChordNotes(4,3)).toStrictEqual([7,10,14,17])
+    
     expect(scale.getChordNotes(5,3)).toStrictEqual([9,12,15,19])
-    expect(scale.getChordNotes(6,3)).toStrictEqual([10,12,15,19])
+    expect(scale.getChordNotes(6,3)).toStrictEqual([10,14,17,21])
  });

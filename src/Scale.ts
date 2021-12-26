@@ -8,10 +8,14 @@ export class Scale {
     /**
      * Return a chord with as density notes added to the root
      */
-    getChordNotes(rootNoteOrder:number, density:number, tonality:number): number[]{
+    getChordNotes(rootNoteOrder:number, density:number, tonality?:number): number[]{
         var chordNotes:number[]= [];        
         var noteShift = 0;
-        var index = rootNoteOrder+tonality;
+        var tonalityShift = Tonality.D;
+        if(tonality != undefined){
+            tonalityShift = tonality;
+        }
+        var index = rootNoteOrder+tonalityShift;
         if(index >= this.getNumNotes()){
             index = index% this.getNumNotes();
             noteShift+=12;
