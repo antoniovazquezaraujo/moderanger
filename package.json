@@ -5,6 +5,9 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@midival/core": "^0.0.14",
+    "@tonaljs/tonal": "^4.6.5",
+    "easymidi": "^2.1.0",
     "webmidi": "^3.0.5"
   },
   "devDependencies": {

@@ -8,15 +8,19 @@ export class Scale {
     /**
      * Return a chord with as density notes added to the root
      */
-    getChordNotes(rootNoteOrder:number, density:number): number[]{
+    getChordNotes(rootNoteOrder:number, density:number, tonality:number): number[]{
         var chordNotes:number[]= [];        
-        chordNotes.push(this.getNotePosition(rootNoteOrder));
-        var index = rootNoteOrder;
         var noteShift = 0;
+        var index = rootNoteOrder+tonality;
+        if(index >= this.getNumNotes()){
+            index = index% this.getNumNotes();
+            noteShift+=12;
+        }
+        chordNotes.push(this.getNotePosition(index)+noteShift);
         for(var n=0; n<density; n++){
             index+=2;
             if(index >= this.getNumNotes()){
-                index = 0;
+                index = index% this.getNumNotes();
                 noteShift+=12;
             }
             chordNotes.push(this.getNotePosition(index)+ noteShift);
@@ -63,16 +67,16 @@ const SCALES: Scale[] = [
     new Scale([0,2,4,6,8,10])
 ];
 export enum Tonality {
-    D = 1,
-    e = 2,
-    E = 3,
-    F = 4,
-    g = 5,
-    G = 6,
-    a = 7,
-    A = 8,
-    b = 9,
-    B = 0,
-    C = 11,
-    d = 12
+    D = 0,
+    e = 1,
+    E = 2,
+    F = 3,
+    g = 4,
+    G = 5,
+    a = 6,
+    A = 7,
+    b = 8,
+    B = 9,
+    C = 10,
+    d = 11
 }

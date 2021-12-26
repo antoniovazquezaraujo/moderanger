@@ -1,12 +1,37 @@
 ++++
+<script src="JZZ.js"></script>
+<script src="JZZ.synth.Tiny.js"></script>
+<script src="JZZ.input.Kbd.js"></script>
+</head>
 
-  <div class="wrapper">
-    <h1>Moderanger</h1>
-    </ul>
-  </div>
-  <canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
-   <script type = "module"  src='moderanger.js'></script>
+<body>
+<h1>Responsive Piano</h1>
 
+<div id=piano></div>
+
+El piano iría aquí
+
+<script><!--
+JZZ.synth.Tiny.register();
+
+JZZ.input.Kbd({
+  at: 'piano',
+  from: 'C4',
+  to: 'B4',
+  0:   { pos: 'W' },
+  320: { },
+  450: { to: 'E5' },
+  610: { to: 'B5' },
+  900: { to: 'B6' },
+  onCreate: function() {
+    this.getKeys().setStyle({ borderColor:'#00f' });
+    this.getBlackKeys().setStyle({ backgroundColor:'#c0c' }, {});
+    this.getWhiteKeys().setStyle({ backgroundColor:'#fef' }, {});
+  }
+}).connect(JZZ().openMidiOut());
+--></script>
+
+</body>
 ++++
 
 == Propósito
