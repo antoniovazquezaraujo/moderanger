@@ -11,15 +11,15 @@ async function start() {
     instrument.tonality = Tonality.D; 
 
     var player: Player = new Player();
-    player.density = 2;
-    player.inversion = 0; 
+    player.density = 3;
+    player.inversion = 3; 
     player.octave = 4; 
-
+ 
     for (var index = 0; index < 7; index++) {
         player.selectedNote = index;
-        var result = player.play(instrument);
+        player.selectNotes(instrument);
         await delay(250); 
-        playNotes(result, 250);
+        playNotes(instrument.notes, 250);
     } 
 }
 function delay(ms: number) {

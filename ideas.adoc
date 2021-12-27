@@ -213,3 +213,22 @@ InstrumentView:
 Respecto a las notas:
 Estamos usando los patrones de escala como conjuntos de unos y ceros, cuando realmente sería más práctico anotar el desplazamiento de cada nota de la escala, es decir:
 '01010110' sería '1356', más corto, más claro y más facil de saber el desplazamiento de cada nota. Vamos a cambiar esto.
+
+Bien, resumen de lo que tenemos:
+
+-Player, Sound, Scale, Instrument. Funcionan perfectamente. 
+Necesitamos hacer un componente visual para probar todas las propiedades.
+Recordemos qué tipo de componentes vamos a necesitar en el doc:
+-Una simple escala en modo estandar
+-Escala en modo circular sin notas, que suene
+-Escala con notas que se pueda modificar
+-Instrumento formado por escalas circulares apiladas concentricamente
+-Instrumento programable, con secuencias pre-cargadas
+-Instrumento programable que se pueda tocar con el teclado
+
+En qué consiste una vista de un instrumento?
+
+-Instrumento en cuestión
+-Radio, es decir size
+-Color
+-Orientación

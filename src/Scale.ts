@@ -1,3 +1,5 @@
+import { NUM_OF_SECTORS } from "./View";
+
 export class Scale {
     notes: number[];
 
@@ -70,6 +72,10 @@ const SCALES: Scale[] = [
     new Scale([0,2,5,7,10]),
     new Scale([0,2,4,6,8,10])
 ];
+
+export function getNoteName(noteOrder:number):string{
+    return Tonality[noteOrder % 12];
+}
 export enum Tonality {
     D = 0,
     e = 1,
@@ -84,3 +90,4 @@ export enum Tonality {
     C = 10,
     d = 11
 }
+ 
