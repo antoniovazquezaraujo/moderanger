@@ -1,4 +1,4 @@
-import {getNoteName, Tonality,getScaleByNum, Scale} from './Scale.js';
+import { Tonality} from './Scale.js';
  
 
 export class Instrument {

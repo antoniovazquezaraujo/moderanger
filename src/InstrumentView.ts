@@ -1,37 +1,42 @@
+import {getNoteName,Tonality, getScaleByNum, Scale} from './Scale.js';
 import {Instrument} from './Instrument.js';
-import {getNoteName, Tonality,getScaleByNum, Scale} from './Scale.js';
    
 const NUM_OF_SECTORS = 12;
 const START_SECTOR = 6;
 
-
+ 
 window.onload = function () {
     var canvas = <HTMLCanvasElement>document.getElementById('myCanvas');    
-    // var view = new InstrumentView(new Instrument(), canvas);
-    // view.radius= 75;
-    // view.circleColor= 'lightgreen';
-    // view.drawCircle();
-    // view.drawScaleGrades();
-    // var instrument:Instrument = new Instrument();
-    // instrument.tonality=Tonality.D;
-    // var view2 = new InstrumentView(instrument, canvas);
-    // view2.radius= 105;
-    // view2.orientation = 0;
-    // view2.circleColor= 'lightblue';
-    // view2.drawCircle();
-    // view2.showChord([1,3,5]);
-    // view2.drawScaleNotes();
-    for(var n = 0; n<6; n++){
-        var instrument = new Instrument();
-        instrument.scale=n;
-        var view = new InstrumentView(instrument, canvas);
-        view.circleColor= 'red';
-        view.radius= 100+n + (25*n);
-        view.drawCircle();
-        view.drawScaleNotes();    
-    }
+    var instrument1:Instrument = new Instrument();
+    instrument1.tonality=Tonality.F;
+    instrument1.notes = [3,5,7];
+    var view = new InstrumentView(instrument1, canvas);
+    view.radius= 75;
+    view.circleColor= 'lightgreen';
+    view.draw();
+    var instrument2:Instrument = new Instrument();
+    instrument2.tonality=Tonality.D;
+    instrument2.notes = [1,3,5];
+    var view2 = new InstrumentView(instrument2, canvas);
+    view2.radius= 105;
+    view2.orientation = 0;
+    view2.circleColor= 'lightblue';
+    view2.draw();
+    // for(var n = 0; n<6; n++){
+    //     var instrument = new Instrument();
+    //     instrument.scale=n;
+    //     var view = new InstrumentView(instrument, canvas);
+    //     view.circleColor= 'red';
+    //     view.radius= 100+n + (25*n);
+    //     view.drawCircle();
+    //     view.drawScaleNotes();    
+    // }
 }
  
+export enum ShowMode{
+    showNotes=0,
+    showIntervals=1
+}
 export class InstrumentView {
     centerX: number;
     centerY: number;
@@ -42,6 +47,8 @@ export class InstrumentView {
     instrument: Instrument;
     context: CanvasRenderingContext2D;
     canvas: HTMLCanvasElement;
+    mode: ShowMode;
+    showChords: boolean;
  
     constructor(instrument: Instrument, canvas: HTMLCanvasElement) {
         this.instrument = instrument;
@@ -54,7 +61,23 @@ export class InstrumentView {
         this.circleColor = 'white';
         this.textColor = 'black';
         this.orientation=0;
+        this.mode = ShowMode.showNotes;
+        this.showChords = true;
     } 
+    getInstrument():Instrument{
+        return this.instrument;
+    }
+    draw(){
+        this.drawCircle();
+        if(this.showChords){
+            this.showChord(this.instrument.notes);
+        }
+        if(this.mode === ShowMode.showIntervals){
+            this.drawScaleGrades();
+        }else{
+            this.drawScaleNotes();
+        }
+    }
     drawCircle(): void {
         this.context.strokeStyle = this.circleColor;
         this.context.beginPath();
@@ -90,15 +113,16 @@ export class InstrumentView {
         var scheme:Scale = getScaleByNum(this.instrument.scale);
         for(var note = 0; note< notes.length; note++){
             var noteSector = scheme.getNotePosition(notes[note]-1);
-            this.selectNote(noteSector, 70+60*note);
-        }
+            let color = note===0?'red':'gray';
+            this.selectNote(noteSector, color);
+        } 
     }
-    selectNote(sector:number, color:number){
+    selectNote(sector:number, color:string){
         var angle = 360 / 12 ;
         var labelX = this.centerX + (this.radius ) * Math.sin(angle * (START_SECTOR + this.orientation + sector) * Math.PI / 180)
         var labelY = this.centerY - (this.radius ) * Math.cos(angle * (START_SECTOR + this.orientation + sector) * Math.PI / 180)
         this.context.beginPath();
-        this.context.fillStyle = `rgb(${color},${color},${color})`
+        this.context.fillStyle = color;
         this.context.arc(labelX , labelY , 10, 0, Math.PI *2, true );
         this.context.fill();
     }

@@ -1,5 +1,3 @@
-import { NUM_OF_SECTORS } from "./View";
-
 export class Scale {
     notes: number[];
 

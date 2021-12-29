@@ -232,3 +232,17 @@ En qué consiste una vista de un instrumento?
 -Radio, es decir size
 -Color
 -Orientación
+
+Tenemos el concepto de instrument y el de orchestra. Hay que madurar estas ideas.
+La idea final de todo esto sería que pudiera estar sonando un instrumento programado mientras el usuario toca otro manualmente. Los dos podrían estar sincronizados en los cambios de modo, de tonalidad o de tiempo.
+Pero entonces, un instrumento sería un conjunto de varios "modos" concentricos, cuya programación o manejo incluye saltar de un modo a otro o cambiar la tonalidad. Así que un instrumento ya es un conjunto de modos concéntricos.
+Otra cosa sería el concepto de player. Podríamos tener un conjunto de modos concentricos, es decir, un instrumento, siendo tocado por dos players al mismo tiempo, uno programado, y otro manual. 
+Esta sí sería una buena idea. 
+Instrumento con un conjunto de modos que es tocado por un player programado, que envía acordes y cambia entre los distintos modos.
+En ese mismo instrumento, se agrega otro player que puede tocar solamente los bajos, por ejemplo.
+Luego agregamos un player manual, que recibe las teclas del usuario y va haciendo sonar los modos que desea. 
+Parece buena idea.
+
+Para no complicar las cosas, parecería interesante mantener el concepto de orchestra, es decir, un conjunto de modos será realmente un conjunto de instruments, es decir, una orchestra. 
+Quizá el nombre de player entonces debería sustituirse por Conductor, es decir, el que dirige la orquesta.
+Habría un ManualConductor y un ProgrammableConductor. Veremos esto.

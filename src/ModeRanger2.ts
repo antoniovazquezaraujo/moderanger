@@ -2,9 +2,9 @@ import { Instrument } from './Instrument.js';
 import { Tonality } from './Scale.js';
 import { Player } from './Player.js';
 import {  playNotes, initSound } from './Sound.js';
-
+ 
 async function start() {
-    initSound();
+    initSound(); 
     var instrument = new Instrument();
     instrument.scale = 1;
     instrument.timbre = 4;
