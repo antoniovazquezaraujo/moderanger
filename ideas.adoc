@@ -246,3 +246,45 @@ Parece buena idea.
 Para no complicar las cosas, parecería interesante mantener el concepto de orchestra, es decir, un conjunto de modos será realmente un conjunto de instruments, es decir, una orchestra. 
 Quizá el nombre de player entonces debería sustituirse por Conductor, es decir, el que dirige la orquesta.
 Habría un ManualConductor y un ProgrammableConductor. Veremos esto.
+
+Ya funciona la orquesta. Ahora vamos a crear un ManualConductor que sería el más simple en apariencia. Recuperamos las ideas de teclado anteriores.
+
+Vale, funciona, pero hay un lío tremendo con los nombres de las notas y los intervalos y los sectores y la forma de obtener todo.
+Vamos a aclarar todo esto:
+
+- Scale: Conjunto de intervalos que definen una escala musical. Cada elemento de la escala indica una cantidad de semitonos de desplazamiento desde un tono dado. Hay 6 diferentes hasta el momento. Cada escala tiene solamente los intervalos de la primera octava, a partir de ahí, las notas que se salgan se calculan sumando y restando 12 por cada octava.
+
+- Conductor: Elemento que "dirige" una orquesta, es decir, que envía las notas que se han de hacer sonar a un Player. Se envían como grados de la escala del instrumento seleccionado, es decir, "quiero que suene la eneava nota de la escala, sea la que sea".
+
+- Player: selecciona notas que han de sonar en un instrumento. A partir de la nota seleccionada por el conductor, el player agrega una densidad, una inversión, una octavación y crea un conjunto de notas en la escala seleccionada. Estas ya son notas reales, es decir, que se pueden salir de la octava de la escala.
+
+
+time:5---/----/5-../5-.5/5--./5---/..../..../5.../..../5-../5..5/5.../5---/----/----/
+note:1              2  3 2    1              4         2       3 1    2  
+dens:2                   4    0                        3
+octa:5                                       6
+sche:1
+
+time:5---/----/5-../5-.5/5--./5---/..../..../5.../..../5-../5..5/5.../5---/----/----/
+note:1              2  3 2    1              4         2       3 1    2  
+dens:2                   4    0                        3
+octa:5                                       6
+sche:1
+
+time:5---/----/1-../2 -.1/1--./3  ---/..../..../2 .../..../1-../1..1/1.../1---/----/----/
+note:1              24  3 2    1.2              .5         2       3 1    2  
+inte:5
+
+t: time            P:pulse
+d: density         D:density
+o: octave          O:octave
+s: scale           S:scale/scheme
+n: tone            T:tone
+
+time: cuántas notas caben en un tiempo, es decir, negras=1, corcheas=2, tresillo de corchea=3,etc
+si una nota dura más de un tiempo entonces se agregan signos '-', por ejemplo blanca = 1- redonda= 1--- etc.
+Los silencios son puntos
+Cada grupo de una medida ha de ir entre paréntesis, p.e. (t1 59833FAB) = 8 negras (t3 435) = tresillo de negras, etc
+No hacen falta paréntesis: es una simple máquina de estados.
+
+P1:4354533 P4:593---84AB--CD--EF...8...7 P1,D2:43 P2,O3:4 P1,S3,TC:5 P2:433

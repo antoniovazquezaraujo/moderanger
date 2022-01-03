@@ -1,5 +1,5 @@
 import {Instrument} from './Instrument.js';
-
+import {  playNotes,  sound } from './Sound.js';
 export class Orchestra{
  
     instruments:Instrument[];
@@ -20,5 +20,9 @@ export class Orchestra{
     getInstrument(order:number):Instrument{
         return this.instruments[this.instrumentOrder[order]];
     }
-
+    selectNotesToPlay(){
+        for (var index = 0; index < this.instruments.length; index++) {
+            this.getInstrument(index).player.selectNotes(this.getInstrument(index));
+        } 
+    }
 }

@@ -7,6 +7,7 @@
   "dependencies": {
     "@midival/core": "^0.0.14",
     "@tonaljs/tonal": "^4.6.5",
+    "canvas": "^2.8.0",
     "easymidi": "^2.1.0",
     "webmidi": "^3.0.5"
   },

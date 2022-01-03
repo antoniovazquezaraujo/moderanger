@@ -13,7 +13,7 @@ export function initSound() {
 
 export function playNotes(notes: number[], duration: number): void {
     for (var n of notes) {
-        sound.note(n, 127, duration)
+        sound.noteOn(n, 127, duration)
     }
     sound.wait(duration);
 }
