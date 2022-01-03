@@ -1,3 +1,10 @@
+///////////////////////////
+//  P:Pulse (bits per time)
+//  W:Width (chord density)
+//  O:Octave
+//  S:Scale
+//  K:Key (Tonality)
+////////////////////////////
 
 SONG := 
     head = BLOCK 

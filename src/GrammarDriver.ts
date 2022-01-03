@@ -13,7 +13,7 @@ interface Block{
 }
 interface Command{
     commandType:string;
-    value: string;
+    commandValue: string;
 } 
 
 class Command implements Command{
@@ -35,7 +35,12 @@ export function evaluate(tree : any) : Song | null {
 
 var result = Parser.parse('W1,P2,S4:87843ABCD PF,S2:84837473747'); 
 var song: Song = parseSong(result.ast!);
-console.log(song);
+console.log(song.blocks);
+for(var block of song.blocks){
+    block.commands.forEach(command =>{
+        console.log(command.commandType + " -> "+ command.commandValue);
+    });
+}
 
 export function parseSong(at : Parser.SONG) : Song {
     var song:Song = new Song();
@@ -73,7 +78,7 @@ export function parseChar( t: string):string{
 export function parseCommand(at: Parser.COMMAND): Command{  
     var ret:Command =  new Command();
     ret.commandType = parseCommandType(at.commandType);
-    ret.value = parseCommandValue(at.commandValue);
+    ret.commandValue = parseCommandValue(at.commandValue);
     return ret;
 }
 
