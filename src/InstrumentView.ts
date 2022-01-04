@@ -111,11 +111,9 @@ export class InstrumentView {
     showChord(notes:number[] ): void {
         this.context.strokeStyle = this.textColor;
         var scheme:Scale = getScaleByNum(this.instrument.scale);
-        console.log("Notas:"+ notes + " Escala:"+ scheme.notes);
         for(var note = 0; note< notes.length; note++){
-            var noteSector = scheme.getNotePosition(notes[note]);
-            console.log("Posición de la nota:"+ note + " en "+ notes[note] + " : " + scheme.getNotePosition(note))
-            let color = note===0?'red':'blue';
+            var noteSector = notes[note] %12;
+            let color = note===0?'red':'lightblue';
             this.selectNote(noteSector, color);
         } 
     }

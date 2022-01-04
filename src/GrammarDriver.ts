@@ -4,26 +4,38 @@ class ParseResult {
     ast: Song | null = null;
     errs: SyntaxError[] =[];
 }
-interface Song{
-    blocks: Block[];
-}  
-interface Block{ 
-    commands: Command[];
-    blockContent:string;
+// interface Song{
+//     blocks: Block[];
+// }  
+// interface Block{ 
+//     commands: Command[];
+//     blockContent:string;
+// }
+// interface Command{
+//     commandType:string;
+//     commandValue: string;
+// } 
+
+class Command {
+    constructor(
+        public commandType:string,
+        public commandValue:string
+    ){}
+    public toString = () : string => {
+        return `Command (${this.commandType} ${this.commandValue})`;
+    }
+
 }
-interface Command{
-    commandType:string;
-    commandValue: string;
-} 
-
-class Command implements Command{
-
+class Block{
+    constructor(
+        public commands:Command[], 
+        public blockContent:string
+    ){} 
 }
-class Block implements Block{
-
-}
-class Song implements Song{
-
+class Song {
+    constructor(
+        public blocks: Block[]
+    ){}
 }
 export function evaluate(tree : any) : Song | null {
     if(tree.err === null && tree.ast){
@@ -35,28 +47,24 @@ export function evaluate(tree : any) : Song | null {
 
 var result = Parser.parse('W1,P2,S4:87843ABCD PF,S2:84837473747'); 
 var song: Song = parseSong(result.ast!);
-console.log(song.blocks);
-for(var block of song.blocks){
-    block.commands.forEach(command =>{
-        console.log(command.commandType + " -> "+ command.commandValue);
-    });
-}
+console.log(JSON.stringify(song));
+console.log(song);
+ 
 
 export function parseSong(at : Parser.SONG) : Song {
-    var song:Song = new Song();
-    song.blocks = [];
-    song.blocks.push(parseBlock(at.head));
+    var blocks = [];
+    blocks.push(parseBlock(at.head));
     at.tail.forEach(t => {
-        song.blocks.push(parseBlock(t.block));
+        blocks.push(parseBlock(t.block));
     });
-    return song;
+    return new Song(blocks);
 }
 
 export function parseBlock(at : Parser.BLOCK): Block{
-    var block:Block = new Block();
-    block.commands = parseCommandGroup(at.commandGroup);
-    block.blockContent = parseBlockContent(at.blockContent);
-    return block;
+    
+    var commands = parseCommandGroup(at.commandGroup);
+    var blockContent = parseBlockContent(at.blockContent);
+    return new Block(commands, blockContent);
 }
 export function parseCommandGroup(at : Parser.COMMAND_GROUP) : Command[] {
     var commands:Command[] = [];
@@ -76,10 +84,9 @@ export function parseChar( t: string):string{
     return t;
 }
 export function parseCommand(at: Parser.COMMAND): Command{  
-    var ret:Command =  new Command();
-    ret.commandType = parseCommandType(at.commandType);
-    ret.commandValue = parseCommandValue(at.commandValue);
-    return ret;
+    var commandType = parseCommandType(at.commandType);
+    var commandValue = parseCommandValue(at.commandValue);
+    return new Command(commandType, commandValue);
 }
 
 function parseCommandValue(commandValue: Parser.VALUE_ID): string {

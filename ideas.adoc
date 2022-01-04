@@ -288,3 +288,16 @@ Cada grupo de una medida ha de ir entre paréntesis, p.e. (t1 59833FAB) = 8 negr
 No hacen falta paréntesis: es una simple máquina de estados.
 
 P1:4354533 P4:593---84AB--CD--EF...8...7 P1,D2:43 P2,O3:4 P1,S3,TC:5 P2:433
+
+Bien, tenemos una gramática que puede parsear canciones con el formato más simple posible.
+Ahora necesitamos que una Orchestra pueda tener un conductor programable.
+Volvemos atrás para arreglar el problema de las notas:
+Hay una cierta confusión entre las notas que caen dentro de la escala y las notas reales, que pueden salirse de la misma.
+
+Cuando un player toma la nota seleccionada y le pide a la escala las notas del acorde, las notas que se obtienen ya pueden estar saliéndose de la escala, puesto que podemos simplemente pedir las notas del último grado de la escala, con lo cual se saldrán hacia arriba.
+
+Además de eso, el player luego va a octavar estas notas y a invertirlas, con lo cual pueden volver a salirse todavía más lejos del tramo de la escala.
+
+Es decir, las notas que obtenemos ya son notas REALES, o sea, semitonos a partir de el inicio del acorde, de la tonalidad y de la octava. Así que esto debe ser tenido en cuenta en el momento de mostrar estas notas.
+
+

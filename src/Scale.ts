@@ -35,7 +35,7 @@ export class Scale {
      * Returns the position of the nht note in the scale
      */
     getNotePosition(noteOrder: number): number {
-        return this.notes[noteOrder];
+        return this.notes[noteOrder%12];
     }
 
     /**

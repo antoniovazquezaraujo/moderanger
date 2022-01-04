@@ -5,7 +5,7 @@ export class Player{
     selectedNote: number = 0; //Nota que está seleccionada para sonar
     density: number = 0;      //Densidad de notas, mono o acordes de x notas (0-6)
     inversion: number = 0;    //0-6 Nota más baja del acorde que suena (1,3,5,7, etc)
-    octave: number = 0;       //En qué octava está (0-6)
+    octave: number = 5;       //En qué octava está (0-6)
   
     selectNotes(instrument:Instrument):void{
         var scale = getScaleByNum(instrument.scale);       

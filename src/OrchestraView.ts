@@ -64,7 +64,6 @@ export class OrchestraView {
                 instrumentView.circleColor = 'lightgreen';
             }
             instrumentView.draw();
-            console.log("Notas:" + instrumentView.getInstrument().notes);
         }
         playNotes(this.getSelectedView().getInstrument().notes, 200);
 
