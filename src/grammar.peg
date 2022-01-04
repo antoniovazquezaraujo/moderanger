@@ -1,8 +1,10 @@
 ///////////////////////////
+//  V:Velocity
 //  P:Pulse (bits per time)
 //  W:Width (chord density)
 //  O:Octave
 //  S:Scale
+//  I:Inversion
 //  K:Key (Tonality)
 ////////////////////////////
 
@@ -23,9 +25,9 @@ COMMAND :=
     commandType ={COMMAND_TYPE} 
     commandValue={VALUE_ID}
 COMMAND_TYPE := 
-    commandType = '[PWOST]'
+    commandType = '[VPWOSIK]'
 VALUE_ID := 
-    val = '[0-9A-F]'
+    val = '[0-9A-F]{1,2}'
 BLOCK_CONTENT:=
     val = '[0-9A-F\-\.]+'
 COMMAND_SEPARATOR := ','

@@ -306,3 +306,22 @@ Faltaría:
     - Que suene solamente con las teclas de Fn
 
 Vale, esto está.    
+
+Lo siguiente sería ya intentar crear el conductor programable. Faltan muchos aspectos gráficos que mejorar, pero quizá eso tenga menos prisa. Haremos una miniatura que nos permita ver si el concepto funciona.
+
+Vale, funciona. 
+Ahora necesitamos entender bien el asunto del tiempo y la velocidad.
+Tenemos una VELOCITY que es la velocidad de metrónomo del tema. Puede cambiar en cualquier momento.
+Luego tenemos la duración de cada nota, que es el PULSE, de modo que:
+    - 1 -> En un tiempo cabe una nota (negra)
+    - 2 -> En un tiempo caben 2 notas (corchea)
+    - 3 -> En un tiempo caben 3 notas (tresillo de corchea)
+    - 4 -> En un tiempo caben 4 notas (semi-corchea)
+    ...
+No tenemos una medida para indicar notas que duren más de un tiempo. Eso es lo máximo.
+Para conseguir eso, se usa el caracter '-' que produce que la nota anterior siga sonando. Se pueden agregar tantos como sean necesarios.
+En caso de que se necesiten notas muy largas, podríamos pensar en otra cosa.
+Para los silencios se usa el caracter '.' que también se puede alargar, o simplemente, poner varios silencios seguidos.
+    
+Vale, ya está funcionando.
+Necesitamos aclarar en profundidad el asunto de la sincronización en Typescript, para poder controlar la duración y el ritmo de las notas.

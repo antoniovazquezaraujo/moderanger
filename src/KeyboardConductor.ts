@@ -1,6 +1,5 @@
 import { OrchestraView } from "./OrchestraView";
 
-
 window.onload = function () {
 
 }
@@ -17,7 +16,7 @@ window.onload = function () {
     Right,Left: rotar instrumento
     Ctrl+Right,Left: cambiar escala
 */
-export class Conductor {
+export class KeyboardConductor  {
     orchestraView: OrchestraView;
 
     constructor(orchestraView: OrchestraView) {

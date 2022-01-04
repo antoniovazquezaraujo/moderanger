@@ -2,8 +2,11 @@ import { getNoteName, Tonality, getScaleByNum, Scale } from './Scale.js';
 import { Instrument } from './Instrument.js';
 import { InstrumentView } from './InstrumentView.js';
 import { Orchestra } from './Orchestra.js';
-import { Conductor } from './Conductor.js';
+import { KeyboardConductor } from './KeyboardConductor.js';
 import { playNotes, initSound } from './Sound.js';
+import { ProgrammableConductor } from './ProgrammableConductor.js';
+import { parseSong, Song } from './GrammarDriver.js';
+import * as Parser from './parser.js';
 const NUM_OF_SECTORS = 12;
 const START_SECTOR = 6;
 
@@ -23,8 +26,14 @@ window.onload = function () {
         view.instrumentViews[n].orientation = 0;
     }
 
-    var conductor = new Conductor(view);
+    var conductor = new KeyboardConductor(view);
     conductor.start();
+    
+    var programmableConductor = new ProgrammableConductor(view);
+    var result = Parser.parse('W0,P1,S1,V10:1357 W0,SF0:24686427531');  
+    var song: Song = parseSong(result.ast!);
+    programmableConductor.setSong(song);
+    programmableConductor.start();
 }
 
 
@@ -69,7 +78,9 @@ export class OrchestraView {
     play(){
         playNotes(this.getSelectedView().getInstrument().notes, 200);
     }
-
+    playTimed(time:number){
+        playNotes(this.getSelectedView().getInstrument().notes, time);
+    }
     selectView(n: number) {
         this.selectedView = n;
     }

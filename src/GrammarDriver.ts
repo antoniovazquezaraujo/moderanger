@@ -1,22 +1,10 @@
 import * as Parser from './parser.js';
 
-class ParseResult {
+export class ParseResult {
     ast: Song | null = null;
     errs: SyntaxError[] =[];
 }
-// interface Song{
-//     blocks: Block[];
-// }  
-// interface Block{ 
-//     commands: Command[];
-//     blockContent:string;
-// }
-// interface Command{
-//     commandType:string;
-//     commandValue: string;
-// } 
-
-class Command {
+export class Command {
     constructor(
         public commandType:string,
         public commandValue:string
@@ -26,13 +14,13 @@ class Command {
     }
 
 }
-class Block{
+export class Block{
     constructor(
         public commands:Command[], 
         public blockContent:string
     ){} 
 }
-class Song {
+export class Song {
     constructor(
         public blocks: Block[]
     ){}
@@ -45,10 +33,9 @@ export function evaluate(tree : any) : Song | null {
     return null;
 }  
 
-var result = Parser.parse('W1,P2,S4:87843ABCD PF,S2:84837473747'); 
-var song: Song = parseSong(result.ast!);
-console.log(JSON.stringify(song));
-console.log(song);
+// var result = Parser.parse('W1,P2,S4:87843ABCD PF,VF2,S2:84837473747'); 
+// var song: Song = parseSong(result.ast!);
+// console.log(JSON.stringify(song, null, 2 ));
  
 
 export function parseSong(at : Parser.SONG) : Song {
