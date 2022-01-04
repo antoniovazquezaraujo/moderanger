@@ -14,7 +14,7 @@ window.onload = function () {
     var orchestra = new Orchestra();
     for (var n = 0; n < 6; n++) {
         let instrument = new Instrument();
-        instrument.scale = n;
+        instrument.selectScale(n);
         //instrument.tonality = n;
         orchestra.addInstrument(instrument);
     }
@@ -65,8 +65,9 @@ export class OrchestraView {
             }
             instrumentView.draw();
         }
+    }
+    play(){
         playNotes(this.getSelectedView().getInstrument().notes, 200);
-
     }
 
     selectView(n: number) {

@@ -2,9 +2,9 @@ import { OrchestraView } from "./OrchestraView";
 
 
 window.onload = function () {
- 
+
 }
- 
+
 /*
     Teclas:
     F1-F12: tocar notas
@@ -14,29 +14,32 @@ window.onload = function () {
     Ctrl+1-9:seleccionar inversion
     Up,Down:seleccionar instrumento
     Ctrl+Up,Down:mover instrumento
-
+    Right,Left: rotar instrumento
+    Ctrl+Right,Left: cambiar escala
 */
 export class Conductor {
     orchestraView: OrchestraView;
 
-    constructor(orchestraView: OrchestraView){
+    constructor(orchestraView: OrchestraView) {
         this.orchestraView = orchestraView;
-    }  
+    }
     start(): void {
         document.addEventListener('keydown', (event) => {
             const keyName = event.key;
             event.preventDefault();
             if (keyName.match(/F\d/)) {
                 if (event.shiftKey) {
-                    this.setTonality(Number(keyName.substring(1))-1);
+                    this.setTonality(Number(keyName.substring(1)) - 1);
                 } else if (event.ctrlKey) {
-                    this.setNodeDensity(Number(keyName.charAt(1))-1);
+                    this.setNodeDensity(Number(keyName.charAt(1)) - 1);
                 } else {
-                    this.playNote(Number(keyName.substring(1))-1);
+                    this.selectNoteInInstrument(Number(keyName.substring(1)) - 1);
+                    this.orchestraView.orchestra.selectNotesToPlay();
+                    this.orchestraView.play();
                 }
             } else if (keyName === 'ArrowDown') {
                 if (event.ctrlKey) {
-                    this.moveInstrumentUp(); 
+                    this.moveInstrumentUp();
                 } else {
                     this.selectNextInstrument();
                 }
@@ -46,20 +49,31 @@ export class Conductor {
                 } else {
                     this.selectPrevInstrument();
                 }
+            } else if (keyName === 'ArrowLeft') {
+                if (event.ctrlKey) {
+                    this.selectPrevScale();
+                } else {
+                    this.rotateInstrumentLeft();
+                }
+            } else if (keyName === 'ArrowRight') {
+                if (event.ctrlKey) {
+                    this.selectNextScale();
+                } else {
+                    this.rotateInstrumentRight();
+                }
             } else if (keyName.match(/[123456789]/)) {
                 if (event.ctrlKey) {
                     this.setInversion(Number(keyName.charAt(0)));
-                }else{
+                } else {
                     this.setOctave(Number(keyName.charAt(0)));
                 }
             }
             this.refresh();
         });
     }
-    refresh(){
+    refresh() {        
         this.orchestraView.draw();
-        this.orchestraView.orchestra.selectNotesToPlay();
-4    }
+    }
     // delay(ms: number) {
     //     return new Promise(resolve => setTimeout(resolve, ms));
     // }
@@ -79,18 +93,29 @@ export class Conductor {
         this.orchestraView.getSelectedView().getInstrument().player.octave = octave;
     }
 
-    playNote(note: number) {
+    selectNoteInInstrument(note: number) {
         this.orchestraView.getSelectedView().getInstrument().player.selectedNote = note;
     }
 
     moveInstrumentUp() {
-        this.orchestraView.moveView(this.orchestraView.selectedView, this.orchestraView.selectedView+1);
+        this.orchestraView.moveView(this.orchestraView.selectedView, this.orchestraView.selectedView + 1);
     }
 
     moveInstrumentDown() {
-        this.orchestraView.moveView(this.orchestraView.selectedView, this.orchestraView.selectedView-1);
+        this.orchestraView.moveView(this.orchestraView.selectedView, this.orchestraView.selectedView - 1);
     }
-
+    rotateInstrumentLeft() {
+        this.orchestraView.getSelectedView().orientation--;
+    }
+    rotateInstrumentRight() {
+        this.orchestraView.getSelectedView().orientation++;
+    }
+    selectPrevScale() {
+        this.orchestraView.getSelectedView().getInstrument().selectPrevScale();
+    }
+    selectNextScale() {
+        this.orchestraView.getSelectedView().getInstrument().selectNextScale();
+    }
     selectNextInstrument() {
         this.orchestraView.selectNextView();
     }

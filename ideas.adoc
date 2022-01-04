@@ -300,4 +300,9 @@ Además de eso, el player luego va a octavar estas notas y a invertirlas, con lo
 
 Es decir, las notas que obtenemos ya son notas REALES, o sea, semitonos a partir de el inicio del acorde, de la tonalidad y de la octava. Así que esto debe ser tenido en cuenta en el momento de mostrar estas notas.
 
+Vale, ahora se están mostrando los acordes más o menos bien. 
+Faltaría:
+    - Girar el instrumento
+    - Que suene solamente con las teclas de Fn
 
+Vale, esto está.    
