@@ -23,6 +23,19 @@ export async function playNotesInChannel(notes: number[], duration: number, chan
           sound.noteOff(n, 127);
     }
 }
+
+export async function play(notes: number[], duration: number) {
+    for (var n of notes) {
+          sound.noteOn(n, 127, duration);
+    }
+    await sound.wait(duration);
+}
+export async function stop(notes: number[] ) {
+    for (var n of notes){
+        sound.noteOff(n, 127);
+  }
+}
+
 export async function open(channel: number, program: number) {
     sound.ch(channel).program(program);
 }

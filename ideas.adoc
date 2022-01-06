@@ -487,3 +487,8 @@ Se podría simplificar todo con la idea siguiente:
 
     Para que funcione, el bloque que procesamos tiene que guardar el tiempo inicial, el tiempo restante y las notas.
     Esto se obtiene directamente al procesar los bloques.
+
+    Vale, lo de la sincronización está funcionando.
+    Habrá que decidir entonces el tema de - y .
+    Vamos con ello.
+    

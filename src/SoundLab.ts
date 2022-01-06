@@ -1,4 +1,4 @@
-import {playNote, playNotes, playNotesInChannel, sound, initSound } from "./Sound.js";
+import { play, stop, playNotes, playNotesInChannel, sound, initSound } from "./Sound.js";
 import * as Grammar from './GrammarDriver.js';
 import { parse, Parser } from "./parser.js";
 import { OrchestraView } from './OrchestraView.js';
@@ -12,12 +12,12 @@ import { Instrument } from "./Instrument.js";
 */
 async function start() {
     initSound();
-    var s: Grammar.Song;  
-    var result = parse('W0,O4,K0,P60,S0:0123456789ABCD W0,O4,K7,P60,S0:0123456789ABCD');
+    var s: Grammar.Song; 
+    var result = parse('W0,O3,K0,P20,S0:0.1.2.3.4..5..6..7-8-9--A--B---C---D W1,O3,K7,P60,S0:0123456789ABCD');
     var song = Grammar.parseSong(result.ast!);
     let instrument: Instrument = new Instrument();
     let blockPlayer: BlockPlayer = new BlockPlayer(instrument);
-    for(var block of song.blocks){
+    for (var block of song.blocks) {
         await blockPlayer.playBlock(block);
     }
 }
@@ -28,30 +28,46 @@ export class BlockPlayer {
 
     constructor(instrument: Instrument) {
         this.instrument = instrument;
-        this.blockTime = 0; 
-    } 
+        this.blockTime = 0;
+    }
 
     async playBlock(block: Grammar.Block) {
         await this.parseCommands(block.commands);
         let chars = block.blockContent.split('');
         let n = 0;
+        let notesToPlay: number[] = [];
         for (let char of chars) {
             let note = parseInt(char, 16);
-            this.instrument.player.selectedNote = note; 
-            let notesToPlay = this.instrument.player.getSelectedNotes(this.instrument.getScale(), this.instrument.tonality);
-             await playNotes(notesToPlay,this.blockTime*100 );
-             await this.delay(this.blockTime*100);
-        }     
-    }   
+            this.instrument.player.selectedNote = note;
+            //Stop sounding notes if char not a "extend" key
+            if (char != '-') {
+                await stop(notesToPlay);
+            }
+            //Play new notes only if not extend or silence
+            if (char != '-' && char != '.') {
+                notesToPlay = this.instrument.player.getSelectedNotes(this.instrument.getScale(), this.instrument.tonality);
+            }
+            //If not real notes, play empty notes to take the same time
+            if (char === '-' || char === '.') {
+                await play([], this.blockTime * 100);
+            }else{
+                await play(notesToPlay, this.blockTime * 100);
+            }
+            //Allways delay
+            await this.delay(this.blockTime * 100);
+
+        }
+    }
+
     delay(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     async parseCommands(commands: Grammar.Command[]) {
         commands.forEach(async command => {
             await this.parseCommand(command);
-        }); 
+        });
     }
-    async parseCommand(command: Grammar.Command)  {
+    async parseCommand(command: Grammar.Command) {
         switch (command.commandType) {
             case 'V': // Velocity
                 //PENDING
