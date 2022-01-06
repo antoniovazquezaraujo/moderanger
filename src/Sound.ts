@@ -1,8 +1,10 @@
 declare var JZZ: any;
 export var sound: any;
 
+import {PlayMode} from './Player.js';
 import './JZZ.js';
 import './JZZ.synth.Tiny.js';
+import { arpeggiate } from './PlayMode.js';
 
 export async function initSound() {
     JZZ.synth.Tiny.register('Synth');
@@ -24,11 +26,36 @@ export async function playNotesInChannel(notes: number[], duration: number, chan
     }
 }
 
-export async function play(notes: number[], duration: number) {
+export async function playChord(notes: number[], duration: number) {
     for (var n of notes) {
           sound.noteOn(n, 127, duration);
     }
     await sound.wait(duration);
+}
+export async function play(notes: number[], duration: number, playMode:PlayMode) {
+    if(playMode != PlayMode.CHORD){
+        notes = arpeggiate(notes, playMode);
+    }
+    for (var n of notes) {
+          sound.noteOn(n, 127, duration);
+          if(playMode != PlayMode.CHORD){
+              await sound.wait(duration);
+          }
+    }
+    if(playMode === PlayMode.CHORD || notes.length=== 0){
+        await sound.wait(duration);
+    }
+}
+export async function playQUEFUNCIONA(notes: number[], duration: number, playMode:PlayMode) {
+    for (var n of notes.reverse()) {
+          sound.noteOn(n, 127, duration);
+          if(playMode != PlayMode.CHORD){
+              await sound.wait(duration);
+          }
+    }
+    if(playMode === PlayMode.CHORD){
+        await sound.wait(duration);
+    }
 }
 export async function stop(notes: number[] ) {
     for (var n of notes){

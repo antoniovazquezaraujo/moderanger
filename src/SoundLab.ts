@@ -3,6 +3,7 @@ import * as Grammar from './GrammarDriver.js';
 import { parse, Parser } from "./parser.js";
 import { OrchestraView } from './OrchestraView.js';
 import { Instrument } from "./Instrument.js";
+import { PlayMode } from "./Player.js";
 
 /*
     NOTA:
@@ -11,16 +12,16 @@ import { Instrument } from "./Instrument.js";
     lo haga el usuario. Realmente, no debería saber nada de ningún instrument.
 */
 async function start() {
-    initSound();
-    var s: Grammar.Song; 
-    var result = parse('W0,O3,K0,P20,S0:0.1.2.3.4..5..6..7-8-9--A--B---C---D W1,O3,K7,P60,S0:0123456789ABCD');
+    initSound(); 
+    var s: Grammar.Song;  
+    var result = parse('W4,I5,M1,O3,K0,P30,S1:012-----3.4.5. W4,I5,M0,O3,K0,P30,S1:012-----3.4.5. ');
     var song = Grammar.parseSong(result.ast!);
     let instrument: Instrument = new Instrument();
     let blockPlayer: BlockPlayer = new BlockPlayer(instrument);
     for (var block of song.blocks) {
         await blockPlayer.playBlock(block);
     }
-}
+} 
 
 export class BlockPlayer {
     blockTime: number;
@@ -48,13 +49,13 @@ export class BlockPlayer {
                 notesToPlay = this.instrument.player.getSelectedNotes(this.instrument.getScale(), this.instrument.tonality);
             }
             //If not real notes, play empty notes to take the same time
+            let playedNotes = notesToPlay;
             if (char === '-' || char === '.') {
-                await play([], this.blockTime * 100);
-            }else{
-                await play(notesToPlay, this.blockTime * 100);
+                playedNotes = [];
             }
+            await play(playedNotes, this.blockTime * 100, this.instrument.player.playMode);
             //Allways delay
-            await this.delay(this.blockTime * 100);
+           //await this.delay(this.blockTime * 100);
 
         }
     }
@@ -76,6 +77,9 @@ export class BlockPlayer {
             case 'P': // Pulse (bits per time)
                 this.parsePulse(parseInt(command.commandValue, 16));
                 break;
+            case 'M': // Pulse (bits per time)
+                this.parsePlayMode(parseInt(command.commandValue, 16));
+                break;
             case 'W': // Width (chord density)
                 this.setNodeDensity(parseInt(command.commandValue, 16));
                 break;
@@ -92,6 +96,9 @@ export class BlockPlayer {
                 this.setTonality(parseInt(command.commandValue, 16));
                 break;
         }
+    }
+    parsePlayMode(playMode: number) {
+        this.instrument.player.playMode = playMode;
     }
     parsePulse(pulse: number) {
         this.blockTime = 64 / pulse;

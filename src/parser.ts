@@ -4,6 +4,7 @@
 * //  V:Velocity
 * //  P:Pulse (bits per time)
 * //  W:Width (chord density)
+* //  M:Mode (chord, arpeggios, etc)
 * //  O:Octave
 * //  S:Scale
 * //  I:Inversion
@@ -26,7 +27,7 @@
 *     commandType ={COMMAND_TYPE} 
 *     commandValue={VALUE_ID}
 * COMMAND_TYPE := 
-*     commandType = '[VPWOSIK]'
+*     commandType = '[VMPWOSIK]'
 * VALUE_ID := 
 *     val = '[0-9A-F]{1,2}'
 * BLOCK_CONTENT:=
@@ -236,7 +237,7 @@ export class Parser {
                 let $scope$commandType: Nullable<string>;
                 let $$res: Nullable<COMMAND_TYPE> = null;
                 if (true
-                    && ($scope$commandType = this.regexAccept(String.raw`(?:[VPWOSIK])`, $$dpth + 1, $$cr)) !== null
+                    && ($scope$commandType = this.regexAccept(String.raw`(?:[VMPWOSIK])`, $$dpth + 1, $$cr)) !== null
                 ) {
                     $$res = {kind: ASTKinds.COMMAND_TYPE, commandType: $scope$commandType};
                 }

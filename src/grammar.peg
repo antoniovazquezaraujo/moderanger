@@ -2,6 +2,7 @@
 //  V:Velocity
 //  P:Pulse (bits per time)
 //  W:Width (chord density)
+//  M:Mode (chord, arpeggios, etc)
 //  O:Octave
 //  S:Scale
 //  I:Inversion
@@ -25,7 +26,7 @@ COMMAND :=
     commandType ={COMMAND_TYPE} 
     commandValue={VALUE_ID}
 COMMAND_TYPE := 
-    commandType = '[VPWOSIK]'
+    commandType = '[VMPWOSIK]'
 VALUE_ID := 
     val = '[0-9A-F]{1,2}'
 BLOCK_CONTENT:=

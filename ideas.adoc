@@ -491,4 +491,33 @@ Se podría simplificar todo con la idea siguiente:
     Vale, lo de la sincronización está funcionando.
     Habrá que decidir entonces el tema de - y .
     Vamos con ello.
-    
+
+    Vale, está funcionando.
+    Habría que pensar en el tema de las repeticiones: bloques del tema que han de repetirse n veces, incluso con finales de bloque diferentes, o incluso saltos a puntos concretos del tema, estilo da capo y codas y todo ese rollo.
+
+    Bueno, esa idea puede quedar para más adelante, ahora mismo interesaría más el tema de los arpegios, es decir, tocar los acordes nota por nota, en lugar de todos juntos. Eso daría mucho juego. Investigemos eso.
+
+    Vale, tenemos el tema de acordes y arpegios muy bien pensado: hay un playMode en el player que puede tener estos valores:
+ 
+ enum PlayMode {
+    CHORD = 0,
+    ASCENDING = 1,
+    DESCENDING = 2,
+    ASC_DESC= 3,
+    DESC_ASC=4,
+    EVEN_ASC_ODD_ASC = 5,
+    EVEN_ASC_ODD_DESC = 6,
+    EVEN_DESC_ODD_DESC = 7,
+    EVEN_DESC_ODD_ASC = 8,
+    ODD_ASC_EVEN_ASC = 9,
+    ODD_ASC_EVEN_DESC = 10,
+    ODD_DESC_EVEN_DESC = 11,
+    ODD_DESC_EVEN_ASC = 12
+}
+
+El primer modo hace sonar todas las notas simultaneamente. El segundo las arpegia ascendentemente y el tercero descendentemente.
+En el 3 suben y luego bajan, en el 4 bajan y luego suben y en los restantes se mezclan los movimientos de las notas pares y las impares.
+Esto nos daría bastantes posibilidades. Entonces, el algoritmo para sonar con todo esto sería algo como:
+
+Vale, está funcionando. Veamos qué más cosas necesitamos.
+ 
