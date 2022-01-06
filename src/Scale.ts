@@ -15,19 +15,19 @@ export class Scale {
         if(tonality != undefined){
             tonalityShift = tonality;
         }
-        var index = rootNoteOrder+tonalityShift;
+        var index = rootNoteOrder;
         if(index >= this.getNumNotes()){
             index = index% this.getNumNotes();
             noteShift+=12;
         }
-        chordNotes.push(this.getNotePosition(index)+noteShift);
+        chordNotes.push(this.getNotePosition(index)+noteShift+tonalityShift);
         for(var n=0; n<density; n++){
             index+=2;
             if(index >= this.getNumNotes()){
                 index = index% this.getNumNotes();
                 noteShift+=12;
             }
-            chordNotes.push(this.getNotePosition(index)+ noteShift);
+            chordNotes.push(this.getNotePosition(index)+ noteShift+tonalityShift);
         }
         return chordNotes;
     }

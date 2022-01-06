@@ -15,9 +15,6 @@ export async function playNotes(notes: number[], duration: number) {
     await playNotesInChannel(notes, duration, 0);
 }
 export async function playNotesInChannel(notes: number[], duration: number, channel: number) {
-    // sound = JZZ().openMidiOut().or(function () { alert('Cannot open MIDI port!'); })
-    // .ch(channel)
-    // .program(0);
     for (var n of notes) {
           sound.noteOn(n, 127, duration);
     }
@@ -25,7 +22,6 @@ export async function playNotesInChannel(notes: number[], duration: number, chan
     for (var n of notes){
           sound.noteOff(n, 127);
     }
-    // sound.close(); 
 }
 export async function open(channel: number, program: number) {
     sound.ch(channel).program(program);
