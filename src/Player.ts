@@ -7,13 +7,16 @@ export class Player{
     inversion: number = 0;    //0-6 Nota más baja del acorde que suena (1,3,5,7, etc)
     octave: number = 5;       //En qué octava está (0-6)
   
-    selectNotes(instrument:Instrument):void{
-        var scale = getScaleByNum(instrument.scale);       
+    getSelectedNotes(scaleNum:number, tonality:number):number[]{
+        var scale = getScaleByNum(scaleNum);       
         var tunnedNote = this.selectedNote;
-        var chordNotes= scale.getChordNotes(tunnedNote, this.density, instrument.tonality);
+        var chordNotes= scale.getChordNotes(tunnedNote, this.density, tonality);
         var octavedNotes = this.setOctave(chordNotes);
         var invertedNotes = this.setInversion(octavedNotes);
-        instrument.notes = invertedNotes;
+        return invertedNotes;
+    }
+    selectNotes(instrument:Instrument):void{
+        instrument.notes = this.getSelectedNotes(instrument.getScale(), instrument.tonality);
     }  
     setInversion(notes: number[]):number[] {
         var invertedNotes:number[] =[];

@@ -34,7 +34,7 @@ export class KeyboardConductor  {
                 } else {
                     this.selectNoteInInstrument(Number(keyName.substring(1)) - 1);
                     this.orchestraView.orchestra.selectNotesToPlay();
-                    this.orchestraView.play();
+                    this.orchestraView.play(200);
                 }
             } else if (keyName === 'ArrowDown') {
                 if (event.ctrlKey) {

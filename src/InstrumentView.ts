@@ -94,7 +94,7 @@ export class InstrumentView {
     }
     drawScaleGrades( ): void {
         this.context.strokeStyle = this.textColor;
-        var scheme:Scale = getScaleByNum(this.instrument.scale);
+        var scheme:Scale = getScaleByNum(this.instrument.getScale());
         for(var note = 0; note< scheme.getNumNotes(); note++){
             var noteSector = scheme.getNotePosition(note);
             this.drawNote((note+1), noteSector);
@@ -102,7 +102,7 @@ export class InstrumentView {
     }
     drawScaleNotes( ): void {
         this.context.strokeStyle = this.textColor;
-        var scheme:Scale = getScaleByNum(this.instrument.scale);
+        var scheme:Scale = getScaleByNum(this.instrument.getScale());
         for(var note = 0; note< scheme.getNumNotes(); note++){
             var noteSector = scheme.getNotePosition(note);
             this.drawNote(getNoteName(noteSector+this.instrument.tonality), noteSector);
@@ -110,7 +110,7 @@ export class InstrumentView {
     }
     showChord(notes:number[] ): void {
         this.context.strokeStyle = this.textColor;
-        var scheme:Scale = getScaleByNum(this.instrument.scale);
+        var scheme:Scale = getScaleByNum(this.instrument.getScale());
         for(var note = 0; note< notes.length; note++){
             var noteSector = notes[note] %12;
             let color = note===0?'red':'lightblue';

@@ -4,7 +4,7 @@ import { Tonality } from '../target/Scale';
 
 test('play is working', () => {
     var instrument = new Instrument();
-    instrument.scale = 2;
+    instrument.selectScale(2);
     instrument.timbre = 4;
     instrument.tonality = Tonality.G;
 

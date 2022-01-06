@@ -6,7 +6,7 @@ import {  playNotes, initSound } from './Sound.js';
 async function start() {
     initSound(); 
     var instrument = new Instrument();
-    instrument.scale = 1;
+    instrument.selectScale(1);
     instrument.timbre = 4;
     instrument.tonality = Tonality.D; 
 

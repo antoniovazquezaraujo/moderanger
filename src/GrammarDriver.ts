@@ -20,6 +20,9 @@ export class Block{
         public blockContent:string
     ){} 
 }
+export class Pepe{
+    public dato:number = 42; 
+}
 export class Song {
     constructor(
         public blocks: Block[]

@@ -18,17 +18,18 @@ export class ProgrammableConductor {
     start(): void {
         this.parseSong(this.song);
     }
+
     parseSong(song: Grammar.Song) {
-        this.song.blocks.forEach(block => {
-            this.parseBlock(block);
+        this.song.blocks.forEach(async block => {
+            await this.parseBlock(block);
         });
     }
 
     async parseBlock(block: Grammar.Block) {
-        this.parseCommands(block.commands);
+        await this.parseCommands(block.commands)
         await this.parseNotes(block.blockContent);
     }
-    parseCommands(commands: Grammar.Command[]) {
+    async parseCommands(commands: Grammar.Command[]) {
         commands.forEach(command => {
             this.parseCommand(command);
         });
@@ -58,14 +59,16 @@ export class ProgrammableConductor {
                 break;
         }
     }
- 
+
     async parseNotes(content: string) {
         for (const c of content) {
-            this.selectNoteInInstrument(Number(c) - 1);
-            this.orchestraView.orchestra.selectNotesToPlay();
-            this.orchestraView.playTimed(10);
-            await this.delay(10000/(this.velocity)); 
+            await this.parseAndPlayNotes(c);
         }
+    }
+    async parseAndPlayNotes(char: string) {
+        this.selectNoteInInstrument(Number(char) - 1);
+        this.orchestraView.orchestra.selectNotesToPlay();
+        await this.orchestraView.play(400);
     }
     // async parseNotes(content: string) {
     //     return new Promise(async resolve => {

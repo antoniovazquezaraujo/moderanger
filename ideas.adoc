@@ -325,3 +325,165 @@ Para los silencios se usa el caracter '.' que también se puede alargar, o simpl
     
 Vale, ya está funcionando.
 Necesitamos aclarar en profundidad el asunto de la sincronización en Typescript, para poder controlar la duración y el ritmo de las notas.
+
+Tendría que haber una especie de metrónomo, que fuera marcando con un ritmo siempre igual, el tic básico, dentro del cual se deberían incluir las notas necesarias a hacer sonar en cada tic.
+Digamos que cada tic es un "turno" y en cada turno revisamos si hay que comenzar o parar notas. Para ello, revisamos los instrumentos y las notas que tienen y les agregamos las nuevas (según el usuario haya tecleado más o el conductor programable haya leído más).
+Una vez agregadas las notas necesarias a cada instrumento, hay que tener en cuenta que esas notas tendrán una duración, es decir, podrían tener un pulse de 16, es decir, que entraría una en cada tic, a la velocidad que estuviese puesto el metrónomo. Sin embargo, si en vez de 16 tienen un tiempo de 1 entonces cada nota duraría 16 turnos completos. 
+Además, hay que detener la nota que está sonando cuando se termina el tiempo del tic solamente si la siguiente nota no es un -, en cuyo caso seguirá sonando, es decir, es como se se volviera a repetir la misma, pero sin parar en medio.
+
+Para entender mejor el asunto, vamos a considerar que siempre hacemos sonar una sola nota a la vez, porque el sistema de sonido ya se encarga de hacer sonar varias simultaneamente con el mismo truco, así que, a este nivel es lo mismo una nota que un acorde.
+
+Los instrumentos nos proporcionan notas con una duración en cada tic. Imaginando que todas fueran a 16 de pulso, tendría que sonar una en cada turno. Así que sería leer nota, sonar nota y repetir. Sin embargo, la mayoría de las notas serán de pulso 1, es decir, que suenan durante 16 tics, es decir, que el bucle sería leer nota, empezar a sonar nota y no volver a leer nota hasta 16 tics después. 
+Está claro que la velocidad de entrada no es igual que la de proceso, es decir, la velocidad a la que leemos depende del contenido de lo que leemos, o sea, una nota de 1 la leemos y no leeremos la siguiente hasta 16 tics después. En cambio una nota de 16, se lee y en el siguiente tic se lee la siguiente.
+Parece que deberíamos tener una especie de cola de notas en la que se van insertando a la espera de ser procesadas.
+Además, en cada bloque de notas podemos tener una serie de comandos que han de procesarse antes de procesar el bloque de notas.
+Partiremos de que tenemos las notas ya en una cosa como:
+    [{ nota, duración},{ nota, duración},{ nota, duración},{ nota, duración},{ nota, duración}]
+
+tics         bits/compas      figura
+64                  1          redonda
+32                  2          blanca
+24                  3          tresillo de blanca
+16                  4          negra
+12                  6          tresillo de negra
+8                   8          corchea
+6                  12          tresillo de corchea
+4                  16          semicorchea
+3                  24          tresillo de semicorchea
+2                  32          fusa
+1                  64          semifusa
+
+Es decir, el número indica exactamente la cantidad de elementos que entran en un compás, que debería ser lo que tenemos ahora mismo.
+
+Vale, entonces los bits por compas son las notas que caben en un compás, y los tics son la cantidad de tics que ocupa esa nota, es decir, la duración de la misma.
+Estas correspondencias son las que son exactas, es decir, las que son divisores exactos de 64. Sin embargo, podríamos tener también cinquillos y septillos supongo, que no darían un número exacto de bits por compas. Aún así, si el dato es un número raro, como 13 por ejemplo, obtendremos un número decimal, que se puede redondear para dar el número de tics igualmente.
+Así que de cada nota tendremos la duración, dividiendo 64 por su pulso, por ejemplo:
+de la secuencia 
+    W2:123
+obtendremos el array
+    [{1,32},{2,32},{3,32}]    
+que indica que tenemos las notas 1,2 y 3 con una duración de 32 tics.
+Mejor deberíamos tener un objeto equivalente, es decir, duración + grupo de notas, o sea
+    { 32, [1,2,3]}    
+O sea, con la duración 32 tenemos las notas 1,2, y 3.
+Así que el timer lo que tiene que hacer es poner las notas a sonar y en cada vuelta del bucle decrementar la duración. Cuando esta llegue a cero indicará que las notas se han terminado. Si en el siguiente grupo tenemos notas - entonces tendrán que seguir sonando, si no, se detendrán.
+
+Un momento, nos estamos liando: en la "partitura" tendremos una lista de notas separadas, que pueden ser notas sueltas o acordes, me explico:
+
+Lo que va en la partitura es la secuencia de notas que se desean tocar, pero con una densidad determinada. Así que podrían ser arrays de notas o arrays de acordes, es decir arrays de grupos de notas a tocar simultaneamente. Sea como sea, una nota o un acorde, tienen un pulso, especificado en el comando W:, es decir, podemos calcular su duración. En resumen:
+El objeto en la cola podría ser una nota o un grupo de notas:
+    { 32, [1]}    
+    { 16, [1,2,3]}    
+    { 32, [3]}    
+Siempre tendremos que decrementar su duración para esperar a procesar la siguiente nota.
+Si la siguiente nota es un "-" entonces indicará que lo que estaba sonando debe continuar sonando con la duración indicada    
+    { 32, [1]}    
+    { 16, [1,2,3]}    
+    { 16, [-]}    
+    { 32, [3]}    
+En este caso, el acorde seguirá sonando otros 16 tics. Esto sería equivalente a ponerle 32 de duración. Pero es más simple porque no hay que usar un comando W: para indicarlo.
+Otra cosa que puede aparecer es un silencio, en forma de ".". Esto hará que no suene nada con la duración indicada.
+Un silencio también se puede extender, aunque en ese caso es igual repetir que extender, porque no se notará la "unión" entre los silencios consecutivos.
+
+Entonces el proceso completo consistente en leer bloques de la canción, procesar sus comandos y sus bloques y hacer sonar las notas sería:
+
+while(true){
+    para cada bloque{
+        leer y procesar los comandos
+        enviar las notas con su duración a la cola
+    }
+}
+
+Ahora tenemos simplemente la cola con las notas a procesar:
+[   { 32, [1]},    
+    { 16, [1,2,3]},    
+    { 16, [-]},    
+    { 32, [3]}    
+]
+tomamos cada elemento y establecemos un contador con su duración y hacemos sonar la nota. Cuando el contador termine, pasamos a la siguiente nota. Si la siguiente nota es un '-' hemos de parar de tocar la nota, pero si lo es hemos de continuar, así que igual hemos de hacer un lookAhead para saber cuál será su duración real, no??
+O sea, para hacer sonar una sola nota, tenemos que procesarla por completo, es decir, seguir buscando notas de la cola hasta encontrar otra. Si solo encontramos '-' entonces simplemente vamos ampliando la duración.
+Es un lookAhead pero aparentemente sencillo.
+Una vez que sabemos la duración, hacemos sonar la nota.
+
+type TimedPack = {
+    notes,
+    duration,
+    nextPos
+}
+var duration = 0;
+var notes;
+var playing = false;
+var timer = 0;
+position = 0;
+
+Ahora bien, podemos meter en la cola los elementos con la duración ya calculada, es decir, si el elemento es un '-', en lugar de agregarlo a la cola, incrementamos la duración del último de la misma, así, la cola quedaría más limpia:
+Esto:
+[   { 32, [1]},    
+    { 16, [1,2,3]},    
+    { 16, [-]},    
+    { 32, [3]}    
+]
+Pasaría a ser esto:
+[   { 32, 32, [1]},    
+    { 32, 32, [1,2,3]},    
+    { 32, 32, [3]}    
+]
+Que es más simple. Ahora el bucle no necesita lookAhead.
+Cada elemento tiene su tiempo restante y su tiempo inicial.
+
+Elige la nota inicial
+En cada ciclo:
+    - Si el tiempo inicial es igual al restante: play de la nota con esa duración y decrementa tiempo restante
+    - Si son distintos, solo decrementa
+    - Si el restante es cero, pasa a la siguiente nota
+
+var position = 0
+while(position < length){
+    block = blocks[position];
+    if(block.remainingTime === block.totalTime){
+        play(block.notes, block.totalTime);
+        block.remainingTime--;
+    }else{
+        if(block.remainingTime === 0){
+            position++;
+        }else{
+            block.remainingTime--;
+        }
+    }
+    delay();
+}    
+
+Vale, hay que retroceder:
+Cuando leemos un Song, lo que obtenemos es un objeto con un conjunto de Blocks. En cada block puede haber muchos comandos. Primero de todo, hay que procesar los comandos para obtener las notas
+
+//  V:Velocity
+//  P:Pulse (bits per time)
+//  W:Width (chord density)
+//  O:Octave
+//  S:Scale
+//  I:Inversion
+//  K:Key (Tonality)
+
+De todos los comandos, solo afecta a la duración de las notas el pulso. Las demás deciden qué notas van a incluirse. Pero se necesita procesar todo eficientemente.
+
+Se podría simplificar todo con la idea siguiente:
+    Ponemos a sonar el bloque actual, con el tiempo indicado.
+    Después del retardo adecuado, procesamos el siguiente bloque
+    Si el contenido es '-' entonces no paramos la nota anterior
+    Si es un '.' la paramos
+    Si es otra nota, paramos la anterior y suena la nueva
+    Si es el fin de los bloques, paramos todo.
+    De esta forma, una nota no sabe si tiene que parar hasta que encuentra la siguiente.
+    La duración del sonido real, da igual, porque podría ser un sonido que se apaga solo, como una guitarra, sin embargo tener un pulso muy largo y apagarse antes de terminar el tiempo. Pero da igual. Sirve para todos los sonidos.
+
+    Resumen:
+    Suena el bloque actual.
+    Retardo conveniente
+    Pasamos al bloque siguiente:
+        - '-' -> seguimos adelante
+        - '.' -> paramos la nota que esté sonando si la hay
+        - nota -> paramos la anterior y tocamos la nueva
+    Retardo
+
+    Para que funcione, el bloque que procesamos tiene que guardar el tiempo inicial, el tiempo restante y las notas.
+    Esto se obtiene directamente al procesar los bloques.

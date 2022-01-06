@@ -75,11 +75,12 @@ export class OrchestraView {
             instrumentView.draw();
         }
     }
-    play(){
-        playNotes(this.getSelectedView().getInstrument().notes, 200);
+    async play(time:number){
+        await playNotes(this.getSelectedView().getInstrument().notes, time);
     }
-    playTimed(time:number){
-        playNotes(this.getSelectedView().getInstrument().notes, time);
+
+    async delay(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
     selectView(n: number) {
         this.selectedView = n;

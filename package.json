@@ -21,7 +21,8 @@
     "typescript": "^4.5.4"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "grammar": "tspeg src/grammar.peg src/parser.ts"
   },
   "author": "",
   "license": "ISC"

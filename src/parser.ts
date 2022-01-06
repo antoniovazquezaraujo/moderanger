@@ -6,6 +6,7 @@
 * //  W:Width (chord density)
 * //  O:Octave
 * //  S:Scale
+* //  I:Inversion
 * //  K:Key (Tonality)
 * ////////////////////////////
 * SONG := 
@@ -25,7 +26,7 @@
 *     commandType ={COMMAND_TYPE} 
 *     commandValue={VALUE_ID}
 * COMMAND_TYPE := 
-*     commandType = '[VPWOST]'
+*     commandType = '[VPWOSIK]'
 * VALUE_ID := 
 *     val = '[0-9A-F]{1,2}'
 * BLOCK_CONTENT:=
@@ -235,7 +236,7 @@ export class Parser {
                 let $scope$commandType: Nullable<string>;
                 let $$res: Nullable<COMMAND_TYPE> = null;
                 if (true
-                    && ($scope$commandType = this.regexAccept(String.raw`(?:[VPWOST])`, $$dpth + 1, $$cr)) !== null
+                    && ($scope$commandType = this.regexAccept(String.raw`(?:[VPWOSIK])`, $$dpth + 1, $$cr)) !== null
                 ) {
                     $$res = {kind: ASTKinds.COMMAND_TYPE, commandType: $scope$commandType};
                 }
