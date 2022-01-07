@@ -1,4 +1,5 @@
 import {Instrument} from './Instrument.js';
+import { KeyboardConductor } from './KeyboardConductor.js';
 import {  playNotes,  sound } from './Sound.js';
 export class Orchestra{
  
@@ -8,6 +9,7 @@ export class Orchestra{
     constructor(){
         this.instruments = [];
         this.instrumentOrder = [];
+ 
     }
  
     addInstrument(instrument:Instrument):void{

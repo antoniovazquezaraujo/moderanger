@@ -1,14 +1,64 @@
-== Orchestra view
+== ModeRanger
 ++++
-<html>
 <head>
-<title>SVG Piano</title>
- <script src="InstrumentView.js"></script> 
+<style>
+#modeRanger {
+-webkit-column-count: 2;
+-moz-column-count: 2;
+column-count: 2;
+-webkit-column-gap: 49px;
+-moz-column-gap: 49px;
+column-gap: 49px;
+}
+</style>
 </head>
- 
-<body>
-  <canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
-  <script type = "module"  src='OrchestraView.js'></script>
-</body>
-++++ 
+<script src="InstrumentView.js"></script> 
+<script type = "module"  src='OrchestraView.js'></script>
+<div id="modeRanger">
+    <canvas id="orchestraView" width="500" height="500" style="border:1px solid #000000;"></canvas>
+    <br /> 
+    <div id="keyboardPlayer">
+        <form>
+            <label for="scale">Scale:</label>
+            <select id='scale' name='scale'>
+                <option selected>white</option>
+                <option>blue</option>
+                <option>red</option>
+                <option>black</option>
+                <option>penta</option>
+                <option>tones</option>
+            </select>
+            <label for="tone">Tone:</label>
+            <select id='tone' name='tone'>
+                <option selected>D</option>
+                <option>e</option>
+                <option>E</option>
+                <option>F</option>
+                <option>g</option>
+                <option>G</option>
+                <option>a</option>
+                <option>A</option>
+                <option>b</option>
+                <option>B</option>
+                <option>C</option>
+                <option>d</option>
+            </select>
+            <label for="density">Density:</label>
+            <input id="density" name="density" type="range"  min="0" step="1" max="12" value="0" oninput="this.form.densityInput.value=this.value">
+            <input type="number" name="densityInput" min="0" max="10" value="0" oninput="this.form.density.value=this.value" />
+            <br /> 
+            <label for="octave">Octave:</label>
+            <input id="octave" name="octave" type="range"  min="0" step="1" value="5" max="8" oninput="this.form.octaveInput.value=this.value">
+            <input type="number" name="octaveInput" min="0" max="8" value="5" oninput="this.form.octave.value=this.value" />
+            <br /> 
+            <input type="button" value="Start" id="startButton"/>
+            <input type="button" value="Stop" id="stopButton"/>
+        </form>
+    </div>
+</div>
+<div id="conductors">
 
+</div>
+
+++++ 
+ 

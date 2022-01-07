@@ -10,10 +10,30 @@ import * as Parser from './parser.js';
 const NUM_OF_SECTORS = 12;
 const START_SECTOR = 6;
 
+var conductor1:ProgrammableConductor;
+var conductor2:ProgrammableConductor;
+
+function handlePageEvents() {
+    let startButton = document.getElementById("startButton");
+    startButton!.addEventListener("click", (e:Event) => start());
+    
+    let stopButton = document.getElementById("stopButton");
+    stopButton!.addEventListener("click", (e:Event) => stop());
+}
+function start(){
+    conductor1.start();
+    conductor2.start();    
+}
+function stop(){
+    conductor1.stop();
+    conductor2.stop();    
+}
+
+handlePageEvents();
 
 window.onload = function () {
     initSound();
-    var canvas = <HTMLCanvasElement>document.getElementById('myCanvas');
+    var canvas = <HTMLCanvasElement>document.getElementById('orchestraView');
     var orchestra = new Orchestra();
     for (var n = 0; n < 6; n++) {
         let instrument = new Instrument();
@@ -29,22 +49,20 @@ window.onload = function () {
     var conductor = new KeyboardConductor(view);
     conductor.start();
      
-    var programmableConductor = new ProgrammableConductor();
+    conductor1 = new ProgrammableConductor();
     //var result = Parser.parse('W5,I0,M1,O4,K0,P48,S0:0----5----6---- W3,S3:0---- S2:0----1---- S4:0----3----');
-//    var result = Parser.parse('W5,I3,M3,O4,K0,P30,S1:02--4- M5,S4,I4,O3,K2:0234 S2,I4,O3,K5:02--4- S3,I4,O3,K6:02--4- S5,I3,O4,K1:02--4- S2,I4,O4,K1:1234---- S2,I4,O4,K2:4235--6--');
-    var result = Parser.parse('W5,I3,M5,O3,K2,P40,S3:0 ');
+    var result = Parser.parse('W5,I3,M3,O4,K0,P30,S1:02--4- M5,S4,I4,O3,K2:0234 S2,I4,O3,K5:02--4- S3,I4,O3,K6:02--4- S5,I3,O4,K1:02--4- S2,I4,O4,K1:1234---- S2,I4,O4,K2:4235--6--');
+//    var result = Parser.parse('W5,I3,M5,O3,K2,P1,S3:0 ');
     var song: Song = parseSong(result.ast!);
-    programmableConductor.setSong(song);
-    programmableConductor.setInstrument(orchestra.getInstrument(0));
-    programmableConductor.start();
+    conductor1.setSong(song);
+    conductor1.setInstrument(orchestra.getInstrument(0));
     
-    var programmableConductor2 = new ProgrammableConductor();
-    //var result = Parser.parse('W5,I0,M1,O4,K0,P48,S0:0----5----6---- W3,S3:0---- S2:0----1---- S4:0----3----');
-    var result2 = Parser.parse('W5,I3,M0,O4,K2,P8,S3:0----2-----3-----5--7-- ');
+    conductor2 = new ProgrammableConductor();
+     var result2 = Parser.parse('W5,I0,M1,O4,K0,P48,S0:0----5----6---- W3,S3:0---- S2:0----1---- S4:0----3----');
+    //var result2 = Parser.parse('W5,I3,M0,O4,K2,P1,S3:0----2-----3-----5--7-- ');
     var song2: Song = parseSong(result2.ast!);
-    programmableConductor2.setSong(song2);
-    programmableConductor2.setInstrument(orchestra.getInstrument(2));
-    programmableConductor2.start();
+    conductor2.setSong(song2);
+    conductor2.setInstrument(orchestra.getInstrument(2));
 
 }
 
@@ -75,6 +93,7 @@ export class OrchestraView {
             radius += 28;
             this.instrumentViews.push(instrumentView);
         }
+
     }
     draw() {
         for (var n = 0; n < this.orchestra.instruments.length; n++) {
@@ -129,4 +148,6 @@ export class OrchestraView {
         [this.instrumentViews[from].radius, this.instrumentViews[to].radius] = [this.instrumentViews[to].radius, this.instrumentViews[from].radius];
         this.selectedView = to;
     }
+
 }
+

@@ -529,3 +529,23 @@ Quizá más adelante se puedan agregar más comandos como cambiar de instrumento
 Vale, está funcionando, podemos poner varios ProgrammableConductor a sonar simultáneamente. Good!
 
 Vamos a intentar un poco de CSS para crear los controles en la página.
+
+En cuanto al diseño, diría que habrá que buscar los componentes necesarios para mostrar una Orchestra, un KeyboardConductor y varios ProgrammableConductor agregables. En la orquesta podríamos desear agregar instrumentos. De cada instrumento necesitamos los siguientes componentes:
+- scale: 0-5
+- tone: 1-12
+- octave: 0-8
+- density:1-12
+- playMode:0-12
+- inversion:1-12
+- rotación?:1-12
+- showMode:notes/grades
+- color?:
+- position: nivel concentrico
+
+El instrumento se podría seleccionar también con el ratón. El resto de teclas podrían seguir funcionando.
+Se puede incluso girar con el ratón, por ejemplo.
+
+Vale, tenemos un pequeño diseño html con un mínimo de css y podemos acceder a los eventos de los componentes, pero...
+Así no se puede trabajar.
+No hay una estructura clara ahora mismo, está todo amontonado. Hay muchas cosas que funcionan pero no están conectadas. Necesitamos pensar una estructura más formal, teniendo ya en cuenta los componentes de la web y los dos tipos de conductores que tenemos.
+Además, hay un cierto descontrol con las clases y los ficheros adoc. Y los nombres de todo, etc. Hay que pasar la segadora YA.
