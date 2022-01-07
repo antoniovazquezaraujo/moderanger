@@ -521,3 +521,11 @@ Esto nos daría bastantes posibilidades. Entonces, el algoritmo para sonar con t
 
 Vale, está funcionando. Veamos qué más cosas necesitamos.
  
+Necesitamos integrar este nuevo BlockPlayer al servicio de ProgrammableConductor.
+Este conductor tiene que poder leer y parsear una Song y hacerla sonar.
+Está pensado para trabajar sobre un solo instrumento, no puede, de momento, cambiar de instrumento como el KeyboardConductor.
+Quizá más adelante se puedan agregar más comandos como cambiar de instrumento, etc.
+
+Vale, está funcionando, podemos poner varios ProgrammableConductor a sonar simultáneamente. Good!
+
+Vamos a intentar un poco de CSS para crear los controles en la página.

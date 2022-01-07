@@ -16,14 +16,23 @@ window.onload = function () {
     Right,Left: rotar instrumento
     Ctrl+Right,Left: cambiar escala
 */
-export class KeyboardConductor  {
+export class KeyboardConductor {
     orchestraView: OrchestraView;
 
     constructor(orchestraView: OrchestraView) {
         this.orchestraView = orchestraView;
     }
     start(): void {
+        var down = false;
+        document.addEventListener('keyup', (event) => {
+            event.preventDefault();
+            down = false;
+        }, false);
         document.addEventListener('keydown', (event) => {
+            if (down) {
+                return;
+            }
+            down = true;
             const keyName = event.key;
             event.preventDefault();
             if (keyName.match(/F\d/)) {
@@ -32,9 +41,9 @@ export class KeyboardConductor  {
                 } else if (event.ctrlKey) {
                     this.setNodeDensity(Number(keyName.charAt(1)) - 1);
                 } else {
-                    this.selectNoteInInstrument(Number(keyName.substring(1)) - 1);
-                    this.orchestraView.orchestra.selectNotesToPlay();
-                    this.orchestraView.play(200);
+                    // this.selectNoteInInstrument(Number(keyName.substring(1)) - 1);
+                    // this.orchestraView.orchestra.selectNotesToPlay();
+                    // this.orchestraView.play(200);
                 }
             } else if (keyName === 'ArrowDown') {
                 if (event.ctrlKey) {
@@ -66,11 +75,19 @@ export class KeyboardConductor  {
                 } else {
                     this.setOctave(Number(keyName.charAt(0)));
                 }
+            } else {
+                let note: number | undefined = this.getNoteFromKeyboard(keyName);
+                if (note != undefined) {
+                    this.selectNoteInInstrument(note);
+                    this.orchestraView.orchestra.selectNotesToPlay();
+                    this.orchestraView.play(200);
+                }
+
             }
             this.refresh();
         });
     }
-    refresh() {        
+    refresh() {
         this.orchestraView.draw();
     }
     // delay(ms: number) {
@@ -123,5 +140,39 @@ export class KeyboardConductor  {
         this.orchestraView.selectPrevView();
     }
 
+    notesFromKeys = new Map<string, number>([
+        ['z', 0],
+        ['x', 1],
+        ['c', 2],
+        ['v', 3],
+        ['b', 4],
+        ['n', 5],
+        ['m', 6],
+        ['a', 7],
+        ['s', 8],
+        ['d', 9],
+        ['f', 10],
+        ['g', 11],
+        ['h', 12],
+        ['j', 13],
+        ['k', 14],
+        ['l', 15],
+        ['q', 16],
+        ['w', 17],
+        ['e', 18],
+        ['r', 19],
+        ['t', 20],
+        ['y', 21],
+        ['u', 22],
+        ['i', 23],
+        ['o', 24],
+        ['p', 25]
+    ]);
+
+    getNoteFromKeyboard(key: string): number | undefined {
+        return this.notesFromKeys.get(key);
+    }
 
 }
+
+

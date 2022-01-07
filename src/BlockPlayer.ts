@@ -1,9 +1,7 @@
-import { play, stop, playNotes, playNotesInChannel, sound, initSound } from "./Sound.js";
+import { play, stop, initSound } from "./Sound.js";
 import * as Grammar from './GrammarDriver.js';
-import { parse, Parser } from "./parser.js";
-import { OrchestraView } from './OrchestraView.js';
+import { parse } from "./parser.js";
 import { Instrument } from "./Instrument.js";
-import { PlayMode } from "./Player.js";
 
 /*
     NOTA:
@@ -11,19 +9,9 @@ import { PlayMode } from "./Player.js";
     También el player no debería poner las notas al instrument, sino solamente devolverlas para que
     lo haga el usuario. Realmente, no debería saber nada de ningún instrument.
 */
-async function start() {
-    initSound(); 
-    var s: Grammar.Song;  
-    var result = parse('W4,I5,M1,O3,K0,P30,S1:012-----3.4.5. W4,I5,M0,O3,K0,P30,S1:012-----3.4.5. ');
-    var song = Grammar.parseSong(result.ast!);
-    let instrument: Instrument = new Instrument();
-    let blockPlayer: BlockPlayer = new BlockPlayer(instrument);
-    for (var block of song.blocks) {
-        await blockPlayer.playBlock(block);
-    }
-} 
+ 
 
-  class BlockPlayer {
+export class BlockPlayer {
     blockTime: number;
     instrument: Instrument;
 
@@ -123,5 +111,4 @@ async function start() {
         this.instrument.player.octave = octave;
     }
 }
-start();
-//testPlay();
+ 

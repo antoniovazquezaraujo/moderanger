@@ -1,115 +1,23 @@
+import { BlockPlayer } from './BlockPlayer.js';
 import * as Grammar from './GrammarDriver.js';
-import { OrchestraView } from './OrchestraView.js';
+import { Instrument } from './Instrument.js';
 
 export class ProgrammableConductor {
-    orchestraView: OrchestraView;
-    velocity: number;
-    pulse: number;
-    constructor(orchestraView: OrchestraView) {
-        this.orchestraView = orchestraView;
-        this.velocity = 100;
-        this.pulse = 1;
-    }
+    instrument!: Instrument;
     song!: Grammar.Song;
+
     setSong(song: Grammar.Song) {
         this.song = song;
     }
-
-    start(): void {
-        this.parseSong(this.song);
+    setInstrument(instrument: Instrument) {
+        this.instrument = instrument;
     }
-
-    parseSong(song: Grammar.Song) {
-        this.song.blocks.forEach(async block => {
-            await this.parseBlock(block);
-        });
-    }
-
-    async parseBlock(block: Grammar.Block) {
-        await this.parseCommands(block.commands)
-        await this.parseNotes(block.blockContent);
-    }
-    async parseCommands(commands: Grammar.Command[]) {
-        commands.forEach(command => {
-            this.parseCommand(command);
-        });
-    }
-    parseCommand(command: Grammar.Command): void {
-        switch (command.commandType) {
-            case 'V': // Velocity
-                this.velocity = parseInt(command.commandValue, 16);
-                break;
-            case 'P': // Pulse (bits per time)
-                this.pulse = parseInt(command.commandValue, 16);
-                break;
-            case 'W': // Width (chord density)
-                this.setNodeDensity(parseInt(command.commandValue, 16));
-                break;
-            case 'O': // Octave
-                this.setOctave(parseInt(command.commandValue, 16));
-                break;
-            case 'S': // Scale
-                this.setScale(parseInt(command.commandValue, 16));
-                break;
-            case 'I': // Scale
-                this.setInversion(parseInt(command.commandValue, 16));
-                break;
-            case 'K': // Key (Tonality)
-                this.setTonality(parseInt(command.commandValue, 16));
-                break;
+    async start() {
+        let blockPlayer: BlockPlayer = new BlockPlayer(this.instrument);
+        while (true) {
+            for (var block of this.song.blocks) {
+                await blockPlayer.playBlock(block);
+            }
         }
     }
-
-    async parseNotes(content: string) {
-        for (const c of content) {
-            await this.parseAndPlayNotes(c);
-        }
-    }
-    async parseAndPlayNotes(char: string) {
-        this.selectNoteInInstrument(Number(char) - 1);
-        this.orchestraView.orchestra.selectNotesToPlay();
-        await this.orchestraView.play(400);
-    }
-    // async parseNotes(content: string) {
-    //     return new Promise(async resolve => {
-    //         var timeOut = this.velocity;
-    //         for (const c of content) {
-    //             this.selectNoteInInstrument(Number(c) - 1);
-    //             this.orchestraView.orchestra.selectNotesToPlay();
-    //             this.orchestraView.play();
-    //             //await this.delay(this.velocity);
-    //             timeOut*= this.velocity;
-    //         }
-    //         console.log("Timeout: "+ timeOut);
-    //         setTimeout(resolve, timeOut);
-    //         return resolve;
-    //     });
-    // }
-
-    async delay(ms: number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    setScale(scale: number) {
-        this.orchestraView.getSelectedView().getInstrument().selectScale(scale);
-    }
-    selectNoteInInstrument(note: number) {
-        this.orchestraView.getSelectedView().getInstrument().player.selectedNote = note;
-    }
-    refresh(): void {
-        throw new Error("Method not implemented.");
-    }
-    setInversion(inversion: number) {
-        this.orchestraView.getSelectedView().getInstrument().player.inversion = inversion;
-    }
-    setTonality(tonality: number): void {
-        this.orchestraView.getSelectedView().getInstrument().tonality = tonality;
-    }
-    setNodeDensity(density: number): void {
-        this.orchestraView.getSelectedView().getInstrument().player.density = density;
-    }
-    setOctave(octave: number): void {
-        this.orchestraView.getSelectedView().getInstrument().player.octave = octave;
-    }
-
-
 }

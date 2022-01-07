@@ -36,6 +36,7 @@ export async function play(notes: number[], duration: number, playMode:PlayMode)
     if(playMode != PlayMode.CHORD){
         notes = arpeggiate(notes, playMode);
     }
+
     for (var n of notes) {
           sound.noteOn(n, 127, duration);
           if(playMode != PlayMode.CHORD){
