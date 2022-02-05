@@ -9,7 +9,8 @@ import { Block } from 'src/app/model/block';
 import { Command } from 'src/app/model/command';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
-
+import { SongPlayer } from 'src/app/model/song.player';
+import { initSound } from 'src/app/model/sound';
 @Component({
     selector: 'app-new-editor',
     templateUrl: './new-editor.component.html',
@@ -18,82 +19,41 @@ import { Song } from 'src/app/model/song';
 export class NewEditorComponent implements OnInit{
 
     public song:Song;
-    // separatorKeysCodes: number[] = [ENTER, COMMA];
-    // fruitCtrl = new FormControl();
-    // filteredFruits: Observable<string[]>;
-    // fruits: string[] = ['Lemon'];
-    // allFruits: string[] = ['Apple', 'Lemon', 'Lime', 'Orange', 'Strawberry'];
-    // foods: string[] = ['pan', 'vino', 'carne', 'pescado'];
-
-    // @ViewChild('fruitInput') fruitInput!: ElementRef<HTMLInputElement>;
-
+    songPlayer!:SongPlayer;
     getParts(){
         return this.song.parts;
     }
     constructor() {
+        this.songPlayer= new SongPlayer( ); 
         this.song = new Song(this.createParts());
-        // this.filteredFruits = this.fruitCtrl.valueChanges.pipe(
-        //     startWith(null),
-        //     map((fruit: string | null) => (fruit ? this._filter(fruit) : this.allFruits.slice())),
-        // );
     }
     ngOnInit(): void {
+        initSound();
     }
-
+    async play() {
+        this.songPlayer.playSong(this.song);
+    }
     createParts() : Part[]{
          return [
             new Part(
                 [new Block(
                     [new Command("M", "0"), 
                     new Command("I", "1")
-                ], "234")
+                ], "23445674567567")
             ]),
             new Part(
                 [new Block(
                     [new Command("S", "0"), 
                     new Command("P", "F")
-                ], "234")
+                ], "234333333333333333333333")
             ]),
             new Part(
                 [new Block(
                     [new Command("R", "3"), 
                     new Command("W", "2")
-                ], "234")
+                ], "2345555555555555555555")
             ]),
         ];
     
     }
-    // add(event: MatChipInputEvent): void {
-    //     const value = (event.value || '').trim();
-
-    //     // Add our fruit
-    //     if (value) {
-    //         this.fruits.push(value);
-    //     }
-
-    //     // Clear the input value
-    //     event.chipInput!.clear();
-
-    //     this.fruitCtrl.setValue(null);
-    // }
-
-    // remove(fruit: string): void {
-    //     const index = this.fruits.indexOf(fruit);
-
-    //     if (index >= 0) {
-    //         this.fruits.splice(index, 1);
-    //     }
-    // }
-
-    // Cuando seleccionamos un elemento de la lista
-    // selected(event: MatAutocompleteSelectedEvent): void {
-    //     this.fruits.push(event.option.viewValue);
-    //     this.fruitInput.nativeElement.value = '';
-    //     this.fruitCtrl.setValue(null);
-    // }
-
-    // private _filter(value: string): string[] {
-    //     const filterValue = value.toLowerCase();
-    //     return this.allFruits.filter(fruit => fruit.toLowerCase().includes(filterValue));
-    // }
 }
