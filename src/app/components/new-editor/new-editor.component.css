@@ -1,0 +1,5 @@
+.example-chip-list {
+    display: flex;
+    direction: row;
+    width: 100%;
+  }

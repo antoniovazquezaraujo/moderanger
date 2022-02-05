@@ -1,0 +1,13 @@
+/* .command{
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-flow: row wrap;
+    justify-content: space-around;
+} */
+
+.commandType {
+ 
+    width: 20px;
+    height:20px;
+  }

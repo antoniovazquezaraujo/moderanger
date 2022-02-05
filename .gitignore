@@ -4,3 +4,5 @@ target/musica-de-particulas.html
 node_modules/**
 yarn.lock
 coverage/**
+.angular/cache/**
+dist/**
