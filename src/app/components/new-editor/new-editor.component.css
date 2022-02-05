@@ -1,5 +1,6 @@
-.example-chip-list {
-    display: flex;
-    direction: row;
-    width: 100%;
-  }
+.container{
+    display:flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+}

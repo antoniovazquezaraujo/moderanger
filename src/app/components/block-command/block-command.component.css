@@ -1,13 +1,15 @@
-/* .command{
+.command{
     display:flex;
     flex-direction: row;
-    flex-wrap: wrap;
-    flex-flow: row wrap;
-    justify-content: space-around;
-} */
-
-.commandType {
- 
-    width: 20px;
-    height:20px;
-  }
+    justify-content: flex-start;
+    align-items: flex-start; 
+    max-width:200px;
+    gap:5px;
+    
+}
+.commandType{
+     max-width:50%;  
+}
+.commandValue{
+    max-width:50%;  
+}
