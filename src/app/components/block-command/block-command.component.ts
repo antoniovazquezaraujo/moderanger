@@ -7,9 +7,9 @@ import { Command } from 'src/app/model/command';
     styleUrls: ['./block-command.component.css']
 })
 export class BlockCommandComponent implements OnInit {
-    @Input() command: Command;
+    @Input() command!: Command;
     constructor() {
-        this.command = new Command("", "");
+        // this.command = new Command("", "");
     }
 
     ngOnInit(): void {

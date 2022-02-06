@@ -1,16 +1,19 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { CommandContent } from 'src/app/model/command.content';
 
 @Component({
-  selector: 'app-block-notes',
-  templateUrl: './block-notes.component.html',
-  styleUrls: ['./block-notes.component.css']
+    selector: 'app-block-notes',
+    templateUrl: './block-notes.component.html',
+    styleUrls: ['./block-notes.component.css']
 })
-export class BlockNotesComponent implements OnInit {
-    @Input() notes:string = '';
+export class BlockNotesComponent   {
     
-  constructor() { }
+    @Input() blockContent!: CommandContent;
 
-  ngOnInit(): void {
-  }
+    constructor( ) {
+    }
 
+    setBlockContent(event:any){
+        this.blockContent.content = event;
+    }
 }

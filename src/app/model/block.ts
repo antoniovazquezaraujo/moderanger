@@ -1,14 +1,15 @@
 import { Command } from "./command";
+import { CommandContent } from "./command.content";
 
 export class Block{
-     public commands:Command[] = []; 
-     public blockContent:string ='';   
+    commands:Command[]; 
+    blockContent:CommandContent;   
 
-    constructor(commands:Command[], blockContent:string){
+    constructor(commands:Command[], blockContent:CommandContent){
         this.commands = commands;
         this.blockContent=blockContent;
     } 
-    getCommand(commandType:string){
+    getCommandByType(commandType:string){
         return this.commands.filter(command => command.commandType === commandType);
     }
 }

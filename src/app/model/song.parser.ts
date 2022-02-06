@@ -3,6 +3,7 @@ import {Command} from './command';
 import { Song } from './song';
 import   {Block } from './block';
 import { Part } from './part';
+import { CommandContent } from './command.content';
 
  
 
@@ -36,7 +37,7 @@ export function parseBlock(at : Parser.BLOCK): Block{
     
     var commands = parseCommandGroup(at.commandGroup);
     var blockContent = parseBlockContent(at.blockContent);
-    return new Block(commands, blockContent);
+    return new Block(commands, new CommandContent(blockContent));
 }
 export function parseCommandGroup(at : Parser.COMMAND_GROUP) : Command[] {
     var commands:Command[] = [];

@@ -7,10 +7,10 @@ import { Block } from 'src/app/model/block';
   styleUrls: ['./block.component.css']
 })
 export class BlockComponent implements OnInit {
-  @Input() block:Block;
+  @Input() block!:Block;
 
   constructor( ) { 
-    this.block = new Block([], "");
+    //this.block = new Block([], "");
   }
 
   ngOnInit(): void {
