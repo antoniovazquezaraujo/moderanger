@@ -32,6 +32,9 @@ export class NewEditorComponent implements OnInit{
     ngOnInit(): void {
         initSound();
     }
+    addPart(){
+        this.song.addPart();
+    }
     addCommand(){
         this.song.addCommand();
     }

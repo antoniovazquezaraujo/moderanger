@@ -40,7 +40,7 @@ export class SongPlayer {
         let times: number[] = [1];
         await this.parseCommands(block.commands, instrument, blockTime, times);
         setSoundProgram(instrument.channel, instrument.timbre);
-        let chars = block.blockContent.content.split('');
+        let chars = block.blockContent.notes.split('');
         let n = 0;
         let notesToPlay: number[] = [];
         for (let t = 0; t < times[0]; t++) {

@@ -6,7 +6,7 @@ export class Instrument {
     channel:number=0;
     private scale: number = 0;        //Escala usada (0-5)
     tonality: number = Tonality.D;     //En qué tonalidad está el círculo (1-12)
-    timbre: number = 1;       //El sonido seleccionado para ese círculo
+    timbre: number = 0;       //El sonido seleccionado para ese círculo
     notes: number[] = [];      //Notas seleccionadas para tocar por un player
     constructor(channel:number){
         this.channel = channel;

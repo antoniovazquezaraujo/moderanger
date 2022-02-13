@@ -1,6 +1,6 @@
 import {Block} from './block';
 import { Command } from './command';
-import { CommandContent } from './command.content';
+import { CommandNotes } from './command.notes';
 import { Part } from './part';
 export class Song {
     public parts:Part[];
@@ -15,15 +15,18 @@ export class Song {
         let lastPart =this.parts[this.parts.length-1];
         return lastPart;
     }
+    addPart():void{
+        this.parts.push(new Part([]));
+    }
     addCommand():void{
         var lastPart = this.getLastPart();
         if(lastPart.blocks.length == 0){
-            lastPart.blocks.push(new Block([], new CommandContent("")));
+            lastPart.blocks.push(new Block([], new CommandNotes("")));
         }
         let lastBlock = lastPart.blocks[lastPart.blocks.length-1];
         lastBlock.commands.push(new Command('P','50'));
     }
     addNotes():void{
-        this.getLastPart().blocks.push(new Block([],new CommandContent("")));
+        this.getLastPart().blocks.push(new Block([],new CommandNotes("")));
     }
 }

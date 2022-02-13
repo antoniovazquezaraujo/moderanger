@@ -1,4 +1,19 @@
-<div class = "container">
-    <app-block-commands [commands] = "block.commands"></app-block-commands>
-    <app-block-notes [blockContent] = "block.blockContent"></app-block-notes>
-</div>
+<!-- <div class="container"> -->
+<mat-accordion>
+    <mat-expansion-panel hideToggle>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <app-block-notes (addNewCommand)="onAddNewCommand()" [blockContent]="block.blockContent">
+                </app-block-notes>
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="container">
+            <app-block-commands [commands]="block.commands" (removeCommand)="onRemoveCommand($event)">
+            </app-block-commands>
+            <button mat-icon-button (click) = "onAddNewCommand()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    </mat-expansion-panel>
+</mat-accordion>
+<!-- </div> -->

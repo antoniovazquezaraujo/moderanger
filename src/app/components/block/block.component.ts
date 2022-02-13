@@ -16,4 +16,10 @@ export class BlockComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  onRemoveCommand(command:any){
+    this.block.removeCommand(command);
+  }
+  onAddNewCommand(){
+    this.block.addNewCommand();
+  }
 }

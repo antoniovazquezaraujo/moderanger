@@ -1,5 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { CommandContent } from 'src/app/model/command.content';
+import { Component, OnInit, Output, Input, EventEmitter } from '@angular/core';
+import { CommandNotes } from 'src/app/model/command.notes';
 
 @Component({
     selector: 'app-block-notes',
@@ -8,12 +8,17 @@ import { CommandContent } from 'src/app/model/command.content';
 })
 export class BlockNotesComponent   {
     
-    @Input() blockContent!: CommandContent;
+    @Input() blockContent!: CommandNotes;
+    @Output() addNewCommand: EventEmitter<any>;
 
     constructor( ) {
+        this.addNewCommand = new EventEmitter();
     }
 
     setBlockContent(event:any){
-        this.blockContent.content = event;
+        this.blockContent.notes = event;
+    }
+    addCommand(event:any){
+        this.addNewCommand.emit();
     }
 }
