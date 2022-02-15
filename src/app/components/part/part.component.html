@@ -1,5 +1,8 @@
 <div class = "container">
     <app-block  *ngFor="let block of part.blocks" [block] = "block"></app-block>
+    <button mat-icon-button (click) = "onAddNotes()">
+        <mat-icon>add</mat-icon>
+    </button>
 </div>
 
 

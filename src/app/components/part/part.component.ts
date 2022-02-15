@@ -1,6 +1,7 @@
 import { Input, Component, OnInit } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command } from 'src/app/model/command';
+import { CommandNotes } from 'src/app/model/command.notes';
 import { Part } from 'src/app/model/part';
 
 @Component({
@@ -16,6 +17,9 @@ export class PartComponent implements OnInit {
     }
 
     ngOnInit(): void {
+    }
+    onAddNotes(){
+        this.part.blocks.push(new Block([], new CommandNotes('')));
     }
 
 }

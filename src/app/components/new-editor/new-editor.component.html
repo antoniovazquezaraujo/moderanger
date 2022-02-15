@@ -1,5 +1,5 @@
 <app-parts [parts] = "getParts()"></app-parts> 
-<button (click) = "addPart()" mat-raised-button>Add part</button>
-<!-- <button (click) = "addCommand()" mat-raised-button>Add command</button> -->
-    <button (click) = "addNotes()" mat-raised-button>Add notes</button>
+<button mat-icon-button (click) = "addPart()">
+    <mat-icon>add</mat-icon>
+</button>
 <button (click) = "play()" mat-raised-button>Play</button> 

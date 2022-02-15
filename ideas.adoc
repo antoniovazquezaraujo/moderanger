@@ -549,3 +549,23 @@ Vale, tenemos un pequeño diseño html con un mínimo de css y podemos acceder a
 Así no se puede trabajar.
 No hay una estructura clara ahora mismo, está todo amontonado. Hay muchas cosas que funcionan pero no están conectadas. Necesitamos pensar una estructura más formal, teniendo ya en cuenta los componentes de la web y los dos tipos de conductores que tenemos.
 Además, hay un cierto descontrol con las clases y los ficheros adoc. Y los nombres de todo, etc. Hay que pasar la segadora YA.
+
+Vale, la cosa está funcionando con Angular Material, y tiene buena pinta.
+Tenemos una especie de secuenciador, que permite probar las escalas con alguna soltura, e incluso divertirse un rato.
+Anotaremos las cosas que se echan en falta ahora mismo:
+
+- Los valores por defecto de los comandos no están especificados. Deberían darse los valores habituales, para evitar comandos innecesarios
+- El arpegiador falla porque los modos mueven notas y no se salen de la misma octava, así que cada patrón hace cosas distintas en cada grado
+v-Falta la selección de timbres
+- Falta la velocidad general del tema
+- Falta un botón de stop
+v-El botón de add notes debe ir al final de cada bloque
+- Que las notas al ir sonando se vayan resaltando de alguna forma
+- Que el pulse se herede del bloque anterior, como todas las demás propiedades
+- Que se pueda duplicar un bloque o una parte
+- Que los bloques se puedan arrastrar para cambiarlos de orden, e incluso de parte
+- Que los bloques se puedan eliminar
+- Que el usuario pueda tocar con el teclado
+- Que los valores numericos vayan en decimal en vez de hexadecimal y que estén limitados
+v-Que se puedan repetir notas
+- Que se puedan repetir bloques de notas (Ver lo de la composición arborea)
