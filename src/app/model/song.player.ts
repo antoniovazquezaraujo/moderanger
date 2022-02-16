@@ -8,10 +8,10 @@ import { Block } from './block';
 import { Part } from './part';
 
 export class SongPlayer {
-    blockTime: number;
-
+    //blockTime: number;
+    blockTime: number[] = [0];
     constructor() {
-        this.blockTime = 0;
+        this.blockTime = [];
     }
 
     stop() {
@@ -36,9 +36,9 @@ export class SongPlayer {
         }
     }
     async playBlock(block: Block, instrument: Instrument) {
-        let blockTime: number[] = [0];
+        //let blockTime: number[] = [0];
         let times: number[] = [1];
-        await this.parseCommands(block.commands, instrument, blockTime, times);
+        await this.parseCommands(block.commands, instrument, this.blockTime, times);
         setSoundProgram(instrument.channel, instrument.timbre);
         let chars = block.blockContent.notes.split('');
         let n = 0;
@@ -59,10 +59,10 @@ export class SongPlayer {
                 let playedNotes = notesToPlay;
                 if (char === '-' || char === '.') {
                     playedNotes = [];
-                    await wait(blockTime[0] * 100); 
+                    await wait(this.blockTime[0] * 100); 
                 } else {
-                    await play(playedNotes, blockTime[0] * 100, instrument.player.playMode, instrument.channel);
-                    await this.delay(blockTime[0] * 100);
+                    await play(playedNotes, this.blockTime[0] * 100, instrument.player.playMode, instrument.channel);
+                    await this.delay(this.blockTime[0] * 100);
                 }
             }
         }

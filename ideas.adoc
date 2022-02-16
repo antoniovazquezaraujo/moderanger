@@ -569,3 +569,5 @@ v-El botón de add notes debe ir al final de cada bloque
 - Que los valores numericos vayan en decimal en vez de hexadecimal y que estén limitados
 v-Que se puedan repetir notas
 - Que se puedan repetir bloques de notas (Ver lo de la composición arborea)
+- Que se pueda cambiar el volumen de cada bloque (ADSR ???)
+v-Que si no hay ningún comando no se vea nada, que ahora se ve un cuadrado
