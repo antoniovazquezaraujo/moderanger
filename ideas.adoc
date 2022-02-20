@@ -616,3 +616,17 @@ gradeToSemitones(grade:number):number{
 }
 
 Vale está reparado. Ahora funciona bien.
+
+Retomamos las ideas que faltan:
+- Falta la velocidad general del tema
+-v Falta un botón de stop
+- Que las notas al ir sonando se vayan resaltando de alguna forma
+- Que se pueda duplicar un bloque o una parte
+- Que los bloques se puedan arrastrar para cambiarlos de orden, e incluso de parte
+- Que los bloques se puedan eliminar
+- Que el usuario pueda tocar con el teclado
+- Que los valores numericos vayan en decimal en vez de hexadecimal y que estén limitados
+- Que se puedan repetir bloques de notas (Ver lo de la composición arborea)
+- Que se pueda cambiar el volumen de cada bloque (ADSR ???)
+- Que se pueda playear solamente una part
+- 

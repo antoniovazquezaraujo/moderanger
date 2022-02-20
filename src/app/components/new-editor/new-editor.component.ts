@@ -44,5 +44,8 @@ export class NewEditorComponent implements OnInit{
     async play() {
         this.songPlayer.playSong(this.song);
     }
+    async stop(){
+        this.songPlayer.stop();
+    }
    
 }

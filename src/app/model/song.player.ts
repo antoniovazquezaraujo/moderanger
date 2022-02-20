@@ -9,15 +9,18 @@ import { Part } from './part';
 
 export class SongPlayer {
     //blockTime: number;
+    isStop:boolean = false;
     blockTime: number[] = [0];
     constructor() {
         this.blockTime = [];
     }
 
     stop() {
+        this.isStop = true;
         stopSound();
     }
     async start() {
+        this.isStop = false;
         initSound();
         var s: Song;
         var result = parse('W5,I5,M1,O3,K0,P30,S1:012-----3.4.5. W3,I2,M0,O4,K0,PF,S1:01---2-----3.4------5. ');
@@ -25,6 +28,7 @@ export class SongPlayer {
         this.playSong(song);
     }
     playSong(song: Song) {
+        this.isStop = false;
         let channel = 0;
         for (var part of song.parts) {
             this.playPart(part, new Instrument(channel++));
@@ -44,7 +48,13 @@ export class SongPlayer {
         let n = 0;
         let notesToPlay: number[] = [];
         for (let t = 0; t < times[0]; t++) {
+            if(this.isStop){
+                break;
+            }
             for (let char of chars) {
+                if(this.isStop){
+                    break;
+                }
                 let note = parseInt(char, 16);
                 instrument.player.selectedNote = note;
                 //Stop sounding notes if char not a "extend" key
