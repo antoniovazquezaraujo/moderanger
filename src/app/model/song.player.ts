@@ -55,7 +55,7 @@ export class SongPlayer {
                 if(this.isStop){
                     break;
                 }
-                let note = parseInt(char, 16);
+                let note = parseInt(char, 10);
                 instrument.player.selectedNote = note;
                 //Stop sounding notes if char not a "extend" key
                 if (char != '=') {
