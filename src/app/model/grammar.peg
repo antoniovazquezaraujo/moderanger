@@ -7,6 +7,8 @@
 //  S:Scale
 //  I:Inversion
 //  K:Key (Tonality)
+//  G:Gear (timbre)
+//  C:Channel (channel, 9 is percussion)
 ////////////////////////////
 SONG:= 
     head = PART
@@ -28,11 +30,11 @@ COMMAND :=
     commandType ={COMMAND_TYPE} 
     commandValue={VALUE_ID}
 COMMAND_TYPE := 
-    commandType = '[VMPWOSIKRG]'
+    commandType = '[VMPWOSIKRGC]'
 VALUE_ID := 
     val = '[0-9A-F]{1,2}'
 BLOCK_CONTENT:=
-    val = '[0-9A-F\-\.]+'
+    val = '[0-9\-\=\.]+'
 COMMAND_SEPARATOR := ','
 COMMAND_GROUP_SEPARATOR := ':'
 BLOCK_SEPARATOR := '\n' 

@@ -47,6 +47,7 @@ export async function play(notes: number[], duration: number, playMode: PlayMode
 }
 export async function playChord(notes: number[], duration: number, channel:number) {
     for (var n of notes) {
+        console.log("canal:"+ channel+ " note:"+ n);
         sound.ch(channel).noteOn(n, 127, duration);
     }
     //await sound.wait(duration);

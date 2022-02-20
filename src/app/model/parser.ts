@@ -39,7 +39,7 @@
 * COMMAND_GROUP_SEPARATOR := ':'
 * BLOCK_SEPARATOR := '\n' 
 * SILENCE := '.'
-* EXTENSION := '-'
+* EXTENSION := '='
 * PART_SEPARATOR:='\n\n' 
 */
 type Nullable<T> = T | null;

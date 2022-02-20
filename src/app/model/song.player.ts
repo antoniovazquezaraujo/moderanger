@@ -28,8 +28,8 @@ export class SongPlayer {
         let channel = 0;
         for (var part of song.parts) {
             this.playPart(part, new Instrument(channel++));
-        }
-    }
+        } 
+    } 
     async playPart(part: Part, instrument: Instrument) {
         for (var block of part.blocks) {
             await this.playBlock(block, instrument);
@@ -40,7 +40,7 @@ export class SongPlayer {
         let times: number[] = [1];
         await this.parseCommands(block.commands, instrument, this.blockTime, times);
         setSoundProgram(instrument.channel, instrument.timbre);
-        let chars = block.blockContent.notes.split('');
+        let chars = block.blockContent.notes.split(' ').filter(t => t != '');
         let n = 0;
         let notesToPlay: number[] = [];
         for (let t = 0; t < times[0]; t++) {
@@ -48,16 +48,16 @@ export class SongPlayer {
                 let note = parseInt(char, 16);
                 instrument.player.selectedNote = note;
                 //Stop sounding notes if char not a "extend" key
-                if (char != '-') {
+                if (char != '=') {
                     await stop(notesToPlay, instrument.channel);
                 } 
                 //Play new notes only if not extend or silence
-                if (char != '-' && char != '.') {
+                if (char != '=' && char != '.') {
                     notesToPlay = instrument.player.getSelectedNotes(instrument.getScale(), instrument.tonality);
                 }
                 //If not real notes, play empty notes to take the same time
                 let playedNotes = notesToPlay;
-                if (char === '-' || char === '.') {
+                if (char === '=' || char === '.') {
                     playedNotes = [];
                     await wait(this.blockTime[0] * 100); 
                 } else {
@@ -83,31 +83,35 @@ export class SongPlayer {
                 //this.velocity = parseInt(command.commandValue, 16);
                 break;
             case 'P': // Pulse (bits per time)
-                blockTime[0] = 64 / parseInt(command.commandValue, 16);
+                blockTime[0] = 64 / parseInt(command.commandValue, 10);
                 break;
             case 'M': // Play mode (Chord, arpeggios, etc)
-                instrument.player.playMode = parseInt(command.commandValue, 16);
+                instrument.player.playMode = parseInt(command.commandValue, 10);
                 break;
             case 'W': // Width (chord density)
                 instrument.player.density = parseInt(command.commandValue, 16);
                 break;
             case 'O': // Octave
-                instrument.player.octave = parseInt(command.commandValue, 16);
+                instrument.player.octave = parseInt(command.commandValue, 10);
                 break;
             case 'S': // Scale
-                instrument.selectScale(parseInt(command.commandValue, 16));
+                instrument.selectScale(parseInt(command.commandValue, 10));
                 break;
             case 'I': // Inversion
-                instrument.player.inversion = parseInt(command.commandValue, 16);
+                instrument.player.inversion = parseInt(command.commandValue, 10);
                 break;
             case 'K': // Key (Tonality)
-                instrument.tonality = parseInt(command.commandValue, 16);
+                instrument.tonality = parseInt(command.commandValue, 10);
                 break;
             case 'R':
-                times[0] = parseInt(command.commandValue, 16);
+                times[0] = parseInt(command.commandValue, 10);
                 break;
             case 'G': // "gear". Instrument to play
-                instrument.timbre = parseInt(command.commandValue, 16);
+                instrument.timbre = parseInt(command.commandValue, 10);
+                break;
+            case 'C': // "channel". Channel to play (9 is percussion)
+                instrument.channel = parseInt(command.commandValue, 10);                
+                break;
 
         }
     }

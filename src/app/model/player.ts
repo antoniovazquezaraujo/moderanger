@@ -29,7 +29,7 @@ export class Player{
     getSelectedNotes(scaleNum:number, tonality:number):number[]{
         var scale = getScaleByNum(scaleNum);       
         var tunnedNote = this.selectedNote;
-        var chordNotes= scale.getChordNotes(tunnedNote, this.density, tonality);
+        var chordNotes= scale.gradeToChord(tunnedNote, this.density, tonality);
         var octavedNotes = this.setOctave(chordNotes);
         var invertedNotes = this.setInversion(octavedNotes);
         return invertedNotes;

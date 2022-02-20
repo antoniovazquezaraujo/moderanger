@@ -5,6 +5,7 @@
                 <mat-chip *ngFor="let command of commands" (removed)="remove(command)">
                     <mat-select class="commandType" [(ngModel)]="command.commandType">
                         <mat-option value="V">Velocity</mat-option>
+                        <mat-option value="C">Channel</mat-option>
                         <mat-option value="G">Gear</mat-option>
                         <mat-option value="M">Mode</mat-option>
                         <mat-option value="P">Pulse</mat-option>

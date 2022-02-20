@@ -5,29 +5,49 @@ export class Scale {
         this.notes = notes;
     }
 
+    gradeToSemitones(grade: number): number {
+        var scalesToAdd = Math.floor(Math.abs(grade) / this.notes.length);
+        var gradeInScale = Math.abs(grade) % this.notes.length;
+        var numSemitones = this.notes[gradeInScale];
+        var totalSemitones = numSemitones + (scalesToAdd * 12)
+        if (grade < 0) {
+            totalSemitones *= -1;
+        }
+        return totalSemitones;
+    }
+    gradeToChord(grade: number, density: number, tonality: number): number[] {
+        var chordNotes = [];
+        chordNotes.push(this.gradeToSemitones(grade)+tonality);
+        var index = grade;
+        for (var n = 0; n < density; n++) {
+            index += 2;
+            chordNotes.push(this.gradeToSemitones(index)+tonality);
+        }
+        return chordNotes;
+    }
     /**
      * Return a chord with as density notes added to the root
      */
-    getChordNotes(rootNoteOrder:number, density:number, tonality?:number): number[]{
-        var chordNotes:number[]= [];        
+    getChordNotes(rootNoteOrder: number, density: number, tonality?: number): number[] {
+        var chordNotes: number[] = [];
         var noteShift = 0;
         var tonalityShift = Tonality.D;
-        if(tonality != undefined){
+        if (tonality != undefined) {
             tonalityShift = tonality;
         }
         var index = rootNoteOrder;
-        if(index >= this.getNumNotes()){
-            index = index% this.getNumNotes();
-            noteShift+=12;
+        if (index >= this.getNumNotes()) {
+            index = index % this.getNumNotes();
+            noteShift += 12;
         }
-        chordNotes.push(this.getNotePosition(index)+noteShift+tonalityShift);
-        for(var n=0; n<density; n++){
-            index+=2;
-            if(index >= this.getNumNotes()){
-                index = index% this.getNumNotes();
-                noteShift+=12;
+        chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
+        for (var n = 0; n < density; n++) {
+            index += 2;
+            if (index >= this.getNumNotes()) {
+                index = index % this.getNumNotes();
+                noteShift += 12;
             }
-            chordNotes.push(this.getNotePosition(index)+ noteShift+tonalityShift);
+            chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
         }
         return chordNotes;
     }
@@ -35,7 +55,7 @@ export class Scale {
      * Returns the position of the nht note in the scale
      */
     getNotePosition(noteOrder: number): number {
-        return this.notes[noteOrder%12];
+        return this.notes[noteOrder % 12];
     }
 
     /**
@@ -63,15 +83,15 @@ export function getScaleByName(name: string): Scale {
     return SCALES[0]; // default case
 }
 const SCALES: Scale[] = [
-    new Scale([0,2,3,5,7, 9, 10]),
-    new Scale([0,2,4,5,7,8,10]),
-    new Scale([0,1,4,5,7,8,11]),
-    new Scale([1,2,4,5,7,8,10,11]),
-    new Scale([0,2,5,7,10]),
-    new Scale([0,2,4,6,8,10])
+    new Scale([0, 2, 3, 5, 7, 9, 10]),
+    new Scale([0, 2, 4, 5, 7, 8, 10]),
+    new Scale([0, 1, 4, 5, 7, 8, 11]),
+    new Scale([1, 2, 4, 5, 7, 8, 10, 11]),
+    new Scale([0, 2, 5, 7, 10]),
+    new Scale([0, 2, 4, 6, 8, 10])
 ];
 
-export function getNoteName(noteOrder:number):string{
+export function getNoteName(noteOrder: number): string {
     return Tonality[noteOrder % 12];
 }
 export enum Tonality {
@@ -88,4 +108,3 @@ export enum Tonality {
     C = 10,
     d = 11
 }
- 

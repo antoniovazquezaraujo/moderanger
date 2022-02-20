@@ -35,20 +35,20 @@ export function getArpeggios(notes:number[], mode: PlayMode ):number[][] {
             let [_, ...notesExceptFirstElement]  = notes;
             return [[...notes].reverse(), notesExceptFirstElement];
         case PlayMode.EVEN_ASC_ODD_ASC:
-            return [notes.filter((t) => isEven(t)), notes.filter((t) => isOdd(t))];
+            return [notes.filter((value, index) => isEven(index)), notes.filter((value, index) => isOdd(index))];
         case PlayMode.EVEN_ASC_ODD_DESC:
-            return [notes.filter((t) => isEven(t)), notes.filter((t) => isOdd(t)).reverse()];
+            return [notes.filter((value, index) => isEven(index)), notes.filter((value, index) => isOdd(index)).reverse()];
         case PlayMode.EVEN_DESC_ODD_DESC:
-            return [notes.filter((t) => isEven(t)).reverse(), notes.filter((t) => isOdd(t)).reverse()];
+            return [notes.filter((value, index) => isEven(index)).reverse(), notes.filter((value, index) => isOdd(index)).reverse()];
         case PlayMode.EVEN_DESC_ODD_ASC:
-            return [notes.filter((t) => isEven(t)).reverse(), notes.filter((t) => isOdd(t))];
+            return [notes.filter((value, index) => isEven(index)).reverse(), notes.filter((value, index) => isOdd(index))];
         case PlayMode.ODD_ASC_EVEN_ASC:
-            return [notes.filter((t) => isOdd(t)), notes.filter((t) => isEven(t))];
+            return [notes.filter((value, index) => isOdd(index)), notes.filter((value, index) => isEven(index))];
         case PlayMode.ODD_ASC_EVEN_DESC:
-            return [notes.filter((t) => isOdd(t)), notes.filter((t) => isEven(t)).reverse()];
+            return [notes.filter((value, index) => isOdd(index)), notes.filter((value, index) => isEven(index)).reverse()];
         case PlayMode.ODD_DESC_EVEN_DESC:
-            return [notes.filter((t) => isOdd(t)).reverse(), notes.filter((t) => isEven(t)).reverse()];
+            return [notes.filter((value, index) => isOdd(index)).reverse(), notes.filter((value, index) => isEven(index)).reverse()];
         case PlayMode.ODD_DESC_EVEN_ASC:
-            return [notes.filter((t) => isOdd(t)).reverse(), notes.filter((t) => isEven(t))];
+            return [notes.filter((value, index) => isOdd(index)).reverse(), notes.filter((value, index) => isEven(index))];
     }
 }

@@ -588,3 +588,31 @@ Finalmente: números negativos o positivos excepto el cero o bién puntos o sign
 En los comandos numeros decimales, en algunos positivos solamente, como el el pulso, no tiene sentido un pulso negativo.
 Vale, cambiemos todo esto ya.
 
+Estoy pensando que igual las operaciones matemáticas son mucho más complejas de lo que parecen si no usamos el cero. Necesitamos hacer cálculos para hacer las inversiones de acordes, subir o bajar octavas, fabricar los patrones de los arpegios, etc. Son demasiados elementos como para no usar el cero, vamos a arrastrar el problema constantemente.
+
+re mi fa sol la si do re mi fa sol la si do re
+-7 -6 -5 -4  -3 -2 -1  0  1  2  3  4  5  6  7
+Una octava más alto:
+re mi fa sol la si do re mi fa sol la si do re
+8  9  10 11  12 13 14 15 16 17 18  19 20 21 22
+
+El cero será la primera nota de la octava actual. Desde ahí se puede tocar cualquier nota. Simplemente hemos de proteger las notas fuera de rango y ya está.
+
+Vale, necesitamos que la escala nos devuelva la nota a partir de un número entero. La escala tiene un patrón y dándole una nota solamente puede saber cuántos semitonos a partir de la nota cero de la escala habrá de distancia positiva o negativa. Lo que hace es convertir un grado de la escala en semitonos de distancia desde la nota cero. Vale, luego se aplicará la octavación por encima, pero sin necesidad de ella, desde aquí podemos alcanzar cualquier nota. Entonces:
+
+gradeToSemitones(grade:number):number{
+    // toma el patrón de la escala y calcula los semitonos de distancia:
+    // Un patron ejemplo: new Scale([0,2,3,5,7, 9, 10])
+    // 0->0, 1->2, 2->3, 3->5, 4->7, 5->9, 6->10, -1->-2, -2->-3, -3->5, -4->7, -5->9, -6->10
+    // Si el número es mayor al de grados de la escala empezamos en cero pero le sumamos el número de semitonos total de una octava: 12
+    // 7->0+12, 8->2+12, etc
+    // -7->0-12
+    Como las dos operaciones son simétricas, podemos hacer una solamente y al final agregar el mismo signo del grado
+
+    gradeSemitones(1)  ->   2
+    gradeSemitones(-1) ->  -2
+    gradeSemitones(7)  ->  12
+    gradeSemitones(-7) -> -12
+}
+
+Vale está reparado. Ahora funciona bien.
