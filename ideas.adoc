@@ -557,17 +557,34 @@ Anotaremos las cosas que se echan en falta ahora mismo:
 - Los valores por defecto de los comandos no están especificados. Deberían darse los valores habituales, para evitar comandos innecesarios
 - El arpegiador falla porque los modos mueven notas y no se salen de la misma octava, así que cada patrón hace cosas distintas en cada grado
 v-Falta la selección de timbres
+v-El botón de add notes debe ir al final de cada bloque
+v-Que el pulse se herede del bloque anterior, como todas las demás propiedades
+v-Que se puedan repetir notas
+v-Que si no hay ningún comando no se vea nada, que ahora se ve un cuadrado
 - Falta la velocidad general del tema
 - Falta un botón de stop
-v-El botón de add notes debe ir al final de cada bloque
 - Que las notas al ir sonando se vayan resaltando de alguna forma
-- Que el pulse se herede del bloque anterior, como todas las demás propiedades
 - Que se pueda duplicar un bloque o una parte
 - Que los bloques se puedan arrastrar para cambiarlos de orden, e incluso de parte
 - Que los bloques se puedan eliminar
 - Que el usuario pueda tocar con el teclado
 - Que los valores numericos vayan en decimal en vez de hexadecimal y que estén limitados
-v-Que se puedan repetir notas
 - Que se puedan repetir bloques de notas (Ver lo de la composición arborea)
 - Que se pueda cambiar el volumen de cada bloque (ADSR ???)
-v-Que si no hay ningún comando no se vea nada, que ahora se ve un cuadrado
+
+Tema de los valores numéricos:
+En los commands pueden ser perfectamente números negativos, porque cada comando tiene un valor único, y sería más facil para el usuario.
+El problema es con las notas, se está usando el guión para indicar persistencia de la nota. Podría cambiarse por un signo = y usar el guión como signo menos, de forma que pudieramos tener números negativos y positivos.
+Sería algo como:
+W-5,I5,M1,O-3,K-2,P30,S1:01-2====3.-4.5. W3,I2,M0,O4,K0,PF,S1:01===2=====3.4======5.  
+De esta forma, las notas solo podrían ir de -9 a +9. Puede resultar incómodo porque igual hay que estar cambiando de octava innecesariamente. Para ello, deberíamos poder usar más cifras para las notas, con lo cual necesitaríamos separarlas entre comas:
+W-5,I5,M1,O-3,K-2,P30,S1:0,1,-2====,13,.,-14,.,-5,. W3,I2,M0,O4,K0,PF,S1:0,1===,12=====,13,.,-4,======-15,.  
+
+Obviamente sería más cómodo, más robusto y nos daría más libertad. Habría que pensar si la primera nota es 0 o 1. Musicalmente hablando, sería más cómodo llamarle 1 a la primera nota de la escala. Sin embargo, si usamos también números negativos entonces el 0 sería la última nota de la anterior octava, lo que sería inconsistente. Se podría eliminar la nota 0 y usar solamente 1 y -1. Pero también puede dar lugar a confusión y a problemas matemáticos, aunque podrían solventarse, supongo.
+Para pensar musicalmente tendría mucho más sentido, incluso podríamos considerar el 0 como un silencio, aunque es más gráfico e intuitivo el punto me parece. Entonces qué hacer con el cero? Usarlo como = para mantener la nota anterior sonando? Podría ser. 
+1,-2,11,14000,1500,-300,-2-,-1,1,200,400,.,5,..., No lo veo.
+El signo = está bien para eso. Simplemente impedimos usar el 0 y punto.
+Finalmente: números negativos o positivos excepto el cero o bién puntos o signos =, separados por comas
+En los comandos numeros decimales, en algunos positivos solamente, como el el pulso, no tiene sentido un pulso negativo.
+Vale, cambiemos todo esto ya.
+

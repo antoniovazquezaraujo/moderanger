@@ -6,3 +6,4 @@ yarn.lock
 coverage/**
 .angular/cache/**
 dist/**
+
