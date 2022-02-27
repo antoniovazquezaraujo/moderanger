@@ -668,3 +668,45 @@ var result = parse('0=5,1=5,20=1,6=3,9=0,20=30,7=1:0,1,2,-,-,-,-,-,3,.,4,.,5,. 3
 Es decir, la clave numérica del comando, un signo igual y el valor del comando. Todos entre comas. Vale. Hagámoslo.
 
 Bien, los comandos tienen claves numéricas y hemos agregado un enum para guardarlos todos. Correcto.
+
+Retomamos las ideas que faltan:
+- Falta la velocidad general del tema
+- Que las notas al ir sonando se vayan resaltando de alguna forma
+- Que se pueda duplicar un bloque o una parte
+- Que los bloques se puedan arrastrar para cambiarlos de orden, e incluso de parte
+- Que los bloques se puedan eliminar
+- Que el usuario pueda tocar con el teclado
+- Que los valores numericos estén limitados
+- Que se puedan repetir conjuntos de bloques (Ver lo de la composición arborea)
+- Que se pueda cambiar el volumen de cada bloque (ADSR ???)
+- Que se pueda playear solamente una part
+
+Vamos a analizar la parte en la que el usuario puede tocar con el teclado.
+Esto requiere que algún playMode haga que las notas no suenen, que solamente se seleccionen en el momento adecuado, pero que sea el usuario el que, mediante el teclado, haga sonar las que desee de las que se han seleccionado. En el modo 0, actualmente suenan todas al mismo tiempo, como un acorde, en los demás modos suenan como un arpegio, una nota después de otra. En este nuevo modo especial, no sonaría ninguna, a no ser que el usuario enviase la orden desde el teclado. El sistema de seleccion de notas sería idéntico.
+
+Como hay varias partes que pueden sonar simultaneamente, el teclado debería estar asignado a una parte en concreto, para hacer sonar las notas de esa parte solamente. Entonces podemos hacer que el teclado se pueda asignar a una parte concreta, para hacer sonar sus notas. 
+
+Hay dos cuestiones con la selección de notas: podríamos tomar las notas que ya están agregadas en el bloque y, a partir de esas notas, seleccionar las notas "posibles" y que el teclado seleccionase notas entre esas posibles. Otra cosa sería que el teclado fuera el que "agregase" las notas inicialmente en lugar de hacer sonar notas de entre las que han sido seleccionadas a partir de las notas del bloque. Es decir, el teclado podría ser generador de notas o simplemente activador de las notas ya preseleccionadas.
+En el caso de ser generador, el usuario es más libre, porque puede decidir qué notas serán las semillas del resultado final al aplicar los comandos del bloque. En cambio, cuando en lugar de generador solamente es activador, las notas que se seleccionan parten de las que había en el bloque, con lo que el usuario es menos libre, pero nunca va a fallar, porque solamente le dejamos tocar alguna de las notas que ya han sido pre-cocinadas. Nunca va a desafinar. :-)
+
+Entonces tendríamos dos formas de usar el teclado, los nombres no están claros:
+- Generate - Activate
+- Generator - Activator
+- Selector - Player
+- Master - Player
+- Creator - Player
+- Free - Guided
+- SelectAndPlay - PlaySelected
+- Manual - Auto
+- SelectNotes - PlayNotes
+- Pre-select - Select
+
+No está claro. En resumen, si el teclado se asigna a una part, entonces el block actual pasa a sonar cuando lo ordene el teclado. Si el teclado está en modo Generator, no se tienen en cuenta las notas del block, sino que las genera el teclado, si el teclado está en modo Activator, entonces son las notas del bloque las que seleccionan las notas a tocar, y el teclado simplemente elige entre ellas para que suenen finalmente o no.
+
+Otra cosa: el ritmo. Con los modos actuales las notas pueden sonar simultaneamente o bien arpegiadas, con un patrón determinado. El teclado puede tener en cuenta también esto, es decir, si está en modo generator, entonces es el propio teclado el que decide el ritmo, o sea, si suenan varias notas a la vez y cuántas. En cambio, si está en modo player, entonces las notas suenan como dice el bloque, o sea, todas a la vez, con lo que el teclado solamente decidiría el ritmo en el que suenan, o arpegiadas, con lo que el teclado debería elegir qué nota de las seleccionadas desea hacer sonar.
+Estos modos del teclado deberían poder cambiarse sobre la marcha mediante el propio teclado, con alguna tecla especial.
+Teclas que podrían asignarse inicialmente: 
+    - Notas: Las tres hileras de teclas normales serían las notas, desde abajo a la izda hasta arriba a la dcha.
+    - Modo Generator: 1
+    - Modo Player: 2
+    
