@@ -630,3 +630,41 @@ Retomamos las ideas que faltan:
 - Que se pueda cambiar el volumen de cada bloque (ADSR ???)
 - Que se pueda playear solamente una part
 - 
+
+Vamos a aclarar el asunto de play mode. 
+
+Dada una lista de notas, debemos poder crear las notas seleccionadas de múltiples formas, no solamente formando un acorde, o formándolo pero de múltiples maneras, por ejemplo:
+- Agrupar las notas con un intervalo dado, es decir, cada nota, cada dos notas, cada tres, por ejemplo:
+    [1,2,3,4,5,6,7] ->[1,2,3], [1,3,5],[1,4,7],[1,6]
+- Tomar un grupo de esas notas y subirles o bajarles una octava, por ejemplo:
+    [1,2,3,4,5,6,7] ->[2..1,3,4,5,6,7], [2,3...1,4,5,6,7], [2,3,4..1,5,6,7]
+    El grupo de notas empieza en la segunda nota y va creciendo, pero podría empezar en otra:
+    [1,2,3,4,5,6,7] ->[4..1,2,3,5,6,7], [4,5..1,2,3,6,7], etc
+
+Variables:
+    -gap: espacio entre las notas seleccionadas. 0 te da la escala, 1 te da acordes "normales", 2 acordes "cuartales", etc.
+    -shiftStart: principio del shifting de una octava, en qué nota empezamos a contar para cambiarle de octava
+    -shiftSize: cuántas notas tomamos para cambiarles de octava
+    -octave: +1, -1, +2, -2, etc, las octavas que se agregan o restan a esas notas.
+
+Ahora mismo, el playMode nos da las notas del acorde todas al mismo tiempo si tiene valor 0 y arpegios con distintos valores.
+Esto se mantiene, pero los diferentes arpegios pueden ampliarse mucho, incluso usar patterns de notas.
+Además habrá otro comando, que podría llamarse "noteSelect", que tendrá varios parámetros:
+    noteSelect(gap, shiftStart, shiftSize, octave)
+Mejor que sean parámetros separados, todos afectan a las notas seleccionadas, pero no tienen por qué agruparse:
+    -gap: intervalo entre notas seleccionadas
+    -shiftStart: primera nota en el shift
+    -shiftRange: tamaño del shift
+    -shiftValue: cantidad de octavas a aplicar    
+
+Vale, haciendo pruebas con los valores directamente, parece que funciona. Se trataría de agregar los comandos, pero estoy viendo que:
+
+Los comandos están íntimamente acoplados a las letras que los simbolizan, y esto nos está dando problemas porque se acaban las letras y habría colisiones. Entonces, habría que crear una enumeración para los comandos, de manera que si luego queremos guardarlos como texto, simplemente sean números o algo así, pero que no tengamos que estar asignando letras.
+El asunto de guardar los temas como texto sigue siendo interesante, aunque podría hacerse en json directamente, pero quizá así ocupe mucho menos, eso hay que verlo. En todo caso, no tiene por que ser comprensible para un humano, cada comando puede ser un número y punto.
+Repasemos la gramática:
+var result = parse('W5,I5,M1,O3,K0,P30,S1:0,1,2,-,-,-,-,-,3,.,4,.,5,. W3,I2,M0,O4,K0,PF,S1:0,1,-,-,-,2,-,-,-,-,-,3,.,4,-,-,-,-,5,. ');
+En lugar de esto, sería algo como:
+var result = parse('0=5,1=5,20=1,6=3,9=0,20=30,7=1:0,1,2,-,-,-,-,-,3,.,4,.,5,. 3=5,2=10,6=-2:0,1,-,-,-,2,-,-,-,-,-,3,.,4,-,-,-,5,. ');
+Es decir, la clave numérica del comando, un signo igual y el valor del comando. Todos entre comas. Vale. Hagámoslo.
+
+Bien, los comandos tienen claves numéricas y hemos agregado un enum para guardarlos todos. Correcto.

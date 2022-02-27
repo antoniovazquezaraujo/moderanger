@@ -1,5 +1,5 @@
 import {Block} from './block';
-import { Command } from './command';
+import { Command, CommandType } from './command';
 import { CommandNotes } from './command.notes';
 import { Part } from './part';
 export class Song {
@@ -24,7 +24,7 @@ export class Song {
             lastPart.blocks.push(new Block([], new CommandNotes("")));
         }
         let lastBlock = lastPart.blocks[lastPart.blocks.length-1];
-        lastBlock.commands.push(new Command('P','50'));
+        lastBlock.commands.push(new Command(CommandType.PULSE,'50'));
     }
     addNotes():void{
         this.getLastPart().blocks.push(new Block([],new CommandNotes("")));

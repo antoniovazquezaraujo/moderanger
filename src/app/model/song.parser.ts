@@ -1,11 +1,10 @@
 import * as Parser from './parser';
-import {Command} from './command';
+import {Command, CommandType } from './command';
 import { Song } from './song';
 import   {Block } from './block';
 import { Part } from './part';
 import { CommandNotes } from './command.notes';
-
- 
+  
 
 export function evaluate(tree : any) : Song | null {
     if(tree.err === null && tree.ast){
@@ -57,8 +56,8 @@ export function parseChar( t: string):string{
     return t;
 }
 export function parseCommand(at: Parser.COMMAND): Command{  
-    var commandType = parseCommandType(at.commandType);
-    var commandValue = parseCommandValue(at.commandValue);
+    var commandType:CommandType = parseCommandType(at.commandType);
+    var commandValue:string = parseCommandValue(at.commandValue);
     return new Command(commandType, commandValue);
 }
 
@@ -66,6 +65,6 @@ function parseCommandValue(commandValue: Parser.VALUE_ID): string {
     return commandValue.val;
 }
 
-function parseCommandType(commandType: Parser.COMMAND_TYPE): string {
-    return commandType.commandType;
+function parseCommandType(commandType: Parser.COMMAND_TYPE): CommandType {
+    return CommandType.PULSE; //TODO: PROVISIONAL, CAMBIAR ESTO
 }

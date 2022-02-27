@@ -1,4 +1,4 @@
-import { Command } from "./command";
+import { Command, CommandType } from "./command";
 import { CommandNotes } from "./command.notes";
 
 export class Block{
@@ -9,13 +9,13 @@ export class Block{
         this.commands = commands;
         this.blockContent=blockContent;
     } 
-    getCommandByType(commandType:string){
+    getCommandByType(commandType:CommandType){
         return this.commands.filter(command => command.commandType === commandType);
     }
     removeCommand(command:any){
         this.commands = this.commands.filter(t => t !== command);
     }
     addNewCommand(){
-        this.commands.push(new Command('', ''));
+        this.commands.push(new Command(CommandType.PULSE, ''));
     }
 }

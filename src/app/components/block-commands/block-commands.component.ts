@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Command } from 'src/app/model/command';
+import { Command, CommandType } from 'src/app/model/command';
 
 @Component({
     selector: 'app-block-commands',
@@ -9,12 +9,19 @@ import { Command } from 'src/app/model/command';
 export class BlockCommandsComponent implements OnInit {
     @Input() commands!: Command[];
     @Output() removeCommand: EventEmitter<any>;
+    
+    commandTypes  = CommandType;
+    enumKeys:any[] = [];
+ 
+    
     constructor() { 
+
         this.removeCommand = new EventEmitter<any>();
+ 
     }
 
     ngOnInit(): void {
-
+        this.enumKeys = Object.keys(this.commandTypes).filter(f => !isNaN(Number(f)));
     }
 
     remove(command: any):void {

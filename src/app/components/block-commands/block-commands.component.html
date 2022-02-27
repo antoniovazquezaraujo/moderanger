@@ -3,18 +3,8 @@
         <mat-form-field appearance="fill">
             <mat-chip-list aria-orientation="vertical">
                 <mat-chip *ngFor="let command of commands" (removed)="remove(command)">
-                    <mat-select class="commandType" [(ngModel)]="command.commandType">
-                        <mat-option value="V">Velocity</mat-option>
-                        <mat-option value="C">Channel</mat-option>
-                        <mat-option value="G">Gear</mat-option>
-                        <mat-option value="M">Mode</mat-option>
-                        <mat-option value="P">Pulse</mat-option>
-                        <mat-option value="W">Width</mat-option>
-                        <mat-option value="O">Octave</mat-option>
-                        <mat-option value="S">Scale</mat-option>
-                        <mat-option value="I">Inversion</mat-option>
-                        <mat-option value="K">Key</mat-option>
-                        <mat-option value="R">Repeat</mat-option>
+                    <mat-select type="number" class="commandType" [(ngModel)]="command.commandType">
+                        <mat-option *ngFor="let key of enumKeys" [value]="key"> {{commandTypes[key]}} </mat-option>
                     </mat-select>
                     <input type="number" class="commandValue" matInput mat-line [(ngModel)]="command.commandValue">
                     <button matChipRemove>

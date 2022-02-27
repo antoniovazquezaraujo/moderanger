@@ -42,12 +42,11 @@ export async function play(notes: number[], duration: number, playMode: PlayMode
     if (playMode === PlayMode.CHORD) {
         await playChord(notes, duration, channel);
     } else {
-        playArpeggio(notes, duration, playMode, channel);
+       playArpeggio(notes, duration, playMode, channel);
     }
 }
 export async function playChord(notes: number[], duration: number, channel:number) {
     for (var n of notes) {
-        console.log("canal:"+ channel+ " note:"+ n);
         sound.ch(channel).noteOn(n, 127, duration);
     }
     //await sound.wait(duration);
@@ -55,6 +54,7 @@ export async function playChord(notes: number[], duration: number, channel:numbe
 export async function playArpeggio(notes: number[], duration: number, playMode: PlayMode, channel:number) {
     notes = arpeggiate(notes, playMode);
     duration = duration / notes.length * 1.0;
+
     for (var n of notes) {
         sound.ch(channel).noteOn(n, 127, duration);
         await sound.wait(duration);

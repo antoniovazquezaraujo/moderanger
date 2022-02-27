@@ -9,6 +9,8 @@
 * //  S:Scale
 * //  I:Inversion
 * //  K:Key (Tonality)
+* //  G:Gear (timbre)
+* //  C:Channel (channel, 9 is percussion)
 * ////////////////////////////
 * SONG:= 
 *     head = PART
@@ -30,16 +32,16 @@
 *     commandType ={COMMAND_TYPE} 
 *     commandValue={VALUE_ID}
 * COMMAND_TYPE := 
-*     commandType = '[VMPWOSIKRG]'
+*     commandType = '[0-9]+'
 * VALUE_ID := 
 *     val = '[0-9A-F]{1,2}'
 * BLOCK_CONTENT:=
-*     val = '[0-9A-F\-\.]+'
+*     val = '[0-9\-\=\.]+'
 * COMMAND_SEPARATOR := ','
 * COMMAND_GROUP_SEPARATOR := ':'
 * BLOCK_SEPARATOR := '\n' 
 * SILENCE := '.'
-* EXTENSION := '='
+* EXTENSION := '-'
 * PART_SEPARATOR:='\n\n' 
 */
 type Nullable<T> = T | null;
@@ -282,7 +284,7 @@ export class Parser {
                 let $scope$commandType: Nullable<string>;
                 let $$res: Nullable<COMMAND_TYPE> = null;
                 if (true
-                    && ($scope$commandType = this.regexAccept(String.raw`(?:[VMPWOSIKRG])`, $$dpth + 1, $$cr)) !== null
+                    && ($scope$commandType = this.regexAccept(String.raw`(?:[0-9]+)`, $$dpth + 1, $$cr)) !== null
                 ) {
                     $$res = {kind: ASTKinds.COMMAND_TYPE, commandType: $scope$commandType};
                 }
@@ -308,7 +310,7 @@ export class Parser {
                 let $scope$val: Nullable<string>;
                 let $$res: Nullable<BLOCK_CONTENT> = null;
                 if (true
-                    && ($scope$val = this.regexAccept(String.raw`(?:[0-9A-F\-\.]+)`, $$dpth + 1, $$cr)) !== null
+                    && ($scope$val = this.regexAccept(String.raw`(?:[0-9\-\=\.]+)`, $$dpth + 1, $$cr)) !== null
                 ) {
                     $$res = {kind: ASTKinds.BLOCK_CONTENT, val: $scope$val};
                 }

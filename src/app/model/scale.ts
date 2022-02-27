@@ -15,8 +15,12 @@ export class Scale {
         }
         return totalSemitones;
     }
-    gradeToChord(grade: number, density: number, tonality: number): number[] {
-        var chordNotes = [];
+    gradeToChord(grade: number, density: number, tonality: number, gap:number, shiftStart:number, shiftSize:number, shiftValue:number): number[] {
+        return this.getShiftedNotes(this.getSelectedNotes(grade, density, tonality,gap), shiftStart,shiftSize,shiftValue);
+    }
+    OLDgradeToChord(grade: number, density: number, tonality: number): number[] {
+        return this.getShiftedNotes(this.getSelectedNotes(grade, density, tonality,2), 1,1,-1);
+/*        var chordNotes = [];
         chordNotes.push(this.gradeToSemitones(grade)+tonality);
         var index = grade;
         for (var n = 0; n < density; n++) {
@@ -24,11 +28,45 @@ export class Scale {
             chordNotes.push(this.gradeToSemitones(index)+tonality);
         }
         return chordNotes;
+*/        
+    }
+    getShiftedNotes(notes:number[], shiftStart:number, shiftSize:number, shiftValue:number): number[] {
+        for (var n = 0; n< shiftSize; n++) {
+            if(n+shiftStart > notes.length){
+                break;
+            }
+            notes[n+shiftStart]+=shiftValue*12;
+        }
+        return notes;
+    }
+
+    getSelectedNotes(rootNoteOrder: number, density: number, tonality: number, gap:number): number[] {
+        var chordNotes: number[] = [];
+        var noteShift = 0;
+        var tonalityShift = tonality;
+
+        var index = rootNoteOrder;
+        if (index >= this.getNumNotes()) {
+            index = index % this.getNumNotes();
+            noteShift += 12;
+        }
+        chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
+        for (var n = 0; n < density; n++) {
+            index += gap;
+            if (index >= this.getNumNotes()) {
+                index = index % this.getNumNotes();
+                noteShift += 12;
+            }
+            chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
+        }
+        return chordNotes;
     }
     /**
      * Return a chord with as density notes added to the root
      */
-    getChordNotes(rootNoteOrder: number, density: number, tonality?: number): number[] {
+    getChordNotes(rootNoteOrder: number, density: number, tonality: number): number[] {
+        return this.getSelectedNotes(rootNoteOrder, density, tonality,4);
+/*
         var chordNotes: number[] = [];
         var noteShift = 0;
         var tonalityShift = Tonality.D;
@@ -50,6 +88,8 @@ export class Scale {
             chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
         }
         return chordNotes;
+
+*/        
     }
     /**
      * Returns the position of the nht note in the scale
