@@ -79,3 +79,634 @@ Nuevos controles:
 * Octave selector: 1-7 (asdfghj)
 * Circle selector: 1-6 (zxcvbn)
 
+Nueva idea:
+Los círculos dejan de ser exactamente 6 y pasan a ser infinitos, es decir, en pantalla se pueden ver por ejemplo 3 concentricos siempre, pero si avanzamos o retrocedemos, aparecen otros nuevos que van sustituyendo a esos tres, cada uno programado con su escala, modo, nota, densidad, acorde, etc. De esta forma se pueden tener muchos círculos e ir cambiando durante una canción de círculo, incluso automáticamente, y seguir tocando.
+
+Luego el "estado" general del artefacto, deberá contar con las siguientes propiedades:
+
+    note: nota seleccionada
+    tonality: tonalidad
+    density: cantidad de notas que suenan simultaneamente (de la escala o del arpegio)
+    octave: octava
+    circle: círculo seleccionado
+    playMode: modo arpegio o acorde
+
+Pero claro, tenemos también el círculo seleccionado. Habrá que diferenciar qué es del círculo y qué es general:
+Estoy pensando que podríamos tener un programa de notas o acordes sonando en un círculo, formando una base de acompañamiento, y el usuario podría estar tocando notas en otro círculo, con otro modo, tono, octava, etc.
+Quizá eso nos ayude a crear cosas más complejas. De modo que:
+Creo que retiramos el playMode. Solo tenemos densidad, o una nota o varias, más simple.
+Ranger:
+    Circle:
+        -Tonality: En qué tonalidad está el círculo
+        -Density: Densidad de notas, mono o acordes de x notas
+        -Octave: En qué octava está
+        -Orientation: Posición visual del círculo
+
+Podemos tener varios círculos seleccionados a la vez, más adelante, pero de momento solo habrá uno.
+Las notas que hagamos sonar dependerán del círculo seleccionado.
+Cada círculo, cuando esté haciendo sonar notas, tendrá que iluminarlas, diferenciando al menos la raiz.
+Qué hacer con las inversiones?
+Con densidad distinta de uno, podríamos entender que coloquen como raiz del acorde a otra nota, pero qué hacer con una sola nota? Bueno, puede hacer simplemente lo mismo. Considera que es la raiz de un acorde y se desplaza a su tercera, quinta, séptima, etc, según la densidad seleccionada. Quizá modificando inversión muchas veces, puedan crearse melodías atractivas.
+El selector de inversión sería un simple número de 1 a 7, que indicaría cuál es la nota más baja del acorde. 1 sería la raíz, 2 la tercera, 3 la quinta, 4 la septima, etc, etc.  Parece bueno.
+Luego:
+
+Ranger:
+    Circle:
+        -Tonality: En qué tonalidad está el círculo
+        -Density: Densidad de notas, mono o acordes de x notas
+        -Octave: En qué octava está
+        -Orientation: Posición visual del círculo
+        -Inversion: 1-7 Nota más baja del acorde que suena (1,3,5,7, etc)
+        -PlayNotes: Notas que están seleccionadas para sonar de este círculo
+
+Un círculo puede tener notas seleccionadas para sonar debido a la interacción del usuario o a un programa interno que las irá cambiando automáticamente. Quizá grabado anteriormente, o escrito.
+O sea, los eventos de selección de notas se envían a un círculo determinado, que tiene un setting concreto, así que las mismas notas pueden sonar diferentemente en diferentes círculos.
+Como el usuario puede pulsar varias teclas a la vez, podría ser que un evento enviase muchas notas para que sonaran, y el círculo, debido a su densidad de notas, podría agregarle más. Así que las notas deseadas son una cosa y las que sonarán son otras, probablemente. Entre otras cosas, porque lo que el usuario selecciona no son notas, sino teclas, que luego el círculo decidirá a qué notas pertenecen. Llamaremos a lo que el usuario envía frets, como los trastes de la guitarra, que dependiendo de la cuerda donde pulses, hacen sonar distintas notas. Puede ser una buena analogía.
+
+Otra idea: cada círculo puede tener un sonido (un timbre) distinto.
+
+Volviendo a los frets, podría ser que con densidad 2 el usuario pulsara 3 teclas, es decir, enviara 3 frets. Eso se convertiría en 6 notas, por ejemplo:
+Enviando C y F sonaría C E F A, enviando C y D sonaría C D E G. Puede ser muy interesante eso.
+
+Así que tenemos dos elementos: los círculos, que están configurados de una determinada forma y los eventos que se envían a cada uno.
+Habrá que hacer como un director o manager para los eventos, donde se tomen de distintas fuentes, como eventos de usuario o secuencias programadas y se envíen a distintos círculos. Las secuencias se deberían poder aplicar a todos los controles, es decir, que mediante una secuencia programable se pueda cambiar la octava de un círculo, o su densidad, etc. Veremos eso.
+
+Así que un ranger sería algo como:
+Ranger:
+    Circle:
+        -Tonality: En qué tonalidad está el círculo
+        -Density: Densidad de notas, mono o acordes de x notas
+        -Octave: En qué octava está
+        -Orientation: Posición visual del círculo
+        -Inversion: 1-7 Nota más baja del acorde que suena (1,3,5,7, etc)
+        -PlayNotes: Notas que están seleccionadas para sonar de este círculo
+        -Timbre: El sonido seleccionado para ese círculo
+
+
+Vale, no podemos complicarlo tanto en un principio, hay que bajar las espectativas, así que de momento, en esta vuelta solamente vamos a cambiar que en vez de tocar como está ahora, se pueda tocar con las teclas de función propuestas. Nada más de momento. Ya veremos luego.
+
+Vale, aún para hacerlo simple hay que pensar. Vamos despacio:
+
+El sistema actual funciona bien, pero queremos cambiar la forma como se tocan las notas. Ahora mismo se selecciona una nota y una densidad, es decir, se agregan o se eliminan notas del acorde y cuando se pulsa espacio se hacen sonar. Se puede mover la tonalidad o el grado en la escala, y la nota se moverá junto con las notas del acorde. Bien.
+Ahora se trata de enviar desde el teclado las notas, no tomar las del acorde del círculo.
+Podríamos empezar por agregar simplemente esta funcionalidad a lo que ya tenemos para ir viendo cómo actúa. Es decir, aunque el círculo tenga un acorde seleccionado, con las teclas de función, simplemente seleccionamos otro. Y con las de densidad agregamos o eliminamos notas al propio acorde. Esto sería lo más básico de momento.
+
+Vale, tenemos lo básico. Se puede tocar con las teclas de función. Queda práctico y se pueden probar muchas cosas.
+Ahora el código está totalmente desorganizado y convendría separar las clases un poco para continuar. Vamos con ello.
+
+
+Vamos a estructurar las clases entonces:
+
+Chord: Notas de un acorde, podemos integrarlo en Circle me parece.
+Circle: Setting para seleccionar notas que tocar. Tiene una view donde se muestran
+Sound: Conexión con midi
+View: Vista de un Circle, representa la orientación de la escala, su posición, tonalidad y notas que suenan
+ModeRanger: Programa principal.
+
+Un Circle no es un buen nombre para ese objeto. Representa un "instrumento" musical, que está afinado en un tono determinado, con un timbre, una escala, una densidad de notas, etc. Debemos separar esto de su aspecto circular. Sacaremos todo lo visual fuera de ahí:
+
+Instrument: Representa a un instrumento, sería el antiguo círculo.
+InstrumentView: Representa la vista de un instrumento, en el caso por defecto, un círculo con notas en 12 sectores.
+
+Podríamos crear vistas más pequeñas, como por ejemplo la vista en forma de simple rectángulo, para usar en los textos.
+Quizá puede tener las mismas funciones musicales, pero el aspecto es totalmente distinto.
+
+También necesitaremos un "player", un objeto que se encargue de enviar las notas al instrumento. Puede ser disparado por el teclado, por un programa automático, o incluso desde un verdadero instrumento midi.
+
+Inicialmente tendremos solamente el player de teclado. Pero se debe crear uno programable cuanto antes, para poder hacer experimentos.
+
+En resumen:
+Sound: Conexión con midi
+ModeRanger: Programa principal.
+Instrument: Representa el elemento que recibe los eventos y que envía las notas finales al sound
+InstrumentView: Vista de un Instrument, representa la orientación de la escala, su posición, tonalidad y notas que suenan
+Player: Recibe eventos de usuario o programables y los envía al instrument.
+
+Una escena estaría entonces compuesta de un Sound, un grupo de Instruments con sus InstrumentViews respectivas y sus Players.
+Quizá un grupo de instrumentos tenga también su vista, tambien, para poder seleccionar uno u otro, cambiarlos de posición, etc.
+
+Un InstrumentGroup sería un grupo de instrumentos, simplemente. Un InstrumentGroupView sería una vista capaz de mostrar este grupo y recibir los eventos necesarios para organizarlos correctamente.
+
+Scene:
+    sound: Sound
+    combo: Combo
+    comboView: ComboView
+    players: Player[]
+
+Combo:
+    instruments: Instrument
+
+Instrument:
+    scale: number        Escala usada (1-6)
+    tonality: number     En qué tonalidad está el círculo (1-12)
+    timbre: number       El sonido seleccionado para ese círculo
+
+Player:
+    selectedNote: number Nota que están seleccionadas para sonar de este círculo
+    density: number      Densidad de notas, mono o acordes de x notas (1-7)
+    inversion: number    1-7 Nota más baja del acorde que suena (1,3,5,7, etc)
+    octave: number       En qué octava está (1-7)
+
+InstrumentView:    
+    orientation: number  Posición visual del círculo
+
+Respecto a las notas:
+Estamos usando los patrones de escala como conjuntos de unos y ceros, cuando realmente sería más práctico anotar el desplazamiento de cada nota de la escala, es decir:
+'01010110' sería '1356', más corto, más claro y más facil de saber el desplazamiento de cada nota. Vamos a cambiar esto.
+
+Bien, resumen de lo que tenemos:
+
+-Player, Sound, Scale, Instrument. Funcionan perfectamente. 
+Necesitamos hacer un componente visual para probar todas las propiedades.
+Recordemos qué tipo de componentes vamos a necesitar en el doc:
+-Una simple escala en modo estandar
+-Escala en modo circular sin notas, que suene
+-Escala con notas que se pueda modificar
+-Instrumento formado por escalas circulares apiladas concentricamente
+-Instrumento programable, con secuencias pre-cargadas
+-Instrumento programable que se pueda tocar con el teclado
+
+En qué consiste una vista de un instrumento?
+
+-Instrumento en cuestión
+-Radio, es decir size
+-Color
+-Orientación
+
+Tenemos el concepto de instrument y el de orchestra. Hay que madurar estas ideas.
+La idea final de todo esto sería que pudiera estar sonando un instrumento programado mientras el usuario toca otro manualmente. Los dos podrían estar sincronizados en los cambios de modo, de tonalidad o de tiempo.
+Pero entonces, un instrumento sería un conjunto de varios "modos" concentricos, cuya programación o manejo incluye saltar de un modo a otro o cambiar la tonalidad. Así que un instrumento ya es un conjunto de modos concéntricos.
+Otra cosa sería el concepto de player. Podríamos tener un conjunto de modos concentricos, es decir, un instrumento, siendo tocado por dos players al mismo tiempo, uno programado, y otro manual. 
+Esta sí sería una buena idea. 
+Instrumento con un conjunto de modos que es tocado por un player programado, que envía acordes y cambia entre los distintos modos.
+En ese mismo instrumento, se agrega otro player que puede tocar solamente los bajos, por ejemplo.
+Luego agregamos un player manual, que recibe las teclas del usuario y va haciendo sonar los modos que desea. 
+Parece buena idea.
+
+Para no complicar las cosas, parecería interesante mantener el concepto de orchestra, es decir, un conjunto de modos será realmente un conjunto de instruments, es decir, una orchestra. 
+Quizá el nombre de player entonces debería sustituirse por Conductor, es decir, el que dirige la orquesta.
+Habría un ManualConductor y un ProgrammableConductor. Veremos esto.
+
+Ya funciona la orquesta. Ahora vamos a crear un ManualConductor que sería el más simple en apariencia. Recuperamos las ideas de teclado anteriores.
+
+Vale, funciona, pero hay un lío tremendo con los nombres de las notas y los intervalos y los sectores y la forma de obtener todo.
+Vamos a aclarar todo esto:
+
+- Scale: Conjunto de intervalos que definen una escala musical. Cada elemento de la escala indica una cantidad de semitonos de desplazamiento desde un tono dado. Hay 6 diferentes hasta el momento. Cada escala tiene solamente los intervalos de la primera octava, a partir de ahí, las notas que se salgan se calculan sumando y restando 12 por cada octava.
+
+- Conductor: Elemento que "dirige" una orquesta, es decir, que envía las notas que se han de hacer sonar a un Player. Se envían como grados de la escala del instrumento seleccionado, es decir, "quiero que suene la eneava nota de la escala, sea la que sea".
+
+- Player: selecciona notas que han de sonar en un instrumento. A partir de la nota seleccionada por el conductor, el player agrega una densidad, una inversión, una octavación y crea un conjunto de notas en la escala seleccionada. Estas ya son notas reales, es decir, que se pueden salir de la octava de la escala.
+
+
+time:5---/----/5-../5-.5/5--./5---/..../..../5.../..../5-../5..5/5.../5---/----/----/
+note:1              2  3 2    1              4         2       3 1    2  
+dens:2                   4    0                        3
+octa:5                                       6
+sche:1
+
+time:5---/----/5-../5-.5/5--./5---/..../..../5.../..../5-../5..5/5.../5---/----/----/
+note:1              2  3 2    1              4         2       3 1    2  
+dens:2                   4    0                        3
+octa:5                                       6
+sche:1
+
+time:5---/----/1-../2 -.1/1--./3  ---/..../..../2 .../..../1-../1..1/1.../1---/----/----/
+note:1              24  3 2    1.2              .5         2       3 1    2  
+inte:5
+
+t: time            P:pulse
+d: density         D:density
+o: octave          O:octave
+s: scale           S:scale/scheme
+n: tone            T:tone
+
+time: cuántas notas caben en un tiempo, es decir, negras=1, corcheas=2, tresillo de corchea=3,etc
+si una nota dura más de un tiempo entonces se agregan signos '-', por ejemplo blanca = 1- redonda= 1--- etc.
+Los silencios son puntos
+Cada grupo de una medida ha de ir entre paréntesis, p.e. (t1 59833FAB) = 8 negras (t3 435) = tresillo de negras, etc
+No hacen falta paréntesis: es una simple máquina de estados.
+
+P1:4354533 P4:593---84AB--CD--EF...8...7 P1,D2:43 P2,O3:4 P1,S3,TC:5 P2:433
+
+Bien, tenemos una gramática que puede parsear canciones con el formato más simple posible.
+Ahora necesitamos que una Orchestra pueda tener un conductor programable.
+Volvemos atrás para arreglar el problema de las notas:
+Hay una cierta confusión entre las notas que caen dentro de la escala y las notas reales, que pueden salirse de la misma.
+
+Cuando un player toma la nota seleccionada y le pide a la escala las notas del acorde, las notas que se obtienen ya pueden estar saliéndose de la escala, puesto que podemos simplemente pedir las notas del último grado de la escala, con lo cual se saldrán hacia arriba.
+
+Además de eso, el player luego va a octavar estas notas y a invertirlas, con lo cual pueden volver a salirse todavía más lejos del tramo de la escala.
+
+Es decir, las notas que obtenemos ya son notas REALES, o sea, semitonos a partir de el inicio del acorde, de la tonalidad y de la octava. Así que esto debe ser tenido en cuenta en el momento de mostrar estas notas.
+
+Vale, ahora se están mostrando los acordes más o menos bien. 
+Faltaría:
+    - Girar el instrumento
+    - Que suene solamente con las teclas de Fn
+
+Vale, esto está.    
+
+Lo siguiente sería ya intentar crear el conductor programable. Faltan muchos aspectos gráficos que mejorar, pero quizá eso tenga menos prisa. Haremos una miniatura que nos permita ver si el concepto funciona.
+
+Vale, funciona. 
+Ahora necesitamos entender bien el asunto del tiempo y la velocidad.
+Tenemos una VELOCITY que es la velocidad de metrónomo del tema. Puede cambiar en cualquier momento.
+Luego tenemos la duración de cada nota, que es el PULSE, de modo que:
+    - 1 -> En un tiempo cabe una nota (negra)
+    - 2 -> En un tiempo caben 2 notas (corchea)
+    - 3 -> En un tiempo caben 3 notas (tresillo de corchea)
+    - 4 -> En un tiempo caben 4 notas (semi-corchea)
+    ...
+No tenemos una medida para indicar notas que duren más de un tiempo. Eso es lo máximo.
+Para conseguir eso, se usa el caracter '-' que produce que la nota anterior siga sonando. Se pueden agregar tantos como sean necesarios.
+En caso de que se necesiten notas muy largas, podríamos pensar en otra cosa.
+Para los silencios se usa el caracter '.' que también se puede alargar, o simplemente, poner varios silencios seguidos.
+    
+Vale, ya está funcionando.
+Necesitamos aclarar en profundidad el asunto de la sincronización en Typescript, para poder controlar la duración y el ritmo de las notas.
+
+Tendría que haber una especie de metrónomo, que fuera marcando con un ritmo siempre igual, el tic básico, dentro del cual se deberían incluir las notas necesarias a hacer sonar en cada tic.
+Digamos que cada tic es un "turno" y en cada turno revisamos si hay que comenzar o parar notas. Para ello, revisamos los instrumentos y las notas que tienen y les agregamos las nuevas (según el usuario haya tecleado más o el conductor programable haya leído más).
+Una vez agregadas las notas necesarias a cada instrumento, hay que tener en cuenta que esas notas tendrán una duración, es decir, podrían tener un pulse de 16, es decir, que entraría una en cada tic, a la velocidad que estuviese puesto el metrónomo. Sin embargo, si en vez de 16 tienen un tiempo de 1 entonces cada nota duraría 16 turnos completos. 
+Además, hay que detener la nota que está sonando cuando se termina el tiempo del tic solamente si la siguiente nota no es un -, en cuyo caso seguirá sonando, es decir, es como se se volviera a repetir la misma, pero sin parar en medio.
+
+Para entender mejor el asunto, vamos a considerar que siempre hacemos sonar una sola nota a la vez, porque el sistema de sonido ya se encarga de hacer sonar varias simultaneamente con el mismo truco, así que, a este nivel es lo mismo una nota que un acorde.
+
+Los instrumentos nos proporcionan notas con una duración en cada tic. Imaginando que todas fueran a 16 de pulso, tendría que sonar una en cada turno. Así que sería leer nota, sonar nota y repetir. Sin embargo, la mayoría de las notas serán de pulso 1, es decir, que suenan durante 16 tics, es decir, que el bucle sería leer nota, empezar a sonar nota y no volver a leer nota hasta 16 tics después. 
+Está claro que la velocidad de entrada no es igual que la de proceso, es decir, la velocidad a la que leemos depende del contenido de lo que leemos, o sea, una nota de 1 la leemos y no leeremos la siguiente hasta 16 tics después. En cambio una nota de 16, se lee y en el siguiente tic se lee la siguiente.
+Parece que deberíamos tener una especie de cola de notas en la que se van insertando a la espera de ser procesadas.
+Además, en cada bloque de notas podemos tener una serie de comandos que han de procesarse antes de procesar el bloque de notas.
+Partiremos de que tenemos las notas ya en una cosa como:
+    [{ nota, duración},{ nota, duración},{ nota, duración},{ nota, duración},{ nota, duración}]
+
+tics         bits/compas      figura
+64                  1          redonda
+32                  2          blanca
+24                  3          tresillo de blanca
+16                  4          negra
+12                  6          tresillo de negra
+8                   8          corchea
+6                  12          tresillo de corchea
+4                  16          semicorchea
+3                  24          tresillo de semicorchea
+2                  32          fusa
+1                  64          semifusa
+
+Es decir, el número indica exactamente la cantidad de elementos que entran en un compás, que debería ser lo que tenemos ahora mismo.
+
+Vale, entonces los bits por compas son las notas que caben en un compás, y los tics son la cantidad de tics que ocupa esa nota, es decir, la duración de la misma.
+Estas correspondencias son las que son exactas, es decir, las que son divisores exactos de 64. Sin embargo, podríamos tener también cinquillos y septillos supongo, que no darían un número exacto de bits por compas. Aún así, si el dato es un número raro, como 13 por ejemplo, obtendremos un número decimal, que se puede redondear para dar el número de tics igualmente.
+Así que de cada nota tendremos la duración, dividiendo 64 por su pulso, por ejemplo:
+de la secuencia 
+    W2:123
+obtendremos el array
+    [{1,32},{2,32},{3,32}]    
+que indica que tenemos las notas 1,2 y 3 con una duración de 32 tics.
+Mejor deberíamos tener un objeto equivalente, es decir, duración + grupo de notas, o sea
+    { 32, [1,2,3]}    
+O sea, con la duración 32 tenemos las notas 1,2, y 3.
+Así que el timer lo que tiene que hacer es poner las notas a sonar y en cada vuelta del bucle decrementar la duración. Cuando esta llegue a cero indicará que las notas se han terminado. Si en el siguiente grupo tenemos notas - entonces tendrán que seguir sonando, si no, se detendrán.
+
+Un momento, nos estamos liando: en la "partitura" tendremos una lista de notas separadas, que pueden ser notas sueltas o acordes, me explico:
+
+Lo que va en la partitura es la secuencia de notas que se desean tocar, pero con una densidad determinada. Así que podrían ser arrays de notas o arrays de acordes, es decir arrays de grupos de notas a tocar simultaneamente. Sea como sea, una nota o un acorde, tienen un pulso, especificado en el comando W:, es decir, podemos calcular su duración. En resumen:
+El objeto en la cola podría ser una nota o un grupo de notas:
+    { 32, [1]}    
+    { 16, [1,2,3]}    
+    { 32, [3]}    
+Siempre tendremos que decrementar su duración para esperar a procesar la siguiente nota.
+Si la siguiente nota es un "-" entonces indicará que lo que estaba sonando debe continuar sonando con la duración indicada    
+    { 32, [1]}    
+    { 16, [1,2,3]}    
+    { 16, [-]}    
+    { 32, [3]}    
+En este caso, el acorde seguirá sonando otros 16 tics. Esto sería equivalente a ponerle 32 de duración. Pero es más simple porque no hay que usar un comando W: para indicarlo.
+Otra cosa que puede aparecer es un silencio, en forma de ".". Esto hará que no suene nada con la duración indicada.
+Un silencio también se puede extender, aunque en ese caso es igual repetir que extender, porque no se notará la "unión" entre los silencios consecutivos.
+
+Entonces el proceso completo consistente en leer bloques de la canción, procesar sus comandos y sus bloques y hacer sonar las notas sería:
+
+while(true){
+    para cada bloque{
+        leer y procesar los comandos
+        enviar las notas con su duración a la cola
+    }
+}
+
+Ahora tenemos simplemente la cola con las notas a procesar:
+[   { 32, [1]},    
+    { 16, [1,2,3]},    
+    { 16, [-]},    
+    { 32, [3]}    
+]
+tomamos cada elemento y establecemos un contador con su duración y hacemos sonar la nota. Cuando el contador termine, pasamos a la siguiente nota. Si la siguiente nota es un '-' hemos de parar de tocar la nota, pero si lo es hemos de continuar, así que igual hemos de hacer un lookAhead para saber cuál será su duración real, no??
+O sea, para hacer sonar una sola nota, tenemos que procesarla por completo, es decir, seguir buscando notas de la cola hasta encontrar otra. Si solo encontramos '-' entonces simplemente vamos ampliando la duración.
+Es un lookAhead pero aparentemente sencillo.
+Una vez que sabemos la duración, hacemos sonar la nota.
+
+type TimedPack = {
+    notes,
+    duration,
+    nextPos
+}
+var duration = 0;
+var notes;
+var playing = false;
+var timer = 0;
+position = 0;
+
+Ahora bien, podemos meter en la cola los elementos con la duración ya calculada, es decir, si el elemento es un '-', en lugar de agregarlo a la cola, incrementamos la duración del último de la misma, así, la cola quedaría más limpia:
+Esto:
+[   { 32, [1]},    
+    { 16, [1,2,3]},    
+    { 16, [-]},    
+    { 32, [3]}    
+]
+Pasaría a ser esto:
+[   { 32, 32, [1]},    
+    { 32, 32, [1,2,3]},    
+    { 32, 32, [3]}    
+]
+Que es más simple. Ahora el bucle no necesita lookAhead.
+Cada elemento tiene su tiempo restante y su tiempo inicial.
+
+Elige la nota inicial
+En cada ciclo:
+    - Si el tiempo inicial es igual al restante: play de la nota con esa duración y decrementa tiempo restante
+    - Si son distintos, solo decrementa
+    - Si el restante es cero, pasa a la siguiente nota
+
+var position = 0
+while(position < length){
+    block = blocks[position];
+    if(block.remainingTime === block.totalTime){
+        play(block.notes, block.totalTime);
+        block.remainingTime--;
+    }else{
+        if(block.remainingTime === 0){
+            position++;
+        }else{
+            block.remainingTime--;
+        }
+    }
+    delay();
+}    
+
+Vale, hay que retroceder:
+Cuando leemos un Song, lo que obtenemos es un objeto con un conjunto de Blocks. En cada block puede haber muchos comandos. Primero de todo, hay que procesar los comandos para obtener las notas
+
+//  V:Velocity
+//  P:Pulse (bits per time)
+//  W:Width (chord density)
+//  O:Octave
+//  S:Scale
+//  I:Inversion
+//  K:Key (Tonality)
+
+De todos los comandos, solo afecta a la duración de las notas el pulso. Las demás deciden qué notas van a incluirse. Pero se necesita procesar todo eficientemente.
+
+Se podría simplificar todo con la idea siguiente:
+    Ponemos a sonar el bloque actual, con el tiempo indicado.
+    Después del retardo adecuado, procesamos el siguiente bloque
+    Si el contenido es '-' entonces no paramos la nota anterior
+    Si es un '.' la paramos
+    Si es otra nota, paramos la anterior y suena la nueva
+    Si es el fin de los bloques, paramos todo.
+    De esta forma, una nota no sabe si tiene que parar hasta que encuentra la siguiente.
+    La duración del sonido real, da igual, porque podría ser un sonido que se apaga solo, como una guitarra, sin embargo tener un pulso muy largo y apagarse antes de terminar el tiempo. Pero da igual. Sirve para todos los sonidos.
+
+    Resumen:
+    Suena el bloque actual.
+    Retardo conveniente
+    Pasamos al bloque siguiente:
+        - '-' -> seguimos adelante
+        - '.' -> paramos la nota que esté sonando si la hay
+        - nota -> paramos la anterior y tocamos la nueva
+    Retardo
+
+    Para que funcione, el bloque que procesamos tiene que guardar el tiempo inicial, el tiempo restante y las notas.
+    Esto se obtiene directamente al procesar los bloques.
+
+    Vale, lo de la sincronización está funcionando.
+    Habrá que decidir entonces el tema de - y .
+    Vamos con ello.
+
+    Vale, está funcionando.
+    Habría que pensar en el tema de las repeticiones: bloques del tema que han de repetirse n veces, incluso con finales de bloque diferentes, o incluso saltos a puntos concretos del tema, estilo da capo y codas y todo ese rollo.
+
+    Bueno, esa idea puede quedar para más adelante, ahora mismo interesaría más el tema de los arpegios, es decir, tocar los acordes nota por nota, en lugar de todos juntos. Eso daría mucho juego. Investigemos eso.
+
+    Vale, tenemos el tema de acordes y arpegios muy bien pensado: hay un playMode en el player que puede tener estos valores:
+ 
+ enum PlayMode {
+    CHORD = 0,
+    ASCENDING = 1,
+    DESCENDING = 2,
+    ASC_DESC= 3,
+    DESC_ASC=4,
+    EVEN_ASC_ODD_ASC = 5,
+    EVEN_ASC_ODD_DESC = 6,
+    EVEN_DESC_ODD_DESC = 7,
+    EVEN_DESC_ODD_ASC = 8,
+    ODD_ASC_EVEN_ASC = 9,
+    ODD_ASC_EVEN_DESC = 10,
+    ODD_DESC_EVEN_DESC = 11,
+    ODD_DESC_EVEN_ASC = 12
+}
+
+El primer modo hace sonar todas las notas simultaneamente. El segundo las arpegia ascendentemente y el tercero descendentemente.
+En el 3 suben y luego bajan, en el 4 bajan y luego suben y en los restantes se mezclan los movimientos de las notas pares y las impares.
+Esto nos daría bastantes posibilidades. Entonces, el algoritmo para sonar con todo esto sería algo como:
+
+Vale, está funcionando. Veamos qué más cosas necesitamos.
+ 
+Necesitamos integrar este nuevo BlockPlayer al servicio de ProgrammableConductor.
+Este conductor tiene que poder leer y parsear una Song y hacerla sonar.
+Está pensado para trabajar sobre un solo instrumento, no puede, de momento, cambiar de instrumento como el KeyboardConductor.
+Quizá más adelante se puedan agregar más comandos como cambiar de instrumento, etc.
+
+Vale, está funcionando, podemos poner varios ProgrammableConductor a sonar simultáneamente. Good!
+
+Vamos a intentar un poco de CSS para crear los controles en la página.
+
+En cuanto al diseño, diría que habrá que buscar los componentes necesarios para mostrar una Orchestra, un KeyboardConductor y varios ProgrammableConductor agregables. En la orquesta podríamos desear agregar instrumentos. De cada instrumento necesitamos los siguientes componentes:
+- scale: 0-5
+- tone: 1-12
+- octave: 0-8
+- density:1-12
+- playMode:0-12
+- inversion:1-12
+- rotación?:1-12
+- showMode:notes/grades
+- color?:
+- position: nivel concentrico
+
+El instrumento se podría seleccionar también con el ratón. El resto de teclas podrían seguir funcionando.
+Se puede incluso girar con el ratón, por ejemplo.
+
+Vale, tenemos un pequeño diseño html con un mínimo de css y podemos acceder a los eventos de los componentes, pero...
+Así no se puede trabajar.
+No hay una estructura clara ahora mismo, está todo amontonado. Hay muchas cosas que funcionan pero no están conectadas. Necesitamos pensar una estructura más formal, teniendo ya en cuenta los componentes de la web y los dos tipos de conductores que tenemos.
+Además, hay un cierto descontrol con las clases y los ficheros adoc. Y los nombres de todo, etc. Hay que pasar la segadora YA.
+
+Vale, la cosa está funcionando con Angular Material, y tiene buena pinta.
+Tenemos una especie de secuenciador, que permite probar las escalas con alguna soltura, e incluso divertirse un rato.
+Anotaremos las cosas que se echan en falta ahora mismo:
+
+- Los valores por defecto de los comandos no están especificados. Deberían darse los valores habituales, para evitar comandos innecesarios
+- El arpegiador falla porque los modos mueven notas y no se salen de la misma octava, así que cada patrón hace cosas distintas en cada grado
+v-Falta la selección de timbres
+v-El botón de add notes debe ir al final de cada bloque
+v-Que el pulse se herede del bloque anterior, como todas las demás propiedades
+v-Que se puedan repetir notas
+v-Que si no hay ningún comando no se vea nada, que ahora se ve un cuadrado
+- Falta la velocidad general del tema
+- Falta un botón de stop
+- Que las notas al ir sonando se vayan resaltando de alguna forma
+- Que se pueda duplicar un bloque o una parte
+- Que los bloques se puedan arrastrar para cambiarlos de orden, e incluso de parte
+- Que los bloques se puedan eliminar
+- Que el usuario pueda tocar con el teclado
+- Que los valores numericos vayan en decimal en vez de hexadecimal y que estén limitados
+- Que se puedan repetir bloques de notas (Ver lo de la composición arborea)
+- Que se pueda cambiar el volumen de cada bloque (ADSR ???)
+
+Tema de los valores numéricos:
+En los commands pueden ser perfectamente números negativos, porque cada comando tiene un valor único, y sería más facil para el usuario.
+El problema es con las notas, se está usando el guión para indicar persistencia de la nota. Podría cambiarse por un signo = y usar el guión como signo menos, de forma que pudieramos tener números negativos y positivos.
+Sería algo como:
+W-5,I5,M1,O-3,K-2,P30,S1:01-2====3.-4.5. W3,I2,M0,O4,K0,PF,S1:01===2=====3.4======5.  
+De esta forma, las notas solo podrían ir de -9 a +9. Puede resultar incómodo porque igual hay que estar cambiando de octava innecesariamente. Para ello, deberíamos poder usar más cifras para las notas, con lo cual necesitaríamos separarlas entre comas:
+W-5,I5,M1,O-3,K-2,P30,S1:0,1,-2====,13,.,-14,.,-5,. W3,I2,M0,O4,K0,PF,S1:0,1===,12=====,13,.,-4,======-15,.  
+
+Obviamente sería más cómodo, más robusto y nos daría más libertad. Habría que pensar si la primera nota es 0 o 1. Musicalmente hablando, sería más cómodo llamarle 1 a la primera nota de la escala. Sin embargo, si usamos también números negativos entonces el 0 sería la última nota de la anterior octava, lo que sería inconsistente. Se podría eliminar la nota 0 y usar solamente 1 y -1. Pero también puede dar lugar a confusión y a problemas matemáticos, aunque podrían solventarse, supongo.
+Para pensar musicalmente tendría mucho más sentido, incluso podríamos considerar el 0 como un silencio, aunque es más gráfico e intuitivo el punto me parece. Entonces qué hacer con el cero? Usarlo como = para mantener la nota anterior sonando? Podría ser. 
+1,-2,11,14000,1500,-300,-2-,-1,1,200,400,.,5,..., No lo veo.
+El signo = está bien para eso. Simplemente impedimos usar el 0 y punto.
+Finalmente: números negativos o positivos excepto el cero o bién puntos o signos =, separados por comas
+En los comandos numeros decimales, en algunos positivos solamente, como el el pulso, no tiene sentido un pulso negativo.
+Vale, cambiemos todo esto ya.
+
+Estoy pensando que igual las operaciones matemáticas son mucho más complejas de lo que parecen si no usamos el cero. Necesitamos hacer cálculos para hacer las inversiones de acordes, subir o bajar octavas, fabricar los patrones de los arpegios, etc. Son demasiados elementos como para no usar el cero, vamos a arrastrar el problema constantemente.
+
+re mi fa sol la si do re mi fa sol la si do re
+-7 -6 -5 -4  -3 -2 -1  0  1  2  3  4  5  6  7
+Una octava más alto:
+re mi fa sol la si do re mi fa sol la si do re
+8  9  10 11  12 13 14 15 16 17 18  19 20 21 22
+
+El cero será la primera nota de la octava actual. Desde ahí se puede tocar cualquier nota. Simplemente hemos de proteger las notas fuera de rango y ya está.
+
+Vale, necesitamos que la escala nos devuelva la nota a partir de un número entero. La escala tiene un patrón y dándole una nota solamente puede saber cuántos semitonos a partir de la nota cero de la escala habrá de distancia positiva o negativa. Lo que hace es convertir un grado de la escala en semitonos de distancia desde la nota cero. Vale, luego se aplicará la octavación por encima, pero sin necesidad de ella, desde aquí podemos alcanzar cualquier nota. Entonces:
+
+gradeToSemitones(grade:number):number{
+    // toma el patrón de la escala y calcula los semitonos de distancia:
+    // Un patron ejemplo: new Scale([0,2,3,5,7, 9, 10])
+    // 0->0, 1->2, 2->3, 3->5, 4->7, 5->9, 6->10, -1->-2, -2->-3, -3->5, -4->7, -5->9, -6->10
+    // Si el número es mayor al de grados de la escala empezamos en cero pero le sumamos el número de semitonos total de una octava: 12
+    // 7->0+12, 8->2+12, etc
+    // -7->0-12
+    Como las dos operaciones son simétricas, podemos hacer una solamente y al final agregar el mismo signo del grado
+
+    gradeSemitones(1)  ->   2
+    gradeSemitones(-1) ->  -2
+    gradeSemitones(7)  ->  12
+    gradeSemitones(-7) -> -12
+}
+
+Vale está reparado. Ahora funciona bien.
+
+Retomamos las ideas que faltan:
+- Falta la velocidad general del tema
+-v Falta un botón de stop
+- Que las notas al ir sonando se vayan resaltando de alguna forma
+- Que se pueda duplicar un bloque o una parte
+- Que los bloques se puedan arrastrar para cambiarlos de orden, e incluso de parte
+- Que los bloques se puedan eliminar
+- Que el usuario pueda tocar con el teclado
+- Que los valores numericos vayan en decimal en vez de hexadecimal y que estén limitados
+- Que se puedan repetir bloques de notas (Ver lo de la composición arborea)
+- Que se pueda cambiar el volumen de cada bloque (ADSR ???)
+- Que se pueda playear solamente una part
+- 
+
+Vamos a aclarar el asunto de play mode. 
+
+Dada una lista de notas, debemos poder crear las notas seleccionadas de múltiples formas, no solamente formando un acorde, o formándolo pero de múltiples maneras, por ejemplo:
+- Agrupar las notas con un intervalo dado, es decir, cada nota, cada dos notas, cada tres, por ejemplo:
+    [1,2,3,4,5,6,7] ->[1,2,3], [1,3,5],[1,4,7],[1,6]
+- Tomar un grupo de esas notas y subirles o bajarles una octava, por ejemplo:
+    [1,2,3,4,5,6,7] ->[2..1,3,4,5,6,7], [2,3...1,4,5,6,7], [2,3,4..1,5,6,7]
+    El grupo de notas empieza en la segunda nota y va creciendo, pero podría empezar en otra:
+    [1,2,3,4,5,6,7] ->[4..1,2,3,5,6,7], [4,5..1,2,3,6,7], etc
+
+Variables:
+    -gap: espacio entre las notas seleccionadas. 0 te da la escala, 1 te da acordes "normales", 2 acordes "cuartales", etc.
+    -shiftStart: principio del shifting de una octava, en qué nota empezamos a contar para cambiarle de octava
+    -shiftSize: cuántas notas tomamos para cambiarles de octava
+    -octave: +1, -1, +2, -2, etc, las octavas que se agregan o restan a esas notas.
+
+Ahora mismo, el playMode nos da las notas del acorde todas al mismo tiempo si tiene valor 0 y arpegios con distintos valores.
+Esto se mantiene, pero los diferentes arpegios pueden ampliarse mucho, incluso usar patterns de notas.
+Además habrá otro comando, que podría llamarse "noteSelect", que tendrá varios parámetros:
+    noteSelect(gap, shiftStart, shiftSize, octave)
+Mejor que sean parámetros separados, todos afectan a las notas seleccionadas, pero no tienen por qué agruparse:
+    -gap: intervalo entre notas seleccionadas
+    -shiftStart: primera nota en el shift
+    -shiftRange: tamaño del shift
+    -shiftValue: cantidad de octavas a aplicar    
+
+Vale, haciendo pruebas con los valores directamente, parece que funciona. Se trataría de agregar los comandos, pero estoy viendo que:
+
+Los comandos están íntimamente acoplados a las letras que los simbolizan, y esto nos está dando problemas porque se acaban las letras y habría colisiones. Entonces, habría que crear una enumeración para los comandos, de manera que si luego queremos guardarlos como texto, simplemente sean números o algo así, pero que no tengamos que estar asignando letras.
+El asunto de guardar los temas como texto sigue siendo interesante, aunque podría hacerse en json directamente, pero quizá así ocupe mucho menos, eso hay que verlo. En todo caso, no tiene por que ser comprensible para un humano, cada comando puede ser un número y punto.
+Repasemos la gramática:
+var result = parse('W5,I5,M1,O3,K0,P30,S1:0,1,2,-,-,-,-,-,3,.,4,.,5,. W3,I2,M0,O4,K0,PF,S1:0,1,-,-,-,2,-,-,-,-,-,3,.,4,-,-,-,-,5,. ');
+En lugar de esto, sería algo como:
+var result = parse('0=5,1=5,20=1,6=3,9=0,20=30,7=1:0,1,2,-,-,-,-,-,3,.,4,.,5,. 3=5,2=10,6=-2:0,1,-,-,-,2,-,-,-,-,-,3,.,4,-,-,-,5,. ');
+Es decir, la clave numérica del comando, un signo igual y el valor del comando. Todos entre comas. Vale. Hagámoslo.
+
+Bien, los comandos tienen claves numéricas y hemos agregado un enum para guardarlos todos. Correcto.
+
+Retomamos las ideas que faltan:
+- Falta la velocidad general del tema
+- Que las notas al ir sonando se vayan resaltando de alguna forma
+- Que se pueda duplicar un bloque o una parte
+- Que los bloques se puedan arrastrar para cambiarlos de orden, e incluso de parte
+- Que los bloques se puedan eliminar
+- Que el usuario pueda tocar con el teclado
+- Que los valores numericos estén limitados
+- Que se puedan repetir conjuntos de bloques (Ver lo de la composición arborea)
+- Que se pueda cambiar el volumen de cada bloque (ADSR ???)
+- Que se pueda playear solamente una part
+
+Vamos a analizar la parte en la que el usuario puede tocar con el teclado.
+Esto requiere que algún playMode haga que las notas no suenen, que solamente se seleccionen en el momento adecuado, pero que sea el usuario el que, mediante el teclado, haga sonar las que desee de las que se han seleccionado. En el modo 0, actualmente suenan todas al mismo tiempo, como un acorde, en los demás modos suenan como un arpegio, una nota después de otra. En este nuevo modo especial, no sonaría ninguna, a no ser que el usuario enviase la orden desde el teclado. El sistema de seleccion de notas sería idéntico.
+
+Como hay varias partes que pueden sonar simultaneamente, el teclado debería estar asignado a una parte en concreto, para hacer sonar las notas de esa parte solamente. Entonces podemos hacer que el teclado se pueda asignar a una parte concreta, para hacer sonar sus notas. 
+
+Hay dos cuestiones con la selección de notas: podríamos tomar las notas que ya están agregadas en el bloque y, a partir de esas notas, seleccionar las notas "posibles" y que el teclado seleccionase notas entre esas posibles. Otra cosa sería que el teclado fuera el que "agregase" las notas inicialmente en lugar de hacer sonar notas de entre las que han sido seleccionadas a partir de las notas del bloque. Es decir, el teclado podría ser generador de notas o simplemente activador de las notas ya preseleccionadas.
+En el caso de ser generador, el usuario es más libre, porque puede decidir qué notas serán las semillas del resultado final al aplicar los comandos del bloque. En cambio, cuando en lugar de generador solamente es activador, las notas que se seleccionan parten de las que había en el bloque, con lo que el usuario es menos libre, pero nunca va a fallar, porque solamente le dejamos tocar alguna de las notas que ya han sido pre-cocinadas. Nunca va a desafinar. :-)
+
+Entonces tendríamos dos formas de usar el teclado, los nombres no están claros:
+- Generate - Activate
+- Generator - Activator
+- Selector - Player
+- Master - Player
+- Creator - Player
+- Free - Guided
+- SelectAndPlay - PlaySelected
+- Manual - Auto
+- SelectNotes - PlayNotes
+- Pre-select - Select
+
+No está claro. En resumen, si el teclado se asigna a una part, entonces el block actual pasa a sonar cuando lo ordene el teclado. Si el teclado está en modo Generator, no se tienen en cuenta las notas del block, sino que las genera el teclado, si el teclado está en modo Activator, entonces son las notas del bloque las que seleccionan las notas a tocar, y el teclado simplemente elige entre ellas para que suenen finalmente o no.
+
+Otra cosa: el ritmo. Con los modos actuales las notas pueden sonar simultaneamente o bien arpegiadas, con un patrón determinado. El teclado puede tener en cuenta también esto, es decir, si está en modo generator, entonces es el propio teclado el que decide el ritmo, o sea, si suenan varias notas a la vez y cuántas. En cambio, si está en modo player, entonces las notas suenan como dice el bloque, o sea, todas a la vez, con lo que el teclado solamente decidiría el ritmo en el que suenan, o arpegiadas, con lo que el teclado debería elegir qué nota de las seleccionadas desea hacer sonar.
+Estos modos del teclado deberían poder cambiarse sobre la marcha mediante el propio teclado, con alguna tecla especial.
+Teclas que podrían asignarse inicialmente: 
+    - Notas: Las tres hileras de teclas normales serían las notas, desde abajo a la izda hasta arriba a la dcha.
+    - Modo Generator: 1
+    - Modo Player: 2
+    

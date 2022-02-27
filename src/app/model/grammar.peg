@@ -1,0 +1,43 @@
+///////////////////////////
+//  V:Velocity
+//  P:Pulse (bits per time)
+//  W:Width (chord density)
+//  M:Mode (chord, arpeggios, etc)
+//  O:Octave
+//  S:Scale
+//  I:Inversion
+//  K:Key (Tonality)
+//  G:Gear (timbre)
+//  C:Channel (channel, 9 is percussion)
+////////////////////////////
+SONG:= 
+    head = PART
+    tail = {PART_SEPARATOR part = PART}*
+PART := 
+    head = BLOCK 
+    tail = {BLOCK_SEPARATOR block = BLOCK}*
+BLOCK := 
+    commandGroup = {COMMAND_GROUP} 
+    COMMAND_GROUP_SEPARATOR 
+    blockContent = {BLOCK_CONTENT}
+COMMAND_GROUP := 
+    head = COMMAND  
+    tail = {
+        COMMAND_SEPARATOR 
+        command= COMMAND 
+    }*
+COMMAND := 
+    commandType ={COMMAND_TYPE} 
+    commandValue={VALUE_ID}
+COMMAND_TYPE := 
+    commandType = '[0-9]+'
+VALUE_ID := 
+    val = '[0-9A-F]{1,2}'
+BLOCK_CONTENT:=
+    val = '[0-9\-\=\.]+'
+COMMAND_SEPARATOR := ','
+COMMAND_GROUP_SEPARATOR := ':'
+BLOCK_SEPARATOR := '\n' 
+SILENCE := '.'
+EXTENSION := '-'
+PART_SEPARATOR:='\n\n' 

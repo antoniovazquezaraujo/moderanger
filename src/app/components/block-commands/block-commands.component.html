@@ -1,0 +1,17 @@
+<ng-container class="container">
+    <ng-container *ngIf="commands.length > 0">
+        <mat-form-field appearance="fill">
+            <mat-chip-list aria-orientation="vertical">
+                <mat-chip *ngFor="let command of commands" (removed)="remove(command)">
+                    <mat-select type="number" class="commandType" [(ngModel)]="command.commandType">
+                        <mat-option *ngFor="let key of enumKeys" [value]="key"> {{commandTypes[key]}} </mat-option>
+                    </mat-select>
+                    <input type="number" class="commandValue" matInput mat-line [(ngModel)]="command.commandValue">
+                    <button matChipRemove>
+                        <mat-icon>cancel</mat-icon>
+                    </button>
+                </mat-chip>
+            </mat-chip-list>
+        </mat-form-field>
+    </ng-container>
+</ng-container>

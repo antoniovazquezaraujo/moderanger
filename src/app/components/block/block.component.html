@@ -1,0 +1,18 @@
+<!-- <div class="container"> -->
+<mat-accordion>
+    <mat-expansion-panel >
+        <mat-expansion-panel-header>
+            {{block.blockContent.notes}}
+        </mat-expansion-panel-header>
+        <div class="container">
+            <app-block-notes (addNewCommand)="onAddNewCommand()" [blockContent]="block.blockContent">
+            </app-block-notes>
+            <app-block-commands [commands]="block.commands" (removeCommand)="onRemoveCommand($event)">
+            </app-block-commands>
+            <button mat-icon-button (click) = "onAddNewCommand()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    </mat-expansion-panel>
+</mat-accordion>
+<!-- </div> -->
