@@ -50,12 +50,20 @@ export class Scale {
             index = index % this.getNumNotes();
             noteShift += 12;
         }
+        if( index < 0){
+            index = this.getNumNotes() - Math.abs(index);
+            noteShift -= 12;
+        }
         chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
         for (var n = 0; n < density; n++) {
             index += gap;
             if (index >= this.getNumNotes()) {
                 index = index % this.getNumNotes();
                 noteShift += 12;
+            }
+            if( index < 0){
+                index = this.getNumNotes() - Math.abs(index);
+                noteShift -= 12;
             }
             chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
         }

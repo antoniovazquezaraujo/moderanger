@@ -38,20 +38,32 @@ export async function wait(duration: number) {
 export async function setSoundProgram(channel: number, program: number) {
     sound.ch(channel).program(program);
 }
-export async function play(notes: number[], duration: number, playMode: PlayMode, channel:number) {
+
+export async function noteStart(notes: number[], channel: number) {
+    for (var n of notes) {
+        sound.ch(channel).noteOn(n, 127);
+    }
+}
+export async function noteEnd(notes: number[], channel: number) {
+    for (var n of notes) {
+        sound.ch(channel).noteOff(n);
+    }
+}
+
+export async function play(notes: number[], duration: number, playMode: PlayMode, channel: number) {
     if (playMode === PlayMode.CHORD) {
         await playChord(notes, duration, channel);
     } else {
-       playArpeggio(notes, duration, playMode, channel);
+        playArpeggio(notes, duration, playMode, channel);
     }
 }
-export async function playChord(notes: number[], duration: number, channel:number) {
+export async function playChord(notes: number[], duration: number, channel: number) {
     for (var n of notes) {
         sound.ch(channel).noteOn(n, 127, duration);
     }
     //await sound.wait(duration);
 }
-export async function playArpeggio(notes: number[], duration: number, playMode: PlayMode, channel:number) {
+export async function playArpeggio(notes: number[], duration: number, playMode: PlayMode, channel: number) {
     notes = arpeggiate(notes, playMode);
     duration = duration / notes.length * 1.0;
 
@@ -73,7 +85,7 @@ export async function playQUEFUNCIONA(notes: number[], duration: number, playMod
         await sound.wait(duration);
     }
 }
-export async function stop(notes: number[], channel:number) {
+export async function stop(notes: number[], channel: number) {
     for (var n of notes) {
         sound.ch(channel).noteOff(n, 127);
     }

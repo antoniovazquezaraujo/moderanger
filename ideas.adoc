@@ -709,4 +709,23 @@ Teclas que podrían asignarse inicialmente:
     - Notas: Las tres hileras de teclas normales serían las notas, desde abajo a la izda hasta arriba a la dcha.
     - Modo Generator: 1
     - Modo Player: 2
+
+En resumen, el teclado puede estar en estos dos modos, pero para que el teclado actúe, tiene que estar activado, y eso podría ser otro modo más, o no??
+Quizá no, porque si no habría que ir cambiando el modo de cada bloque. Realmente es un modo más general de todo el programa, que indica si el teclado está asignado a esa parte o no, en el momento de hacerla sonar. Así que el songPlayer debe tener anotada la parte a la que está asignado el teclado. Si no es ninguna suena normalmente, si es alguna, cuando vaya a sonar los bloques de esa parte, las notas podrán salir del propio teclado, si está en modo generator, o bien ser seleccionadas a partir de esas cuando está en player. Vamos allá.    
     
+Vale, lo del teclado no es tan simple, necesitamos que sea el propio teclado también el que decida el ritmo en el que suenan las notas, según se pulsan las teclas, en todo caso, podríamos hacer que parasen con cada tic del metrónomo, pero vaya, mejor dejar que el usuario ponga su propio tiempo. Entonces necesitamos los dos eventos por cada tecla: cuando se pulsa y cuando se suelta, para poner esa nota a sonar y hacer que se detenga. Entonces, las notas enviadas desde el teclado ya no son notas, sino eventos, que habrá que convertir en cada momento en el evento midi adecuado.
+Es decir: el metrónomo corre por su cuenta igual que en el modo automático, pero no suena ninguna nota. Son los eventos de teclado los que las hacen sonar en este modo, así como parar. Entonces hay que cambiar todo el algoritmo.
+Así que si el teclado está asignado a alguna Part entonces atenderemos a los eventos de teclado para lanzar las notas, y el modo automático no hará que suene ninguna. Lo demás hará lo mismo.
+
+Bien, el teclado funciona +-, pero hay un ligero fallo de concepto. Cuando el teclado actua sobre una secuencia determinada, el teclado actua como "generador" rítmico, así que el ritmo de las propias notas no se nota, porque si una tecla está pulsada, el sonido sigue sonando igual aunque el ritmo interno haya cambiado las notas posibles. Esto está mal: si la tecla sigue pulsada, tendremos que elegir las nuevas notas correspondientes en cada cambio de ritmo.
+
+Hay que revisar todo eso.
+Por otra parte, pierdo mucho tiempo en las pruebas por no estar el interfaz un poco más amable. Necesitamos:
+
+- Que se pueda duplicar un bloque o una parte
+- Que los bloques se puedan eliminar
+- Que se puedan repetir conjuntos de bloques (Ver lo de la composición arborea)
+- Que se pueda playear solamente una part
+- Que los valores estén limitados y tengan valor por defecto
+
+
