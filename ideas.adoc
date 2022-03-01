@@ -739,6 +739,8 @@ v- Que se pueda duplicar un bloque
 v- Que se pueda duplicar una parte
 v- Que los bloques se puedan eliminar
 v- Que se pueda eliminar una parte
+v- Que se pueda playear solamente una part
 - Que se puedan repetir conjuntos de bloques (Ver lo de la composición arborea)
-- Que se pueda playear solamente una part
 - Que los valores estén limitados y tengan valor por defecto
+
+Vale, ahora la parte gráfica soporta todo lo que estábamos necesitando, quizá habría que mezclar esto en develop para volver con el asunto del teclado. Necesitaremos aclarar el asunto de los instrumentos, que ahora se están asignando de cualquier manera, y quizá interese pasar algunos de los comandos a los instrumentos, para que sea todo más flexible
