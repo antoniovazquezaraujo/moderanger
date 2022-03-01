@@ -12,4 +12,7 @@ export class Part{
             this.blocks = opts.blocks.map(val => new Block(val));
         }
     }
+    removeBlock(block:Block){
+        this.blocks = this.blocks.filter(t => t != block);
+    }
 }

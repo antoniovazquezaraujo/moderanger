@@ -5,10 +5,14 @@
             {{block.blockContent.notes}}
         </mat-expansion-panel-header>
         <div class="container">
-            <button mat-mini-fab color="accent" (click) = "onDuplicateBlock()">
-                <mat-icon>forward</mat-icon>
-            </button>
-
+            <div class="blockButtons">
+                <button mat-mini-fab color="accent" (click) = "onDuplicateBlock()">
+                    <mat-icon>forward</mat-icon>
+                </button>
+                <button mat-mini-fab color="accent" (click) = "onRemoveBlock()">
+                    <mat-icon>backspace</mat-icon>
+                </button>    
+            </div>
             <app-block-notes (addNewCommand)="onAddNewCommand()" [blockContent]="block.blockContent">
             </app-block-notes>
             <app-block-commands [commands]="block.commands" (removeCommand)="onRemoveCommand($event)">

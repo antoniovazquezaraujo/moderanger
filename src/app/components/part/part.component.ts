@@ -21,6 +21,9 @@ export class PartComponent implements OnInit {
         var copy = new Block(block);
         this.part.blocks.push(copy as Block);        
     }
+    onRemoveBlock(block:Block){
+        this.part.removeBlock(block);
+    }
     ngOnInit(): void {
     }
     addNewBlock(){

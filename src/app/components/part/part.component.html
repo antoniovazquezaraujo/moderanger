@@ -1,5 +1,5 @@
 <div class = "container">
-    <app-block  *ngFor="let block of part.blocks" [block] = "block" (duplicateBlock)="onDuplicateBlock($event)"></app-block>
+    <app-block  *ngFor="let block of part.blocks" [block] = "block" (duplicateBlock)="onDuplicateBlock($event)" (removeBlock)="onRemoveBlock($event)"></app-block>
     <button mat-mini-fab color="warn" (click) = "addNewBlock()">
         <mat-icon>add</mat-icon>
     </button>

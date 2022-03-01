@@ -9,9 +9,11 @@ import { Block } from 'src/app/model/block';
 export class BlockComponent implements OnInit {
   @Input() block!:Block;
   @Output() duplicateBlock: EventEmitter<any>;
+  @Output() removeBlock: EventEmitter<any>;
 
   constructor( ) { 
     this.duplicateBlock = new EventEmitter<any>();
+    this.removeBlock = new EventEmitter<any>();
   }
 
   ngOnInit(): void {
@@ -19,6 +21,9 @@ export class BlockComponent implements OnInit {
 
   onDuplicateBlock(){
     this.duplicateBlock.emit(this.block);
+  }
+  onRemoveBlock(){
+    this.removeBlock.emit(this.block);
   }
   onRemoveCommand(command:any){
     this.block.removeCommand(command);
