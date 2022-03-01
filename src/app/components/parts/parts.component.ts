@@ -15,5 +15,9 @@ export class PartsComponent  {
 
     }
  
+    duplicatePart(part:any){
+        var copy = new Part(part);
+        this.parts.push(copy);
+    }
 
 }

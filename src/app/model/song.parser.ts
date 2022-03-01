@@ -28,15 +28,15 @@ export function parsePart(at : Parser.PART): Part{
     at.tail.forEach(t => {
         blocks.push(parseBlock(t.block));
     });
-    let part = new Part(blocks);
+    let part = new Part({blocks:blocks});
     return part;
 }
 
 export function parseBlock(at : Parser.BLOCK): Block{
     
     var commands = parseCommandGroup(at.commandGroup);
-    var blockContent = parseBlockContent(at.blockContent);
-    return new Block(commands, new CommandNotes(blockContent));
+    var content =  new CommandNotes({notes:parseBlockContent(at.blockContent)}) ;
+    return new Block( {commands:commands, blockContent:content}) ;
 }
 export function parseCommandGroup(at : Parser.COMMAND_GROUP) : Command[] {
     var commands:Command[] = [];
@@ -58,7 +58,7 @@ export function parseChar( t: string):string{
 export function parseCommand(at: Parser.COMMAND): Command{  
     var commandType:CommandType = parseCommandType(at.commandType);
     var commandValue:string = parseCommandValue(at.commandValue);
-    return new Command(commandType, commandValue);
+    return new Command({commandType:commandType, commandValue:commandValue});
 }
 
 function parseCommandValue(commandValue: Parser.VALUE_ID): string {

@@ -722,7 +722,8 @@ Bien, el teclado funciona +-, pero hay un ligero fallo de concepto. Cuando el te
 Hay que revisar todo eso.
 Por otra parte, pierdo mucho tiempo en las pruebas por no estar el interfaz un poco más amable. Necesitamos:
 
-- Que se pueda duplicar un bloque o una parte
+v- Que se pueda duplicar un bloque 
+v- Que se pueda duplicar una parte
 - Que los bloques se puedan eliminar
 - Que se puedan repetir conjuntos de bloques (Ver lo de la composición arborea)
 - Que se pueda playear solamente una part

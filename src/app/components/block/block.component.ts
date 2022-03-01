@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Block } from 'src/app/model/block';
 
 @Component({
@@ -8,14 +8,18 @@ import { Block } from 'src/app/model/block';
 })
 export class BlockComponent implements OnInit {
   @Input() block!:Block;
+  @Output() duplicateBlock: EventEmitter<any>;
 
   constructor( ) { 
-    //this.block = new Block([], "");
+    this.duplicateBlock = new EventEmitter<any>();
   }
 
   ngOnInit(): void {
   }
 
+  onDuplicateBlock(){
+    this.duplicateBlock.emit(this.block);
+  }
   onRemoveCommand(command:any){
     this.block.removeCommand(command);
   }

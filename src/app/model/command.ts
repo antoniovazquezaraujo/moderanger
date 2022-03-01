@@ -18,15 +18,18 @@ export enum CommandType{
 }
 export class Command {
 
-    public commandType:CommandType;
-    public commandValue:string;
-    constructor(
-         commandType:CommandType,
-         commandValue:string
-    ){
-        this.commandType=commandType;
-        this.commandValue=commandValue;
+    public commandType!:CommandType;
+    public commandValue!:string;
+    
+    constructor(opts?: Partial<Command>) {
+        if (opts?.commandType != null) {
+            this.commandType = opts.commandType;
+        }
+        if (opts?.commandValue != null) {
+            this.commandValue = opts.commandValue;
+        }
     }
+ 
     public toString = () : string => {
         return `Command (${this.commandType} ${this.commandValue})`;
     }

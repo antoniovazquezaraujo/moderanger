@@ -15,9 +15,7 @@ export class BlockCommandsComponent implements OnInit {
  
     
     constructor() { 
-
         this.removeCommand = new EventEmitter<any>();
- 
     }
 
     ngOnInit(): void {
