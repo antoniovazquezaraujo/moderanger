@@ -12,8 +12,10 @@ export class PartsComponent  {
 
     @Input() parts!: Part[];
     @Output() onRemovePart:EventEmitter<Part>;
+    @Output() onPlayPart:EventEmitter<Part>;
     constructor() { 
         this.onRemovePart = new EventEmitter<Part>();
+        this.onPlayPart = new EventEmitter<Part>();
     }
  
     duplicatePart(part:any){
@@ -22,7 +24,9 @@ export class PartsComponent  {
     }
     removePart(part:any){
         this.onRemovePart.emit(part);
-        
+    }
+    playPart(part:any){
+        this.onPlayPart.emit(part);
     }
 
 }

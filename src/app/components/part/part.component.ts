@@ -1,7 +1,5 @@
 import { Input, Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Block } from 'src/app/model/block';
-import { Command } from 'src/app/model/command';
-import { CommandNotes } from 'src/app/model/command.notes';
 import { Part } from 'src/app/model/part';
 
 @Component({
@@ -14,9 +12,11 @@ export class PartComponent implements OnInit {
     @Input() part!:Part;
     @Output() onDuplicatePart: EventEmitter<any>;
     @Output() onRemovePart: EventEmitter<any>;
+    @Output() onPlayPart: EventEmitter<any>;
     constructor() {
         this.onDuplicatePart = new EventEmitter<any>();
         this.onRemovePart = new EventEmitter<any>();
+        this.onPlayPart = new EventEmitter<any>();
     }
  
     onDuplicateBlock(block:Block){
@@ -36,6 +36,9 @@ export class PartComponent implements OnInit {
     }
     removePart(){
         this.onRemovePart.emit(this.part);
+    }
+    playPart(){
+        this.onPlayPart.emit(this.part);
     }
 
 }

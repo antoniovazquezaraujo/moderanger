@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
 
@@ -10,8 +10,11 @@ import { Song } from 'src/app/model/song';
 export class SongComponent implements OnInit {
     
     @Input() song!:Song;
+    @Output() onPlayPart:EventEmitter<Part>;
     
-    constructor() { }
+    constructor() {
+        this.onPlayPart = new EventEmitter<Part>();
+     }
 
     ngOnInit(): void {
     }
@@ -30,5 +33,8 @@ export class SongComponent implements OnInit {
     }
     removePart(part:Part){
         this.song.parts = this.song.parts.filter(t => t!=part);
+    }
+    playPart(part:Part){
+        this.onPlayPart.emit(part);
     }
 }

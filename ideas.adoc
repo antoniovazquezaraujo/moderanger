@@ -733,3 +733,12 @@ v- Que los bloques se puedan eliminar
 
 Bien, las partes se pueden eliminar ahora, pero entonces ya no se pueden volver a crear. Algo está mal en el diseño general.
 Ocurre que usamos un componente "New Editor", cuyo nombre absurdo expresa la idea de que se edita una Song. Sin embargo no tenemos un editor que exprese la idea de Song. Faltaría eso para luego agregar un verdadero SongEditor. Así que vamos a cambiar esto.
+
+Ok, arreglado. Continuemos:
+v- Que se pueda duplicar un bloque 
+v- Que se pueda duplicar una parte
+v- Que los bloques se puedan eliminar
+v- Que se pueda eliminar una parte
+- Que se puedan repetir conjuntos de bloques (Ver lo de la composición arborea)
+- Que se pueda playear solamente una part
+- Que los valores estén limitados y tengan valor por defecto

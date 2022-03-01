@@ -1,3 +1,7 @@
-<app-song [song] = "getSong()"></app-song>
-<button (click) = "play()" mat-raised-button>Play</button> 
-<button (click) = "stop()" mat-raised-button>Stop</button> 
+<app-song [song]="getSong()" (onPlayPart)="playPart($event)"></app-song>
+<button mat-mini-fab color="accent" (click)="play()">
+    <mat-icon>play_circle_filled</mat-icon>
+</button>
+<button mat-mini-fab color="accent" (click)="stop()">
+    <mat-icon>stop</mat-icon>
+</button>
