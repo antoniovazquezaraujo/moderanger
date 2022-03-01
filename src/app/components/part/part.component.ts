@@ -13,8 +13,10 @@ export class PartComponent implements OnInit {
 
     @Input() part!:Part;
     @Output() onDuplicatePart: EventEmitter<any>;
+    @Output() onRemovePart: EventEmitter<any>;
     constructor() {
         this.onDuplicatePart = new EventEmitter<any>();
+        this.onRemovePart = new EventEmitter<any>();
     }
  
     onDuplicateBlock(block:Block){
@@ -31,6 +33,9 @@ export class PartComponent implements OnInit {
     }
     duplicatePart(){
         this.onDuplicatePart.emit(this.part);
+    }
+    removePart(){
+        this.onRemovePart.emit(this.part);
     }
 
 }

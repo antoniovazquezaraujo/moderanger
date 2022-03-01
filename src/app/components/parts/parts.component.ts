@@ -1,4 +1,4 @@
-import { Input, Component, OnInit, OnChanges } from '@angular/core';
+import { Input, Component, OnInit, OnChanges, EventEmitter, Output } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command } from 'src/app/model/command';
 import { Part } from 'src/app/model/part';
@@ -11,13 +11,18 @@ import { Part } from 'src/app/model/part';
 export class PartsComponent  {
 
     @Input() parts!: Part[];
+    @Output() onRemovePart:EventEmitter<Part>;
     constructor() { 
-
+        this.onRemovePart = new EventEmitter<Part>();
     }
  
     duplicatePart(part:any){
         var copy = new Part(part);
         this.parts.push(copy);
+    }
+    removePart(part:any){
+        this.onRemovePart.emit(part);
+        
     }
 
 }

@@ -7,20 +7,22 @@ import { MaterialModule } from './material/material.module';
 import { BlockComponent } from './components/block/block.component';
 import { BlockNotesComponent } from './components/block-notes/block-notes.component';
 import { BlockCommandsComponent } from './components/block-commands/block-commands.component';
-import { NewEditorComponent } from './components/new-editor/new-editor.component';
+import { SongEditorComponent } from './components/song-editor/song-editor.component';
 import { PartsComponent } from './components/parts/parts.component';
 import { PartComponent } from './components/part/part.component';
 import { ChipsComponent } from './components/chips/chips.component';
+import { SongComponent } from './components/song/song.component';
 @NgModule({
   declarations: [
     AppComponent,
     BlockComponent,
     BlockNotesComponent,
     BlockCommandsComponent,
-    NewEditorComponent,
+    SongEditorComponent,
     PartsComponent,
     PartComponent,
-    ChipsComponent
+    ChipsComponent,
+    SongComponent
   ],
   imports: [
     //   NgModule,

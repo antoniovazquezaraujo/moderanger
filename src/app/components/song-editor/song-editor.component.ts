@@ -13,11 +13,11 @@ import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
 import { initSound } from 'src/app/model/sound';
 @Component({
-    selector: 'app-new-editor',
-    templateUrl: './new-editor.component.html',
-    styleUrls: ['./new-editor.component.css']
+    selector: 'app-song-editor',
+    templateUrl: './song-editor.component.html',
+    styleUrls: ['./song-editor.component.css']
 })
-export class NewEditorComponent implements OnInit {
+export class SongEditorComponent implements OnInit {
 
     @HostListener('window:keyup', ['$event'])
     keyUpEvent(event: KeyboardEvent) {
@@ -29,13 +29,11 @@ export class NewEditorComponent implements OnInit {
     }
 
     public song: Song;
-    public keyboard:Keyboard;
+    public keyboard: Keyboard;
 
     songPlayer!: SongPlayer;
 
-    getParts() {
-        return this.song.parts;
-    }
+
     constructor() {
         this.songPlayer = new SongPlayer();
         this.keyboard = new Keyboard(this.songPlayer);
@@ -44,15 +42,10 @@ export class NewEditorComponent implements OnInit {
     ngOnInit(): void {
         initSound();
     }
-    addPart() {
-        this.song.addPart();
+    getSong():Song{
+        return this.song;
     }
-    addCommand() {
-        this.song.addCommand();
-    }
-    addNotes() {
-        this.song.addNotes();
-    }
+  
     async play() {
         this.songPlayer.playSong(this.song);
     }
