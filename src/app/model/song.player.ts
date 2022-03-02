@@ -113,18 +113,25 @@ export class SongPlayer {
                 let time = this.blockTime[0] * 100;
                 if (playNotes) {
                     let playedNotes = this.notesToPlay;
+                    if(char != '='){
+                        stop(this.notesToPlay, instrument.channel);
+                    }
                     if (char === '=' || char === '.') {
                         playedNotes = [];
                         await wait(time);
                     } else {
                         await play(playedNotes, time, instrument.player.playMode, instrument.channel);
-                        await this.delay(time);
+                        await this.delay(time);                        
                     }
+                    // if(char != '='){
+                    //     stop(this.notesToPlay, instrument.channel);
+                    // }
                 } else {
                     await wait(time);
                 }
             }
         }
+        stop(this.notesToPlay, instrument.channel);
 
     }
     async OLDplayBlock(block: Block, instrument: Instrument) {

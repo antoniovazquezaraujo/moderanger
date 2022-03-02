@@ -91,7 +91,10 @@ export async function stop(notes: number[], channel: number) {
     }
 }
 export async function stopSound() {
-    sound.allSoundOff();
+    for (let c = 0; c < 16; c++) {
+        sound.ch(c).allSoundOff(c);
+        sound.ch(c).allNotesOff(c);
+    }
 }
 
 export async function open(channel: number, program: number) {

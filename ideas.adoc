@@ -745,3 +745,11 @@ v- Que se pueda playear solamente una part
 
 Vale, ahora la parte gráfica soporta todo lo que estábamos necesitando, quizá habría que mezclar esto en develop para volver con el asunto del teclado. Necesitaremos aclarar el asunto de los instrumentos, que ahora se están asignando de cualquier manera, y quizá interese pasar algunos de los comandos a los instrumentos, para que sea todo más flexible
 
+Hay un fallo al detener las notas, a veces no se paran. Vamos a ver eso.
+
+Los canales midi que estamos usando deben tener relación con las partes que pueden sonar simultaneamente, pues solo existen 16 canales midi. Sin embargo, el canal 9 se reserva para la percusión, así que vale, un bloque tiene un canal seleccionado, pero no podemos asignar más de 16, y no sé qué pasa si dos parts usan el mismo canal.
+Revisemos el asunto de los valores por defecto. Quizá un block deba tener por defecto un canal concreto.
+
+Vale, parece que el efecto está arreglado. Ahora veo que sería interesante poder manejar "columnas" si es que eso tiene algún sentido, es decir, tratar columnas de bloques como si fuesen a ir sincronizadas. Aunque no parece interesante, más bien sería mejor poder seleccionar varios bloques y cambiarles algo a todos juntos, eso sí parece buena idea. De forma que habrá que poder seleccionar bloques, y así también pueden arrastrarse incluso. Hay que pensar que el efecto de los comandos se hereda, es decir, un bloque anterior puede cambiar un valor para todos sus bloques siguientes. Hay que pensar esto bien.
+También habría que pensar en la repetición de conjuntos de bloques, que no está planteada.
+A este respecto, qué tal sería agregar otro comando más que fuese el tamaño de la repetición, es decir, la cantidad de bloques a partir de ese que van a repetirse? Podría funcionar. Vamos a intentarlo.
