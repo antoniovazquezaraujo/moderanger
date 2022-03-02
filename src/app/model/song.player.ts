@@ -63,7 +63,7 @@ export class SongPlayer {
     }
     async playPart(part: Part, instrument: Instrument) {
         let playNotes: boolean = true;
-        if (true || this.keyboardManagedPart === part) {
+        if (false || this.keyboardManagedPart === part) {
             playNotes = false;
             this.playingInstrument = instrument;
         }
@@ -83,7 +83,7 @@ export class SongPlayer {
         let times: number[] = [1];
         await this.parseCommands(block.commands, instrument, this.blockTime, times);
         setSoundProgram(instrument.channel, instrument.timbre);
-        this.playBlockNotes(block, instrument, times[0], playNotes);
+        await this.playBlockNotes(block, instrument, times[0], playNotes);
     }
     async playBlockNotes(block: Block, instrument: Instrument, times: number, playNotes: boolean) {
         let chars: string[] = this.getRootNotes(block);
