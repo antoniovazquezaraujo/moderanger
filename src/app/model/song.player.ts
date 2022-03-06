@@ -14,7 +14,7 @@ export class SongPlayer {
     keyboardManagedPart?: Part;
     notesToPlay: number[] = [];
     playingInstrument!: Instrument;
-    partPlayer: PartPlayer = new PartPlayer();
+    //partPlayer: PartPlayer = new PartPlayer();
 
     constructor() {
     }
@@ -52,11 +52,11 @@ export class SongPlayer {
         stopSound();
     }
 
-    async playSong(song: Song) {
+    playSong(song: Song) {
         this.isStop = false;
         let channel = 0;
         for (var part of song.parts) {
-            await this.playPart(part, new Instrument(channel++));
+            this.playPart(part, new Instrument(channel++));
         }
     }
     // async NEWplayPart(part: Part, instrument: Instrument) {
@@ -69,7 +69,8 @@ export class SongPlayer {
     // }
 
     async playPart(part: Part, instrument: Instrument) {
-        await this.partPlayer.playPart(this, part, instrument);
+        let partPlayer:PartPlayer = new PartPlayer();
+        await partPlayer.playPart(this, part, instrument);
     }
     getRootNotes(block: Block): string[] {
         let chars = block.blockContent.notes.split(' ').filter(t => t != '');
@@ -81,7 +82,7 @@ export class SongPlayer {
     }
     async parseBlock(block: Block, instrument: Instrument) {
         await this.parseCommands(block, instrument);
-    }
+    } 
 
     async playBlockNotes(block: Block, instrument: Instrument) {
         setSoundProgram(instrument.channel, instrument.timbre);

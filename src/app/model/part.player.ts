@@ -35,24 +35,25 @@ export class PartPlayer {
         let block: Block;
         this.blockStack.reset();
         block = blocks[this.blockIndex];
-        this.songPlayer.parseBlock(block, instrument);
+
         while (this.blockIndex < blocks.length) {
+            this.songPlayer.parseBlock(block, instrument);
             if (this.isRepeating(block)) {
                 if (this.isInTheStack(block)) {
                     this.decStackedTimes();
-                    if (this.stackedTimesIsEmpty()) {
-                        this.pop();
-                        this.goToNextBlock();
-                    } else {
+                    // if (this.stackedTimesIsEmpty()) {
+                    //     this.pop();
+                    //     this.goToNextBlock();
+                    // } else {
                         this.resetStackedSize(block);
                         this.decStackedSize();
                         await this.playBlockNotes(block)
                         if (this.stackedSizeIsEmpty()) {
                             this.goToStackedBlock();
                         } else {
-                            this.goToNextBlock();
+                            this.goToNextBlock(); 
                         }
-                    }
+                    // }
                 } else {
                     this.push(block);
                 }
@@ -63,7 +64,12 @@ export class PartPlayer {
                 } else {
                     this.decStackedSize();
                     if (this.stackedSizeIsEmpty()) {
-                        this.goToStackedBlock();
+                        if (this.stackedTimesIsEmpty()) {
+                            this.pop();
+                            this.goToNextBlock();
+                        }else{
+                            this.goToStackedBlock();
+                        }
                     } else {
                         this.goToNextBlock();
                     }
