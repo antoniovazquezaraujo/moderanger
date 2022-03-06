@@ -14,7 +14,8 @@ export enum CommandType{
     SHIFTSTART  = 11,
     SHIFTSIZE   = 12,
     SHIFTVALUE  = 13,
-    REPEAT      = 14
+    REPEAT_TIMES= 14,
+    REPEAT_SIZE = 15
 }
 export class Command {
 

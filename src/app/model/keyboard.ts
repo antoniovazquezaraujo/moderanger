@@ -6,7 +6,7 @@ export class Keyboard {
     pressedKeys:Map<string, number> = new Map();
     onKeyUp(key: string) {
         if(this.pressedKeys.has(key)) {
-            this.songPlayer.onNoteRelease(this.pressedKeys.get(key)!);
+                // this.songPlayer.onNoteRelease(this.pressedKeys.get(key)!);
             this.pressedKeys.delete(key);
         }
     }
@@ -16,7 +16,7 @@ export class Keyboard {
         }
         var note = this.notesFromKeys.get(key);
         if (note != null) {
-            this.songPlayer.onNotePress(note);
+                // this.songPlayer.onNotePress(note);
             this.pressedKeys.set(key, note);
         }
 
