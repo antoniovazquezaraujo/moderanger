@@ -753,3 +753,118 @@ Revisemos el asunto de los valores por defecto. Quizá un block deba tener por d
 Vale, parece que el efecto está arreglado. Ahora veo que sería interesante poder manejar "columnas" si es que eso tiene algún sentido, es decir, tratar columnas de bloques como si fuesen a ir sincronizadas. Aunque no parece interesante, más bien sería mejor poder seleccionar varios bloques y cambiarles algo a todos juntos, eso sí parece buena idea. De forma que habrá que poder seleccionar bloques, y así también pueden arrastrarse incluso. Hay que pensar que el efecto de los comandos se hereda, es decir, un bloque anterior puede cambiar un valor para todos sus bloques siguientes. Hay que pensar esto bien.
 También habría que pensar en la repetición de conjuntos de bloques, que no está planteada.
 A este respecto, qué tal sería agregar otro comando más que fuese el tamaño de la repetición, es decir, la cantidad de bloques a partir de ese que van a repetirse? Podría funcionar. Vamos a intentarlo.
+
+Vamos a ver, se impone un mecanismo de ejecución estructurado, un sistema que, en vez de lanzar los bloques uno detrás de otro, examine la lista de bloques y decida cuál de ellos lanzar en cada momento. De esta forma, un bloque puede decidir repetirse o no y la cantidad de bloques subsiguientes que también se repetirán, y también el número de veces que lo harán.
+Así que tendremos una pila donde meteremos los datos de repetición, que serán elementos con:
+    - id del bloque repetidor
+    - tamaño de bloques a repetir
+    - número de veces a repetir
+
+Ahora todos los bloques se referirán por el orden que ocupan en la lista. Deberían poder cambiarse de orden también, pero eso más adelante.
+Cuando parseamos los comandos de un bloque podemos encontrar un comando de repetición. En ese caso metemos en la pila el dato.
+Los comandos serán:
+    -RepetitionSize: tamaño de los bloques
+    -RepetitionTimes: número de veces a repetir esos bloques
+Si encontramos el primero, agregamos a la pila un objeto que tiene la id del bloque actual, y ese tamaño de bloques. Por defecto lleva un 1, que indicará que se repite una vez. Si luego queremos cambiar el número de veces, agregaremos el segundo comando, que buscará el objeto en la pila (estará de primero, obviamente) y variará el número de repeticiones.
+Si ponemos 0 repeticiones significa que esos elementos no se harán sonar, se saltarán. No sé si eso puede tener utilidad, pero parece fácil. También, si ponemos -1, puede indicar que se repetirán infinitamente.    
+
+El mecanismo tiene que tener el conjunto de bloque a su disposición, tomar el primer bloque, interpretarlo y de ahí decidir cuál es el siguiente bloque a interpretar. Es decir, primero interpretamos el primer bloque, luego decidimos cuál coger y volvemos a repetir el proceso
+
+El esquema sería algo como lo siguiente:
+- Tenemos un stack donde apilar los elementos a repetir
+- Antes de comenzar a playear la parte, recorremos todos los bloques y guardamos en el stack los repetibles
+- Tomo el primer bloque
+- Tomo el top del stack, si es que hay algo.
+- Si no hay nada en el stack, simplemente parseo los comandos y playeo el bloque actual y paso al siguiente, hasta terminar.
+- Si hay algo puede tener la id del bloque actual o una diferente.
+- Si tiene la del actual es que es él el que desea repetirse. Luego decremento en 1 la cantidad de veces repetidas.
+- Mientras haya veces por repetir, los bloques suenan.
+- Si la id del bloque a repetir no es igual que la del bloque actual, entonces hay que calcular si el bloque está en el grupo.
+- Si quedan veces por repetir, entonces lo hago sonar. Y paso al siguiente bloque.
+- Parseo los comandos. Ahora, si quería repetirse se 
+
+top: id:2, size:4, times:3
+top: id:4, size:3, times:2
+
+1     2       3       4       5        6        7        8        9
+--------------------------------------------------------------------
+1     2       3       
+
+Vale, no. Los elementos se meten en la pila en el momento de parsear los comandos, no todos al principio, para eso es una pila.
+Así que solo tienen que comprobar el elemento superior. Cuando se le acaban las repeticiones se eliminan y se sigue contando el siguiente.
+Un elemento solo se mete en la pila si no estaba. Si ya estaba entonces ha de decrementar el número de veces.
+Cuando termina un elemento por completo lo retira de la pila. Cuando vuelve a parsearse, si no está lo vuelve a meter. 
+
+Vale esto requiere un experimento completo a parte. Vamos allá.
+
+
+1     2(t1s4)       3       4(t2s2)       5        6        7        8        9
+--------------------------------------------------------------------------------------
+1     
+      2t1s4       
+                  2t1s3      
+                            2t1s2
+                            4t2s2
+                                        4t2s1
+                                                 4t2s0
+                                                 <4
+                            4t1s2
+                                        4t1s1
+                                                 4t1s0
+                                                 <4
+                            4t0s2
+                                        4t0s1
+                                                 4t0s0
+                                                 <4
+                            (4t0s0)
+                            2t1s2
+                                        2t1s1
+                                                 2t1s0
+                                                 <2
+      2t0s4
+                ...
+      (2t0s0)                                                 
+
+
+- El bloque 1 no desea repetirse. No hay nada en el stack. Se procesa y se continúa al siguiente bloque
+- El bloque 2 desea repetirse. Como no está en el stack se agrega. Se procesa y se continúa al siguiente
+- El bloque 3 no desea repetirse. Encuentra al 2 en el stack. Decrementa el size. Como el size es > 0 se procesa y continua al siguiente
+- El bloque 4 desea repetirse. Como no está en el stack se agrega. Decrementa el times. Como aún es > 0 se procesa y se continua al siguiente
+- El bloque 5 no desea repetirse. Encuentra al 4 en el stack. Decrementa el size. Como el size es > 0 se procesa y continua al siguiente
+- El bloque 6 no desea repetirse. Encuentra al 4 en el stack. Decrementa el size. Como el size es = 0 retorna al 4
+- El bloque 4 desea repetirse. Como está en el stack no se agrega. Decrementa el times. Como es = 0 se elimina del stack
+- Ahora el bloque 4 ya no desea repetirse. Ahora toma lo que hay en el stack, encuentra el 2. Decrementa el size...
+
+
+Preguntas:
+-Desea repetirse?
+-Hay algo en el stack?
+-Está en el stack
+-El size es > 0?
+-El times es > 0?
+
+Acciones:
+-Se procesa
+-Continúa al siguiente bloque
+-Se agrega al stack
+-Se retira del stack
+-Decrementa el times
+-Decrementa el size
+-Reinicia el size
+
+Questions:
+-isRepeating?
+-stackIsEmpty?
+-isInTheStack?
+-stackedSizeIsEmpty?
+-stackedTimesIsEmpty?
+
+Actions:
+-play
+-goToNextBlock
+-push
+-pop
+-decStackTimes
+-decStackSize
+-resetStackSize
+

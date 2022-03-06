@@ -6,6 +6,7 @@ import { Command, CommandType } from './command';
 import { Song } from './song';
 import { Block } from './block';
 import { Part } from './part';
+import { Manager } from './lab';
 
 
 export class SongPlayer {
@@ -55,22 +56,28 @@ export class SongPlayer {
     }
 
     playSong(song: Song) {
+        new Manager().run();
+        return;
         this.isStop = false;
         let channel = 0;
         for (var part of song.parts) {
             this.playPart(part, new Instrument(channel++));
         }
     }
-    async playPart(part: Part, instrument: Instrument) {
-        let playNotes: boolean = true;
-        if (false || this.keyboardManagedPart === part) {
-            playNotes = false;
-            this.playingInstrument = instrument;
-        }
+    async NEWplayPart(part: Part, instrument: Instrument) {
         for (var block of part.blocks) {
-            await this.playBlock(block, instrument, playNotes);
+            let times: number[] = [1];
+            await this.parseCommands(block.commands, instrument, this.blockTime, times);
+            setSoundProgram(instrument.channel, instrument.timbre);
+            await this.playBlockNotes(block, instrument, times[0]);
         }
     }
+
+    async playPart(part: Part, instrument: Instrument) {
+        for (var block of part.blocks) {
+            await this.playBlock(block, instrument);
+        }
+    }    
     getRootNotes(block: Block): string[] {
         let chars = block.blockContent.notes.split(' ').filter(t => t != '');
         return chars;
@@ -79,13 +86,13 @@ export class SongPlayer {
         let notesToPlay = instrument.player.getSelectedNotes(instrument.getScale(), instrument.tonality);
         return notesToPlay;
     }
-    async playBlock(block: Block, instrument: Instrument, playNotes: boolean) {
+    async playBlock(block: Block, instrument: Instrument ) {
         let times: number[] = [1];
         await this.parseCommands(block.commands, instrument, this.blockTime, times);
         setSoundProgram(instrument.channel, instrument.timbre);
-        await this.playBlockNotes(block, instrument, times[0], playNotes);
+        await this.playBlockNotes(block, instrument, times[0]);
     }
-    async playBlockNotes(block: Block, instrument: Instrument, times: number, playNotes: boolean) {
+    async playBlockNotes(block: Block, instrument: Instrument, times: number) {
         let chars: string[] = this.getRootNotes(block);
         let n = 0;
         this.notesToPlay = [];
@@ -99,19 +106,16 @@ export class SongPlayer {
                 }
                 let note = parseInt(char, 10);
                 instrument.player.selectedNote = note;
-                if (playNotes) {
                     //Stop sounding notes if char not a "extend" key
                     if (char != '=') {
                         await stop(this.notesToPlay, instrument.channel);
                     }
-                }
                 //Play new notes only if not extend or silence
                 if (char != '=' && char != '.') {
                     this.notesToPlay = this.getSelectedNotes(instrument);
                 }
                 //If not real notes, play empty notes to take the same time
                 let time = this.blockTime[0] * 100;
-                if (playNotes) {
                     let playedNotes = this.notesToPlay;
                     if(char != '='){
                         stop(this.notesToPlay, instrument.channel);
@@ -123,57 +127,12 @@ export class SongPlayer {
                         await play(playedNotes, time, instrument.player.playMode, instrument.channel);
                         await this.delay(time);                        
                     }
-                    // if(char != '='){
-                    //     stop(this.notesToPlay, instrument.channel);
-                    // }
-                } else {
-                    await wait(time);
                 }
-            }
         }
         stop(this.notesToPlay, instrument.channel);
 
     }
-    async OLDplayBlock(block: Block, instrument: Instrument) {
-        //let blockTime: number[] = [0];
-        let times: number[] = [1];
-        await this.parseCommands(block.commands, instrument, this.blockTime, times);
-        setSoundProgram(instrument.channel, instrument.timbre);
-        let chars = block.blockContent.notes.split(' ').filter(t => t != '');
-        let n = 0;
-        let notesToPlay: number[] = [];
-        for (let t = 0; t < times[0]; t++) {
-            if (this.isStop) {
-                break;
-            }
-            for (let char of chars) {
-                if (this.isStop) {
-                    break;
-                }
-                let note = parseInt(char, 10);
-                instrument.player.selectedNote = note;
-                //Stop sounding notes if char not a "extend" key
-                if (char != '=') {
-                    await stop(notesToPlay, instrument.channel);
-                }
-                //Play new notes only if not extend or silence
-                if (char != '=' && char != '.') {
-                    notesToPlay = instrument.player.getSelectedNotes(instrument.getScale(), instrument.tonality);
-                }
-                //If not real notes, play empty notes to take the same time
-                let playedNotes = notesToPlay;
-                let time = this.blockTime[0] * 100;
-                if (char === '=' || char === '.') {
-                    playedNotes = [];
-                    await wait(time);
-                } else {
-                    await play(playedNotes, time, instrument.player.playMode, instrument.channel);
-                    await this.delay(time);
-                }
-            }
-        }
-    }
-
+    
     delay(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
