@@ -14,6 +14,7 @@ export class SongPlayer {
     keyboardManagedPart?: Part;
     notesToPlay: number[] = [];
     playingInstrument!: Instrument;
+    currentBlockPulse:number = 0;
     //partPlayer: PartPlayer = new PartPlayer();
 
     constructor() {
@@ -84,6 +85,7 @@ export class SongPlayer {
         await this.parseCommands(block, instrument);
     } 
 
+
     async playBlockNotes(block: Block, instrument: Instrument) {
         setSoundProgram(instrument.channel, instrument.timbre);
         let chars: string[] = this.getRootNotes(block);
@@ -107,7 +109,10 @@ export class SongPlayer {
                 this.notesToPlay = this.getSelectedNotes(instrument);
             }
             //If not real notes, play empty notes to take the same time
-            let time = block.pulse * 100;
+            if(block.pulse != 0){
+                this.currentBlockPulse = block.pulse;
+            }
+            let time = this.currentBlockPulse * 100;
             let playedNotes = this.notesToPlay;
             if (char != '=') {
                 stop(this.notesToPlay, instrument.channel);
@@ -138,6 +143,7 @@ export class SongPlayer {
         block.remainingRepeatingTimes = 0;
         block.repeatingSize = 0;
         block.remainingRepeatingSize = 0;
+        block.pulse = 0;
         block.commands.forEach(async command => {
             switch (+command.commandType) {
                 case CommandType.REPEAT_TIMES:
