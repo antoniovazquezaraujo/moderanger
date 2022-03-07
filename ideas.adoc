@@ -835,36 +835,16 @@ Vale esto requiere un experimento completo a parte. Vamos allá.
 - El bloque 4 desea repetirse. Como está en el stack no se agrega. Decrementa el times. Como es = 0 se elimina del stack
 - Ahora el bloque 4 ya no desea repetirse. Ahora toma lo que hay en el stack, encuentra el 2. Decrementa el size...
 
+Vale, el asunto de la repetición quedó perfecto. Ahora hay que pensar en la duplicación de partes. Realmente la estoy haciendo siempre para reforzar los timbres con diferentes sonidos simultaneos en distintas octavas. Eso es muy interesante, pero debe resolverse de otra forma, que no requiera repetir toda la part.
+Hay que volver a la idea de tener instrumentos con varios timbres. Entonces, en resumen:
+v- Que se pueda duplicar un bloque 
+v- Que se pueda duplicar una parte
+v- Que los bloques se puedan eliminar
+v- Que se pueda eliminar una parte
+v- Que se pueda playear solamente una part
+v- Que se puedan repetir conjuntos de bloques (Ver lo de la composición arborea)
+- Que los valores estén limitados y tengan valor por defecto
+- Que un bloque pueda usar un instrumento con varios timbres
+- El sistema de edición es bastante incómodo. Quizá una pantalla completa con todos los comandos
 
-Preguntas:
--Desea repetirse?
--Hay algo en el stack?
--Está en el stack
--El size es > 0?
--El times es > 0?
-
-Acciones:
--Se procesa
--Continúa al siguiente bloque
--Se agrega al stack
--Se retira del stack
--Decrementa el times
--Decrementa el size
--Reinicia el size
-
-Questions:
--isRepeating?
--stackIsEmpty?
--isInTheStack?
--stackedSizeIsEmpty?
--stackedTimesIsEmpty?
-
-Actions:
--play
--goToNextBlock
--push
--pop
--decStackTimes
--decStackSize
--resetStackSize
 
