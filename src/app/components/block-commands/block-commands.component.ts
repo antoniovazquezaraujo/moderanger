@@ -27,7 +27,7 @@ export class BlockCommandsComponent implements OnInit {
         this.block!.resetPulse();
     }
     addCommand(){
-        this.block!.commands?.push(new Command({}));
+        this.block!.commands?.push(new Command());
     }     
 
 }

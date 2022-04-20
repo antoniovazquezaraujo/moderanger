@@ -1,6 +1,6 @@
 
 export enum CommandType{
-    VELOCITY    = 20,
+    VELOCITY    = 0,
     PULSE       = 1,
     PLAYMODE    = 2,
     WIDTH       = 3,
@@ -19,8 +19,8 @@ export enum CommandType{
 }
 export class Command {
 
-    public commandType!:CommandType;
-    public commandValue!:string;
+    public commandType:CommandType =CommandType.VELOCITY;
+    public commandValue:string="";
     
     constructor(opts?: Partial<Command>) {
         if (opts?.commandType != null) {
