@@ -9,7 +9,7 @@ export class Block {
     label:string="label";
     commands:Command[]=[]; 
     blockContent={notes:''};
-    pulse =10 ;
+    pulse =0 ;
     repeatingTimes = 1;   
     children:Block[] =[];
     expandedIcon:string= "pi pi-folder-open";

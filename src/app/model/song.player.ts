@@ -54,7 +54,6 @@ export class SongPlayer {
     }
 
     playSong(song: Song) {
-        // new Manager().run();
         this.isStop = false;
         let channel = 0;
         for (var part of song.parts) {
@@ -63,13 +62,7 @@ export class SongPlayer {
     }
 
     async playPart(part: Part, instrument: Instrument) {
-        this.parseBlock(part.block, instrument);
-        for (let n: number = 0; n < part.block.repeatingTimes; n++) {
-            await this.playBlockNotes(part.block, instrument);
-            for (let block of part.block.children) {
-                await this.playBlock(block, instrument);
-            }
-        }
+        await this.playBlock(part.block, instrument);
     }
     async playBlock(block: Block, instrument: Instrument) {
         this.parseBlock(block, instrument);
@@ -89,8 +82,8 @@ export class SongPlayer {
         let notesToPlay = instrument.player.getSelectedNotes(instrument.getScale(), instrument.tonality);
         return notesToPlay;
     }
-    async parseBlock(block: Block, instrument: Instrument) {
-        await this.parseCommands(block, instrument);
+    parseBlock(block: Block, instrument: Instrument) {
+        this.parseCommands(block, instrument);
     }
 
     async playBlockNotes(block: Block, instrument: Instrument) {
@@ -139,9 +132,9 @@ export class SongPlayer {
     delay(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    async parseCommands(block: Block, instrument: Instrument) {
+    parseCommands(block: Block, instrument: Instrument) {
         block.commands?.forEach(async command => {
-            await this.parseCommand(block, command, instrument);
+            this.parseCommand(block, command, instrument);
         });
     }
 
