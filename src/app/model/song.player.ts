@@ -65,8 +65,8 @@ export class SongPlayer {
         await this.playBlock(part.block, instrument);
     }
     async playBlock(block: Block, instrument: Instrument) {
-        this.parseBlock(block, instrument);
         for (let n: number = 0; n < block.repeatingTimes; n++) {
+            this.parseBlock(block, instrument);
             await this.playBlockNotes(block, instrument);
             for (let child of block.children) {
                 await this.playBlock(child, instrument);

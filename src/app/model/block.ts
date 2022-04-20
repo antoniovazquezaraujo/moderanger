@@ -38,6 +38,9 @@ export class Block {
             this.collapsedIcon= opts.collapsedIcon;
         }
     }
+    resetPulse(){
+        this.pulse = 0;
+    }
     getCommandByType(commandType:CommandType){
         return this.commands?.filter(command => command.commandType === commandType);
     }
