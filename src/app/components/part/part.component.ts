@@ -1,5 +1,8 @@
+import { NestedTreeControl } from '@angular/cdk/tree';
 import { Input, Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { Block } from 'src/app/model/block';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { Block  } from 'src/app/model/block';
+import { CommandNotes } from 'src/app/model/command.notes';
 import { Part } from 'src/app/model/part';
 
 @Component({
@@ -8,8 +11,10 @@ import { Part } from 'src/app/model/part';
     styleUrls: ['./part.component.css']
 })
 export class PartComponent implements OnInit {
+    treeControl = new NestedTreeControl<Block>(node => node.children);
+    dataSource = new MatTreeNestedDataSource<Block>();
 
-    @Input() part!:Part;
+    @Input() part!: Part;
     @Output() onDuplicatePart: EventEmitter<any>;
     @Output() onRemovePart: EventEmitter<any>;
     @Output() onPlayPart: EventEmitter<any>;
@@ -18,26 +23,39 @@ export class PartComponent implements OnInit {
         this.onRemovePart = new EventEmitter<any>();
         this.onPlayPart = new EventEmitter<any>();
     }
- 
-    onDuplicateBlock(block:Block){
-        var copy = new Block(block);
-        this.part.blocks.push(copy as Block);        
+
+    hasChildren(index: number, block: Block): boolean {
+        return block?.children.length > 0;
     }
-    onRemoveBlock(block:Block){
+    onDuplicateBlock(block: Block) {
+        var copy = new Block(block);
+        this.part.block.children.push(copy as Block);
+    }
+    onRemoveBlock(block: Block) {
         this.part.removeBlock(block);
     }
+    onAddNewCommand(){
+        this.part.block.addCommand();
+    }
+    onAddChild(block:Block){
+        this.dataSource.data = [];
+        block.addChild();
+        this.dataSource.data = this.part.block.children;
+    }
+    onRemoveCommand(block: Block){
+     
+    }
     ngOnInit(): void {
+        this.dataSource.data = this.part.block.children;
     }
-    addNewBlock(){
-        this.part.blocks.push(new Block({commands:[], blockContent:{notes:''}}));
-    }
-    duplicatePart(){
+
+    duplicatePart() {
         this.onDuplicatePart.emit(this.part);
     }
-    removePart(){
+    removePart() {
         this.onRemovePart.emit(this.part);
     }
-    playPart(){
+    playPart() {
         this.onPlayPart.emit(this.part);
     }
 

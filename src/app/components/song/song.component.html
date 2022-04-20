@@ -1,4 +1,7 @@
-<app-parts [parts] = "getParts()" (onRemovePart)="removePart($event)" (onPlayPart)="playPart($event)"></app-parts> 
-<button mat-mini-fab color="primary" (click) = "addPart()">
-    <mat-icon>add</mat-icon>
+<app-parts 
+    [parts] = "getParts()" 
+    (onRemovePart)="removePart($event)" 
+    (onPlayPart)="playPart($event)">
+</app-parts> 
+<button pButton type="button" icon="pi pi-plus" (click) = "addPart()">
 </button>

@@ -1,17 +1,15 @@
-<ng-container class="container">
-    <ng-container *ngIf="commands.length > 0">
-        <mat-form-field appearance="fill">
-            <mat-chip-list aria-orientation="vertical">
-                <mat-chip *ngFor="let command of commands" (removed)="remove(command)">
-                    <mat-select type="number" class="commandType" [(ngModel)]="command.commandType">
-                        <mat-option *ngFor="let key of enumKeys" [value]="key"> {{commandTypes[key]}} </mat-option>
-                    </mat-select>
-                    <input type="number" class="commandValue" matInput mat-line [(ngModel)]="command.commandValue">
-                    <button matChipRemove>
-                        <mat-icon>cancel</mat-icon>
-                    </button>
-                </mat-chip>
-            </mat-chip-list>
-        </mat-form-field>
-    </ng-container>
-</ng-container>
+
+<div id="commands" *ngFor="let item of commands">
+    <p-dropdown appendTo="body" [options]="enumKeys" [(ngModel)]="item.commandType">
+        <ng-template let-commandType pTemplate="selectedItem">
+            {{commandTypes[commandType]}}
+        </ng-template>
+        <ng-template let-commandType pTemplate="item">
+            {{commandTypes[commandType]}}
+        </ng-template>
+    </p-dropdown>
+    <p-inputNumber [(ngModel)]="item.commandValue" [showButtons]="true" [min]="-250" [max]="250" [size]="1">
+    </p-inputNumber>
+    <button pButton type="button" icon="pi pi-times" (click)="removeCommand(item)"></button>
+</div>
+<button pButton type="button" icon="pi pi-copy" (click)="addCommand()"></button>

@@ -1,6 +1,10 @@
+import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Block } from 'src/app/model/block';
-
+import {TreeModule} from 'primeng/tree';
+import {TreeNode,PrimeIcons} from 'primeng/api';
+import {ButtonModule} from 'primeng/button';
 @Component({
   selector: 'app-block',
   templateUrl: './block.component.html',
@@ -8,27 +12,39 @@ import { Block } from 'src/app/model/block';
 })
 export class BlockComponent implements OnInit {
   @Input() block!:Block;
-  @Output() duplicateBlock: EventEmitter<any>;
-  @Output() removeBlock: EventEmitter<any>;
+  @Output() onDuplicateBlock: EventEmitter<any>;
+  @Output() onRemoveBlock: EventEmitter<any>;
+  @Output() onAddChild: EventEmitter<any>;
 
-  constructor( ) { 
-    this.duplicateBlock = new EventEmitter<any>();
-    this.removeBlock = new EventEmitter<any>();
+  constructor( ) {
+    this.onDuplicateBlock = new EventEmitter<any>();
+    this.onRemoveBlock = new EventEmitter<any>();
+    this.onAddChild = new EventEmitter<any>();
   }
 
   ngOnInit(): void {
+    this.files = this.block.children;
   }
 
-  onDuplicateBlock(){
-    this.duplicateBlock.emit(this.block);
+  duplicateBlock(block:Block){
+    this.onDuplicateBlock.emit(block);
   }
-  onRemoveBlock(){
-    this.removeBlock.emit(this.block);
+  removeChild(block:any){
+    this.block.removeChild(block);
+    this.files = this.block.children;
   }
+ 
   onRemoveCommand(command:any){
+    console.log("hemos llegado!")
     this.block.removeCommand(command);
   }
-  onAddNewCommand(){
-    this.block.addNewCommand();
+  onAddCommand(block:Block){
+    block.addCommand();
   }
+  addChild(block:Block){
+    this.onAddChild.emit(block);
+  }
+   files: TreeNode[]=[];
+
+  hasChildren = (_: number, block: Block) => !!block.children && block.children.length > 0;
 }

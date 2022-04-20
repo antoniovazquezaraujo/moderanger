@@ -6,7 +6,7 @@ import { Command, CommandType } from './command';
 import { Song } from './song';
 import { Block } from './block';
 import { Part } from './part';
-import { PartPlayer } from './part.player';
+import { Manager } from './lab';
 
 
 export class SongPlayer {
@@ -14,7 +14,7 @@ export class SongPlayer {
     keyboardManagedPart?: Part;
     notesToPlay: number[] = [];
     playingInstrument!: Instrument;
-    currentBlockPulse:number = 0;
+    currentBlockPulse: number = 0;
     //partPlayer: PartPlayer = new PartPlayer();
 
     constructor() {
@@ -54,27 +54,35 @@ export class SongPlayer {
     }
 
     playSong(song: Song) {
+        // new Manager().run();
         this.isStop = false;
         let channel = 0;
         for (var part of song.parts) {
             this.playPart(part, new Instrument(channel++));
         }
     }
-    // async NEWplayPart(part: Part, instrument: Instrument) {
-    //     for (var block of part.blocks) {
-    //         let times: number[] = [1];
-    //         await this.parseCommands(block.commands, instrument, this.blockTime, times);
-    //         setSoundProgram(instrument.channel, instrument.timbre);
-    //         await this.playBlockNotes(block, instrument, times[0]);
-    //     }
-    // }
 
     async playPart(part: Part, instrument: Instrument) {
-        let partPlayer:PartPlayer = new PartPlayer();
-        await partPlayer.playPart(this, part, instrument);
+        this.parseBlock(part.block, instrument);
+        for (let n: number = 0; n < part.block.repeatingTimes; n++) {
+            await this.playBlockNotes(part.block, instrument);
+            for (let block of part.block.children) {
+                await this.playBlock(block, instrument);
+            }
+        }
     }
+    async playBlock(block: Block, instrument: Instrument) {
+        this.parseBlock(block, instrument);
+        for (let n: number = 0; n < block.repeatingTimes; n++) {
+            await this.playBlockNotes(block, instrument);
+            for (let child of block.children) {
+                await this.playBlock(child, instrument);
+            }
+        }
+    }
+
     getRootNotes(block: Block): string[] {
-        let chars = block.blockContent.notes.split(' ').filter(t => t != '');
+        let chars = block.blockContent?.notes.split(' ').filter(t => t != '');
         return chars;
     }
     getSelectedNotes(instrument: Instrument): number[] {
@@ -83,8 +91,7 @@ export class SongPlayer {
     }
     async parseBlock(block: Block, instrument: Instrument) {
         await this.parseCommands(block, instrument);
-    } 
-
+    }
 
     async playBlockNotes(block: Block, instrument: Instrument) {
         setSoundProgram(instrument.channel, instrument.timbre);
@@ -109,7 +116,7 @@ export class SongPlayer {
                 this.notesToPlay = this.getSelectedNotes(instrument);
             }
             //If not real notes, play empty notes to take the same time
-            if(block.pulse != 0){
+            if (block.pulse != 0) {
                 this.currentBlockPulse = block.pulse;
             }
             let time = this.currentBlockPulse * 100;
@@ -133,30 +140,11 @@ export class SongPlayer {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     async parseCommands(block: Block, instrument: Instrument) {
-        block.commands.forEach(async command => {
+        block.commands?.forEach(async command => {
             await this.parseCommand(block, command, instrument);
         });
     }
 
-    async parseRepetitions(block: Block) {
-        block.repeatingTimes = 0;
-        block.remainingRepeatingTimes = 0;
-        block.repeatingSize = 0;
-        block.remainingRepeatingSize = 0;
-        block.pulse = 0;
-        block.commands.forEach(async command => {
-            switch (+command.commandType) {
-                case CommandType.REPEAT_TIMES:
-                    block.repeatingTimes = parseInt(command.commandValue, 10);
-                    block.remainingRepeatingTimes = block.repeatingTimes;
-                    break;
-                case CommandType.REPEAT_SIZE:
-                    block.repeatingSize = parseInt(command.commandValue, 10);
-                    block.remainingRepeatingSize = block.repeatingSize;
-                    break;
-            }
-        });
-    }
     async parseCommand(block: Block, command: Command, instrument: Instrument) {
         switch (+command.commandType) {
             case CommandType.GAP:
@@ -206,8 +194,4 @@ export class SongPlayer {
                 console.log("Error in command type");
         }
     }
-
-    // selectNoteInInstrument(note: number) {
-    //     this.instrument.player.selectedNote = note;
-    // }
 }

@@ -20,6 +20,7 @@ export class SongComponent implements OnInit {
     }
     
     addPart() {
+        console.log("adding part");
         this.song.addPart();
     }
     addCommand() {

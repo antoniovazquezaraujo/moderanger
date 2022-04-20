@@ -28,12 +28,12 @@ export function parsePart(at : Parser.PART): Part{
     at.tail.forEach(t => {
         blocks.push(parseBlock(t.block));
     });
-    let part = new Part({blocks:blocks});
+    let part = new Part({});
     return part;
 }
 
 export function parseBlock(at : Parser.BLOCK): Block{
-    
+     
     var commands = parseCommandGroup(at.commandGroup);
     var content =  new CommandNotes({notes:parseBlockContent(at.blockContent)}) ;
     return new Block( {commands:commands, blockContent:content}) ;

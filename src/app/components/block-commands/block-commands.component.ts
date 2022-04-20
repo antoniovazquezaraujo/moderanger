@@ -8,21 +8,26 @@ import { Command, CommandType } from 'src/app/model/command';
 })
 export class BlockCommandsComponent implements OnInit {
     @Input() commands!: Command[];
-    @Output() removeCommand: EventEmitter<any>;
-    
+
+   
     commandTypes  = CommandType;
     enumKeys:any[] = [];
  
-    
+   
     constructor() { 
-        this.removeCommand = new EventEmitter<any>();
     }
 
     ngOnInit(): void {
         this.enumKeys = Object.keys(this.commandTypes).filter(f => !isNaN(Number(f)));
     }
 
-    remove(command: any):void {
-        this.removeCommand.emit(command);
+    removeCommand(command: any):void {
+        this.commands = this.commands?.filter(t => t !== command);
     }
+    addCommand(){
+        this.commands?.push(new Command({}));
+    } 
+ 
+    
+
 }
