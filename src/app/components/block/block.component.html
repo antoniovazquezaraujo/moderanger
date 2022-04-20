@@ -1,27 +1,15 @@
 <p-tree [value]="files" [draggableNodes]="true" [droppableNodes]="true" draggableScope="self" droppableScope="self">
   <ng-template let-node pTemplate="default">
-    <!-- <span class="p-float-label"> -->
-      <label for="repeatingTimes">{{node.id}} </label>
-      <p-inputNumber 
-      id="repeatingTimes"
-      placeholder="Repeating times"
-      [(ngModel)]="node.repeatingTimes" 
-      mode="decimal" 
-      [showButtons]="true" 
-      buttonLayout="horizontal" 
-      spinnerMode="horizontal"
-      decrementButtonClass="p-button-secondary" 
-      incrementButtonClass="p-button-secondary" 
-      incrementButtonIcon="pi pi-plus" 
-      decrementButtonIcon="pi pi-minus"
+    <label for="repeatingTimes">{{node.id}} </label>
+    <p-inputNumber id="repeatingTimes" placeholder="Repeating times" [(ngModel)]="node.repeatingTimes" mode="decimal"
+      [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal" decrementButtonClass="p-button-secondary"
+      incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
       [size]="1">
     </p-inputNumber>
-  <!-- </span> -->
-    <button pButton type="button" icon="pi pi-copy" (click) = "duplicateBlock(node)"></button>
-    <button pButton type="button" icon="pi pi-plus" (click) = "addChild(node)"></button>
-    <button pButton type="button" icon="pi pi-times" (click) = "removeChild(node)"></button>
+    <button pButton type="button" icon="pi pi-copy" (click)="duplicateBlock(node)"></button>
+    <button pButton type="button" icon="pi pi-plus" (click)="addChild(node)"></button>
+    <button pButton type="button" icon="pi pi-times" (click)="removeChild(node)"></button>
     <app-block-notes [blockContent]="node.blockContent"></app-block-notes>
-    <app-block-commands [commands]="node.commands" (removeCommand)="onRemoveCommand($event)"></app-block-commands>    
+    <app-block-commands [block]="node" (removeCommand)="onRemoveCommand($event)"></app-block-commands>
   </ng-template>
 </p-tree>
- 

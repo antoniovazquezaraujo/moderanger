@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
 
 @Component({
@@ -7,7 +8,7 @@ import { Command, CommandType } from 'src/app/model/command';
     styleUrls: ['./block-commands.component.css']
 })
 export class BlockCommandsComponent implements OnInit {
-    @Input() commands!: Command[];
+    @Input() block?: Block;
 
    
     commandTypes  = CommandType;
@@ -21,13 +22,12 @@ export class BlockCommandsComponent implements OnInit {
         this.enumKeys = Object.keys(this.commandTypes).filter(f => !isNaN(Number(f)));
     }
 
-    removeCommand(command: any):void {
-        this.commands = this.commands?.filter(t => t !== command);
+    removeCommand(command: Command):void {
+        this.block!.commands = this.block!.commands?.filter(t => t !== command);
+        this.block!.resetPulse();
     }
     addCommand(){
-        this.commands?.push(new Command({}));
-    } 
- 
-    
+        this.block!.commands?.push(new Command({}));
+    }     
 
 }
