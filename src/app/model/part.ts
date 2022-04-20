@@ -1,18 +1,15 @@
 import { Block } from "./block";
-
 export class Part{
-    public blocks!:Block[];
 
-    // constructor(blocks:Block[]){
-    //     this.blocks = blocks;
-    // } 
+    public block:Block= new Block({});
 
     constructor(opts?: Partial<Part>) {
-        if (opts?.blocks != null) {
-            this.blocks = opts.blocks.map(val => new Block(val));
+        if (opts?.block != null) {
+            this.block = new Block(opts.block);
         }
+
     }
     removeBlock(block:Block){
-        this.blocks = this.blocks.filter(t => t != block);
+        this.block.children = this.block.children.filter(t => t!= block);
     }
 }

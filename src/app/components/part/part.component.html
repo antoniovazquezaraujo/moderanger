@@ -1,17 +1,14 @@
 <div class = "container">
-    <app-block  *ngFor="let block of part.blocks" [block] = "block" (duplicateBlock)="onDuplicateBlock($event)" (removeBlock)="onRemoveBlock($event)"></app-block>
-    <button mat-mini-fab color="warn" (click) = "addNewBlock()">
-        <mat-icon>add</mat-icon>
-    </button>
-    <button mat-mini-fab color="warn" (click) = "playPart()">
-        <mat-icon>play_circle_filled</mat-icon>
-    </button>
-    <button mat-mini-fab color="warn" (click) = "duplicatePart()">
-        <mat-icon>list</mat-icon>
-    </button>
-    <button mat-mini-fab color="warn" (click) = "removePart()">
-        <mat-icon>backspace</mat-icon>
-    </button>
+  <button  pButton type="button" icon="pi pi-plus"(click) = "onAddChild(part.block)"></button> 
+  <button  pButton type="button" icon="pi pi-play" (click) = "playPart()"></button>
+  <button  pButton type="button" icon="pi pi-copy" (click) = "duplicatePart()"></button>
+  <button  pButton type="button" icon="pi pi-times" (click) = "removePart()"></button>
+  <app-block        
+        [block] = "part.block"
+        (onDuplicateBlock)="onDuplicateBlock($event)" 
+        (onRemoveBlock)="onRemoveBlock($event)"  
+        (onAddChild)="onAddChild($event)">
+      </app-block> 
 </div>
 
 

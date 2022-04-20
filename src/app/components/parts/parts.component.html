@@ -1,3 +1,9 @@
 <div class="container" >
-    <app-part *ngFor="let part of parts; last as last" [part] = "part" (onDuplicatePart)="duplicatePart($event)" (onRemovePart)="removePart($event)" (onPlayPart)="playPart($event)"></app-part>
+    <app-part 
+        *ngFor="let part of parts" 
+        [part] = "part" 
+        (onDuplicatePart)="duplicatePart($event)" 
+        (onRemovePart)="removePart($event)" 
+        (onPlayPart)="playPart($event)">
+    </app-part>
 </div>    

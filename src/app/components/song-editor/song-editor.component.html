@@ -1,7 +1,8 @@
-<app-song [song]="getSong()" (onPlayPart)="playPart($event)"></app-song>
-<button mat-mini-fab color="accent" (click)="play()">
-    <mat-icon>play_circle_filled</mat-icon>
+<app-song 
+    [song]="getSong()" 
+    (onPlayPart)="playPart($event)">
+</app-song>
+<button pButton type="button" icon="pi pi-play" (click)="playSong()">
 </button>
-<button mat-mini-fab color="accent" (click)="stop()">
-    <mat-icon>stop</mat-icon>
+<button pButton type="button" icon="pi pi-stop"(click)="stop()">  
 </button>

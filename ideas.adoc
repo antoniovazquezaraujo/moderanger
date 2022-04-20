@@ -847,4 +847,367 @@ v- Que se puedan repetir conjuntos de bloques (Ver lo de la composición arborea
 - Que un bloque pueda usar un instrumento con varios timbres
 - El sistema de edición es bastante incómodo. Quizá una pantalla completa con todos los comandos
 
+----------------------------------
+Usar el marcador de pila que estábamos usando no estaba mal del todo. Un poco enrevesado, pero así es el proceso.
+No se puede simplificar de más.
+El primer elemento del grupo se mete a sí mismo en la pila y el último del grupo lo saca cuando se terminan la repeticiones.
+Qué ocurre? Que si hay un solo elemento, él mismo tiene que actuar como último del grupo y quitarse de la pila.
+Tambi├®n, cuando se quita de la pila porque es ├®l mismo el ├║ltimo, entonces no tiene que volver a ponerse si no se encuentra.
+Eso estaba mal, el resto parece que iba funcionando. Volvamos a darle una oportunidad a ese viejo algoritmo!
 
+Otra cosa, igual el truco est├í en que igual, en lugar de meter elementos en la pila sin mirar, tenemos que sacar lo que hay y modificarlo para meter lo nuevo, me explico: igual lo que hab├¡a incluye a lo nuevo, con lo que hay que sacarlo y sustituirlo por lo viejo m├ís lo nuevo, no s├® si entiendo esto...
+
+elements:
+1
+t2(
+  2
+  3
+  t2(
+    4
+    5
+    6
+    7
+  )
+)
+8
+9
+
+El asunto consiste en que la estructura a recorrer es un arbol, con niveles, así que es una estructura recursiva. De modo que:
+Un nodo del arbol puede ser un grupo solo, es decir, una hoja, que simplemente se procesa. Si es una rama, tendrá hijos, que se han de recorrer y procesar las veces que se necesite. Luego los elementos del arbol serán:
+
+Arbol: Node[]
+Node{id:number, children:Node[]}
+
+[
+    {id:0, times:3, children:[
+        {id:0},
+        {id:1},
+        {id:2 ,times:6, children:[
+            {id:3},
+            {id:4},
+        ],
+        {id:5},
+        {id:6},
+    ]
+    {id:6},
+    {id:7},
+    {id:8},
+    {id:9},
+]
+class Block{
+    id:number;
+    reteatTimes:number;
+    repeatSize:number;
+}
+class Tree{
+    id:number;
+    times?:number;
+    children?:Tree[];
+}
+makeTree (block:Block):Tree{
+    Tree ret = new Tree({id:block.id, times:block.times,[]});
+    if(block.times > 0){
+        for(let n:number= 0; n<block.repeatSize; n++){
+            ret.children.add(makeTree({id:block.id+n, times:0,[]});
+        }
+    }
+    return ret;
+}
+
+el método ha de recibir la lista de bloques, el número de bloque a procesar y devolverá un arbol con todos los bloques anidados que le pertenecen. 
+
+makeTree(tree:Tree, blocks:Block[]){
+    Tree ret = new Tree({id:block.id, times:block.times,[]});
+    if(block.times > 0){
+        for(let n:number= 0; n<block.repeatSize; n++){
+            ret.children.add(makeTree({id:block.id+n, times:0,[]});
+        }
+    }
+    return ret;
+}
+
+Veamos:
+-Caso base: recibo un bloque que no tiene children
+-Resto de casos: recibo un bloque que tiene children y, para cada uno, me vuelvo a llamar.
+
+Entonces debería recibir el bloque a procesar y devolver un Tree
+
+makeTree(block:Block, tree:Tree):Tree{
+    let tree:Tree= new Tree(block.id,block.repeatsTime, []);
+    if(block has no children){
+        return tree;
+    }else{
+        for(n of block.children){
+            tree.children.push(makeTree(child, tree));
+        }
+        return tree;
+    }
+}
+
+tendría sentido pasar siempre una lista de bloques, en lugar de uno solo. De esta forma, si son varios hacemos una cosa, si es uno hacemos otra.
+
+makeTree(blocks:Block[], tree:Tree):Tree{
+    let ret:Tree = new Tree();
+    for(block in blocks){ 
+
+
+    }    
+}
+
+No sirve.
+La idea es que los elementos que ya están consumidos no se vuelvan a procesar.
+
+makeTree(block:Block, tree:Tree):Tree{
+    let tree:Tree= new Tree(block.id,block.repeatsTime, []);
+    if(block has no children){
+        return tree;
+    }else{
+        for(n of block.children){
+            tree.children.push(makeTree(child, tree));
+        }
+        return tree;
+    }
+}
+
+Al procesar una lista de elementos, tengo que saber hasta dónde ha llegado para continuar desde ahí.
+Así que el elemento que me devuelve ha de decirme cuántos ha procesado. Es decir, un Tree ha de llevar la cuenta de su número de elementos recursivo, es decir, contando los anidados también.
+Quizá pueda hacerse un proceso separado para eso:
+-Dado un arbol, contar su número de children, cuando un child puede tener, a su vez, otros children. Esto se guardará siempre en el arbol que se devuelve.
+
+
+class Tree{
+    id:number=0;
+    repeatingTimes?:number=0;
+    repeatingSize?:number=0;
+    children?:Tree[]=[];
+}
+
+fillSize(tree:Tree){ 
+    if(tree.children.length==0){
+        tree.repeatingSize=1;
+    }else{
+        let size:number =0;
+        for(child of tree.children){ 
+            fillSize(child);
+            size+=child.repeatingSize;
+        }
+        tree.repeatingSize=size;
+    }
+}
+Con esta función llenaríamos los tamaños de los elementos del arbol. Vale
+Si primero llamamos a esta, tendremos todo el arbol correctamente medido.
+O mejor, si la llamamos al final, no tendremos que preocuparnos de medirlo sobre la marcha, y será más simple construirlo.
+
+makeTree(blocks:Block[]){
+
+}
+
+Nos pasan la lista de bloques que es como están, listos para playear. Entonces tenemos que llenarlos con los datos correctos, es decir, crear un arbol a partir de la lista.
+
+makeTree(blocks:Block[]):Tree{
+    if(blocks.length==1){ 
+        let block:Block = blocks[0];
+        if(block.children.length== 0){ 
+            return new Tree(block.id, block.repeatingTimes, 0,[]);
+        }else{
+
+
+        }
+    }
+}
+Un momento! Cambiemos el nombre de esto: no es un Tree, es un simple block.
+class Block{
+    id:number=0;
+    repeatingTimes?:number=0;
+    repeatingSize?:number=0;
+}
+class NestedBlock extends Block{ 
+    children?:Block[]=[];
+}
+
+Vale, los elementos están en una lista simple de blocks, sin children y hay que convertirlos en un simple NestedBlock, un solo elemento, con todos los demás anidados como children.
+
+makeBlock(start:number, blocks:Block[]):NestedBlock{ 
+    empezando en start, toma esos bloques y los convierte en NestedBlock
+    let block:Block = blocks[start];
+    let ret:NestedBlock = new NestedBlock(block, []);
+    if(block.repeatingSize == 0){ 
+        return ret;
+    }else{ 
+        ret.
+    }
+}
+
+A ver, igual estamos complicando la cosa innecesariamente. Igual la estructura podría ser anidada desde un principio, y así todo sería más simple. Quizá se complicase un poco la notación, pero siempre podemos usar json. Y además no tiene por qué complicarse, sería todo más simple desde el primer momento.
+
+bloque(veces, notas) ó 
+bloque(veces, bloque( veces, notas), bloque(veces, notas))
+
+block(times:1, notes:[2,4,3], children([block(times:3, notes[4,2,5])]))
+
+Los comandos actuarían sobre toda la rama, correcto. El aspecto gráfico debería ser de un árbol. Quizá mejor.
+Tendría más sentido:
+
+{
+    commands:[
+        {id:3,value:2}
+    ],
+    times:3, 
+    notes:[3,4,3],
+    blocks:[
+        {
+            commands:[
+                {id:5,value:12}
+            ],
+            times:1, 
+            notes:[5,4,3,2],
+            blocks:[]
+        },{
+            commands:[
+                {id:1,value:4},
+                {id:3,value:14},
+                {id:31,value:2}
+            ],
+            times:4, 
+            notes:[4,3],
+            blocks:[]
+        }
+    ]
+}
+
+Entonces, ahora, una part sería un arbol de blocks, es decir, un simple block. Igual entonces no tiene sentido la part? Pero sí, porque una part se hace sonar simultaneamente con las demás parts. Entonces, una part tiene un block, que tiene unas notas y unos commands y puede tener unos children, que sonarán en orden secuencial.
+Además se podrán repetir las veces indicadas. Bien.
+Luego, una part simplemente tiene un block.
+Entonces, para mostrar las parts, simplemente las mostraremos apiladas, una al lado de otra, o una encima de otra, incluso se puede cambiar. Y cada part muestra el arbol que contiene los blocks. Vale.
+
+Antes una part contenía una lista de blocks. Ahora contendrá solamente un block, que será un arbol.
+
+Vale, entonces, el aspecto visual cómo quedaría?
+
+Part 1
+Block
+    + Block 2
+    + Block 3
+Part 2
+    Block 1
+
+Quizá podamos eliminar las Parts. Después de todo, lo único que tenemos son Blocks.
+Lo que ocurre es que es más simple tocar en orden las listas de bloques y simultaneamente las partes.
+Así que conservamos las partes.
+Aunque, quizá más simple si una parte ya tiene una lista de bloques, como antes, pero ahora son árboles, así que manejan la repetición de forma automática.
+Pero mejor es que sea un bloque, aunque no mostraremos el elemento raíz, aunque sí sus propiedades. Bien.
+
+Part 1
+    Notes:[3,2,3,4],
+    Repeats:1,
+    Commands:[],
+    + Children[
+        + Block 1:{
+            Notes:[5,6,7,7,6],
+            Repeats:2,
+            Commands:[],
+            Children:[]
+        },
+        + Block 2:{
+            Notes:[1,6,],
+            Repeats:4,
+            Commands:[],
+            Children:[]
+        }
+    ]
+Part 2
+    Notes:[],
+    Repeats:1,
+    Commands:[],
+    + Children[
+        + Block 3:{},
+        + Block 4:{}
+    ]
+
+* Las notas se editan directamente en el componente de texto
+* Los elementos de lista, como comandos y children tendrán un botón para agregar y se podrán suprimir
+* Se deberían poder arrastrar para cambiar de orden también, y copiar y pegar a poder ser.
+* Una part siempre tiene que tener un block
+
+Vale, parece que funciona, pero ahora, una part no tiene que gestionar todo el contenido, sino que ha de mostrar elementos de tipo app-block, donde se muestra el contenido de cada bloque.
+Qué es lo que ha de mostrar un bloque?
+
+    - Duplicate block
+    - Delete block
+    - Play block
+    - Add block child
+
+Y una part?
+    - Duplicate part
+    - Delete part
+    - Play part
+    - Add new block
+
+Aspecto de un bloque plegado:
+    - id
+    - notas
+    - repeatingTimes
+    - commands component 
+    - children component 
+
+Aspecto de un commands component:
+    - Plegado solo pone "commands" y el botón de agregar y el botón de desplegar
+    - Desplegado muestra la lista de comandos cada uno con un botón de eliminar
+Aspecto del componente children:
+    - Plegado pone "blocks" y el botón de agregar bloque y el de desplegar
+    - Desplegado muestra la lista de bloques plegados
+
+Necesitamos separar el trabajo de part y block:
+    - Part:
+        - block
+        - commands
+        - children
+    - Block:
+        - notes
+        - repeatingTimes
+        - commands
+        - children
+
+Block responsability:
+    - Show notes, repeatingTimes, commands and children as list of blocks
+    - add or delete children
+    - add or delete commands
+    - play block
+
+Part responsability:
+    - Show block
+    - play part
+
+
+Está un poco confuso esto.
+Una part simplemente contiene dentro un block. Podemos agregar todas las parts que queramos y se harán sonar simultáneamente. Un block tiene una lista de notas, una lista de comandos y una lista de children.
+Todos los blocks de una part se harán sonar secuencialmente.
+
+
+Los comandos de un Song serán:
+    - Add new part
+    - Play & Stop song
+
+Los comandos que admite una part son:
+    - Play & Stop 
+    - Duplicate 
+    - Delete 
+
+Los comandos de un Block serán:
+    - Play & Stop 
+    - Add or remove child block
+    - Add or remove command
+    
+El aspecto de un Song será:
+    - List of parts
+El aspecto de un Part será:
+    - Block
+El aspecto de un Block será:
+    - List of notes
+    - List of commands foldable
+    - Tree of children foldable
+
+<SONG> PlaySong PlayPart PlayBlock Stop AddPart
+<PART> PlayPart DupPart AddBlock   
+<BLOCK> PlayBlock DupBlock DelBlock AddChild AddCommand
+<COMMAND> DelCommand

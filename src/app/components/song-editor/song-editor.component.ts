@@ -47,8 +47,9 @@ export class SongEditorComponent implements OnInit {
         return this.song;
     }
   
-    async play() {
-        this.songPlayer.playSong(this.song);
+    async playSong() {
+        console.log("play song");
+        this.songPlayer.playSong(this.song); 
     }
     async stop() {
         this.songPlayer.stop();
