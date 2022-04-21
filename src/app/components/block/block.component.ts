@@ -1,6 +1,5 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Block } from 'src/app/model/block';
 import {TreeModule} from 'primeng/tree';
 import {TreeNode,PrimeIcons} from 'primeng/api';
@@ -35,7 +34,6 @@ export class BlockComponent implements OnInit {
   }
  
   onRemoveCommand(command:any){
-    console.log("hemos llegado!")
     this.block.removeCommand(command);
   }
   onAddCommand(block:Block){
@@ -44,7 +42,7 @@ export class BlockComponent implements OnInit {
   addChild(block:Block){
     this.onAddChild.emit(block);
   }
-   files: TreeNode[]=[];
+  files: TreeNode[]=[];
 
   hasChildren = (_: number, block: Block) => !!block.children && block.children.length > 0;
 }
