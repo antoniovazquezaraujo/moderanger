@@ -1,6 +1,5 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Input, Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Block  } from 'src/app/model/block';
 import { CommandNotes } from 'src/app/model/command.notes';
 import { Part } from 'src/app/model/part';
@@ -12,7 +11,6 @@ import { Part } from 'src/app/model/part';
 })
 export class PartComponent implements OnInit {
     treeControl = new NestedTreeControl<Block>(node => node.children);
-    dataSource = new MatTreeNestedDataSource<Block>();
 
     @Input() part!: Part;
     @Output() onDuplicatePart: EventEmitter<any>;
@@ -38,15 +36,13 @@ export class PartComponent implements OnInit {
         this.part.block.addCommand();
     }
     onAddChild(block:Block){
-        this.dataSource.data = [];
         block.addChild();
-        this.dataSource.data = this.part.block.children;
     }
     onRemoveCommand(block: Block){
      
     }
     ngOnInit(): void {
-        this.dataSource.data = this.part.block.children;
+
     }
 
     duplicatePart() {
