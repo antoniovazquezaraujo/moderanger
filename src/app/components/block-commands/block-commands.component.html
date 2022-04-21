@@ -1,15 +1,16 @@
-
-<div id="commands" *ngFor="let item of block!.commands">
-    <p-dropdown appendTo="body" [options]="enumKeys" [(ngModel)]="item.commandType">
-        <ng-template let-commandType pTemplate="selectedItem">
-            {{commandTypes[enumKeys[commandType]]}}
-        </ng-template>
-        <ng-template let-commandType pTemplate="item">
-            {{commandTypes[enumKeys[commandType]]}}
-        </ng-template>
-    </p-dropdown> 
-    <p-inputNumber [(ngModel)]="item.commandValue" [showButtons]="true" [min]="-250" [max]="250" [size]="1">
-    </p-inputNumber>
-    <button pButton type="button" icon="pi pi-times" (click)="removeCommand(item)"></button>
+<div id="commands" class="container">
+    <div *ngFor="let item of block!.commands">
+        <p-dropdown appendTo="body" [options]="enumKeys" [(ngModel)]="item.commandType">
+            <ng-template let-commandType pTemplate="selectedItem">
+                {{commandTypes[enumKeys[commandType]]}}
+            </ng-template>
+            <ng-template let-commandType pTemplate="item">
+                {{commandTypes[enumKeys[commandType]]}}
+            </ng-template>
+        </p-dropdown>
+        <p-inputNumber class="commandValue" [(ngModel)]="item.commandValue" [showButtons]="true" [min]="-250" [max]="250" [size]="1">
+        </p-inputNumber>
+        <button pButton type="button" icon="pi pi-times" (click)="removeCommand(item)"></button>
+    </div>
+    <button pButton type="button" icon="pi pi-plus" (click)="addCommand()"></button>
 </div>
-<button pButton type="button" icon="pi pi-copy" (click)="addCommand()"></button>

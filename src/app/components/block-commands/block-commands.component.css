@@ -1,11 +1,11 @@
 .container{
     display:flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: flex-start;
-    gap: 1px;
+    gap: 5px;
 }
 .commandValue{
-    width:40px;
+    width:100px;
 }
 .commandType{
     width:100px;

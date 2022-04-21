@@ -7,6 +7,10 @@
 .example-tree-invisible {
     display: none;
   }
+  .p-accordion-header{
+    width:100%;
+    background-color: darkorange;
+  }
   
   .example-tree ul,
   .example-tree li {

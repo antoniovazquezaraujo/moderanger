@@ -17,6 +17,7 @@ import {InputTextModule} from 'primeng/inputtext';
 import {KnobModule} from 'primeng/knob';
 import {DropdownModule} from 'primeng/dropdown';
 import {InputNumberModule} from 'primeng/inputnumber';
+import {AccordionModule} from 'primeng/accordion';
 @NgModule({
   declarations: [
     AppComponent,
@@ -37,7 +38,8 @@ import {InputNumberModule} from 'primeng/inputnumber';
     InputTextModule,
     KnobModule,
     DropdownModule,
-    InputNumberModule
+    InputNumberModule,
+    AccordionModule
   ],
   providers: [TreeDragDropService],
   bootstrap: [AppComponent]
