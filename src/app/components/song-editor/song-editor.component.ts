@@ -11,6 +11,7 @@ import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
 import { initSound } from 'src/app/model/sound';
+import {  XNode } from 'src/app/model/lab';
 @Component({
     selector: 'app-song-editor',
     templateUrl: './song-editor.component.html',
@@ -30,13 +31,14 @@ export class SongEditorComponent implements OnInit {
     public song: Song;
     public keyboard: Keyboard;
 
+    songAsText:string= '';
     songPlayer!: SongPlayer;
 
 
     constructor() {
         this.songPlayer = new SongPlayer();
         this.keyboard = new Keyboard(this.songPlayer);
-        this.song = new Song([]);
+        this.song = new Song();
     }
     ngOnInit(): void {
         initSound();
@@ -44,10 +46,26 @@ export class SongEditorComponent implements OnInit {
     getSong():Song{
         return this.song;
     }
-  
+    getCircularReplacer() {
+        const seen = new WeakSet();
+        return (key:any, value:any) => {
+          if (typeof value === "object" && value !== null) {
+            if (seen.has(value)) {
+              return;
+            }
+            seen.add(value);
+          }
+          return value;
+        };
+      };
     async playSong() {
-        console.log("play song");
         this.songPlayer.playSong(this.song); 
+    } 
+    readSong(){
+        this.song = JSON.parse(this.songAsText);
+    }
+    writeSong(){
+        this.songAsText = JSON.stringify(this.song, this.getCircularReplacer());
     }
     async stop() {
         this.songPlayer.stop();

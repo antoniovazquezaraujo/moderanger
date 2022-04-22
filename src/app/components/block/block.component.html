@@ -1,5 +1,5 @@
-<p-tree [value]="files" [draggableNodes]="true" [droppableNodes]="true" draggableScope="self" droppableScope="self">
-  <ng-template let-node pTemplate="default">
+<p-tree [value]="block.children ||[]" [draggableNodes]="true" [droppableNodes]="true" draggableScope="self" droppableScope="self" emptyMessage="Empty">
+    <ng-template let-node pTemplate="default">
     <div class="container">
       <label for="repeatingTimes"> Block {{node.id}} </label>
       <p-inputNumber id="repeatingTimes" placeholder="Repeating times" [(ngModel)]="node.repeatingTimes" mode="decimal"

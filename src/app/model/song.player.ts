@@ -6,7 +6,7 @@ import { Command, CommandType } from './command';
 import { Song } from './song';
 import { Block } from './block';
 import { Part } from './part';
-import { Manager } from './lab';
+
 
 
 export class SongPlayer {
@@ -56,8 +56,10 @@ export class SongPlayer {
     playSong(song: Song) {
         this.isStop = false;
         let channel = 0;
-        for (var part of song.parts) {
-            this.playPart(part, new Instrument(channel++));
+        if (song.parts != null && song.parts.length > 0) {
+            for (var part of song.parts) {
+                this.playPart(part, new Instrument(channel++));
+            }
         }
     }
 
@@ -68,8 +70,10 @@ export class SongPlayer {
         for (let n: number = 0; n < block.repeatingTimes; n++) {
             this.parseBlock(block, instrument);
             await this.playBlockNotes(block, instrument);
-            for (let child of block.children) {
-                await this.playBlock(child, instrument);
+            if (block.children != null && block.children?.length > 0) {
+                for (let child of block.children) {
+                    await this.playBlock(child, instrument);
+                }
             }
         }
     }

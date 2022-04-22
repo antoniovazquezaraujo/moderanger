@@ -11,18 +11,20 @@ import {ButtonModule} from 'primeng/button';
 })
 export class BlockComponent implements OnInit {
   @Input() block!:Block;
+  @Output() blockChange:EventEmitter<Block>;
   @Output() onDuplicateBlock: EventEmitter<any>;
   @Output() onRemoveBlock: EventEmitter<any>;
   @Output() onAddChild: EventEmitter<any>;
-
+  
   constructor( ) {
     this.onDuplicateBlock = new EventEmitter<any>();
     this.onRemoveBlock = new EventEmitter<any>();
     this.onAddChild = new EventEmitter<any>();
+    this.blockChange = new EventEmitter<Block>();
   }
-
+ 
   ngOnInit(): void {
-    this.files = this.block.children;
+
   }
 
   duplicateBlock(block:Block){
@@ -30,8 +32,7 @@ export class BlockComponent implements OnInit {
   }
   removeChild(block:any){
     this.block.removeChild(block);
-    this.files = this.block.children;
-  }
+   }
  
   onRemoveCommand(command:any){
     this.block.removeCommand(command);
@@ -41,8 +42,10 @@ export class BlockComponent implements OnInit {
   }
   addChild(block:Block){
     this.onAddChild.emit(block);
+    this.blockChange.emit(this.block);
   }
-  files: TreeNode[]=[];
 
-  hasChildren = (_: number, block: Block) => !!block.children && block.children.length > 0;
+  hasChildren () {
+    return !!this.block.children && this.block.children.length > 0;
+  }
 }
