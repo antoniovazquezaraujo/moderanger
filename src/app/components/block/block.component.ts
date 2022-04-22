@@ -16,20 +16,15 @@ export class BlockComponent implements OnInit {
   @Output() onRemoveBlock: EventEmitter<any>;
   @Output() onAddChild: EventEmitter<any>;
   
-  
-  @Input() files: TreeNode<any>[]=[];
-  
   constructor( ) {
     this.onDuplicateBlock = new EventEmitter<any>();
     this.onRemoveBlock = new EventEmitter<any>();
     this.onAddChild = new EventEmitter<any>();
     this.blockChange = new EventEmitter<Block>();
   }
-
+ 
   ngOnInit(): void {
-    if(this.hasChildren()){  
-      this.files = this.block!.children as TreeNode[];
-    }
+
   }
 
   duplicateBlock(block:Block){
@@ -37,10 +32,7 @@ export class BlockComponent implements OnInit {
   }
   removeChild(block:any){
     this.block.removeChild(block);
-    if(this.hasChildren()){  
-      this!.files = (this.block.children || [])as TreeNode<any>[];
-    }
-  }
+   }
  
   onRemoveCommand(command:any){
     this.block.removeCommand(command);
@@ -50,12 +42,8 @@ export class BlockComponent implements OnInit {
   }
   addChild(block:Block){
     this.onAddChild.emit(block);
-    if(this.hasChildren()){  
-      this!.files = (this.block!.children || []) as TreeNode[];
-    }
     this.blockChange.emit(this.block);
   }
-
 
   hasChildren () {
     return !!this.block.children && this.block.children.length > 0;
