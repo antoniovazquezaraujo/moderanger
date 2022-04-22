@@ -8,7 +8,7 @@
       <button pButton type="button" icon="pi pi-play" (click)="playPart()"></button>
       <button pButton type="button" icon="pi pi-copy" (click)="duplicatePart()"></button>
       <button pButton type="button" icon="pi pi-times" (click)="removePart()"></button>
-      <app-block [block]="part.block" (onDuplicateBlock)="onDuplicateBlock($event)"
+      <app-block [(block)]="part.block" (onDuplicateBlock)="onDuplicateBlock($event)"
         (onRemoveBlock)="onRemoveBlock($event)" (onAddChild)="onAddChild($event)">
       </app-block>
     </ng-template>

@@ -23,11 +23,11 @@ export class PartComponent implements OnInit {
     }
 
     hasChildren(index: number, block: Block): boolean {
-        return block?.children.length > 0;
+        return (block.children && block?.children.length > 0) as boolean;
     }
     onDuplicateBlock(block: Block) {
         var copy = new Block(block);
-        this.part.block.children.push(copy as Block);
+        this.part.block.children!.push(copy as Block);
     }
     onRemoveBlock(block: Block) {
         this.part.removeBlock(block);
@@ -36,7 +36,7 @@ export class PartComponent implements OnInit {
         this.part.block.addCommand();
     }
     onAddChild(block:Block){
-        block.addChild();
+        block.addNewChild();
     }
     onRemoveCommand(block: Block){
      

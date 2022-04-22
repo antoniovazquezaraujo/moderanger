@@ -8,19 +8,18 @@ import { Song } from 'src/app/model/song';
     styleUrls: ['./song.component.css']
 })
 export class SongComponent implements OnInit {
-    
-    @Input() song!:Song;
-    @Output() onPlayPart:EventEmitter<Part>;
-    
+
+    @Input() song!: Song;
+    @Output() onPlayPart: EventEmitter<Part>;
+
     constructor() {
         this.onPlayPart = new EventEmitter<Part>();
-     }
+    }
 
     ngOnInit(): void {
     }
-    
+
     addPart() {
-        console.log("adding part");
         this.song.addPart();
     }
     addCommand() {
@@ -32,10 +31,12 @@ export class SongComponent implements OnInit {
     getParts() {
         return this.song.parts;
     }
-    removePart(part:Part){
-        this.song.parts = this.song.parts.filter(t => t!=part);
+    removePart(part: Part) {
+        if (this.song.parts && this.song.parts.length > 0) {
+            this.song.parts = this.song.parts.filter(t => t != part);
+        }
     }
-    playPart(part:Part){
+    playPart(part: Part) {
         this.onPlayPart.emit(part);
     }
 }

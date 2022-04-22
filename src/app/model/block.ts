@@ -10,7 +10,7 @@ export class Block {
     blockContent={notes:''};
     pulse =0 ;
     repeatingTimes = 1;   
-    children:Block[] =[];
+    children?:Block[];
     expandedIcon:string= "pi pi-folder-open";
     collapsedIcon:string= "pi pi-folder";
 
@@ -27,7 +27,7 @@ export class Block {
         if (opts?.blockContent != null) {
             this.blockContent = new CommandNotes(opts.blockContent);
         }
-        if (opts?.children != null) {
+        if (opts?.children != undefined && opts.children.length > 0) {
             this.children = opts.children.map(val => new Block(val));
         }
         if (opts?.expandedIcon != null) {
@@ -49,15 +49,21 @@ export class Block {
     addCommand(){
         this.commands?.push(new Command({commandType:CommandType.PULSE, commandValue:''}));
     } 
-    addChild(){
-        this.children.push(new Block({}));
+    addNewChild(){
+        this.addChild(new Block({}));
+    }
+    addChild(block:Block){
+        if(this.children == null){
+            this.children = [];
+        }
+        this.children!.push(block);
     }
     removeChild(block:Block){
         this.removeChildFrom(this, block);
     }
     removeChildFrom(parent:Block, childToRemove:Block){
-        if(parent.children.length > 0){
-            parent.children = parent.children.filter(t => t!== childToRemove);
+        if(parent.hasChildren()){
+            parent.children = parent.children!.filter(t => t!== childToRemove);
             for(let child of parent.children){
                 this.removeChildFrom(child, childToRemove);
             }

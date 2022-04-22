@@ -20,7 +20,8 @@ export function parseSong(at : Parser.SONG) : Song {
     at.tail.forEach(t => {
         parts.push(parsePart(t.part));
     });
-    return new Song(parts);
+    // return new Song(parts);
+    return new Song();
 }
 export function parsePart(at : Parser.PART): Part{   
     var blocks:Block[] = [];
