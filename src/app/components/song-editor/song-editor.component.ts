@@ -31,6 +31,7 @@ export class SongEditorComponent implements OnInit {
     public song: Song;
     public keyboard: Keyboard;
 
+    songAsText:string= '';
     songPlayer!: SongPlayer;
 
 
@@ -58,10 +59,14 @@ export class SongEditorComponent implements OnInit {
         };
       };
     async playSong() {
-        let songAsString:string = JSON.stringify(this.song, this.getCircularReplacer());
-        let songFromString:Song = JSON.parse(songAsString);
-        this.songPlayer.playSong(songFromString); 
+        this.songPlayer.playSong(this.song); 
     } 
+    readSong(){
+        this.song = JSON.parse(this.songAsText);
+    }
+    writeSong(){
+        this.songAsText = JSON.stringify(this.song, this.getCircularReplacer());
+    }
     async stop() {
         this.songPlayer.stop();
     }

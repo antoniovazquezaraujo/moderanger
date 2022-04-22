@@ -6,3 +6,9 @@
 </button>
 <button pButton type="button" icon="pi pi-stop"(click)="stop()">  
 </button>
+
+<br/>
+<textarea pInputTextarea [(ngModel)]="songAsText"></textarea>
+<br/>
+<button pButton type="button" icon="pi pi-cloud-download"(click)="writeSong()"></button>  
+<button pButton type="button" icon="pi pi-cloud-upload"(click)="readSong()"></button>   
