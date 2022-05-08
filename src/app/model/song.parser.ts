@@ -1,71 +1,57 @@
-import * as Parser from './parser';
-import {Command, CommandType } from './command';
-import { Song } from './song';
-import   {Block } from './block';
-import { Part } from './part';
-import { CommandNotes } from './command.notes';
-  
+// import * as Parser from './parser';
+import { Note, Rest, SoundBit } from './note';
+import { BLOCK, Parser, BLOCK_CONTENT, NOTE, ASTKinds } from './parser';
 
-export function evaluate(tree : any) : Song | null {
-    if(tree.err === null && tree.ast){
-        return parseSong(tree.ast);
+
+export function parseTimedBlock(block: BLOCK, duration: number): SoundBit[] {
+    let soundBits: SoundBit[] = [];
+    soundBits = soundBits.concat(parseBlockContent(block.head, duration));
+    block.tail.forEach(t => {
+        soundBits = soundBits.concat(parseTimedBlock(t.content, duration));
+    });
+    return soundBits;
+}
+export function parseBlock(block: BLOCK): SoundBit[] {
+    let soundBits: SoundBit[] = [];
+    soundBits = soundBits.concat(parseBlockContent(block.head, 0));
+    block.tail.forEach(t => {
+        soundBits = soundBits.concat(parseBlock(t.content));
+    });
+    return soundBits;
+}
+
+export function parseBlockContent(blockContent: BLOCK_CONTENT, duration: number): SoundBit[] {
+
+    if ((typeof blockContent)  === typeof ASTKinds.NOTE) {
+        let soundBits: SoundBit[] = [];
+        soundBits.push(parseNote(blockContent.value, duration));
+        return soundBits;
+    } else {
+        return parseNoteGroup(blockContent.noteGroup, duration);
     }
-    console.log('Error en evaluate()' + tree.err);
-    return null;
-}  
+}
+export function parseNote(note: NOTE, duration: number): SoundBit {
+    if (typeof note  === typeof ASTKinds.SIMPLE_NOTE_1) {
+        return parseSimpleNote(note.value, duration);
+    } else {
+        return parseTimedNote(note.timedNote );
+    }
+}
 
-export function parseSong(at : Parser.SONG) : Song {
-    var parts = [];
-    parts.push(parsePart(at.head));
-    at.tail.forEach(t => {
-        parts.push(parsePart(t.part));
+export function parseSimpleNote(timedNote: any, duration: number): SoundBit {
+    if (timedNote.kind === ASTKinds.SIMPLE_NOTE_1) {
+        return new Note({ note: timedNote.noteValue, duration: timedNote.duration });
+    } else { // SILENCE SIGN
+        return new Rest( duration );
+    }
+}
+export function parseTimedNote(timedNote: any): SoundBit {
+    return parseSimpleNote(timedNote.value, timedNote.duration);
+}
+export function parseNoteGroup(noteGroup: any, duration: number): SoundBit[] {
+    let soundBits: SoundBit[] = [];
+    noteGroup.block.forEach((t: BLOCK) => {
+        soundBits = soundBits.concat(parseTimedBlock(t, noteGroup.duration));
     });
-    // return new Song(parts);
-    return new Song();
-}
-export function parsePart(at : Parser.PART): Part{   
-    var blocks:Block[] = [];
-    blocks.push(parseBlock(at.head));
-    at.tail.forEach(t => {
-        blocks.push(parseBlock(t.block));
-    });
-    let part = new Part({});
-    return part;
-}
-
-export function parseBlock(at : Parser.BLOCK): Block{
-     
-    var commands = parseCommandGroup(at.commandGroup);
-    var content =  new CommandNotes({notes:parseBlockContent(at.blockContent)}) ;
-    return new Block( {commands:commands, blockContent:content}) ;
-}
-export function parseCommandGroup(at : Parser.COMMAND_GROUP) : Command[] {
-    var commands:Command[] = [];
-    commands.push(parseCommand(at.head));
-    at.tail.forEach(t => {
-        commands.push(parseCommand(t.command));
-    });
-    return commands;
-}
-
-export function parseBlockContent(at : Parser.BLOCK_CONTENT) : string  {
-    var values:string  =  "";
-    values = at.val;
-    return values;
-}
-export function parseChar( t: string):string{
-    return t;
-}
-export function parseCommand(at: Parser.COMMAND): Command{  
-    var commandType:CommandType = parseCommandType(at.commandType);
-    var commandValue:string = parseCommandValue(at.commandValue);
-    return new Command({commandType:commandType, commandValue:commandValue});
-}
-
-function parseCommandValue(commandValue: Parser.VALUE_ID): string {
-    return commandValue.val;
-}
-
-function parseCommandType(commandType: Parser.COMMAND_TYPE): CommandType {
-    return CommandType.PULSE; //TODO: PROVISIONAL, CAMBIAR ESTO
+    return soundBits;
 }

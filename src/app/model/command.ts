@@ -34,4 +34,5 @@ export class Command {
     public toString = () : string => {
         return `Command (${this.commandType} ${this.commandValue})`;
     }
+ 
 }

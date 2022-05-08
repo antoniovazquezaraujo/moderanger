@@ -6,6 +6,8 @@ import { Command, CommandType } from './command';
 import { Song } from './song';
 import { Block } from './block';
 import { Part } from './part';
+import { SongEvent } from './event';
+import { FMSynth, Loop, Transport } from 'tone';
 
 
 
@@ -61,18 +63,25 @@ export class SongPlayer {
                 this.playPart(part, new Instrument(channel++));
             }
         }
+        console.log("Notas:"+ this.notesToPlay);
+    }
+    doPlay(){
+        const synthA = new FMSynth().toDestination();
+        const loopA = new Loop(time => {
+          synthA.triggerAttackRelease("C4", "8n", time);
+        }, "4n").start(0);
+        Transport.start()
     }
 
-    async playPart(part: Part, instrument: Instrument) {
-        await this.playBlock(part.block, instrument);
+    playPart(part: Part, instrument: Instrument) {
+        this.playBlock(part.block, instrument);
     }
-    async playBlock(block: Block, instrument: Instrument) {
+    playBlock(block: Block, instrument: Instrument) {
         for (let n: number = 0; n < block.repeatingTimes; n++) {
-            this.parseBlock(block, instrument);
-            await this.playBlockNotes(block, instrument);
+            this.extractNotesToPlay(block, instrument);
             if (block.children != null && block.children?.length > 0) {
                 for (let child of block.children) {
-                    await this.playBlock(child, instrument);
+                    this.playBlock(child, instrument);
                 }
             }
         }
@@ -87,62 +96,33 @@ export class SongPlayer {
         return notesToPlay;
     }
     parseBlock(block: Block, instrument: Instrument) {
-        this.parseCommands(block, instrument);
+        this.executeCommands(block, instrument);
     }
 
-    async playBlockNotes(block: Block, instrument: Instrument) {
-        setSoundProgram(instrument.channel, instrument.timbre);
+    extractNotesToPlay(block: Block, instrument: Instrument) {
+        this.executeCommands(block, instrument);
+        this.notesToPlay = this.notesToPlay.concat(this.extractBlockNotes(block, instrument));
+    }
+    extractBlockNotes(block: Block, instrument: Instrument):number[] {
         let chars: string[] = this.getRootNotes(block);
         let n = 0;
-        this.notesToPlay = [];
-        if (this.isStop) {
-            // break;
-        }
+        let blockNotes:number[] = [];
         for (let char of chars) {
-            if (this.isStop) {
-                break;
-            }
             let note = parseInt(char, 10);
             instrument.player.selectedNote = note;
-            //Stop sounding notes if char not a "extend" key
-            if (char != '=') {
-                await stop(this.notesToPlay, instrument.channel);
-            }
-            //Play new notes only if not extend or silence
-            if (char != '=' && char != '.') {
-                this.notesToPlay = this.getSelectedNotes(instrument);
-            }
-            //If not real notes, play empty notes to take the same time
-            if (block.pulse != 0) {
-                this.currentBlockPulse = block.pulse;
-            }
-            let time = this.currentBlockPulse * 100;
-            let playedNotes = this.notesToPlay;
-            if (char != '=') {
-                stop(this.notesToPlay, instrument.channel);
-            }
-            if (char === '=' || char === '.') {
-                playedNotes = [];
-                await wait(time);
-            } else {
-                await play(playedNotes, time, instrument.player.playMode, instrument.channel);
-                await this.delay(time);
-            }
+            let notes:number[] = this.getSelectedNotes(instrument);
+            blockNotes = blockNotes.concat(notes);
         }
-        stop(this.notesToPlay, instrument.channel);
-
+        return blockNotes;
     }
 
-    delay(ms: number) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    parseCommands(block: Block, instrument: Instrument) {
+    executeCommands(block: Block, instrument: Instrument):void {
         block.commands?.forEach(async command => {
-            this.parseCommand(block, command, instrument);
+            this.executeCommand(block, command, instrument);
         });
     }
 
-    async parseCommand(block: Block, command: Command, instrument: Instrument) {
+    executeCommand(block: Block, command: Command, instrument: Instrument):void {
         switch (+command.commandType) {
             case CommandType.GAP:
                 instrument.player.gap = parseInt(command.commandValue, 10);
@@ -160,9 +140,9 @@ export class SongPlayer {
                 //PENDING
                 //this.velocity = parseInt(command.commandValue, 16);
                 break;
-            case CommandType.PULSE:
-                block.pulse = 64 / parseInt(command.commandValue, 10);
-                break;
+            // case CommandType.PULSE:
+            //     block.pulse = 64 / parseInt(command.commandValue, 10);
+            //     break;
             case CommandType.PLAYMODE:
                 instrument.player.playMode = parseInt(command.commandValue, 10);
                 break;
@@ -181,12 +161,12 @@ export class SongPlayer {
             case CommandType.KEY:
                 instrument.tonality = parseInt(command.commandValue, 10);
                 break;
-            case CommandType.GEAR:
-                instrument.timbre = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.CHANNEL:// Channel 9 is percussion
-                instrument.channel = parseInt(command.commandValue, 10);
-                break;
+            // case CommandType.GEAR:
+            //     instrument.timbre = parseInt(command.commandValue, 10);
+            //     break;
+            // case CommandType.CHANNEL:// Channel 9 is percussion
+            //     instrument.channel = parseInt(command.commandValue, 10);
+            //     break;
             default:
                 console.log("Error in command type");
         }

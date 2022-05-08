@@ -7,11 +7,13 @@ import { Block } from 'src/app/model/block';
 import { Command } from 'src/app/model/command';
 import { Instrument } from 'src/app/model/instrument';
 import { Keyboard } from 'src/app/model/keyboard';
+import { Lab } from 'src/app/model/lab';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
 import { initSound } from 'src/app/model/sound';
-import {  XNode } from 'src/app/model/lab';
+
+
 @Component({
     selector: 'app-song-editor',
     templateUrl: './song-editor.component.html',
@@ -31,7 +33,7 @@ export class SongEditorComponent implements OnInit {
     public song: Song;
     public keyboard: Keyboard;
 
-    songAsText:string= '';
+    songAsText: string = '';
     songPlayer!: SongPlayer;
 
 
@@ -43,34 +45,36 @@ export class SongEditorComponent implements OnInit {
     ngOnInit(): void {
         initSound();
     }
-    getSong():Song{
+    getSong(): Song {
         return this.song;
     }
     getCircularReplacer() {
         const seen = new WeakSet();
-        return (key:any, value:any) => {
-          if (typeof value === "object" && value !== null) {
-            if (seen.has(value)) {
-              return;
+        return (key: any, value: any) => {
+            if (typeof value === "object" && value !== null) {
+                if (seen.has(value)) {
+                    return;
+                }
+                seen.add(value);
             }
-            seen.add(value);
-          }
-          return value;
+            return value;
         };
-      };
+    };
     async playSong() {
-        this.songPlayer.playSong(this.song); 
-    } 
-    readSong(){
+        this.songPlayer.playSong(this.song);
+    }
+
+    readSong() {
         this.song = JSON.parse(this.songAsText);
     }
-    writeSong(){
+    synth: any;
+    writeSong() {
         this.songAsText = JSON.stringify(this.song, this.getCircularReplacer());
     }
     async stop() {
         this.songPlayer.stop();
     }
-    async playPart(part:Part){
+    async playPart(part: Part) {
         this.songPlayer.playPart(part, new Instrument(3));
     }
 
