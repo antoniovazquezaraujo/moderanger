@@ -1211,3 +1211,101 @@ El aspecto de un Block será:
 <PART> PlayPart DupPart AddBlock   
 <BLOCK> PlayBlock DupBlock DelBlock AddChild AddCommand
 <COMMAND> DelCommand
+
+7 de Mayo de 2022
+
+Estamos intentando sincronizar las cosas con la librería tone.js. Pero esto cambiaría todas las operaciones con los comandos. Veamos:
+ 
+ Estos serían los comandos actuales:
+- GAP
+- SHIFTSTART
+- SHIFTSIZE
+- SHIFTVALUE
+- VELOCITY
+- PULSE
+- PLAYMODE
+- WIDTH
+- OCTAVE
+- SCALE
+- INVERSION
+- KEY
+- GEAR
+- CHANNEL
+ 
+Deberían seguir funcionando igual, pues la mayoría afectan a la forma como se obtienen las notas. Quizá las notas ahora se pongan en algún tipo de cola y se deje que sea el nuevo timer el que las vaya haciendo sonar. 
+Quizá entonces, la cola no sea de notas, sino de "eventos", que pueden ser simples notas, o comandos, que se han de interpretar por el instrumento correspondiente en el momento exacto en que le llegue su turno.
+Así que el proceso cambia por completo: solo tenemos que organizar nuestras notas y comandos, luego el timer se ocupará de hacerlo todo "en su momento". Ok, debería ser más sencillo aún de lo que es ahora.
+
+O quizá no, quizá tengamos que realizar el proceso dentro de la función temporizada, simplemente ahora todo ocurrirá a su tiempo exacto. Esto sería todavía más facil y requeriría menos cambios. Probemos con esta opción.
+
+Vale, creo que no porque el proceso de bloques es recursivo, es decir, un bloque puede repetirse a sí mismo n veces, y a sus hijos sucesivamente. Así que está claro: las notas y los comandos procesados recursivamente simplemente se envían a una cola donde serán procesador por el timer en orden y con total exactitud. Procesar los eventos de la cola consiste simplemente en ejecutar los comandos y sonar las notas. Nada más. Nada menos.
+
+El asunto de las partes que suenan simultáneamente no está claro entonces.
+Vale, cada parte tiene su propio loop, y ataca a su propio instrumento. Usaremos siempre PolySynth, para poder cambiar entre notas y arpegios (se cambia simplemente enviandole notas o arrays de notas).
+Todos los loops estan sincronizados por Transport y punto.
+Bien.
+
+Los comandos que simplemente cambian la manera de obtener las notas son distintos de los que cambian algo del propio instrumento, como el sonido usado, o algún tipo de efecto como reverb, etc.
+Los que cambian las notas no se necesitan lanzar en el momento final, sino procesarse antes de procesar cada bloque de notas. Ahora bien, los que cambian algo del propio instrumento han de ser lanzados en el momento final. No sé si tiene sentido finalmente que los eventos de instrumento vayan en la misma linea que los de notas. Los eventos de notas definen qué notas resultan, y se obtienen de un campo que el usuario rellena y que forma parte de la canción. Los eventos de instrumento podrían cambiar, aplicarse a otros instrumentos, e incluso eliminarse por completo, no son parte de la canción. Entonces esto debería formar parte de la "automatización" de la interpretación, es decir, debería guardarse por separado. Entonces, vamos a eliminar de momento todo esto y quedarnos nada más que con los eventos que cambian las notas resultantes.
+- GAP
+- SHIFTSTART
+- SHIFTSIZE
+- SHIFTVALUE
+- VELOCITY
+- PULSE
+- PLAYMODE
+- WIDTH
+- OCTAVE
+- SCALE
+- INVERSION
+- KEY
+Vale, en lo que afecta a la duración de las notas, el nuevo sinte admite directamente en cada nota una duración. Habrá que agregar un tipo de notas que sea una duración, por ejemplo, agregar la duración entre paréntesis para decir que de ahí en adelante las notas durarán ese tiempo. Por ejemplo:
+"3 5 6 (2) 7 8 9" o bien usar el paréntesis para anidar las notas de una duración, por ejemplo:
+"(8 3 5 6 (2 7 8 9) )" significaría que todas las notas van a 8 pero que las del paréntesis interno van a 2.
+Habrá una duración por defecto si no se dice nada.
+Habría que agregar una forma más sencilla para indicar la duración de una sola nota específicamente. Por ejemplo:
+"4d2 5 6 3 9d6" significaría que la nota 4 durará 2, luego las duraciones por defecto y la 9 durará 6.
+"4d(2 4 5) 3d(4 5 6)" mejor usar la letra d para indicar que es una duración. Entonces para una nota hacemos al revés: "4d2" significa que con duración 4 hacemos la nota 2.
+Esto no arrastraría las duraciones entre bloques, o sea, si no dices nada, en el siguiente bloque vuelven a estar las duraciones por defecto.
+Esto haría más complejo (mucho más) el proceso de parsing de las notas, pero nos daría toda la flexibilidad necesaria. Además podemos agregar silencios, por ejemplo:
+4d(s) sería un silencio de esa duración.
+Resumen de todo esto:
+- Las notas se representan por sus números
+- Los silencios se representan con una 's'
+- Las duraciones se representan por un número y una letra 'd'
+- Las duraciones pueden ser unitarias o de grupo. Las de grupo engloban con paréntesis a las notas que afectan
+- Las duraciones de grupo pueden ser anidadas, por ejemplo "3d(4 4ds 2 8d(2 s 4) 5 s)"
+
+"3 4 2d4 4d2 5d( s 3 4 5 4d2 8d(s 3 4))"
+"9d( 3 4 2d4 4d2 5d( s 3 4 5 4d2 8d(s 3 4)))"
+
+BLOCK:= 
+    head = BLOCK_CONTENT
+    tail = {NOTE_SEPARATOR content = BLOCK_CONTENT}*
+BLOCK_CONTENT:= NOTE | NOTE_GROUP
+NOTE = SIMPLE_NOTE | TIMED_NOTE
+SIMPLE_NOTE:= NOTE_VALUE | SILENCE_SIGN
+TIMED_NOTE = duration= DURATION value = SIMPLE_NOTE
+NOTE_GROUP:= duration= DURATION ( block=BLOCK )
+DURATION:= value=[0-9]+ DURATION_SIGN
+NOTE_VALUE:= value='-?\d+'
+DURATION_SIGN:= 'd'
+SILENCE_SIGN:= 's'
+NOTE_SEPARATOR:= ' '
+
+Al interpretar esto deberíamos obtener una lista de notas y duraciones. Por ejemplo:
+[{note:3, duration:4}, {note:s, duration:2}, {note:5, duration:4}, {note:3, duration:4}, {note:5, duration:2}, {note:8, duration:4}, {note:3, duration:4}]
+Así que tendremos la clase Note, que tendrá una nota y una duración.
+
+Vale, entonces cuál es la estructura subyacente de la canción?
+
+Ok, el parser de notas funciona perfecto. Pero ocurre una cosa, esas notas han de enviarse a los instruments para que les agregen otras notas para hacer los arpegios. Qué ocurrirá entonces con la duración de las notas? Podríamos tomar dos vías:
+    - Dividir la duración de la nota original entre la cantidad de notas que se agregan
+    - Mantener en las notas agregadas la misma duración.
+
+Ambas opciones podrían ser interesantes y se pueden ofrecer como opcion.
+
+30 de Junio de 2022
+El problema son las duraciones de las notas.
+El callback es llamado según la velocidad que le hayamos puesto. Pero se trata de que solo haga sonar las notas cuando les corresponda, es decir, cuando la nota anterior haya dejado de sonar. 
+

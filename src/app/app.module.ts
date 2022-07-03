@@ -19,6 +19,7 @@ import {DropdownModule} from 'primeng/dropdown';
 import {InputNumberModule} from 'primeng/inputnumber';
 import {AccordionModule} from 'primeng/accordion';
 import {InputTextareaModule} from 'primeng/inputtextarea';
+ 
 @NgModule({
   declarations: [
     AppComponent,
@@ -41,7 +42,7 @@ import {InputTextareaModule} from 'primeng/inputtextarea';
     DropdownModule,
     InputNumberModule,
     AccordionModule ,
-    InputTextareaModule
+    InputTextareaModule 
   ],
   providers: [TreeDragDropService],
   bootstrap: [AppComponent]

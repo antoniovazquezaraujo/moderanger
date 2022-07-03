@@ -1,71 +1,37 @@
-import * as Parser from './parser';
-import {Command, CommandType } from './command';
-import { Song } from './song';
-import   {Block } from './block';
-import { Part } from './part';
-import { CommandNotes } from './command.notes';
-  
+// import * as Parser from './parser';
+import { Note, Rest, SoundBit } from './note';
+import { BLOCK, Parser, BLOCK_CONTENT, NOTE, ASTKinds, SIMPLE_NOTE, NOTE_GROUP, SILENCE_SIGN, NOTE_VALUE, DURATION } from './parser';
 
-export function evaluate(tree : any) : Song | null {
-    if(tree.err === null && tree.ast){
-        return parseSong(tree.ast);
+export function parseBlock(block: BLOCK, duration: string, soundBits: SoundBit[]): SoundBit[] {
+    soundBits = parseBlockContent(block.head, duration, soundBits);
+    block.tail.forEach(t => {
+        soundBits = parseBlock(t.content, duration, soundBits);
+    });
+    return soundBits;
+}
+
+export function parseBlockContent(blockContent: BLOCK_CONTENT, duration:string, soundBits: SoundBit[]): SoundBit[] {
+    if ((blockContent.kind === ASTKinds.BLOCK_CONTENT_2)) { //note
+        soundBits.push(parseNote(blockContent.note, duration));
+        return soundBits;
+    } else { //note_group
+        return parseNoteGroup(blockContent.noteGroup, duration, soundBits);
+    } 
+}
+export function parseNote(note: NOTE, duration:string): SoundBit {
+    let finalDuration = duration;
+    if(note.duration !== null){
+        finalDuration = note.duration.value;
     }
-    console.log('Error en evaluate()' + tree.err);
-    return null;
+    return parseSimpleNote(note.simpleNote, finalDuration!);
 }  
-
-export function parseSong(at : Parser.SONG) : Song {
-    var parts = [];
-    parts.push(parsePart(at.head));
-    at.tail.forEach(t => {
-        parts.push(parsePart(t.part));
-    });
-    // return new Song(parts);
-    return new Song();
+export function parseSimpleNote(simpleNote: SIMPLE_NOTE, duration: string): SoundBit {
+    if (simpleNote.kind === ASTKinds.SIMPLE_NOTE_2) {
+        return new Note({ note: parseInt(simpleNote.note), duration:duration });
+    } else { //silence
+        return new Rest(duration);
+    }
 }
-export function parsePart(at : Parser.PART): Part{   
-    var blocks:Block[] = [];
-    blocks.push(parseBlock(at.head));
-    at.tail.forEach(t => {
-        blocks.push(parseBlock(t.block));
-    });
-    let part = new Part({});
-    return part;
-}
-
-export function parseBlock(at : Parser.BLOCK): Block{
-     
-    var commands = parseCommandGroup(at.commandGroup);
-    var content =  new CommandNotes({notes:parseBlockContent(at.blockContent)}) ;
-    return new Block( {commands:commands, blockContent:content}) ;
-}
-export function parseCommandGroup(at : Parser.COMMAND_GROUP) : Command[] {
-    var commands:Command[] = [];
-    commands.push(parseCommand(at.head));
-    at.tail.forEach(t => {
-        commands.push(parseCommand(t.command));
-    });
-    return commands;
-}
-
-export function parseBlockContent(at : Parser.BLOCK_CONTENT) : string  {
-    var values:string  =  "";
-    values = at.val;
-    return values;
-}
-export function parseChar( t: string):string{
-    return t;
-}
-export function parseCommand(at: Parser.COMMAND): Command{  
-    var commandType:CommandType = parseCommandType(at.commandType);
-    var commandValue:string = parseCommandValue(at.commandValue);
-    return new Command({commandType:commandType, commandValue:commandValue});
-}
-
-function parseCommandValue(commandValue: Parser.VALUE_ID): string {
-    return commandValue.val;
-}
-
-function parseCommandType(commandType: Parser.COMMAND_TYPE): CommandType {
-    return CommandType.PULSE; //TODO: PROVISIONAL, CAMBIAR ESTO
+export function parseNoteGroup(noteGroup: NOTE_GROUP, duration:string, soundBits: SoundBit[]): SoundBit[] {
+    return parseBlock(noteGroup.block, noteGroup.duration.value, soundBits);
 }

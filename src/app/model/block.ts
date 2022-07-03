@@ -2,7 +2,7 @@ import { NestedTreeControl } from "@angular/cdk/tree";
 import { Command, CommandType } from "./command";
 import { CommandNotes } from "./command.notes";
 
-export class Block {
+export class Block {  
     static _id:number = 0;
     id=Block._id++;
     label:string="label";

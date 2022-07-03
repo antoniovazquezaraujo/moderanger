@@ -1,43 +1,27 @@
-///////////////////////////
-//  V:Velocity
-//  P:Pulse (bits per time)
-//  W:Width (chord density)
-//  M:Mode (chord, arpeggios, etc)
-//  O:Octave
-//  S:Scale
-//  I:Inversion
-//  K:Key (Tonality)
-//  G:Gear (timbre)
-//  C:Channel (channel, 9 is percussion)
-////////////////////////////
-SONG:= 
-    head = PART
-    tail = {PART_SEPARATOR part = PART}*
-PART := 
-    head = BLOCK 
-    tail = {BLOCK_SEPARATOR block = BLOCK}*
-BLOCK := 
-    commandGroup = {COMMAND_GROUP} 
-    COMMAND_GROUP_SEPARATOR 
-    blockContent = {BLOCK_CONTENT}
-COMMAND_GROUP := 
-    head = COMMAND  
-    tail = {
-        COMMAND_SEPARATOR 
-        command= COMMAND 
-    }*
-COMMAND := 
-    commandType ={COMMAND_TYPE} 
-    commandValue={VALUE_ID}
-COMMAND_TYPE := 
-    commandType = '[0-9]+'
-VALUE_ID := 
-    val = '[0-9A-F]{1,2}'
-BLOCK_CONTENT:=
-    val = '[0-9\-\=\.]+'
-COMMAND_SEPARATOR := ','
-COMMAND_GROUP_SEPARATOR := ':'
-BLOCK_SEPARATOR := '\n' 
-SILENCE := '.'
-EXTENSION := '-'
-PART_SEPARATOR:='\n\n' 
+BLOCK:=
+    head = BLOCK_CONTENT
+    tail = {NOTE_SEPARATOR content = BLOCK}*
+BLOCK_CONTENT:= noteGroup= {NOTE_GROUP} |  note={NOTE} 
+NOTE:= 
+    duration = {DURATION}? 
+    simpleNote= SIMPLE_NOTE 
+SIMPLE_NOTE:= silence={SILENCE_SIGN} | note={NOTE_VALUE} 
+NOTE_GROUP:= 
+    duration= DURATION 
+    GROUP_START 
+    block=BLOCK 
+    GROUP_END
+GROUP_START:= '\('
+GROUP_END:= '\)'
+DURATION:= 
+    value = {DURATION_VALUE} 
+    DURATION_SIGN
+DURATION_VALUE:= '[0-9]+n\.?' | '[0-9]+m' | '[0-9]+t'
+NOTE_VALUE:= '-?\d+'
+DURATION_SIGN:= ':'
+SILENCE_SIGN:= 's'
+NOTE_SEPARATOR:= ' '
+
+
+
+

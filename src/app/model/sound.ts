@@ -25,13 +25,6 @@ export async function playNotesInChannel(notes: number[], duration: number, chan
         sound.noteOff(n, 127);
     }
 }
-
-// export async function playChord(notes: number[], duration: number) {
-//     for (var n of notes) {
-//         sound.noteOn(n, 127, duration);
-//     }
-//     await sound.wait(duration);
-// }
 export async function wait(duration: number) {
     await sound.wait(duration);
 }
@@ -57,22 +50,46 @@ export async function play(notes: number[], duration: number, playMode: PlayMode
         playArpeggio(notes, duration, playMode, channel);
     }
 }
-export async function playChord(notes: number[], duration: number, channel: number) {
+// export async function playChord(notes: number[], duration: number, channel: number) {
+//     for (var n of notes) {
+//         sound.ch(channel).noteOn(n, 127, duration);
+//     }
+//     //await sound.wait(duration);
+// }
+// export async function playArpeggio(notes: number[], duration: number, playMode: PlayMode, channel: number) {
+//     let startTime = new Date();
+//     let totalDuration = duration;
+//     notes = arpeggiate(notes, playMode);
+//     duration = Math.round(duration / ((notes.length) *1.0));
+
+//     for (var n of notes) {
+//         sound.ch(channel).noteOn(n, 127, duration);
+//         await sound.wait(duration);
+//     }
+//     let endTime = new Date();
+//     let elapsedTime = endTime.getTime() - startTime.getTime();
+//     console.log("Waiting: " + (totalDuration-elapsedTime));
+//     // await sound.wait(totalDuration - elapsedTime); 
+// }
+
+export async function playChord(notes: number[], duration: number,  channel: number ) {
     for (var n of notes) {
         sound.ch(channel).noteOn(n, 127, duration);
     }
-    //await sound.wait(duration);
+    await sound.wait(duration);
+    for (var n of notes) {
+        sound.ch(channel).noteOff(n, 127);
+    }
 }
 export async function playArpeggio(notes: number[], duration: number, playMode: PlayMode, channel: number) {
     notes = arpeggiate(notes, playMode);
-    duration = duration / notes.length * 1.0;
-
+    duration = Math.round(duration / ((notes.length) *1.0)-1);
     for (var n of notes) {
-        sound.ch(channel).noteOn(n, 127, duration);
+        await sound.ch(channel).noteOn(n, 127, duration);
         await sound.wait(duration);
+        await sound.ch(channel).noteOff(n, 127);
     }
 }
-
 
 export async function playQUEFUNCIONA(notes: number[], duration: number, playMode: PlayMode) {
     for (var n of notes.reverse()) {
