@@ -1296,3 +1296,16 @@ NOTE_SEPARATOR:= ' '
 Al interpretar esto deberíamos obtener una lista de notas y duraciones. Por ejemplo:
 [{note:3, duration:4}, {note:s, duration:2}, {note:5, duration:4}, {note:3, duration:4}, {note:5, duration:2}, {note:8, duration:4}, {note:3, duration:4}]
 Así que tendremos la clase Note, que tendrá una nota y una duración.
+
+Vale, entonces cuál es la estructura subyacente de la canción?
+
+Ok, el parser de notas funciona perfecto. Pero ocurre una cosa, esas notas han de enviarse a los instruments para que les agregen otras notas para hacer los arpegios. Qué ocurrirá entonces con la duración de las notas? Podríamos tomar dos vías:
+    - Dividir la duración de la nota original entre la cantidad de notas que se agregan
+    - Mantener en las notas agregadas la misma duración.
+
+Ambas opciones podrían ser interesantes y se pueden ofrecer como opcion.
+
+30 de Junio de 2022
+El problema son las duraciones de las notas.
+El callback es llamado según la velocidad que le hayamos puesto. Pero se trata de que solo haga sonar las notas cuando les corresponda, es decir, cuando la nota anterior haya dejado de sonar. 
+

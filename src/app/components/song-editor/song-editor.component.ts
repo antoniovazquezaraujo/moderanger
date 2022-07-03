@@ -61,6 +61,7 @@ export class SongEditorComponent implements OnInit {
         };
     };
     async playSong() {
+        // new Lab().main();
         this.songPlayer.playSong(this.song);
     }
 
