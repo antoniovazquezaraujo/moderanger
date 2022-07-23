@@ -1309,3 +1309,9 @@ Ambas opciones podrían ser interesantes y se pueden ofrecer como opcion.
 El problema son las duraciones de las notas.
 El callback es llamado según la velocidad que le hayamos puesto. Pero se trata de que solo haga sonar las notas cuando les corresponda, es decir, cuando la nota anterior haya dejado de sonar. 
 
+23 de Julio de 2022
+Ok, las notas suenan con el timing correcto, gracias a la nueva librería Tone.js. Las notas duran lo que se les marca y suenan al ritmo correcto. Está perfecto.
+IDEA: Se podría prescindir del navegador y crear un programa que solamente tomase un texto, lo interpretase y generase la música correspondiente. Una especie de compilador. Habría que cambiar el lenguage un poco, pero sería más divertido. 
+Propuesta para el nombre: Carmen. Significa "canción" en latín, y es increiblemente parecido a "Maven".
+
+Ok. El modo acordes está funcionando. Pero se impone una revisión general de todo.
