@@ -7,23 +7,24 @@ import { Song } from './song';
 import { Block } from './block';
 import { Part } from './part';
 import { SongEvent } from './event';
-import { Synth, Loop,  Time, Transport, Gain, Context, Frequency  } from 'tone';
+import { Synth, Loop, Time, Transport, Gain, Context, Frequency, PolySynth } from 'tone';
 import { Lab } from './lab';
 import { Note, Rest, SoundBit } from './note';
 import { parseBlock } from "./song.parser";
 import { Tone } from 'tone/build/esm/core/Tone';
+import { PlayMode } from './player';
 // import { Tone } from 'tone/build/esm/core/Tone';
 
 
 export class SongPlayer {
     isStop: boolean = false;
     keyboardManagedPart?: Part;
-    soundBitsToPlay: SoundBit[] = [];
+    soundBitsToPlay: SoundBit[][] = [];
     playingInstrument!: Instrument;
     currentBlockPulse: number = 0;
     //partPlayer: PartPlayer = new PartPlayer();
 
-    constructor() { 
+    constructor() {
     }
     // onNoteRelease(note: number) {
     //     var notes: number[] = [];
@@ -65,88 +66,159 @@ export class SongPlayer {
         let channel = 0;
         if (song.parts != null && song.parts.length > 0) {
             for (var part of song.parts) {
-                this.playPart(part, new Instrument(channel++));
-            } 
-        } 
-        this.playSoundBits(this.soundBitsToPlay, new Instrument(0));
-    } 
-    playSoundBits(soundBits: SoundBit[], instrument: Instrument) {
-        const synth = new Synth().toDestination();
-        Transport.stop();
-        let index = 0;
-        let prevNoteDuration  = Time("0:0"); 
-        const loop = new Loop((time: any) => { 
-              let soundBit = soundBits[index];
-              let noteDuration = soundBit.duration;
-              if(prevNoteDuration.valueOf() > 0) {                
-                prevNoteDuration=  Time(prevNoteDuration.valueOf()- new Gain().toSeconds(loop.interval));
-              }
-              if(prevNoteDuration.valueOf() <= 0){
-                if(soundBit instanceof Note){
-                    synth.triggerAttackRelease(Frequency(soundBit.note!, "midi").toFrequency(), noteDuration, time);
-                }else{
-                    // is a rest
-                }
-                prevNoteDuration = Time(noteDuration);                     
-                index = (index + 1) % soundBits.length;
-              } 
-            });            
-            loop.interval = "16n";
-            loop.iterations = Infinity;
-            Transport.bpm.value = 160;
-            Transport.start(0);
-  
-            // Try everything to kill current sound
-            Transport.cancel()
-            Transport.stop()
-          
-            // Start it again
-            Transport.start()
-            loop.start()
- 
-    } 
- 
- 
-
-    playPart(part: Part, instrument: Instrument) {
-        this.playBlock(part.block, instrument);
-    }
-    playBlock(block: Block, instrument: Instrument) {
-        for (let n: number = 0; n < block.repeatingTimes; n++) {
-            this.extractNotesToPlay(block, instrument);
-            if (block.children != null && block.children?.length > 0) {
-                for (let child of block.children) {
-                    this.playBlock(child, instrument);
-                }
+                let instrument = new Instrument(channel++);
+                this.playSoundBits(this.playPart(part, instrument), instrument);
             }
         }
     }
-    extractNotesToPlay(block: Block, instrument: Instrument) {
-        this.executeCommands(block, instrument);
-        this.soundBitsToPlay = this.soundBitsToPlay.concat(this.extractBlockSoundBits(block, instrument));
+    playSoundBits(soundBits: SoundBit[][], instrument: Instrument) {
+        const synth = new PolySynth().toDestination()
+        Transport.stop();
+        let chordIndex = 0;
+        let noteIndex = 0;
+        let prevNoteDuration = Time("0:0");
+        const loop = new Loop((time: any) => {
+            let chordSoundBits: SoundBit[] = soundBits[chordIndex];
+            if (instrument.player.playMode === PlayMode.CHORD) {
+                let noteDuration = chordSoundBits[noteIndex].duration;
+                if (prevNoteDuration.valueOf() > 0) {
+                    prevNoteDuration = Time(prevNoteDuration.valueOf() - new Gain().toSeconds(loop.interval));
+                }
+                if (prevNoteDuration.valueOf() <= 0) {
+                    let notes:any = [];
+                    for(let soundBit of chordSoundBits) {
+                        if(soundBit instanceof Note) {
+                            notes.push(Frequency(soundBit.note!, "midi").toFrequency());
+                        }
+                    } 
+                    synth.triggerAttackRelease(notes, time);
+                }   
+            } else {
+                let noteDuration = chordSoundBits[noteIndex].duration;
+                if (prevNoteDuration.valueOf() > 0) {
+                    prevNoteDuration = Time(prevNoteDuration.valueOf() - new Gain().toSeconds(loop.interval));
+                }
+                if (prevNoteDuration.valueOf() <= 0) {
+                    if (chordSoundBits[noteIndex] instanceof Note) {
+                        let chordNote:Note = chordSoundBits[noteIndex] as Note;
+                        synth.triggerAttackRelease(Frequency(chordNote.note!, "midi").toFrequency(), noteDuration, time);
+                    } else {
+                        // is a rest
+                    }
+                    prevNoteDuration = Time(noteDuration);
+                    noteIndex++;
+                }
+                if(noteIndex >= chordSoundBits.length) {
+                    noteIndex = 0;
+                    chordIndex = (chordIndex + 1) % soundBits.length;
+                }
+            }
+        });
+        loop.interval = "16n";
+        loop.iterations = Infinity;
+        Transport.bpm.value = 160;
+        Transport.start(0);
+
+        // Try everything to kill current sound
+        Transport.cancel();
+        Transport.stop();
+ 
+        // Start it again
+        Transport.start();
+        loop.start(); 
     }
-    extractBlockSoundBits(block: Block, instrument: Instrument):SoundBit[] {
-        let rootSoundBits: SoundBit[] = this.getRootNotes(block, instrument);
-        let n = 0;
-        let soundBits:SoundBit[] = [];
-        for (let soundBit of rootSoundBits) {
-            let duration = soundBit.duration;
-            if (soundBit instanceof Note && soundBit !== null){ 
-                let note =soundBit.note;
-                instrument.player.selectedNote = note!;
-                let notes:number[] = this.getSelectedNotes(instrument);
-                let seconds:number = Time(duration).toSeconds();
-                seconds = seconds / notes.length;
-                let durationByNote = Time(seconds).toNotation();
-                notes.forEach(note => {
-                    soundBits.push(new Note({duration:durationByNote, note:note}));
-                });
-            }else{ // is a rest
-                soundBits.push(new Rest( duration ));
-            }            
+
+    // playPart(part: Part, instrument: Instrument) {
+    //     this.playBlock(part.block, instrument);
+    // }
+    // playBlock(block: Block, instrument: Instrument) {
+    //     for (let n: number = 0; n < block.repeatingTimes; n++) {
+    //         if(block.blockContent.notes.length > 0) {
+    //             this.extractNotesToPlay(block, instrument);
+    //         }
+    //         if (block.children != null && block.children?.length > 0) {
+    //             for (let child of block.children) {
+    //                 this.playBlock(child, instrument);
+    //             }
+    //         }
+    //     }
+    // }
+
+    playPart(part: Part, instrument: Instrument) :SoundBit[][] {
+        return this.playBlock(part.block, [], instrument);
+    }
+    playBlock(block: Block, soundBits:SoundBit[][], instrument: Instrument): SoundBit[][] {
+        for (let n: number = 0; n < block.repeatingTimes; n++) {
+            if(block.blockContent.notes.length > 0) {
+                soundBits = soundBits.concat(this.extractNotesToPlay(block, soundBits, instrument));
+            }
+            if (block.children != null && block.children?.length > 0) {
+                for (let child of block.children) {
+                    soundBits = soundBits.concat(this.playBlock(child, soundBits, instrument));
+                    // return this.playBlock2(child, soundBits, instrument);
+                }
+            }
         }
         return soundBits;
     }
+    extractNotesToPlay(block: Block, soundBits:SoundBit[][], instrument: Instrument): SoundBit[][] {
+        this.executeCommands(block, instrument);
+        soundBits.push(this.extractBlockSoundBits(block, instrument));
+        return soundBits;
+    }
+
+    extractBlockSoundBits(block: Block, instrument: Instrument): SoundBit[] {
+        let rootSoundBits: SoundBit[] = this.getRootNotes(block, instrument);
+        let n = 0;
+        let soundBits: SoundBit[] = [];
+        for (let soundBit of rootSoundBits) {
+            let duration = soundBit.duration;
+            if (soundBit instanceof Note && soundBit !== null) {
+                let note = soundBit.note;
+                instrument.player.selectedNote = note!;
+                let notes: number[] = this.getSelectedNotes(instrument);
+                let seconds: number = Time(duration).toSeconds();
+                seconds = seconds / notes.length;
+                let durationByNote = Time(seconds).toNotation();
+                let chordNotes: SoundBit[] = [];
+                notes.forEach(note => {
+                    chordNotes.push(new Note({ duration: durationByNote, note: note }));
+                });
+                soundBits = soundBits.concat(chordNotes);
+            } else { // is a rest
+                soundBits = soundBits.concat([new Rest(duration)]);
+            }
+        }
+        return soundBits;
+    }
+    // extractNotesToPlay(block: Block, instrument: Instrument) {
+    //     this.executeCommands(block, instrument);
+    //    this.soundBitsToPlay.push(this.extractBlockSoundBits(block, instrument));
+    // }
+    // extractBlockSoundBits(block: Block, instrument: Instrument): SoundBit[] {
+    //     let rootSoundBits: SoundBit[] = this.getRootNotes(block, instrument);
+    //     let n = 0;
+    //     let soundBits: SoundBit[] = [];
+    //     for (let soundBit of rootSoundBits) {
+    //         let duration = soundBit.duration;
+    //         if (soundBit instanceof Note && soundBit !== null) {
+    //             let note = soundBit.note;
+    //             instrument.player.selectedNote = note!;
+    //             let notes: number[] = this.getSelectedNotes(instrument);
+    //             let seconds: number = Time(duration).toSeconds();
+    //             seconds = seconds / notes.length;
+    //             let durationByNote = Time(seconds).toNotation();
+    //             let chordNotes: SoundBit[] = [];
+    //             notes.forEach(note => {
+    //                 chordNotes.push(new Note({ duration: durationByNote, note: note }));
+    //             });
+    //             soundBits = soundBits.concat(chordNotes);
+    //         } else { // is a rest
+    //             soundBits = soundBits.concat([new Rest(duration)]);
+    //         }
+    //     }
+    //     return soundBits;
+    // }
 
     /**
      * Aquí es donde hay que tomar las notas o los bloques de notas y extraer solamente las notas
@@ -156,23 +228,23 @@ export class SongPlayer {
         let parser = new Parser(block.blockContent?.notes);
         const tree = parser.parse();
         let soundBits: SoundBit[] = [];
-        if(tree.ast){ 
-          return parseBlock(tree.ast, "1n", soundBits) ;
-        }        
-        return [];
+        if (tree.ast) {
+            return parseBlock(tree.ast, "1n", soundBits);
+        }
+        return [];  
     }
     getSelectedNotes(instrument: Instrument): number[] {
         let soundBitsToPlay = instrument.player.getSelectedNotes(instrument.getScale(), instrument.tonality);
         return soundBitsToPlay;
     }
 
-    executeCommands(block: Block, instrument: Instrument):void {
+    executeCommands(block: Block, instrument: Instrument): void {
         block.commands?.forEach(async command => {
             this.executeCommand(block, command, instrument);
         });
     }
 
-    executeCommand(block: Block, command: Command, instrument: Instrument):void {
+    executeCommand(block: Block, command: Command, instrument: Instrument): void {
         switch (+command.commandType) {
             case CommandType.GAP:
                 instrument.player.gap = parseInt(command.commandValue, 10);

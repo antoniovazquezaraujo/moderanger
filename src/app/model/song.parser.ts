@@ -8,7 +8,7 @@ export function parseBlock(block: BLOCK, duration: string, soundBits: SoundBit[]
         soundBits = parseBlock(t.content, duration, soundBits);
     });
     return soundBits;
-}
+} 
 
 export function parseBlockContent(blockContent: BLOCK_CONTENT, duration:string, soundBits: SoundBit[]): SoundBit[] {
     if ((blockContent.kind === ASTKinds.BLOCK_CONTENT_2)) { //note
