@@ -1315,3 +1315,21 @@ IDEA: Se podría prescindir del navegador y crear un programa que solamente toma
 Propuesta para el nombre: Carmen. Significa "canción" en latín, y es increiblemente parecido a "Maven".
 
 Ok. El modo acordes está funcionando. Pero se impone una revisión general de todo.
+
+Bien, planifiquemos la dirección a tomar. Cosas pendientes:
+- Documentar todos los cambios que ha traído la librería Tone.js ( medición del tiempo sobre todo)
+- Agregar sonidos distintos
+- A veces se satura el sonido, revisar si se crean demasiados objetos o algo
+- Agregar percusión
+- Play parts simultaneamente. No está funcionando
+- Repite tres veces los bloques, no sé por qué.
+- Arreglar ese horrible interfaz gráfico. Se ve todo fatal
+- Empezar a usar pull requests, y nombrar las issues y las ramas y las prs bien.
+- Eliminar siempre las ramas mezcladas
+- Reescribir el documento de música de partículas desde la nueva perspectiva
+- Renombrarlo a Carmen, definitivamente.
+- Agregar volumen, ataque, decaimiento, sostenimiento y liberación de las notas.
+- Agregar barreras de espera entre partes
+- Revisar toda la gramática y "humanizarla", quizá sea más práctico usar Puppeter y eliminar el interfaz gráfico.
+- Agregar metrónomo
+- 
