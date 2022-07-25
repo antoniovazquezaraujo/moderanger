@@ -18,7 +18,6 @@ import { PlayMode } from './player';
 export class SongPlayer {
     isStop: boolean = false;
     keyboardManagedPart?: Part;
-    soundBitsToPlay: SoundBit[][] = [];
     playingInstrument!: Instrument;
     currentBlockPulse: number = 0;
     //partPlayer: PartPlayer = new PartPlayer();
@@ -60,7 +59,6 @@ export class SongPlayer {
     }
 
     playSong(song: Song) {
-        this.soundBitsToPlay = [];
         this.isStop = false;
         let channel = 0;
         if (song.parts != null && song.parts.length > 0) {
@@ -92,7 +90,13 @@ export class SongPlayer {
                     } 
                     synth.triggerAttackRelease(notes, noteDuration, time);
                     prevNoteDuration = Time(noteDuration);
-                    chordIndex = (chordIndex + 1) % soundBits.length;
+                    if(chordIndex < soundBits.length - 1) {
+                        chordIndex++;
+                    }else{
+                        chordIndex = 0;
+                        Transport.stop();
+                    }
+                    // chordIndex = (chordIndex + 1) % soundBits.length;
                 }   
             } else {
                 let noteDuration = chordSoundBits[noteIndex].duration;
@@ -111,7 +115,12 @@ export class SongPlayer {
                 }
                 if(noteIndex >= chordSoundBits.length) {
                     noteIndex = 0;
-                    chordIndex = (chordIndex + 1) % soundBits.length;
+                    if(chordIndex < soundBits.length - 1) {
+                        chordIndex++;
+                    }else{
+                        chordIndex = 0;
+                        Transport.stop();
+                    }
                 }
             }
         });
@@ -130,24 +139,41 @@ export class SongPlayer {
     }
 
     playPart(part: Part, instrument: Instrument) :SoundBit[][] {
-        return this.playBlock(part.block, [], instrument);
+        return this.playBlock(part.block, [], instrument, part.block.repeatingTimes);
     }
-    playBlock(block: Block, soundBits:SoundBit[][], instrument: Instrument): SoundBit[][] {
-        for (let n: number = 0; n < block.repeatingTimes; n++) {
+    playBlock(block: Block, soundBits:SoundBit[][], instrument: Instrument, repeatingTimes:number): SoundBit[][] {
+        if( repeatingTimes > 0) {
+            soundBits = this.extractNotesToPlay(block, soundBits, instrument);
+            if (block.children != null && block.children?.length > 0) {
+                let childrenSoundBits: SoundBit[][] = [];
+                for (let child of block.children!) {
+                    childrenSoundBits = childrenSoundBits.concat(this.playBlock(child, childrenSoundBits, instrument, child.repeatingTimes));
+                }
+                soundBits = soundBits.concat(this.playBlock(block, childrenSoundBits, instrument,  0)); 
+            }
+            return this.playBlock(block, soundBits, instrument, repeatingTimes-1);            
+        }
+        return soundBits;
+    }
+    playBlock2(block: Block, soundBits:SoundBit[][], instrument: Instrument, repeatingTimes:number): SoundBit[][] {
+        if(repeatingTimes > 0) {
             if(block.blockContent.notes.length > 0) {
                 soundBits = soundBits.concat(this.extractNotesToPlay(block, soundBits, instrument));
             }
             if (block.children != null && block.children?.length > 0) {
+                let childrenSoundBits:SoundBit[][] = [];
                 for (let child of block.children) {
-                    soundBits = soundBits.concat(this.playBlock(child, soundBits, instrument));
-                }
-            }
+                    childrenSoundBits = childrenSoundBits.concat(this.playBlock(child, childrenSoundBits, instrument, child.repeatingTimes));
+                }                
+                soundBits = soundBits.concat(childrenSoundBits);
+            }            
+            return this.playBlock(block, soundBits, instrument, repeatingTimes-1);
+        }else{
+            return soundBits;
         }
-        return soundBits;
     }
     extractNotesToPlay(block: Block, soundBits:SoundBit[][], instrument: Instrument): SoundBit[][] {
         this.executeCommands(block, instrument);
-        // soundBits.push(this.extractBlockSoundBits(block, instrument));
         soundBits = soundBits.concat(this.extractBlockSoundBits(block, instrument));
         return soundBits;
     }
