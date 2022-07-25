@@ -155,23 +155,6 @@ export class SongPlayer {
         }
         return soundBits;
     }
-    playBlock2(block: Block, soundBits:SoundBit[][], instrument: Instrument, repeatingTimes:number): SoundBit[][] {
-        if(repeatingTimes > 0) {
-            if(block.blockContent.notes.length > 0) {
-                soundBits = soundBits.concat(this.extractNotesToPlay(block, soundBits, instrument));
-            }
-            if (block.children != null && block.children?.length > 0) {
-                let childrenSoundBits:SoundBit[][] = [];
-                for (let child of block.children) {
-                    childrenSoundBits = childrenSoundBits.concat(this.playBlock(child, childrenSoundBits, instrument, child.repeatingTimes));
-                }                
-                soundBits = soundBits.concat(childrenSoundBits);
-            }            
-            return this.playBlock(block, soundBits, instrument, repeatingTimes-1);
-        }else{
-            return soundBits;
-        }
-    }
     extractNotesToPlay(block: Block, soundBits:SoundBit[][], instrument: Instrument): SoundBit[][] {
         this.executeCommands(block, instrument);
         soundBits = soundBits.concat(this.extractBlockSoundBits(block, instrument));
