@@ -17,7 +17,7 @@ DURATION:=
     value = {DURATION_VALUE} 
     DURATION_SIGN
 DURATION_VALUE:= '[0-9]+n\.?' | '[0-9]+m' | '[0-9]+t'
-NOTE_VALUE:= '-?\d+'
+NOTE_VALUE:= '-?[0-9]+'
 DURATION_SIGN:= ':'
 SILENCE_SIGN:= 's'
 NOTE_SEPARATOR:= ' '

@@ -14,11 +14,10 @@ export class Note extends SoundBit{
     constructor(part:Partial<Note>){
         if(part.duration){
             super(part.duration);
-        }
-        else{
+        }else{
             super("1n");
         }
-        if(part.note)  {
+        if(part.note || part.note === 0){  
             this.note = part.note;
         }
     }
