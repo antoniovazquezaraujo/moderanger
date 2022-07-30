@@ -19,7 +19,7 @@
 *     value = {DURATION_VALUE} 
 *     DURATION_SIGN
 * DURATION_VALUE:= '[0-9]+n\.?' | '[0-9]+m' | '[0-9]+t'
-* NOTE_VALUE:= '-?\d+'
+* NOTE_VALUE:= '-?[0-9]+'
 * DURATION_SIGN:= ':'
 * SILENCE_SIGN:= 's'
 * NOTE_SEPARATOR:= ' '
@@ -309,7 +309,7 @@ export class Parser {
         return this.regexAccept(String.raw`(?:[0-9]+t)`, $$dpth + 1, $$cr);
     }
     public matchNOTE_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<NOTE_VALUE> {
-        return this.regexAccept(String.raw`(?:-?\d+)`, $$dpth + 1, $$cr);
+        return this.regexAccept(String.raw`(?:-?[0-9]+)`, $$dpth + 1, $$cr);
     }
     public matchDURATION_SIGN($$dpth: number, $$cr?: ErrorTracker): Nullable<DURATION_SIGN> {
         return this.regexAccept(String.raw`(?::)`, $$dpth + 1, $$cr);

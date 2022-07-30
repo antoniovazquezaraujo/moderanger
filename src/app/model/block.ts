@@ -11,9 +11,7 @@ export class Block {
     pulse =0 ;
     repeatingTimes = 1;   
     children?:Block[];
-    expandedIcon:string= "pi pi-folder-open";
-    collapsedIcon:string= "pi pi-folder";
-
+ 
     constructor(opts?: Partial<Block>) {
         if (opts?.pulse != null) {
             this.pulse = opts.pulse;
@@ -30,12 +28,7 @@ export class Block {
         if (opts?.children != undefined && opts.children.length > 0) {
             this.children = opts.children.map(val => new Block(val));
         }
-        if (opts?.expandedIcon != null) {
-            this.expandedIcon = opts.expandedIcon;
-        }
-        if (opts?.collapsedIcon != null) {
-            this.collapsedIcon= opts.collapsedIcon;
-        }
+
     }
     resetPulse(){
         this.pulse = 0;

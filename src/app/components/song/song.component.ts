@@ -22,12 +22,7 @@ export class SongComponent implements OnInit {
     addPart() {
         this.song.addPart();
     }
-    addCommand() {
-        this.song.addCommand();
-    }
-    addNotes() {
-        this.song.addNotes();
-    }
+
     getParts() {
         return this.song.parts;
     }
