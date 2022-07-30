@@ -1332,4 +1332,14 @@ Bien, planifiquemos la dirección a tomar. Cosas pendientes:
 - Agregar barreras de espera entre partes
 - Revisar toda la gramática y "humanizarla", quizá sea más práctico usar Puppeter y eliminar el interfaz gráfico.
 - Agregar metrónomo
-- 
+
+
+30 de Julio de 2022
+Respecto a los instrumentos.
+Vale, tenemos unido el altiguo instrument con el player, de manera que ahora creamos otra nueva clase Instrument que es la que representa al instrumento real de Tone.js. Bien.
+Ahora hace falta poder manejar varios instrumentos de estos y que una parte pueda seleccionar uno determinado.
+Para empezar, el usuario ha de definir para una canción que instrumentos desea crear y configurar cada uno.
+Habrá que identificarlos con un nombre y permitir que, en cualquier momento, una parte decida cambiar de instrumento. 
+Podemos crear un instrumento por defecto que podría ser el piano, y ponerlo si no se pide otro.
+Entonces más adelante, habrá que agregar un comando para asignar el instrumento deseado.
+Así que, de momento, tendremos una lista de instrumentos disponibles que solamente contendrá un piano. Y todas las partes utilizarán el mismo. Habrá que ver si esto es posible, porque las partes suenan simultáneamente. Quizá se necesite crear una lista nueva para cada parte. De momento solo tenemos bloques, y un bloque trabaja siempre con un instrumento, y sus subbloques también. Vamos con esto de momento.

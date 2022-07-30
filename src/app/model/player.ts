@@ -1,5 +1,8 @@
+import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
 import { Instrument } from "./instrument";
 import { getScaleByNum } from "./scale";
+import { Tonality} from './scale';
+import { Song } from "./song";
 
 export function getPlayModeName(order:number):string{
     return PlayMode[order % 12];
@@ -20,6 +23,12 @@ export enum PlayMode {
     ODD_DESC_EVEN_ASC = 12
 }
 export class Player{
+    channel:number=0;
+    private scale: number = 0;        //Escala usada (0-5)
+    tonality: number = Tonality.D;     //En qué tonalidad está el círculo (1-12)
+    timbre: number = 0;       //El sonido seleccionado para ese círculo
+    notes: number[] = [];      //Notas seleccionadas para tocar por un player    
+
     selectedNote: number = 0; //Nota que está seleccionada para sonar
     density: number = 0;      //Densidad de notas, mono o acordes de x notas (0-6)
     inversion: number = 0;    //0-6 Nota más baja del acorde que suena (1,3,5,7, etc)
@@ -29,7 +38,11 @@ export class Player{
     shiftSize=0;
     shiftValue=0;
     playMode: PlayMode= PlayMode.CHORD;
+    instrument:Instrument = Song.getDefultInstrument();
   
+    constructor(channel:number){
+        this.channel=channel;
+    }
     getSelectedNotes(scaleNum:number, tonality:number):number[]{
         var scale = getScaleByNum(scaleNum);       
         var tunnedNote = this.selectedNote;
@@ -38,8 +51,8 @@ export class Player{
         var invertedNotes = this.setInversion(octavedNotes);
         return invertedNotes;
     }
-    selectNotes(instrument:Instrument):void{
-        instrument.notes = this.getSelectedNotes(instrument.getScale(), instrument.tonality);
+    selectNotes():void{
+        this.notes = this.getSelectedNotes(this.getScale(), this.tonality);
     }  
     setInversion(notes: number[]):number[] {
         var invertedNotes:number[] =[];
@@ -59,4 +72,24 @@ export class Player{
         }
         return octavedNotes;
     }
+
+    selectNextScale(){
+        this.scale++;
+        this.scale%=6;  
+    }
+    selectPrevScale(){
+        this.scale--;
+        if(this.scale < 0){
+            this.scale = 5;
+        }
+    }
+    selectScale(scale:number){
+        this.scale=scale%6;
+    }
+    getScale():number{
+        return this.scale;
+    }
+    triggerAttackRelease(notes: Frequency[] | Frequency, duration: Time | Time[], time?: Time, velocity?: NormalRange){
+        this.instrument.synth.triggerAttackRelease(notes, duration, time, velocity);
+    }     
 }
