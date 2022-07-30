@@ -1,5 +1,5 @@
 // import { Block } from "./block";
-// import { Instrument } from "./instrument";
+// import { Player } from "./player";
 // import { Part } from "./part";
 // import { Stack } from "./stack";
 // import { SongPlayer } from "./song.player";
@@ -8,16 +8,16 @@
 //     songPlayer!:SongPlayer;
 //     blockIndex: number = 0;
 //     blockStack: Stack = new Stack();
-//     instrument!: Instrument;
+//     player!: Player;
 
 //     //blocks:Block[] = [];
-//     async playPart(songPlayer:SongPlayer, part: Part, instrument: Instrument) {
+//     async playPart(songPlayer:SongPlayer, part: Part, player: Player) {
 //         this.songPlayer = songPlayer;
-//         this.instrument = instrument;
-//         this.parseRepetitions(part.blocks, instrument)
-//         await this.playBlocks(part.blocks, instrument);
+//         this.player = player;
+//         this.parseRepetitions(part.blocks, player)
+//         await this.playBlocks(part.blocks, player);
 //     }
-//     parseRepetitions(blocks:Block[], instrument:Instrument){
+//     parseRepetitions(blocks:Block[], player:Player){
 //         let id:number = 0;
 //       //  this.blocks = [];
 //         for(let block of blocks){
@@ -27,17 +27,17 @@
 //         }
 //     }
 //     async playBlockNotes(block: Block) {
-//         await this.songPlayer.playBlockNotes(block, this.instrument);
+//         await this.songPlayer.playBlockNotes(block, this.player);
 //     }
 
-//     async playBlocks(blocks: Block[], instrument: Instrument) {
+//     async playBlocks(blocks: Block[], player: Player) {
 //         this.blockIndex = 0;
 //         let block: Block;
 //         this.blockStack.reset();
 //         block = blocks[this.blockIndex];
 
 //         while (this.blockIndex < blocks.length) {
-//             this.songPlayer.parseBlock(block, instrument);
+//             this.songPlayer.parseBlock(block, player);
 //             if (this.isRepeating(block)) {
 //                 if (this.isInTheStack(block)) {
 //                     this.decStackedTimes();

@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { Block } from 'src/app/model/block';
 import { Command } from 'src/app/model/command';
-import { Instrument } from 'src/app/model/instrument';
+import { Player } from 'src/app/model/player';
 import { Keyboard } from 'src/app/model/keyboard';
 import { Lab } from 'src/app/model/lab';
 import { Part } from 'src/app/model/part';
@@ -76,7 +76,7 @@ export class SongEditorComponent implements OnInit {
         this.songPlayer.stop();
     }
     async playPart(part: Part) {
-        this.songPlayer.playPart(part, new Instrument(3));
+        this.songPlayer.playPart(part, new Player(3));
     }
 
 }
