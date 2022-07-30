@@ -1,7 +1,9 @@
 export class SoundBit {
         duration:string;
-        constructor(duration:string){
+        note?:number|undefined;
+        constructor(duration:string, note?:number){
             this.duration = duration;
+            this.note = note;
         }
 }
 export class Rest extends SoundBit{
@@ -10,15 +12,7 @@ export class Rest extends SoundBit{
     }
 }
 export class Note extends SoundBit{
-    note?:number;
-    constructor(part:Partial<Note>){
-        if(part.duration){
-            super(part.duration);
-        }else{
-            super("1n");
-        }
-        if(part.note || part.note === 0){  
-            this.note = part.note;
-        }
+    constructor(duration:string, note:number){
+        super(duration, note);
     }
 }

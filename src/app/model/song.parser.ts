@@ -9,14 +9,14 @@ export function parseBlock(block: BLOCK, duration: string, soundBits: SoundBit[]
     });
     return soundBits;
 } 
-
+ 
 export function parseBlockContent(blockContent: BLOCK_CONTENT, duration:string, soundBits: SoundBit[]): SoundBit[] {
     if ((blockContent.kind === ASTKinds.BLOCK_CONTENT_2)) { //note
         soundBits.push(parseNote(blockContent.note, duration));
         return soundBits;
     } else { //note_group
         return parseNoteGroup(blockContent.noteGroup, duration, soundBits);
-    } 
+    }
 }
 export function parseNote(note: NOTE, duration:string): SoundBit {
     let finalDuration = duration;
@@ -27,7 +27,7 @@ export function parseNote(note: NOTE, duration:string): SoundBit {
 }  
 export function parseSimpleNote(simpleNote: SIMPLE_NOTE, duration: string): SoundBit {
     if (simpleNote.kind === ASTKinds.SIMPLE_NOTE_2) {
-        return new Note({ note: parseInt(simpleNote.note), duration:duration });
+        return new Note(duration, parseInt(simpleNote.note));
     } else { //silence
         return new Rest(duration);
     }

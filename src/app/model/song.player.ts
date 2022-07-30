@@ -24,7 +24,7 @@ export class SongPlayer {
         Transport.stop(); 
     }
 
-    playSong(song: Song) {
+    async playSong(song: Song) {
         Transport.bpm.value = 160;
         Transport.cancel();
         Transport.stop(); 
@@ -33,13 +33,13 @@ export class SongPlayer {
         if (song.parts != null && song.parts.length > 0) {
             for (var part of song.parts) {
                 let player = new Player(channel++);
-                this.playSoundBits(this.playPart(part, player), player);
+                this.playSoundBits(await this.playPart(part, player), player);
             }
         }
 
     }
 
-    playPart(part: Part, player: Player) :SoundBit[][] {
+    async playPart(part: Part, player: Player) :Promise<SoundBit[][]> {
         return this.playBlock(part.block, [], player, part.block.repeatingTimes);
     }
     playBlock(block: Block, soundBits:SoundBit[][], player: Player, repeatingTimes:number): SoundBit[][] {
@@ -75,7 +75,7 @@ export class SongPlayer {
                 let notes: number[] = this.getSelectedNotes(player);
                 let seconds: number = Time(duration).toSeconds();
                 if (player.playMode === PlayMode.CHORD) {
-                
+                 
                 } else {
                     seconds = seconds / notes.length;                
                 }
@@ -83,11 +83,13 @@ export class SongPlayer {
                 let durationByNote = Time(seconds).toNotation();
                 let chordNotes: SoundBit[] = [];
                 notes.forEach(note => {
-                    chordNotes.push(new Note({ duration: durationByNote, note: note }));
+                    chordNotes.push(new Note(durationByNote,  note ));
                 });
                 soundBits = soundBits.concat([chordNotes]);
             } else { // is a rest
-                soundBits = soundBits.concat([new Rest(duration)]);
+                let chordNotes: SoundBit[] = [];
+                chordNotes.push(new Rest(duration));
+                soundBits = soundBits.concat([chordNotes]);
             }
         }
         return soundBits;
@@ -186,7 +188,7 @@ export class SongPlayer {
                         chordIndex++;
                     }else{
                         chordIndex = 0;
-                        Transport.stop();
+                        loop.stop();
                     }
                 }   
             } else {
@@ -210,7 +212,7 @@ export class SongPlayer {
                         chordIndex++;
                     }else{
                         chordIndex = 0;
-                        Transport.stop();
+                        loop.stop();
                     }
                 }
             }
