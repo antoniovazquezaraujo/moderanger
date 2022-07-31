@@ -1,12 +1,12 @@
 import {Block} from './block';
 import { Command, CommandType } from './command';
 import { CommandNotes } from './command.notes';
-import { Instrument } from './instrument';
+import { MusicalInstrument } from './instrument';
 import { Part } from './part';
 import { Piano } from './piano';
 export class Song {
     public parts?:Part[];
-    public static instruments?:Instrument[];
+    public static instruments?:MusicalInstrument[];
 
     constructor(){
         if(Song.instruments == null ){
@@ -21,7 +21,7 @@ export class Song {
         this.parts!.push(new Part());
     }
 
-    static getDefultInstrument():Instrument{
+    static getDefultInstrument():MusicalInstrument{
         return Song.instruments![0];
     }
 }
