@@ -16,3 +16,16 @@ export class Note extends SoundBit{
         super(duration, note);
     }
 }
+export class NoteGroup extends SoundBit{
+    notes:number[];
+    constructor(duration:string, notes:number[]){
+        super(duration);
+        this.notes = notes;
+    }
+}
+export class Arpeggio extends NoteGroup{
+
+}
+export class Chord extends NoteGroup{
+
+}

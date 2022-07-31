@@ -1343,3 +1343,8 @@ Habrá que identificarlos con un nombre y permitir que, en cualquier momento, un
 Podemos crear un instrumento por defecto que podría ser el piano, y ponerlo si no se pide otro.
 Entonces más adelante, habrá que agregar un comando para asignar el instrumento deseado.
 Así que, de momento, tendremos una lista de instrumentos disponibles que solamente contendrá un piano. Y todas las partes utilizarán el mismo. Habrá que ver si esto es posible, porque las partes suenan simultáneamente. Quizá se necesite crear una lista nueva para cada parte. De momento solo tenemos bloques, y un bloque trabaja siempre con un instrumento, y sus subbloques también. Vamos con esto de momento.
+
+Respecto al play mode, algo está muy mal aquí. Debería ir incluído en las propias notas el modo de ejecución, tal como van los efectos, las inversiones, etc, aunque de manera diferente.
+Quizá un arpegio y un acorde sean también un SoundBit.
+Ok, reparado. Ahora los acordes y los arpegios son SoundBits y se hacen sonar de distinta forma.
+Funciona perfecto.
