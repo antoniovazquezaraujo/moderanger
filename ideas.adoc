@@ -1348,3 +1348,19 @@ Respecto al play mode, algo está muy mal aquí. Debería ir incluído en las pr
 Quizá un arpegio y un acorde sean también un SoundBit.
 Ok, reparado. Ahora los acordes y los arpegios son SoundBits y se hacen sonar de distinta forma.
 Funciona perfecto.
+
+Volvemos a lo pendiente:
+- Documentar todos los cambios que ha traído la librería Tone.js ( medición del tiempo sobre todo)
+- Agregar sonidos distintos
+- A veces se satura el sonido, revisar si se crean demasiados objetos o algo
+- Agregar percusión
+- Arreglar ese horrible interfaz gráfico. Se ve todo fatal
+- Reescribir el documento de música de partículas desde la nueva perspectiva
+- Renombrarlo a Carmen, definitivamente.
+- Agregar volumen, ataque, decaimiento, sostenimiento y liberación de las notas.
+- Agregar barreras de espera entre partes
+- Revisar toda la gramática y "humanizarla", quizá sea más práctico usar Puppeter y eliminar el interfaz gráfico.
+- Agregar metrónomo
+
+Lo que más prisa corre parece lo de los sonidos, el sonido actual es insoportable, y el piano era fantástico. Vamos a intentar recuperarlo.
+Vale, recuperado. Vamos a examinar el asunto de arrastrar y soltar, que no respeta las repeticiones.

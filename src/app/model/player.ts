@@ -1,5 +1,5 @@
 import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
-import { Instrument } from "./instrument";
+import { MusicalInstrument } from "./instrument";
 import { getScaleByNum } from "./scale";
 import { Tonality} from './scale';
 import { Song } from "./song";
@@ -38,7 +38,7 @@ export class Player{
     shiftSize=0;
     shiftValue=0;
     playMode: PlayMode= PlayMode.CHORD;
-    instrument:Instrument = Song.getDefultInstrument();
+    instrument:MusicalInstrument = Song.getDefultInstrument();
   
     constructor(channel:number){
         this.channel=channel;
@@ -90,6 +90,6 @@ export class Player{
         return this.scale;
     }
     triggerAttackRelease(notes: Frequency[] | Frequency, duration: Time | Time[], time?: Time, velocity?: NormalRange){
-        this.instrument.synth.triggerAttackRelease(notes, duration, time, velocity);
+        this.instrument.triggerAttackRelease(notes, duration, time, velocity);
     }     
 }

@@ -1,13 +1,13 @@
-import { PolySynth } from "tone";
+import { Sampler, PolySynth } from "tone";
 import { NormalRange, Frequency, Time } from "tone/build/esm/core/type/Units";
  
-export class Instrument{
-    synth:PolySynth;
-    constructor(synth:PolySynth){
-        this.synth = synth;
+export class MusicalInstrument{
+    instrument:Sampler|PolySynth;
+    constructor(instrument:Sampler|PolySynth){
+        this.instrument = instrument;
     }
     triggerAttackRelease(notes: Frequency[] | Frequency, duration: Time | Time[], time?: Time, velocity?: NormalRange){
-        this.synth.triggerAttackRelease(notes, duration, time, velocity);
-    }
+        this.instrument.triggerAttackRelease(notes, duration, time, velocity);
+    } 
         
 }
