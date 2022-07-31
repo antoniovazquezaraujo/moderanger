@@ -2,7 +2,7 @@ import { Frequency, Gain, Loop, Sampler, Time, Transport } from 'tone';
 import { Block } from './block';
 import { Command, CommandType } from './command';
 import { Player } from "./player";
-import { Note, Rest, SoundBit } from './note';
+import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
 import { Parser } from "./parser";
 import { Part } from './part';
 import { PlayMode } from './player';
@@ -21,13 +21,13 @@ export class SongPlayer {
 
     stop() {
         Transport.cancel();
-        Transport.stop(); 
+        Transport.stop();
     }
 
     async playSong(song: Song) {
-        Transport.bpm.value = 160;
+        Transport.bpm.value = 100;
         Transport.cancel();
-        Transport.stop(); 
+        Transport.stop();
         Transport.start();
         let channel = 0;
         if (song.parts != null && song.parts.length > 0) {
@@ -39,34 +39,34 @@ export class SongPlayer {
 
     }
 
-    async playPart(part: Part, player: Player) :Promise<SoundBit[][]> {
+    async playPart(part: Part, player: Player): Promise<SoundBit[]> {
         return this.playBlock(part.block, [], player, part.block.repeatingTimes);
     }
-    playBlock(block: Block, soundBits:SoundBit[][], player: Player, repeatingTimes:number): SoundBit[][] {
-        if( repeatingTimes > 0) {
+    playBlock(block: Block, soundBits: SoundBit[], player: Player, repeatingTimes: number): SoundBit[] {
+        if (repeatingTimes > 0) {
             soundBits = this.extractNotesToPlay(block, soundBits, player);
             if (block.children != null && block.children?.length > 0) {
-                let childrenSoundBits: SoundBit[][] = [];
+                let childrenSoundBits: SoundBit[] = [];
                 for (let child of block.children!) {
                     childrenSoundBits = childrenSoundBits.concat(this.playBlock(child, childrenSoundBits, player, child.repeatingTimes));
                 }
-                soundBits = soundBits.concat(this.playBlock(block, childrenSoundBits, player,  0)); 
+                soundBits = soundBits.concat(this.playBlock(block, childrenSoundBits, player, 0));
             }
-            return this.playBlock(block, soundBits, player, repeatingTimes-1);            
+            return this.playBlock(block, soundBits, player, repeatingTimes - 1);
         }
         return soundBits;
     }
 
-    extractNotesToPlay(block: Block, soundBits:SoundBit[][], player: Player): SoundBit[][] {
+    extractNotesToPlay(block: Block, soundBits: SoundBit[], player: Player): SoundBit[] {
         this.executeCommands(block, player);
         soundBits = soundBits.concat(this.extractBlockSoundBits(block, player));
         return soundBits;
     }
- 
-    extractBlockSoundBits(block: Block, player: Player): SoundBit[][] {
+
+    extractBlockSoundBits(block: Block, player: Player): SoundBit[] {
         let rootSoundBits: SoundBit[] = this.getRootNotes(block, player);
         let n = 0;
-        let soundBits: SoundBit[][] = [];
+        let soundBits: SoundBit[] = [];
         for (let soundBit of rootSoundBits) {
             let duration = soundBit.duration;
             if (soundBit instanceof Note && soundBit !== null) {
@@ -75,21 +75,16 @@ export class SongPlayer {
                 let notes: number[] = this.getSelectedNotes(player);
                 let seconds: number = Time(duration).toSeconds();
                 if (player.playMode === PlayMode.CHORD) {
-                 
+                    let chord = new Chord(duration, notes);
+                    soundBits = soundBits.concat(chord);
                 } else {
-                    seconds = seconds / notes.length;                
+                    let arpeggio = new Arpeggio(duration, notes);
+                    soundBits = soundBits.concat(arpeggio);
                 }
-
-                let durationByNote = Time(seconds).toNotation();
-                let chordNotes: SoundBit[] = [];
-                notes.forEach(note => {
-                    chordNotes.push(new Note(durationByNote,  note ));
-                });
-                soundBits = soundBits.concat([chordNotes]);
             } else { // is a rest
                 let chordNotes: SoundBit[] = [];
                 chordNotes.push(new Rest(duration));
-                soundBits = soundBits.concat([chordNotes]);
+                soundBits = soundBits.concat(chordNotes);
             }
         }
         return soundBits;
@@ -100,7 +95,7 @@ export class SongPlayer {
         const tree = parser.parse();
         let soundBits: SoundBit[] = [];
         if (tree.ast) {
-            return parseBlock(tree.ast, "1n", soundBits);
+            return parseBlock(tree.ast, "4n", soundBits);
         }
         return [];
     }
@@ -112,7 +107,7 @@ export class SongPlayer {
     executeCommands(block: Block, player: Player): void {
         block.commands?.forEach(async command => {
             this.executeCommand(block, command, player);
-        }); 
+        });
     }
 
     executeCommand(block: Block, command: Command, player: Player): void {
@@ -147,7 +142,7 @@ export class SongPlayer {
                 break;
             case CommandType.SCALE:
                 player.selectScale(parseInt(command.commandValue, 10));
-                break; 
+                break;
             case CommandType.INVERSION:
                 player.inversion = parseInt(command.commandValue, 10);
                 break;
@@ -164,61 +159,53 @@ export class SongPlayer {
                 console.log("Error in command type");
         }
     }
-    playSoundBits(soundBits: SoundBit[][], player: Player) { 
-        let chordIndex = 0;
-        let noteIndex = 0;
+    playSoundBits(soundBits: SoundBit[], player: Player) {
+        let soundBitIndex = 0;
+        let arpeggioIndex = 0;
         let prevNoteDuration = Time("0:0");
         const loop = new Loop((time: any) => {
-            let chordSoundBits: SoundBit[] = soundBits[chordIndex];
-            if (player.playMode === PlayMode.CHORD) {
-                let noteDuration = chordSoundBits[0].duration;
+            let soundBit: SoundBit = soundBits[soundBitIndex];
+            if (soundBit != null) {
+                let duration = soundBit.duration;
                 if (prevNoteDuration.valueOf() > 0) {
                     prevNoteDuration = Time(prevNoteDuration.valueOf() - new Gain().toSeconds(loop.interval));
                 }
                 if (prevNoteDuration.valueOf() <= 0) {
-                    let notes:any = [];
-                    for(let soundBit of chordSoundBits) {
-                        if(soundBit instanceof Note) {
-                            notes.push(Frequency(soundBit.note!, "midi").toFrequency());
-                        }
-                    } 
-                    player.triggerAttackRelease(notes, noteDuration, time);
-                    prevNoteDuration = Time(noteDuration);
-                    if(chordIndex < soundBits.length - 1) {
-                        chordIndex++;
-                    }else{
-                        chordIndex = 0;
-                        loop.stop();
+                    let notes: any = [];
+                    if (soundBit instanceof Chord) {
+                        for (let note of soundBit.notes) {
+                            notes.push(Frequency(note, "midi").toFrequency());
+                        } 
+                        player.triggerAttackRelease(notes, duration, time);
+                        soundBitIndex++;
+                    } else if (soundBit instanceof Arpeggio) {
+                        let seconds = Time(duration).toSeconds();
+                        let secondsByNote = seconds/soundBit.notes.length;
+                        let durationByNote = Time(secondsByNote).toNotation();
+                        player.triggerAttackRelease(Frequency(soundBit.notes[arpeggioIndex], "midi").toFrequency(), durationByNote, time );
+                        duration = durationByNote;
+                        arpeggioIndex++;
+                        if(arpeggioIndex >= soundBit.notes.length) {
+                            arpeggioIndex = 0;
+                            soundBitIndex++;
+                        } 
+                    } else if (soundBit instanceof Note) { 
+                        notes.push(Frequency(soundBit.note!, "midi").toFrequency());
+                        player.triggerAttackRelease(soundBit.note!,soundBit.duration, time);
+                        soundBitIndex++;
+                    } else if (soundBit instanceof Rest) {
+                        soundBitIndex++;
                     }
-                }   
-            } else {
-                let noteDuration = chordSoundBits[noteIndex].duration;
-                if (prevNoteDuration.valueOf() > 0) {
-                    prevNoteDuration = Time(prevNoteDuration.valueOf() - new Gain().toSeconds(loop.interval));
-                }
-                if (prevNoteDuration.valueOf() <= 0) {
-                    if (chordSoundBits[noteIndex] instanceof Note) {
-                        let chordNote:Note = chordSoundBits[noteIndex] as Note;
-                        player.triggerAttackRelease(Frequency(chordNote.note!, "midi").toFrequency(), noteDuration, time);
-                    } else {
-                        // is a rest
-                    }
-                    prevNoteDuration = Time(noteDuration);
-                    noteIndex++;
-                }
-                if(noteIndex >= chordSoundBits.length) {
-                    noteIndex = 0;
-                    if(chordIndex < soundBits.length - 1) {
-                        chordIndex++;
-                    }else{
-                        chordIndex = 0;
+                    prevNoteDuration = Time(duration);
+                    if (soundBitIndex > soundBits.length - 1) {
+                        soundBitIndex = 0;
                         loop.stop();
                     }
                 }
             }
         });
-        loop.interval = "16n";
+        loop.interval = "128n";
         loop.iterations = Infinity;
-        loop.start(); 
-    }    
+        loop.start();
+    }
 }
