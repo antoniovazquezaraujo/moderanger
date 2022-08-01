@@ -60,7 +60,7 @@ export class Scale {
             if (index >= this.getNumNotes()) {
                 index = index % this.getNumNotes();
                 noteShift += 12;
-            }
+            } 
             if( index < 0){
                 index = this.getNumNotes() - Math.abs(index);
                 noteShift -= 12;
@@ -127,6 +127,7 @@ export function getScaleByName(name: string): Scale {
         case 'black': return SCALES[3];
         case 'penta': return SCALES[4];
         case 'tones': return SCALES[5];
+        case 'full': return SCALES[6];
     }
     return SCALES[0]; // default case
 }
@@ -136,7 +137,8 @@ const SCALES: Scale[] = [
     new Scale([0, 1, 4, 5, 7, 8, 11]),
     new Scale([1, 2, 4, 5, 7, 8, 10, 11]),
     new Scale([0, 2, 5, 7, 10]),
-    new Scale([0, 2, 4, 6, 8, 10])
+    new Scale([0, 2, 4, 6, 8, 10]),
+    new Scale([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 ];
 
 export function getNoteName(noteOrder: number): string {

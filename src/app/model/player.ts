@@ -1,6 +1,6 @@
 import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
 import { MusicalInstrument } from "./instrument";
-import { getScaleByNum } from "./scale";
+import { getScaleByNum, Scale } from "./scale";
 import { Tonality} from './scale';
 import { Song } from "./song";
 
@@ -75,16 +75,16 @@ export class Player{
 
     selectNextScale(){
         this.scale++;
-        this.scale%=6;  
+        this.scale%=7;  
     }
     selectPrevScale(){
         this.scale--;
         if(this.scale < 0){
-            this.scale = 5;
+            this.scale = 6;
         }
     }
     selectScale(scale:number){
-        this.scale=scale%6;
+        this.scale=scale%7;
     }
     getScale():number{
         return this.scale;
