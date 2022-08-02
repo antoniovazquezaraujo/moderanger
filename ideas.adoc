@@ -1364,3 +1364,7 @@ Volvemos a lo pendiente:
 
 Lo que más prisa corre parece lo de los sonidos, el sonido actual es insoportable, y el piano era fantástico. Vamos a intentar recuperarlo.
 Vale, recuperado. Vamos a examinar el asunto de arrastrar y soltar, que no respeta las repeticiones.
+
+1 de Agosto, la sincronización no está funcionando en absoluto.
+Estamos corriendo un loop distinto por cada parte. No sirve, tienen que ir todas las partes en un solo loop. Vamos allá.
+Vale, ahora está sincronizado PERFECTAMENTE. Hay que renombrar algunas cosas y ordenar el código, pero suena fantástico, no falla nunca, genial!
