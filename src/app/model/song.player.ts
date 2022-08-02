@@ -189,6 +189,9 @@ export class SongPlayer {
             return;
         }
         let soundBitDuration = soundBit.duration;
+        if (soundBit instanceof Arpeggio){
+            soundBitDuration = Time(Time(soundBitDuration).toSeconds()/soundBit.notes.length).toNotation();
+        }
         let timeToPlay:boolean = false;
 
         if(partSoundInfo.pendingTurnsToPlay >1) {
@@ -221,10 +224,10 @@ export class SongPlayer {
                     partSoundInfo.soundBitIndex++;
                 } else if (soundBit instanceof Arpeggio) {
                     let seconds = Time(duration).toSeconds();
-                    let secondsByNote = seconds / soundBit.notes.length;
-                    let durationByNote = Time(secondsByNote).toNotation();
-                    partSoundInfo.player.triggerAttackRelease(Frequency(soundBit.notes[partSoundInfo.arpeggioIndex], "midi").toFrequency(), durationByNote, time);
-                    duration = durationByNote;
+                    // let secondsByNote = seconds / soundBit.notes.length;
+                    // let durationByNote = Time(secondsByNote).toNotation();
+                    partSoundInfo.player.triggerAttackRelease(Frequency(soundBit.notes[partSoundInfo.arpeggioIndex], "midi").toFrequency(), duration, time);
+                    // duration = durationByNote;
                     partSoundInfo.arpeggioIndex++;
                     if (partSoundInfo.arpeggioIndex >= soundBit.notes.length) {
                         partSoundInfo.arpeggioIndex = 0;
