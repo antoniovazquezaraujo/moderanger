@@ -178,7 +178,7 @@ export class SongPlayer {
                 );
             }
         });
-        loop.interval = "256n";
+        loop.interval = "48n";
         loop.iterations = Infinity;
         loop.start();
     }
@@ -189,9 +189,6 @@ export class SongPlayer {
             return;
         }
         let soundBitDuration = soundBit.duration;
-        if (soundBit instanceof Arpeggio){
-            soundBitDuration = Time(Time(soundBitDuration).toSeconds()/soundBit.notes.length).toNotation();
-        }
         let timeToPlay:boolean = false;
 
         if(partSoundInfo.pendingTurnsToPlay >1) {
@@ -199,18 +196,30 @@ export class SongPlayer {
             partSoundInfo.pendingTurnsToPlay--;
         }else{
             timeToPlay = true;
-            let numTurnsNote = Time(soundBitDuration).toSeconds()/interval;
-            if(numTurnsNote > 1){
-                partSoundInfo.pendingTurnsToPlay = numTurnsNote;
+            let numTurnsNote:number = 0.0;
+            if (soundBit instanceof Arpeggio){
+                let x:number = this.floatify(Time(soundBitDuration).toSeconds()/interval);
+                numTurnsNote = this.floatify(x/soundBit.notes.length);
+                console.log("Turnos arpegio:"+ numTurnsNote);
+            }else{
+                numTurnsNote = Time(soundBitDuration).toSeconds()/interval;
+                console.log("Turnos acorde:"+ numTurnsNote);
+            }
+    
+            if(numTurnsNote > 0.0){
+                partSoundInfo.pendingTurnsToPlay = Math.floor(numTurnsNote);
             }else{
                 partSoundInfo.pendingTurnsToPlay = 0;
             }            
-        }
+        } 
 
         if(timeToPlay) {
             this.playPartSoundBits(partSoundInfo, time);
         }
     }
+    floatify(theNumber:number){
+        return parseFloat((theNumber).toFixed(10));
+     }
     playPartSoundBits(partSoundInfo:PartSoundInfo,  time: any) {
         let soundBit: SoundBit = partSoundInfo.soundBits[partSoundInfo.soundBitIndex];
         if (soundBit != null) {
