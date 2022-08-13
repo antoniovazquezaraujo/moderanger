@@ -5,7 +5,7 @@
       "types": ["node", "jasmine"],
       "typeRoots": ["../node_modules/@types","./src/types", "./types"],
     "baseUrl": "./",
-    "outDir": "./dist/out-tsc",
+    "outDir": "./dist",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,

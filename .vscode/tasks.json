@@ -37,6 +37,13 @@
           }
         }
       }
+    },
+    {
+      "type": "npm",
+      "script": "jasmine-test",
+      "problemMatcher": [],
+      "label": "npm: jasmine-test",
+      "detail": "rimraf ./dist && tsc && jasmine"
     }
   ]
 }

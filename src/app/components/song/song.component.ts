@@ -9,7 +9,7 @@ import { Song } from 'src/app/model/song';
 })
 export class SongComponent implements OnInit {
 
-    @Input() song!: Song;
+    @Input() song: Song =new Song();
     @Output() onPlayPart: EventEmitter<Part>;
 
     constructor() {
