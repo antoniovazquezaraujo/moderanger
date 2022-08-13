@@ -8,26 +8,24 @@ import { Command, CommandType } from 'src/app/model/command';
     styleUrls: ['./block-commands.component.css']
 })
 export class BlockCommandsComponent implements OnInit {
-    @Input() block?: Block;
+    @Input() block: Block = new Block();
 
-   
     commandTypes  = CommandType;
     enumKeys:any[] = [];
  
-   
     constructor() { 
     }
 
     ngOnInit(): void {
-        this.enumKeys = Object.keys(this.commandTypes).filter(f => !isNaN(Number(f)));
+        this.enumKeys = Object.keys(CommandType).filter(f => !isNaN(Number(f)));
     }
 
     removeCommand(command: Command):void {
-        this.block!.commands = this.block!.commands?.filter(t => t !== command);
-        this.block!.resetPulse();
+        this.block.commands = this.block.commands?.filter(t => t !== command);
+        this.block.resetPulse();
     }
     addCommand(){
-        this.block!.commands?.push(new Command());
+        this.block.commands?.push(new Command());
     }     
 
 }

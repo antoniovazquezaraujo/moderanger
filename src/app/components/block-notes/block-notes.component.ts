@@ -8,7 +8,7 @@ import { CommandNotes } from 'src/app/model/command.notes';
 })
 export class BlockNotesComponent   {
     
-    @Input() blockContent!: CommandNotes;
+    @Input() blockContent: CommandNotes = new CommandNotes({notes:''});
     @Output() addNewCommand: EventEmitter<any>;
 
     constructor( ) {

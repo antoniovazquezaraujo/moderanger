@@ -8,7 +8,8 @@ import { Part } from './part';
 import { PlayMode } from './player';
 import { Song } from './song';
 import { parseBlock } from "./song.parser";
-import { stopSound } from "./sound";
+import { Tone } from 'tone/build/esm/core/Tone';
+
 
 
 type PartSoundInfo = {
@@ -32,6 +33,7 @@ export class SongPlayer {
     }
 
     playSong(song: Song) {
+        Transport.start();
         Transport.bpm.value = 100;
         Transport.cancel();
         Transport.stop();

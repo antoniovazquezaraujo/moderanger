@@ -6,8 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "rimraf ./dist && tsc && jasmine",
-    "grammar": "tspeg src/app/model/grammar.peg src/app/model/parser.ts"
+    "jasmine-test": "rimraf ./dist && tsc && jasmine",
+    "grammar": "tspeg src/app/model/grammar.peg src/app/model/parser.ts",
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {
@@ -21,7 +22,6 @@
     "@angular/platform-browser-dynamic": "~13.1.0",
     "@angular/router": "~13.1.0",
     "flatted": "^3.2.5",
-    "jzz-synth-tiny": "^1.2.8",
     "primeflex": "^3.1.3",
     "primeicons": "^5.0.0",
     "primeng": "^13.3.3",
@@ -48,5 +48,5 @@
     "karma-jasmine-html-reporter": "~1.7.0",
     "rimraf": "^3.0.2",
     "typescript": "^4.5.5"
-  }
+  } 
 }

@@ -11,7 +11,7 @@ import { Lab } from 'src/app/model/lab';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
-import { initSound } from 'src/app/model/sound';
+
 
 
 @Component({
@@ -43,7 +43,7 @@ export class SongEditorComponent implements OnInit {
         this.song = new Song();
     }
     ngOnInit(): void {
-        initSound();
+   
     }
     getSong(): Song {
         return this.song;
