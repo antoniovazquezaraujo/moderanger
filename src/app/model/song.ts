@@ -5,23 +5,15 @@ import { MusicalInstrument } from './instrument';
 import { Part } from './part';
 import { Piano } from './piano';
 export class Song {
-    public parts?:Part[];
-    public static instruments?:MusicalInstrument[];
+    public parts:Part[]=[];
+    public static instruments:MusicalInstrument[]=[new Piano()];
 
-    constructor(){
-        if(Song.instruments == null ){
-            Song.instruments = [];
-        }
-        Song.instruments!.push(new Piano());
+    constructor(song?: Song){
+        Object.assign(this, song);
     }
-    addPart():void{
-        if(this.parts == null ){
-            this.parts = [];
-        }
-        this.parts!.push(new Part());
-    }
+ 
 
     static getDefultInstrument():MusicalInstrument{
-        return Song.instruments![0];
+        return Song.instruments[0];
     }
 }

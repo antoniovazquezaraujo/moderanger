@@ -22,7 +22,7 @@ export class BlockCommandsComponent implements OnInit {
 
     removeCommand(command: Command):void {
         this.block.commands = this.block.commands?.filter(t => t !== command);
-        this.block.resetPulse();
+
     }
     addCommand(){
         this.block.commands?.push(new Command());

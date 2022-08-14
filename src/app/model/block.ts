@@ -30,34 +30,5 @@ export class Block {
         }
 
     }
-    resetPulse(){
-        this.pulse = 0;
-    }
-    getCommandByType(commandType:CommandType){
-        return this.commands.filter(command => command.commandType === commandType);
-    }
-    removeCommand(command:any){
-        this.commands = this.commands.filter(t => t !== command);
-    }
-    addCommand(){
-        this.commands.push(new Command({commandType:CommandType.PULSE, commandValue:''}));
-    } 
-    addNewChild(){
-        this.children.push(new Block({}));
-    }
-    removeChild(block:Block){
-        this.removeChildFrom(this, block);
-    }
-    removeChildFrom(parent:Block, childToRemove:Block){
-        if(parent.hasChildren()){
-            parent.children = parent.children.filter(t => t!== childToRemove);
-            for(let child of parent.children){
-                this.removeChildFrom(child, childToRemove);
-            }
-        }
-    }
-    
-    hasChildren():boolean{
-        return this.children.length > 0;
-    }
+ 
 }

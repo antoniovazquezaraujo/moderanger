@@ -20,7 +20,7 @@ export class SongComponent implements OnInit {
     }
 
     addPart() {
-        this.song.addPart();
+        this.song.parts.push(new Part());
     }
 
     getParts() {
