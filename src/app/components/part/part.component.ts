@@ -1,6 +1,7 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Input, Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Block  } from 'src/app/model/block';
+import { Command, CommandType } from 'src/app/model/command';
 import { CommandNotes } from 'src/app/model/command.notes';
 import { Part } from 'src/app/model/part';
 
@@ -34,10 +35,10 @@ export class PartComponent implements OnInit {
         this.part.removeBlock(block);
     }
     onAddNewCommand(){
-        this.part.block.addCommand();
+        this.part.block.commands.push(new Command({commandType:CommandType.PULSE, commandValue:''}));
     }
     onAddChild(block:Block){
-        block.addNewChild();
+        block.children.push(new Block({}));
     }
     onRemoveCommand(block: Block){
      

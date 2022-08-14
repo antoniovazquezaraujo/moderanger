@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Event } from '@angular/router';
+import { Command, CommandType } from 'src/app/model/command';
 @Component({
   selector: 'app-block',
   templateUrl: './block.component.html',
@@ -35,14 +36,21 @@ export class BlockComponent implements OnInit {
     this.onDuplicateBlock.emit(block);
   }
   removeChild(block:any){
-    this.block!.removeChild(block);
+    this.removeChildFrom(this.block, block);
    }
- 
+   removeChildFrom(parent:Block, childToRemove:Block){
+    if(parent.children.length > 0){
+        parent.children = parent.children.filter(t => t!== childToRemove);
+        for(let child of parent.children){
+            this.removeChildFrom(child, childToRemove);
+        }
+    }  
+}
   onRemoveCommand(command:any){
-    this.block!.removeCommand(command);
+    this.block.commands = this.block.commands.filter(t => t !== command);
   }
   onAddCommand(block:Block){
-    block.addCommand();
+    block.commands.push(new Command({commandType:CommandType.PULSE, commandValue:''}));
   } 
   addChild(block:Block){
     this.onAddChild.emit(block);

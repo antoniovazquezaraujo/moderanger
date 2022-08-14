@@ -68,7 +68,7 @@ export class SongEditorComponent implements OnInit {
     }
 
     readSong() {
-        this.song = JSON.parse(this.songAsText);
+        this.song = new Song(JSON.parse(this.songAsText));
     }
     synth: any;
     writeSong() {
