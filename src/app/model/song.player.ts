@@ -1,5 +1,5 @@
-import { Frequency, Gain, Loop, Sampler, Time, TimeClass, Transport } from 'tone';
 import { Block } from './block';
+import { Frequency, Gain, Loop, Sampler, Time, TimeClass, Transport } from 'tone';
 import { Command, CommandType } from './command';
 import { Player } from "./player";
 import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
@@ -9,13 +9,11 @@ import { PlayMode } from './player';
 import { Song } from './song';
 import { parseBlock } from "./song.parser";
 import { Tone } from 'tone/build/esm/core/Tone';
-
-
-
-type PartSoundInfo = {
+ 
+ type PartSoundInfo = {
     soundBits: SoundBit[];
     player: Player;
-    soundBitIndex:number;
+    soundBitIndex:number; 
     arpeggioIndex:number;
     pendingTurnsToPlay:number;
 } 
@@ -31,7 +29,7 @@ export class SongPlayer {
         Transport.cancel();
         Transport.stop();
     }
-
+ 
     playSong(song: Song) {
         Transport.start();
         Transport.bpm.value = 100;
@@ -49,25 +47,26 @@ export class SongPlayer {
             Transport.start();            
         }
     }
-
+ 
     playPart(part: Part, player: Player): SoundBit[] {
-        return this.playBlock(part.block, [], player, part.block.repeatingTimes);
+        let ret = this.playBlock(part.block, [], player, part.block.repeatingTimes);
+        return ret;
     }
     playBlock(block: Block, soundBits: SoundBit[], player: Player, repeatingTimes: number): SoundBit[] {
         if (repeatingTimes > 0) {
             soundBits = this.extractNotesToPlay(block, soundBits, player);
-            if (block.children != null && block.children?.length > 0) {
+            if (block.children.length > 0) {
                 let childrenSoundBits: SoundBit[] = [];
                 for (let child of block.children!) {
-                    childrenSoundBits = childrenSoundBits.concat(this.playBlock(child, childrenSoundBits, player, child.repeatingTimes));
+                    childrenSoundBits = this.playBlock(child, childrenSoundBits, player, child.repeatingTimes);
                 }
-                soundBits = soundBits.concat(this.playBlock(block, childrenSoundBits, player, 0));
+                soundBits = soundBits.concat(childrenSoundBits); 
             }
             return this.playBlock(block, soundBits, player, repeatingTimes - 1);
         }
         return soundBits;
     }
-
+  
     extractNotesToPlay(block: Block, soundBits: SoundBit[], player: Player): SoundBit[] {
         this.executeCommands(block, player);
         soundBits = soundBits.concat(this.extractBlockSoundBits(block, player));

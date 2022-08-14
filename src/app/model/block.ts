@@ -16,7 +16,7 @@ export class Block {
         if (opts?.pulse != null) {
             this.pulse = opts.pulse;
         }
-        if (opts?.repeatingTimes != null) {
+        if (opts?.repeatingTimes != undefined) {
             this.repeatingTimes = opts.repeatingTimes;
         }
         if (opts?.commands != null && opts.commands.length > 0) {

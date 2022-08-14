@@ -11,6 +11,7 @@ import { Lab } from 'src/app/model/lab';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
+import { start, Transport } from 'tone';
 
 
 
@@ -62,6 +63,7 @@ export class SongEditorComponent implements OnInit {
     };
     async playSong() {
         // new Lab().main();
+        await start();
         this.songPlayer.playSong(this.song);
     }
 
