@@ -28,10 +28,7 @@ export class PartComponent implements OnInit {
     onDuplicateBlock(block: Block) {
         //var copy = new Block(block);
         
-        let copy = new Block() ;
-        Object.assign(copy, block);
-        
-        this.part.block.children!.push(copy as Block);
+        let copy = new Block(block) ;
     }
     onRemoveBlock(block: Block) {
         this.part.removeBlock(block);
