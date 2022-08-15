@@ -4,6 +4,7 @@ import { Command, CommandType } from './command';
 import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
 import { Parser } from "./parser";
 import { Part } from './part';
+import { arpeggiate } from './play.mode';
 import { Player, PlayMode } from "./player";
 import { Song } from './song';
 import { parseBlock } from "./song.parser";
@@ -98,8 +99,8 @@ export class SongPlayer {
                     let chord = new Chord(duration, notes);
                     soundBits = soundBits.concat(chord);
                 } else {
-                    let arpeggio = new Arpeggio(duration, notes);
-                    soundBits = soundBits.concat(arpeggio);
+                    let arpeggio = arpeggiate(notes, player.playMode);
+                    soundBits = soundBits.concat(new Arpeggio(duration, arpeggio));
                 }
             } else { // is a rest
                 let chordNotes: SoundBit[] = [];
