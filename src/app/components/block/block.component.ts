@@ -63,21 +63,14 @@ export class BlockComponent implements OnInit {
   
   dragStart(block: Block) {
     this.draggedBlock = block;
-    console.log("Arrastrando: ", block);
   }
 
   drop(event:Event) {
     if (this.draggedBlock) {
-      console.log("Agregándome a: ", this.block + " el bloque " + this.draggedBlock);
-        // let draggedBlockIndex = this.findIndex(this.draggedBlock);
-        // this.selectedBlocks = [...this.selectedBlocks, this.draggedBlock];
-        // this.availableBlocks = this.availableBlocks.filter((val,i) => i!=draggedBlockIndex);
-        // this.draggedBlock = null;
     }
   }
 
   dragEnd() {
     this.draggedBlock = undefined;
-    console.log("Drag end: undefined");
   }
 }

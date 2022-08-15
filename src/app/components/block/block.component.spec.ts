@@ -20,7 +20,6 @@ describe('BlockComponent', () => {
   });
 
   it('should create', () => {
-    console.log("El componente es : + !!component");
     expect(component).toBeTruthy();
   });
   
