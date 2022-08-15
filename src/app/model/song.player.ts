@@ -132,13 +132,6 @@ export class SongPlayer {
             case CommandType.SHIFTVALUE:
                 player.shiftValue = parseInt(command.commandValue, 10);
                 break;
-            case CommandType.VELOCITY:
-                //PENDING
-                //this.velocity = parseInt(command.commandValue, 16);
-                break;
-            // case CommandType.PULSE:
-            //     block.pulse = 64 / parseInt(command.commandValue, 10);
-            //     break; 
             case CommandType.PLAYMODE:
                 player.playMode = parseInt(command.commandValue, 10);
                 break;
@@ -157,12 +150,6 @@ export class SongPlayer {
             case CommandType.KEY:
                 player.tonality = parseInt(command.commandValue, 10);
                 break;
-            // case CommandType.GEAR:
-            //     player.timbre = parseInt(command.commandValue, 10);
-            //     break;
-            // case CommandType.CHANNEL:// Channel 9 is percussion
-            //     player.channel = parseInt(command.commandValue, 10);
-            //     break;
             default:
                 console.log("Error in command type");
         }
@@ -199,10 +186,8 @@ export class SongPlayer {
             if (soundBit instanceof Arpeggio){
                 let x:number = this.floatify(Time(soundBitDuration).toSeconds()/interval);
                 numTurnsNote = this.floatify(x/soundBit.notes.length);
-                console.log("Turnos arpegio:"+ numTurnsNote);
             }else{
                 numTurnsNote = Time(soundBitDuration).toSeconds()/interval;
-                console.log("Turnos acorde:"+ numTurnsNote);
             }
     
             if(numTurnsNote > 0.0){
@@ -232,10 +217,7 @@ export class SongPlayer {
                     partSoundInfo.soundBitIndex++;
                 } else if (soundBit instanceof Arpeggio) {
                     let seconds = Time(duration).toSeconds();
-                    // let secondsByNote = seconds / soundBit.notes.length;
-                    // let durationByNote = Time(secondsByNote).toNotation();
                     partSoundInfo.player.triggerAttackRelease(Frequency(soundBit.notes[partSoundInfo.arpeggioIndex], "midi").toFrequency(), duration, time);
-                    // duration = durationByNote;
                     partSoundInfo.arpeggioIndex++;
                     if (partSoundInfo.arpeggioIndex >= soundBit.notes.length) {
                         partSoundInfo.arpeggioIndex = 0;
@@ -251,7 +233,6 @@ export class SongPlayer {
 
                 if (partSoundInfo.soundBitIndex > partSoundInfo.soundBits.length - 1) {
                     partSoundInfo.soundBitIndex = 0;
-                    //loop.stop();
                 }
         }
     }

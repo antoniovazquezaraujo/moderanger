@@ -1380,3 +1380,13 @@ El guardado está reparado. Volvamos a listar las cosas pendientes más urgentes
 - Las notas no pueden superar el 12
 - Hay algunas cosas que sobran, como el pulse y otras.
 Vamos con ello.
+
+Bien, todo arreglado, las notas pueden incluir espacios, el número de nota puede ser cualquiera ( aunque solo entre 83 y -83, hay que atrapar el exceso aquí)  y se limpiaron las cosas.
+
+Habría que pensar de nuevo la dirección correcta del proyecto:
+- Debería poder recargarse la canción sin perder el ritmo
+- Debería poder tocarse solamente una parte (ahora está el botón pero no funciona)
+- Nombres de las escalas
+- Carga de objetos e inyección de dependencias
+- Sintetizadores adicionales
+- Percusión
