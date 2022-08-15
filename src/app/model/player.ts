@@ -1,7 +1,6 @@
 import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
 import { MusicalInstrument } from "./instrument";
-import { getScaleByNum, Scale } from "./scale";
-import { Tonality} from './scale';
+import { getScaleByNum, Tonality } from "./scale";
 import { Song } from "./song";
 
 export function getPlayModeName(order:number):string{

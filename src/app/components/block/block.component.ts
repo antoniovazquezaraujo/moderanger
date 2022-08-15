@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Block } from 'src/app/model/block';
 import { Event } from '@angular/router';
-import { Command, CommandType } from 'src/app/model/command';
+import { Block } from 'src/app/model/block';
+import { Command } from 'src/app/model/command';
 @Component({
   selector: 'app-block',
   templateUrl: './block.component.html',
@@ -50,7 +50,7 @@ export class BlockComponent implements OnInit {
     this.block.commands = this.block.commands.filter(t => t !== command);
   }
   onAddCommand(block:Block){
-    block.commands.push(new Command({commandType:CommandType.PULSE, commandValue:''}));
+    block.commands.push(new Command( ));
   } 
   addChild(block:Block){
     this.onAddChild.emit(block);

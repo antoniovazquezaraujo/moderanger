@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
 

@@ -13,13 +13,11 @@ export enum CommandType{
     GAP         = 10,
     SHIFTSTART  = 11,
     SHIFTSIZE   = 12,
-    SHIFTVALUE  = 13,
-    REPEAT_TIMES= 14,
-    REPEAT_SIZE = 15
+    SHIFTVALUE  = 13
 }
 export class Command {
 
-    public commandType:CommandType =CommandType.VELOCITY;
+    public commandType:CommandType =CommandType.PLAYMODE;
     public commandValue:string="";
     
     constructor(opts?: Partial<Command>) {

@@ -1,4 +1,4 @@
-import { PolySynth, Sampler, Synth } from "tone";
+import { PolySynth, Synth } from "tone";
 
 
 import { MusicalInstrument } from "./instrument";

@@ -1,17 +1,10 @@
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
-import { Block } from 'src/app/model/block';
-import { Command } from 'src/app/model/command';
-import { Player } from 'src/app/model/player';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Keyboard } from 'src/app/model/keyboard';
-import { Lab } from 'src/app/model/lab';
 import { Part } from 'src/app/model/part';
+import { Player } from 'src/app/model/player';
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
-import { start, Transport } from 'tone';
+import { start } from 'tone';
 
 
 
