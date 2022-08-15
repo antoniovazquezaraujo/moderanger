@@ -6,13 +6,15 @@
 * BLOCK_CONTENT:= noteGroup= {NOTE_GROUP} |  note={NOTE} 
 * NOTE:= 
 *     duration = {DURATION}? 
+*     '\s'*
 *     simpleNote= SIMPLE_NOTE 
 * SIMPLE_NOTE:= silence={SILENCE_SIGN} | note={NOTE_VALUE} 
 * NOTE_GROUP:= 
 *     duration= DURATION 
-*     GROUP_START 
+*     '\s'*
+*     GROUP_START '\s'*
 *     block=BLOCK 
-*     GROUP_END
+*     '\s'* GROUP_END
 * GROUP_START:= '\('
 * GROUP_END:= '\)'
 * DURATION:= 
@@ -22,7 +24,7 @@
 * NOTE_VALUE:= '-?[0-9]+'
 * DURATION_SIGN:= ':'
 * SILENCE_SIGN:= 's'
-* NOTE_SEPARATOR:= ' '
+* NOTE_SEPARATOR:= ' '+
 */
 type Nullable<T> = T | null;
 type $$RuleType<T> = () => Nullable<T>;
@@ -111,7 +113,7 @@ export type DURATION_VALUE_3 = string;
 export type NOTE_VALUE = string;
 export type DURATION_SIGN = string;
 export type SILENCE_SIGN = string;
-export type NOTE_SEPARATOR = string;
+export type NOTE_SEPARATOR = string[];
 export class Parser {
     private readonly input: string;
     private pos: PosInfo;
@@ -204,6 +206,7 @@ export class Parser {
                 let $$res: Nullable<NOTE> = null;
                 if (true
                     && (($scope$duration = this.matchNOTE_$0($$dpth + 1, $$cr)) || true)
+                    && this.loop<string>(() => this.regexAccept(String.raw`(?:\s)`, $$dpth + 1, $$cr), true) !== null
                     && ($scope$simpleNote = this.matchSIMPLE_NOTE($$dpth + 1, $$cr)) !== null
                 ) {
                     $$res = {kind: ASTKinds.NOTE, duration: $scope$duration, simpleNote: $scope$simpleNote};
@@ -260,8 +263,11 @@ export class Parser {
                 let $$res: Nullable<NOTE_GROUP> = null;
                 if (true
                     && ($scope$duration = this.matchDURATION($$dpth + 1, $$cr)) !== null
+                    && this.loop<string>(() => this.regexAccept(String.raw`(?:\s)`, $$dpth + 1, $$cr), true) !== null
                     && this.matchGROUP_START($$dpth + 1, $$cr) !== null
+                    && this.loop<string>(() => this.regexAccept(String.raw`(?:\s)`, $$dpth + 1, $$cr), true) !== null
                     && ($scope$block = this.matchBLOCK($$dpth + 1, $$cr)) !== null
+                    && this.loop<string>(() => this.regexAccept(String.raw`(?:\s)`, $$dpth + 1, $$cr), true) !== null
                     && this.matchGROUP_END($$dpth + 1, $$cr) !== null
                 ) {
                     $$res = {kind: ASTKinds.NOTE_GROUP, duration: $scope$duration, block: $scope$block};
@@ -318,7 +324,7 @@ export class Parser {
         return this.regexAccept(String.raw`(?:s)`, $$dpth + 1, $$cr);
     }
     public matchNOTE_SEPARATOR($$dpth: number, $$cr?: ErrorTracker): Nullable<NOTE_SEPARATOR> {
-        return this.regexAccept(String.raw`(?: )`, $$dpth + 1, $$cr);
+        return this.loop<string>(() => this.regexAccept(String.raw`(?: )`, $$dpth + 1, $$cr), false);
     }
     public test(): boolean {
         const mrk = this.mark();
