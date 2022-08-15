@@ -1373,3 +1373,10 @@ Vale, ahora está sincronizado PERFECTAMENTE. Hay que renombrar algunas cosas y 
 El drag and drop funciona bien. Debería tener un panel para no arrastrar todo el nodo, pero bueno, de momento queda así.
 
 Otro fallo que había importante era que al guardar luego no se recuperaba bien. Revisemos eso.
+
+15 de Agosto de 2022
+El guardado está reparado. Volvamos a listar las cosas pendientes más urgentes:
+- La lista de notas no admite más de un espacio seguido
+- Las notas no pueden superar el 12
+- Hay algunas cosas que sobran, como el pulse y otras.
+Vamos con ello.
