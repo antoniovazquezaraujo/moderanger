@@ -38,7 +38,7 @@ export class SongPlayer {
             let partSoundInfo:PartSoundInfo[] = [];
             for (var part of song.parts) {
                 let player = new Player(channel++);
-                let partSoundBits:SoundBit[] = this.playPart(part, player);
+                let partSoundBits:SoundBit[] = this.playPartBlocks(part, player);
                 partSoundInfo.push({soundBits: partSoundBits, player: player, soundBitIndex:0, arpeggioIndex:0, pendingTurnsToPlay:0});
             }
             this.playSoundBits(partSoundInfo);
@@ -46,10 +46,22 @@ export class SongPlayer {
         }
     }
  
-    playPart(part: Part, player: Player): SoundBit[] {
+    playPart(part: Part, player: Player)  {
+        Transport.start();
+        Transport.bpm.value = 100;
+        Transport.cancel();
+        Transport.stop();
+        let channel = 0;
+        let partSoundBits:SoundBit[] = this.playPartBlocks(part, player);
+        let partSoundInfo:PartSoundInfo[] = [];
+        partSoundInfo.push({soundBits: partSoundBits, player: player, soundBitIndex:0, arpeggioIndex:0, pendingTurnsToPlay:0});
+        this.playSoundBits(partSoundInfo);
+        Transport.start();            
+    }
+    playPartBlocks(part: Part, player: Player): SoundBit[] {
         let ret = this.playBlock(part.block, [], player, part.block.repeatingTimes);
         return ret;
-    }
+    }    
     playBlock(block: Block, soundBits: SoundBit[], player: Player, repeatingTimes: number): SoundBit[] {
         if (repeatingTimes > 0) {
             soundBits = this.extractNotesToPlay(block, soundBits, player);
