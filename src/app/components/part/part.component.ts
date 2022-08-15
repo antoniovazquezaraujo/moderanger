@@ -26,9 +26,8 @@ export class PartComponent implements OnInit {
         return (block.children && block?.children.length > 0) as boolean;
     }
     onDuplicateBlock(block: Block) {
-        //var copy = new Block(block);
-        
         let copy = new Block(block) ;
+        this.part.block.children.push(copy);
     }
     onRemoveBlock(block: Block) {
         this.part.removeBlock(block);
