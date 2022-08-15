@@ -1390,3 +1390,15 @@ Habría que pensar de nuevo la dirección correcta del proyecto:
 - Carga de objetos e inyección de dependencias
 - Sintetizadores adicionales
 - Percusión
+
+Vale, arreglado lo de tocar una parte.
+- Debería poder recargarse la canción sin perder el ritmo
+- Nombres de las escalas
+- Carga de objetos e inyección de dependencias
+- Sintetizadores adicionales
+- Percusión
+
+Quizá un botón nuevo para recargar la canción, de manera que solo empiece con los nuevos datos cuando haya terminado con los actuales. Aunque quizá sea incómodo, esperar a que termine toda la canción. Igual solamente se necesita que no pierda el ritmo.
+Bueno, esto se puede dejar como una sofiscación futura.
+Vamos con algo más urgente:
+Revisemos lo de las dependencias, igual nos puede ayudar a hacer más fácil lo siguiente.
