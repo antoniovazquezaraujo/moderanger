@@ -4,13 +4,15 @@ BLOCK:=
 BLOCK_CONTENT:= noteGroup= {NOTE_GROUP} |  note={NOTE} 
 NOTE:= 
     duration = {DURATION}? 
+    '\s'*
     simpleNote= SIMPLE_NOTE 
 SIMPLE_NOTE:= silence={SILENCE_SIGN} | note={NOTE_VALUE} 
 NOTE_GROUP:= 
     duration= DURATION 
-    GROUP_START 
+    '\s'*
+    GROUP_START '\s'*
     block=BLOCK 
-    GROUP_END
+    '\s'* GROUP_END
 GROUP_START:= '\('
 GROUP_END:= '\)'
 DURATION:= 
@@ -20,8 +22,4 @@ DURATION_VALUE:= '[0-9]+n\.?' | '[0-9]+m' | '[0-9]+t'
 NOTE_VALUE:= '-?[0-9]+'
 DURATION_SIGN:= ':'
 SILENCE_SIGN:= 's'
-NOTE_SEPARATOR:= ' '
-
-
-
-
+NOTE_SEPARATOR:= ' '+
