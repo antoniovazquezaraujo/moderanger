@@ -1,4 +1,4 @@
-import { PolySynth, Sampler, Synth } from "tone";
+import { Sampler } from "tone";
 import { MusicalInstrument } from "./instrument";
 
 export class Piano extends MusicalInstrument{

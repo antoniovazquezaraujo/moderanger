@@ -1,6 +1,3 @@
-import {Block} from './block';
-import { Command, CommandType } from './command';
-import { CommandNotes } from './command.notes';
 import { MusicalInstrument } from './instrument';
 import { Part } from './part';
 import { Piano } from './piano';

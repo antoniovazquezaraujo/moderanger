@@ -1,14 +1,12 @@
+import { Frequency, Loop, Time, Transport } from 'tone';
 import { Block } from './block';
-import { Frequency, Gain, Loop, Sampler, Time, TimeClass, Transport } from 'tone';
 import { Command, CommandType } from './command';
-import { Player } from "./player";
 import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
 import { Parser } from "./parser";
 import { Part } from './part';
-import { PlayMode } from './player';
+import { Player, PlayMode } from "./player";
 import { Song } from './song';
 import { parseBlock } from "./song.parser";
-import { Tone } from 'tone/build/esm/core/Tone';
  
  type PartSoundInfo = {
     soundBits: SoundBit[];

@@ -1,5 +1,5 @@
-import { Sampler, PolySynth } from "tone";
-import { NormalRange, Frequency, Time } from "tone/build/esm/core/type/Units";
+import { PolySynth, Sampler } from "tone";
+import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
  
 export class MusicalInstrument{
     instrument:Sampler|PolySynth;

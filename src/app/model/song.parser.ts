@@ -1,6 +1,6 @@
 // import * as Parser from './parser';
 import { Note, Rest, SoundBit } from './note';
-import { BLOCK, Parser, BLOCK_CONTENT, NOTE, ASTKinds, SIMPLE_NOTE, NOTE_GROUP, SILENCE_SIGN, NOTE_VALUE, DURATION } from './parser';
+import { ASTKinds, BLOCK, BLOCK_CONTENT, NOTE, NOTE_GROUP, SIMPLE_NOTE } from './parser';
 
 export function parseBlock(block: BLOCK, duration: string, soundBits: SoundBit[]): SoundBit[] {
     soundBits = parseBlockContent(block.head, duration, soundBits);

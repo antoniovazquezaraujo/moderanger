@@ -1,5 +1,4 @@
-import { NestedTreeControl } from "@angular/cdk/tree";
-import { Command, CommandType } from "./command";
+import { Command } from "./command";
 import { CommandNotes } from "./command.notes";
 
 export class Block {  
