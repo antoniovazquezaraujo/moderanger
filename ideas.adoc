@@ -1401,4 +1401,8 @@ Vale, arreglado lo de tocar una parte.
 Quizá un botón nuevo para recargar la canción, de manera que solo empiece con los nuevos datos cuando haya terminado con los actuales. Aunque quizá sea incómodo, esperar a que termine toda la canción. Igual solamente se necesita que no pierda el ritmo.
 Bueno, esto se puede dejar como una sofiscación futura.
 Vamos con algo más urgente:
-Revisemos lo de las dependencias, igual nos puede ayudar a hacer más fácil lo siguiente.
+
+Vale, una cosa práctica sería lo de mostrar los nombres de los elementos en lugar de números, por ejemplo, las escalas, o los playmodes. Estoy mirando bien cómo va la directiva ngSwitch y parece que se puede hacer.
+Hay que intentar no salirse del objetivo principal: este debe ser solo una herramienta para demostrar la teoría de la música de partículas, así que lo primero ha de ser la armonía y sus posibilidades.
+
+Vale. Arreglado. Ahora se muestran los nombres de las escalas y los playmodes, lo más urgente. 
