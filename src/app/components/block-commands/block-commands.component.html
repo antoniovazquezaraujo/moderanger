@@ -1,15 +1,26 @@
 <div id="commands" class="container">
-    <div *ngFor="let item of block!.commands">
-        <p-dropdown appendTo="body" [options]="enumKeys" [(ngModel)]="item.commandType">
+    <div class="container" *ngFor="let item of block!.commands">
+        <p-dropdown appendTo="body" [options]="commandTypeNames" [(ngModel)]="item.commandType">
             <ng-template let-commandType pTemplate="selectedItem">
-                {{commandTypes[enumKeys[commandType]]}}
+                {{commandTypes[commandTypeNames[commandType]]}}
             </ng-template>
             <ng-template let-commandType pTemplate="item">
-                {{commandTypes[enumKeys[commandType]]}}
+                {{commandTypes[commandTypeNames[commandType]]}}
             </ng-template>
         </p-dropdown>
-        <p-inputNumber class="commandValue" [(ngModel)]="item.commandValue" [showButtons]="true" [min]="-250" [max]="250" [size]="1">
-        </p-inputNumber>
+
+        <ng-container  class="container" [ngSwitch]="item.commandType">
+            <div *ngSwitchCase="commandTypes.PLAYMODE">
+                <p-dropdown class="commandType" appendTo="body" [options]="playModeNames" [(ngModel)]="item.commandValue"></p-dropdown>
+            </div>
+            <div *ngSwitchCase="commandTypes.SCALE">
+                <p-dropdown class="commandType" appendTo="body" [options]="scaleNames" [(ngModel)]="item.commandValue"></p-dropdown>
+            </div>
+            <div *ngSwitchDefault>
+                <p-inputNumber class="commandValue" [(ngModel)]="item.commandValue" [showButtons]="true" [min]="-250" [max]="250" [size]="1">
+                </p-inputNumber>
+            </div>
+        </ng-container>
         <button pButton type="button" icon="pi pi-times" (click)="removeCommand(item)"></button>
     </div>
     <button pButton type="button" icon="pi pi-plus" (click)="addCommand()"></button>

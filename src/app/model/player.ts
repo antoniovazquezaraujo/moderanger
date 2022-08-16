@@ -1,29 +1,12 @@
 import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
 import { MusicalInstrument } from "./instrument";
-import { getScaleByNum, Tonality } from "./scale";
+import { PlayMode } from "./play.mode";
+import { getScaleByName,  ScaleTypes, Tonality } from "./scale";
 import { Song } from "./song";
 
-export function getPlayModeName(order:number):string{
-    return PlayMode[order % 12];
-}
-export enum PlayMode {
-    CHORD = 0,
-    ASCENDING = 1,
-    DESCENDING = 2,
-    ASC_DESC= 3,
-    DESC_ASC=4,
-    EVEN_ASC_ODD_ASC = 5,
-    EVEN_ASC_ODD_DESC = 6,
-    EVEN_DESC_ODD_DESC = 7,
-    EVEN_DESC_ODD_ASC = 8,
-    ODD_ASC_EVEN_ASC = 9,
-    ODD_ASC_EVEN_DESC = 10,
-    ODD_DESC_EVEN_DESC = 11,
-    ODD_DESC_EVEN_ASC = 12
-}
 export class Player{
     channel:number=0;
-    private scale: number = 0;        //Escala usada (0-5)
+    scale: ScaleTypes = ScaleTypes.WHITE;
     tonality: number = Tonality.D;     //En qué tonalidad está el círculo (1-12)
     timbre: number = 0;       //El sonido seleccionado para ese círculo
     notes: number[] = [];      //Notas seleccionadas para tocar por un player    
@@ -42,8 +25,8 @@ export class Player{
     constructor(channel:number){
         this.channel=channel;
     }
-    getSelectedNotes(scaleNum:number, tonality:number):number[]{
-        var scale = getScaleByNum(scaleNum);       
+    getSelectedNotes(scaleNum:ScaleTypes, tonality:number):number[]{
+        var scale = getScaleByName(scaleNum.toString());       
         var tunnedNote = this.selectedNote;
         var chordNotes= scale.gradeToChord(tunnedNote, this.density, tonality, this.gap, this.shiftStart, this.shiftSize, this.shiftValue);
         var octavedNotes = this.setOctave(chordNotes);
@@ -53,7 +36,7 @@ export class Player{
     selectNotes():void{
         this.notes = this.getSelectedNotes(this.getScale(), this.tonality);
     }  
-    setInversion(notes: number[]):number[] {
+    setInversion(notes: number[]):number[] { 
         var invertedNotes:number[] =[];
         for(var n = 0; n<notes.length;n++){
             var note = notes[n];
@@ -72,20 +55,11 @@ export class Player{
         return octavedNotes;
     }
 
-    selectNextScale(){
-        this.scale++;
-        this.scale%=7;  
+ 
+    selectScale(scale:ScaleTypes){
+        this.scale=scale;
     }
-    selectPrevScale(){
-        this.scale--;
-        if(this.scale < 0){
-            this.scale = 6;
-        }
-    }
-    selectScale(scale:number){
-        this.scale=scale%7;
-    }
-    getScale():number{
+    getScale():ScaleTypes{
         return this.scale;
     }
     triggerAttackRelease(notes: Frequency[] | Frequency, duration: Time | Time[], time?: Time, velocity?: NormalRange){

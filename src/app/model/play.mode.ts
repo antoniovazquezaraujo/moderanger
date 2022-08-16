@@ -14,6 +14,29 @@ export enum PlayMode {
     ODD_DESC_EVEN_ASC = 12,
     RANDOM = 13
 };
+export function getPlayModeFromString(mode:string): PlayMode{
+    switch(mode){
+        case 'CHORD': return PlayMode.CHORD;
+        case 'ASCENDING': return PlayMode.ASCENDING;
+        case 'DESCENDING': return PlayMode.DESCENDING;
+        case 'ASC_DESC': return PlayMode.ASC_DESC;
+        case 'DESC_ASC': return PlayMode.DESC_ASC;
+        case 'EVEN_ASC_ODD_ASC': return PlayMode.EVEN_ASC_ODD_ASC;
+        case 'EVEN_ASC_ODD_DESC': return PlayMode.EVEN_ASC_ODD_DESC;
+        case 'EVEN_DESC_ODD_DESC': return PlayMode.EVEN_DESC_ODD_DESC;
+        case 'EVEN_DESC_ODD_ASC': return PlayMode.EVEN_DESC_ODD_ASC;
+        case 'ODD_ASC_EVEN_ASC': return PlayMode.ODD_ASC_EVEN_ASC;
+        case 'ODD_ASC_EVEN_DESC': return PlayMode.ODD_ASC_EVEN_DESC;
+        case 'ODD_DESC_EVEN_DESC': return PlayMode.ODD_DESC_EVEN_DESC;
+        case 'ODD_DESC_EVEN_ASC': return PlayMode.ODD_DESC_EVEN_ASC;
+        case 'RANDOM': return PlayMode.RANDOM;
+    }
+    return PlayMode.CHORD;
+}
+export function getPlayModeNames():string[]{
+    return Object.values(PlayMode).filter(value => typeof value === 'string') as string[];
+}    
+
 export let isOdd = (t: number) => t % 2 === 1;
 export let isEven = (t: number) => t % 2 === 0;
 
@@ -26,7 +49,7 @@ export function getArpeggios(notes: number[], mode: PlayMode): number[][] {
     switch (mode) {
         case PlayMode.CHORD:
             return [];
-        case PlayMode.ASCENDING:
+        case PlayMode.ASCENDING: 
             return [notes];
         case PlayMode.DESCENDING:
             return [[...notes].reverse()];

@@ -4,8 +4,9 @@ import { Command, CommandType } from './command';
 import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
 import { Parser } from "./parser";
 import { Part } from './part';
-import { arpeggiate } from './play.mode';
-import { Player, PlayMode } from "./player";
+import { arpeggiate, getPlayModeFromString, PlayMode } from './play.mode';
+import { Player  } from "./player";
+import { ScaleTypes } from './scale';
 import { Song } from './song';
 import { parseBlock } from "./song.parser";
  
@@ -28,7 +29,7 @@ export class SongPlayer {
         Transport.cancel();
         Transport.stop();
     }
- 
+  
     playSong(song: Song) {
         Transport.start();
         Transport.bpm.value = 100;
@@ -95,6 +96,9 @@ export class SongPlayer {
                 player.selectedNote = note!;
                 let notes: number[] = this.getSelectedNotes(player);
                 let seconds: number = Time(duration).toSeconds();
+                console.log("Type of mode: " + typeof player.playMode);
+                console.log("Mode equals PlayMode.ASCENDING: " + (player.playMode === PlayMode.ASCENDING));
+            
                 if (player.playMode === PlayMode.CHORD) {
                     let chord = new Chord(duration, notes);
                     soundBits = soundBits.concat(chord);
@@ -146,7 +150,9 @@ export class SongPlayer {
                 player.shiftValue = parseInt(command.commandValue, 10);
                 break;
             case CommandType.PLAYMODE:
-                player.playMode = parseInt(command.commandValue, 10);
+                let mode: PlayMode = getPlayModeFromString(command.commandValue);
+
+                player.playMode = mode;
                 break;
             case CommandType.WIDTH:
                 player.density = parseInt(command.commandValue, 10);
@@ -155,11 +161,12 @@ export class SongPlayer {
                 player.octave = parseInt(command.commandValue, 10);
                 break;
             case CommandType.SCALE:
-                player.selectScale(parseInt(command.commandValue, 10));
+                let scale: ScaleTypes = command.commandValue as unknown as ScaleTypes;
+                player.selectScale(scale);
                 break;
             case CommandType.INVERSION:
                 player.inversion = parseInt(command.commandValue, 10);
-                break;
+                break; 
             case CommandType.KEY:
                 player.tonality = parseInt(command.commandValue, 10);
                 break;

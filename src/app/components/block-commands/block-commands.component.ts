@@ -1,7 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
+import { getPlayModeNames } from 'src/app/model/play.mode';
+import { getScaleNames } from 'src/app/model/scale';
 
+ 
 @Component({
     selector: 'app-block-commands',
     templateUrl: './block-commands.component.html',
@@ -11,13 +14,20 @@ export class BlockCommandsComponent implements OnInit {
     @Input() block: Block = new Block();
 
     commandTypes  = CommandType;
-    enumKeys:any[] = [];
+    commandTypeNames:any[] = [];
  
-    constructor() { 
+    playModeValues:number[]=[];
+    scaleValues:number[]=[];
+    playModeNames: any[] ;
+    scaleNames: any[]; 
+  
+    constructor() {         
+        this.playModeNames = getPlayModeNames();
+        this.scaleNames = getScaleNames();
     }
 
     ngOnInit(): void {
-        this.enumKeys = Object.keys(CommandType).filter(f => !isNaN(Number(f)));
+        this.commandTypeNames = Object.keys(CommandType).filter(f => !isNaN(Number(f)));
     }
 
     removeCommand(command: Command):void {

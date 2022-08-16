@@ -1,3 +1,7 @@
+export enum ScaleTypes{
+    'WHITE','BLUE','RED','BLACK','PENTA','TONES','FULL'
+}
+
 export class Scale {
     notes: number[];
 
@@ -82,21 +86,22 @@ export class Scale {
 
 }
 
-export function getScaleByNum(num: number): Scale {
-    return SCALES[num];
-}
+ 
 
 export function getScaleByName(name: string): Scale {
     switch (name) {
-        case 'white': return SCALES[0];
-        case 'blue': return SCALES[1];
-        case 'red': return SCALES[2];
-        case 'black': return SCALES[3];
-        case 'penta': return SCALES[4];
-        case 'tones': return SCALES[5];
-        case 'full': return SCALES[6];
+        case 'WHITE': return SCALES[0];
+        case 'BLUE': return SCALES[1];
+        case 'RED': return SCALES[2];
+        case 'BLACK': return SCALES[3];
+        case 'PENTA': return SCALES[4];
+        case 'TONES': return SCALES[5];
+        case 'FULL': return SCALES[6];
     }
-    return SCALES[0]; // default case
+    return SCALES[0]; 
+}
+export function getScaleNames():string[]{
+    return ['WHITE','BLUE','RED','BLACK','PENTA','TONES','FULL'];
 }
 const SCALES: Scale[] = [
     new Scale([0, 2, 3, 5, 7, 9, 10]),
