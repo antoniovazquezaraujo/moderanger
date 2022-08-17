@@ -19,16 +19,20 @@ export class Player{
     shiftStart=0;
     shiftSize=0;
     shiftValue=0;
+    armonicGap:number=0;
+    intervalicGap:number=0;
+    metricGap:number=0;
+    sonicGap:number=0;
     playMode: PlayMode= PlayMode.CHORD;
     instrument:MusicalInstrument = Song.getDefultInstrument();
-  
+   
     constructor(channel:number){
         this.channel=channel;
     }
     getSelectedNotes(scaleNum:ScaleTypes, tonality:number):number[]{
         var scale = getScaleByName(scaleNum.toString());       
         var tunnedNote = this.selectedNote;
-        var chordNotes= scale.gradeToChord(tunnedNote, this.density, tonality, this.gap, this.shiftStart, this.shiftSize, this.shiftValue);
+        var chordNotes= scale.gradeToChord(tunnedNote, this.density, tonality, this.gap, this.shiftStart, this.shiftSize, this.shiftValue, this.armonicGap, this.intervalicGap, this.metricGap, this.sonicGap);
         var octavedNotes = this.setOctave(chordNotes);
         var invertedNotes = this.setInversion(octavedNotes);
         return invertedNotes;

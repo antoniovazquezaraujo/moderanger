@@ -19,17 +19,31 @@ export class Scale {
         }
         return totalSemitones;
     }
-    gradeToChord(grade: number, density: number, tonality: number, gap:number, shiftStart:number, shiftSize:number, shiftValue:number): number[] {
-        return this.getShiftedNotes(this.getSelectedNotes(grade, density, tonality,gap), shiftStart,shiftSize,shiftValue);
+    gradeToChord(
+        grade: number, 
+        density: number, 
+        tonality: number, 
+        gap:number, 
+        shiftStart:number, 
+        shiftSize:number, 
+        shiftValue:number,
+        armonicGap:number,
+        intervalicGap:number,
+        metricGap:number,
+        sonicGap:number
+        ): number[] {
+        return this.getDecoratedNotes(this.getShiftedNotes(this.getSelectedNotes(grade, density, tonality,gap), shiftStart,shiftSize,shiftValue), armonicGap, intervalicGap, metricGap, sonicGap);
     }
-    OLDgradeToChord(grade: number, density: number, tonality: number): number[] {
-        return this.getShiftedNotes(this.getSelectedNotes(grade, density, tonality,2), 1,1,-1);
+    getDecoratedNotes(notes:number[], armonicGap:number, intervalicGap:number, metricGap:number, sonicGap:number):number[]{
+        console.log("Arguments: "+notes.length+" "+armonicGap+" "+intervalicGap+" "+metricGap+" "+sonicGap);
+        return notes;
     }
+
     getShiftedNotes(notes:number[], shiftStart:number, shiftSize:number, shiftValue:number): number[] {
         for (var n = 0; n< shiftSize; n++) {
             if(n+shiftStart > notes.length){
                 break;
-            }
+            } 
             notes[n+shiftStart]+=shiftValue*12;
         }
         return notes;

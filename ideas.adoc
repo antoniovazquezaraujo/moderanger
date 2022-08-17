@@ -1406,3 +1406,152 @@ Vale, una cosa práctica sería lo de mostrar los nombres de los elementos en lu
 Hay que intentar no salirse del objetivo principal: este debe ser solo una herramienta para demostrar la teoría de la música de partículas, así que lo primero ha de ser la armonía y sus posibilidades.
 
 Vale. Arreglado. Ahora se muestran los nombres de las escalas y los playmodes, lo más urgente. 
+
+Bien, lo más importante sigue siendo el asunto armónico. Así que deberíamos pensar en mejorar ese modo random que parece tan mecánico para hacerlo más humano.
+De modo que vamos a congelar de momento todo el resto de ideas y vamos a centrarnos en la parte "generativa" del proyecto. Debe generar música muy interesante, y debe ser muy fácil de usar. Vamos con el modo random.
+
+Para empezar, no parece que sea un modo más de cómo se toca un arpegio. Principalmente porque posiblemente requiera más de un parámetro, como la cantidad de aleatoriedad, para empezar. Igual hay que pensar en algo distinto.
+Puede ser más como el sistema de shift, que tiene un comienzo, un tamaño y un valor. Sería un comando como ese, donde se dijera desde dónde hasta empezar, qué tamaño de notas y qué cantidad de aleatoriedad.
+Con valores bajos de aleatoriedad, funcionaría como hasta ahora, es decir, dando solamente las notas del arpegio. Con un poco de aleatoriedad podría incluir notas extra entre ellas. No tengo claro esto.
+Veamos, elementos que influyen en una melodía:
+- Lo lejos o cerca que está cada nota de la nota base armónicamente. Eso se mide en intervalos de tercera. 
+- Si tocas las notas más lejanas en los tiempos fuertes o las usas como notas de paso para las notas más cercanas.
+- Lo frecuentemente que cambias de octava
+- Lo largos que pueden ser los saltos que das entre notas
+
+
+También se podría usar otra técnica:
+Cada nota del arpegio es una nota "central". Alrededor de las notas del arpegio se pueden agregar otras notas que actuan como puentes entre ellas. Cuanto más lejos estén de las notas centrales más aleatorio parecerá.
+Por ejemplo. Si las notas son C, E, G, B podríamos hacer simplemente el arpegio o agregar entre ellas algunas notas puente, por ejemplo:
+    C   E   G   B
+    C D E F G A B
+    C G E B G D B 
+    C B E D G F B
+
+Tres conceptos interesantes:
+    - distancia armónica: Distancia medida subiendo por terceras
+    - distancia interválica: Distancia a una nota subiendo por grados
+    - distancia octávica: Distancia a una nota subiendo por octavas
+
+Por ejemplo, para pasar de C a E hemos incluido en medio varias opciones:
+    - Si usamos un D tenemos:
+        - Distancia armónica: 4 (C-> E-> G-> B-> D)
+        - Distancia interválica: 1 (C-> D)
+        - Distancia octávica: 0 (C-> D) (Si tomamos el D de la misma octava)
+    - Si usamos un G tenemos:
+        - Distancia armónica: 2 (C-> E-> G)
+        - Distancia interválica: 4 (C -> D ->E ->F ->G)
+        - Distancia octávica: 1 (C-> G) (Si tomamos el G de la misma octava)        
+    - Si usamos un B tenemos:
+        - Distancia armónica: 3 (C-> E ->G ->B)
+        - Distancia interválica: 6 (C-> D-> E-> F-> G-> A ->B)
+        - Distancia octávica: -1 (B<- C) (Si tomamos el B de la octava anterior)        
+
+Creo que la distancia "octávica" sobra por completo. Realmente las otras dos se manejan mejor solas.
+Si seleccionas una baja distancia interválica, la nota se tomará de la octava donde quede más cerca de la nota base, automáticamente. Si tomas una alta distancia interválica, pueden aparecer saltos de dos o tres octavas perfectamente. Bien.
+La distancia armónica marcará frases más melódicas, si dejamos que se vaya muy lejos de la base o más armónicas, si nos reducimos al arpegio básico.
+A las distancias seleccionadas, habrá que agregarle el desplazamiento de la nota objetivo, aquella a la que queremos "decorar", agregándole notas antes o después. De manera que si en la nota anterior agregamos una segunda por encima y mantenemos las mismas distancias, en la siguiente nota obtendremos una segunda por encima de dicha nota, no la de la anterior. Así se mantiene la naturalidad melódica.
+En cuanto al tiempo, se podría hacer que para agregar notas, la nota "adornada" o su anterior se dividieran para formar más notas, de manera que la medida general no cambie.
+La división rítmica que se genera también puede ser parametrizada mediante una "distancia métrica", es decir, una distancia que se toma como referencia para la división rítmica. Por ejemplo, con una baja distancia métrica, de una negra pasaremos a dos corcheas, por ejemplo, pero con una más alta podríamos pasar a cuatro semicorcheas, o incluso a tresillos. Incluso se podrían generar silencios, aunque igual esta sería otra distancia, la distancia "sónica". A más distancia sónica, más silencios.
+Resumen de momento:
+    -Distancia armónica: más o menos lejos de la base en el arpegio
+    -Distancia interválica: más o menos lejos de la base en la escala
+    -Distancia métrica: más o menos lejos de la medida original
+    -Distancia sónica: más o menos lejos de la cantidad de silencio
+
+Creo que el adorno se aplica sobre la nota actual. No es una nota de paso entre dos, sino una sustitución de una nota por un conjunto de notas.
+Los parámetros podrían ser entonces:
+    - Inicio: primera nota del arpegio que se adorna
+    - Duración: durante cuántas notas se hace el adorno
+    - Distancia armónica: lo lejos en el arpegio que se puede llegar
+    - Distancia interválica: lo lejos en la escala que se puede llegar
+    - Distancia métrica: lo granular que puede ser la nueva medida
+    - Distancia sónica: la cantidad de silencios generados
+
+La distancia interválica puede medirse desde la nota central en notas hacia arriba y hacia abajo. Un valor de cero indicaría toda la octava central, es decir, la octava que rodea a la nota decorada. Por ejemplo, si tenemos  que decorar un C sería:
+    G A B (C) D E F
+El valor 0 indicaría que las notas generadas han de caer dentro de esa octava. A partir de ahí, cada número iría agregando una nota, tanto por arriba como por abajo, así que un 1 indicaría:
+    F G A B (C) D E F G
+Y un 2 indicaría
+    E F G A B (C) D E F G A
+Etc... De esta forma limitamos más o menos lo lejos que pueden estar las notas de la nota base, tanto ascendente como descendentemente.
+La distancia armónica nos serviría para elegir entre esas notas las más cercanas o lejanas en el arpegio.
+
+Resumen de la distancia interválica:
+    0:     (G A B (C) D E F)      (solo en la octava central)
+    1:   (F G A B (C) D E F G)    (1 nota arriba y abajo)
+    2: (E F G A B (C) D E F G A)  (2 notas arriba y abajo)
+    etc...
+
+Una distancia armónica de 0 podría indicar solamente el arpegio base, es decir 1, 3 y 5. A partir de ahí, cada número iría agregando una nota del arpegio, por ejemplo:
+0: C E G
+1: C E G B
+2: C E G B D
+3: C E G B D F
+4: C E G B D F A
+
+No. Quizá mejor empezar desde cero para una distancia nula, que no generaría ninguna nota:
+
+0: No se agrega nota alguna
+1: C
+2: C E
+3: C E G
+4: C E G B
+5: C E G B D
+6: C E G B D F
+7: C E G B D F A
+...
+(Para las escalas de más de 7 notas esto continuaría agregando notas del arpegio)
+
+La distancia rítmica dividirá la nota original en una cantidad de notas igual a la distancia rítmica. Por ejemplo:
+0: No se divide la nota original
+1: Se divide en dos notas
+2: Se divide en tres notas
+3: Se divide en cuatro notas
+4: Se divide en cinco notas
+5: Se divide en seis notas
+6: Se divide en siete notas
+7: Se divide en ocho notas
+etc...
+O sea, la distancia es la CANTIDAD de notas que se agregan a la original dividiendo el espacio para que siga siendo el mismo.
+Todos estos parámetros pueden ser fijos o RANDOM.
+
+    - Inicio: primera nota del arpegio que se adorna
+    - Duración: durante cuántas notas se hace el adorno
+    - Distancia armónica: lo lejos en el arpegio que se puede llegar
+    - Distancia interválica: lo lejos en la escala que se puede llegar
+    - Distancia métrica: lo granular que puede ser la nueva medida
+    - Distancia sónica: la cantidad de silencios generados
+
+Los valores siempre son un random entre cero y el valor seleccionado.
+
+A las distancias les llamaremos por sus iniciales: DA, DI, DM, DS.
+    - DA: 4 (random entre 0 y 4) -> (C E G B D)
+    - DI: 1 (random entre 0 y 1) -> (F G A B (C) D E F G) 
+
+Mejor las siglas en inglés: AD, ID, MD y SD.
+Incluso, mejor que "distance" usaremos "gap", que es más corto y expresa lo mismo:
+AG, IG, MG y SG. 
+
+Aquí, por ejemplo, si la nota generada es un D tiene que ser el de la misma octava, es decir, el que está justo encima de C, porque a eso nos obliga la DI. Sin embargo, si sale un F puede ser el superior o el inferior, puesto que la DI incluye a ambos.
+
+La distancia sónica indica lo probable que es que una nota sea sustituida por un silencio.
+0: ninguna nota se silencia
+1: un 10% de las notas se silenciarán
+8: un 80% de las notas se silenciarán
+etc
+10: todas las notas se silenciarán
+
+IMPORTANTE: Con este sistema, estamos controlando solamente las notas que se AGREGAN a la nota original. En ningún momento la nota original se va a sustituir o eliminar. Quizá esto deba controlarse también.
+
+Vale, teníamos un parámetro que era el INICIO, que indica desde qué nota se hace el adorno. Si ese inicio es 0 entonces la nota original entra a formar parte del cambio, con lo que podrá ser sustituida. Si es 1 entonces no, solamente se agregan notas. Esto puede ser práctico.
+Entonces, el parámetro que no tiene sentido es la duración, puesto que siempre será la de la nota original. Entonces resumen:
+
+    - Inicio: primera nota del arpegio que se adorna
+    - Distancia armónica: lo lejos en el arpegio que se puede llegar
+    - Distancia interválica: lo lejos en la escala que se puede llegar
+    - Distancia métrica: lo granular que puede ser la nueva medida
+    - Distancia sónica: la cantidad de silencios generados
+
+Vale. Creo que tenemos una gran idea. Vamos a pensar cómo llevar esto a la práctica. Nueva rama!
+

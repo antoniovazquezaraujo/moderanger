@@ -1,19 +1,19 @@
 
 export enum CommandType{
-    VELOCITY    = 0,
-    PULSE       = 1,
-    PLAYMODE    = 2,
-    WIDTH       = 3,
-    OCTAVE      = 4,
-    SCALE       = 5,
-    INVERSION   = 6,
-    KEY         = 7,
-    GEAR        = 8,
-    CHANNEL     = 9,
-    GAP         = 10,
-    SHIFTSTART  = 11,
-    SHIFTSIZE   = 12,
-    SHIFTVALUE  = 13
+    PLAYMODE    = 0,
+    WIDTH       = 1,
+    OCTAVE      = 2,
+    SCALE       = 3,
+    INVERSION   = 4,
+    KEY         = 5,
+    GAP         = 6,
+    SHIFTSTART  = 7,
+    SHIFTSIZE   = 8,
+    SHIFTVALUE  = 9,
+    ARMONIC_GAP = 10,
+    INTERVALIC_GAP = 11,
+    METRIC_GAP = 12,
+    SONIC_GAP = 13
 }
 export class Command {
 
