@@ -16,7 +16,7 @@
             <div *ngSwitchCase="commandTypes.SCALE">
                 <p-dropdown class="commandType" appendTo="body" [options]="scaleNames" [(ngModel)]="item.commandValue"></p-dropdown>
             </div>
-            <div *ngSwitchCase="commandTypes.DECORATION_PATTERN">
+            <div *ngSwitchCase="commandTypes.PATTERN">
                 <input type="text" class="patternValue" pInputText [(ngModel)]="item.commandValue"/>
             </div>
             <div *ngSwitchDefault>
