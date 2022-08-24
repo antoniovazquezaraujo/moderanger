@@ -10,10 +10,8 @@ export enum CommandType{
     SHIFTSTART  = 7,
     SHIFTSIZE   = 8,
     SHIFTVALUE  = 9,
-    ARMONIC_GAP = 10,
-    INTERVALIC_GAP = 11,
-    METRIC_GAP = 12,
-    SONIC_GAP = 13
+    PATTERN_GAP = 10,
+    PATTERN = 11
 }
 export class Command {
 

@@ -94,16 +94,20 @@ export class SongPlayer {
             if (soundBit instanceof Note && soundBit !== null) {
                 let note = soundBit.note;
                 player.selectedNote = note!;
-                let notes: number[] = this.getSelectedNotes(player);
+                let noteSoundBits: SoundBit[] = this.getSelectedNotes(player);
+                let notes:number[] = this.soundBitsToNotes(noteSoundBits);
                 let seconds: number = Time(duration).toSeconds();
 
                 if (player.playMode === PlayMode.CHORD) {
-                    let chord = new Chord(duration, notes);
+                    let chord = new Chord(duration, noteSoundBits);
                     soundBits = soundBits.concat(chord);
                 } else {
                     let arpeggio = arpeggiate(notes, player.playMode);
-                    soundBits = soundBits.concat(new Arpeggio(duration, arpeggio));
-                }
+                    let arpeggioSoundBits:SoundBit[] = notesToSoundBits(arpeggio, duration);
+                    let newArpeggio = new Arpeggio(duration, arpeggioSoundBits)
+                    soundBits = soundBits.concat(newArpeggio);
+                    console.log("SoundBits:"+ soundBits);
+                } 
             } else { // is a rest
                 let chordNotes: SoundBit[] = [];
                 chordNotes.push(new Rest(duration));
@@ -111,6 +115,13 @@ export class SongPlayer {
             }
         }
         return soundBits;
+    }
+    soundBitsToNotes(soundBits: SoundBit[]):number[] {
+        let notes: number[]=[];
+        for(const soundBit of soundBits){
+            notes.push(soundBit.note!);
+        }
+        return notes;
     }
 
     getRootNotes(block: Block, player: Player): SoundBit[] {
@@ -122,7 +133,7 @@ export class SongPlayer {
         }
         return [];
     }
-    getSelectedNotes(player: Player): number[] {
+    getSelectedNotes(player: Player): SoundBit[] {
         let soundBitsToPlay = player.getSelectedNotes(player.getScale(), player.tonality);
         return soundBitsToPlay;
     }
@@ -147,17 +158,11 @@ export class SongPlayer {
             case CommandType.SHIFTVALUE:
                 player.shiftValue = parseInt(command.commandValue, 10);
                 break;
-            case CommandType.ARMONIC_GAP:
-                player.armonicGap = parseInt(command.commandValue, 10);
+            case CommandType.PATTERN_GAP:
+                player.decorationGap = parseInt(command.commandValue, 10);
                 break;
-            case CommandType.INTERVALIC_GAP:
-                player.intervalicGap = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.METRIC_GAP:
-                player.metricGap = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.SONIC_GAP:
-                player.sonicGap = parseInt(command.commandValue, 10);
+            case CommandType.PATTERN:
+                player.decorationPattern = command.commandValue;
                 break;
             case CommandType.PLAYMODE:
                 let mode: PlayMode = getPlayModeFromString(command.commandValue);
@@ -214,7 +219,7 @@ export class SongPlayer {
             let numTurnsNote: number = 0.0;
             if (soundBit instanceof Arpeggio) {
                 let x: number = this.floatify(Time(soundBitDuration).toSeconds() / interval);
-                numTurnsNote = this.floatify(x / soundBit.notes.length);
+                numTurnsNote = this.floatify(x / soundBit.soundBits.length);
             } else {
                 numTurnsNote = Time(soundBitDuration).toSeconds() / interval;
             }
@@ -239,16 +244,16 @@ export class SongPlayer {
             let duration = soundBit.duration;
             let notes: any = [];
             if (soundBit instanceof Chord) {
-                for (let note of soundBit.notes) {
-                    notes.push(Frequency(note, "midi").toFrequency());
+                for (let note of soundBit.soundBits) {
+                    notes.push(Frequency(note.note, "midi").toFrequency());
                 }
                 partSoundInfo.player.triggerAttackRelease(notes, duration, time);
                 partSoundInfo.soundBitIndex++;
             } else if (soundBit instanceof Arpeggio) {
                 let seconds = Time(duration).toSeconds();
-                partSoundInfo.player.triggerAttackRelease(Frequency(soundBit.notes[partSoundInfo.arpeggioIndex], "midi").toFrequency(), duration, time);
+                partSoundInfo.player.triggerAttackRelease(Frequency(soundBit.soundBits[partSoundInfo.arpeggioIndex].note, "midi").toFrequency(), duration, time);
                 partSoundInfo.arpeggioIndex++;
-                if (partSoundInfo.arpeggioIndex >= soundBit.notes.length) {
+                if (partSoundInfo.arpeggioIndex >= soundBit.soundBits.length) {
                     partSoundInfo.arpeggioIndex = 0;
                     partSoundInfo.soundBitIndex++;
                 }
@@ -266,3 +271,12 @@ export class SongPlayer {
         }
     }
 }
+function notesToSoundBits(arpeggio: number[], duration: string): SoundBit[] {
+    var soundBitDuration :string = "16n"; //duration / arpeggio.length;
+    var soundBits:SoundBit[] = [];
+    for(const note of arpeggio){
+        soundBits.push(new SoundBit(soundBitDuration, note))
+    }
+    return soundBits;
+}
+
