@@ -54,7 +54,7 @@ export function getArpeggios(notes: number[], mode: PlayMode): number[][] {
         case PlayMode.DESCENDING:
             return [[...notes].reverse()];
         case PlayMode.ASC_DESC:
-            return [[...notes].slice(0, -1), [...notes].reverse()];
+            return [[...notes].slice(0, -2), [...notes].reverse()];
         case PlayMode.DESC_ASC:
             let [_, ...notesExceptFirstElement] = notes;
             return [[...notes].reverse(), notesExceptFirstElement];

@@ -1,81 +1,163 @@
-export enum ScaleTypes{
-    'WHITE','BLUE','RED','BLACK','PENTA','TONES','FULL'
-}
+import { SoundBit } from "./note";
+import { Parser } from "./parser";
+import { parseBlock } from "./song.parser";
 
+export enum ScaleTypes {
+    'WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'
+}
+export class OctavedGrade{
+    grade:number=0;
+    octave:number=0;
+    scale:Scale;
+    duration:string;
+    constructor(scale:Scale, grade:number, octave:number, duration:string){        
+        this.scale=scale;
+        this.addGradeAndOctave(grade, octave);
+        this.duration = duration;
+    }
+    addOctavedGrade(grade:OctavedGrade){
+        this.addGradeAndOctave(grade.grade, grade.octave);
+    }
+    addGradeAndOctave(grade:number, octave:number){
+        this.grade += grade;
+        this.octave+= octave;
+        if(this.grade >= this.scale.getNumNotes()){
+            this.octave+= Math.floor(this.grade / this.scale.getNumNotes());
+            this.grade = Math.abs(this.grade % this.scale.getNumNotes());
+        }else if(this.grade < 0){
+            this.octave-= Math.floor(this.grade / this.scale.getNumNotes());
+            this.grade = Math.abs(this.grade % this.scale.getNumNotes());
+        }
+    }
+    addGrade(grade:number){
+        this.grade += grade;
+        if(this.grade >= this.scale.getNumNotes()){
+            this.octave+= Math.floor(this.grade / this.scale.getNumNotes());
+            this.grade = Math.abs(this.grade % this.scale.getNumNotes());
+        }else if(this.grade <0){
+            this.octave+= Math.floor(this.grade / this.scale.getNumNotes());
+            this.grade = Math.abs((this.scale.getNumNotes() + this.grade) % this.scale.getNumNotes());
+        }
+    }   
+    toNote(){
+        return this.scale.notes[this.grade]+((this.octave)*12);
+    }
+    toSoundBit(){
+        return new SoundBit(this.duration, this.toNote());
+    }
+}
 export class Scale {
     notes: number[];
 
     constructor(notes: number[]) {
         this.notes = notes;
     }
-
-    gradeToSemitones(grade: number): number {
-        var scalesToAdd = Math.floor(Math.abs(grade) / this.notes.length);
-        var gradeInScale = Math.abs(grade) % this.notes.length;
-        var numSemitones = this.notes[gradeInScale];
-        var totalSemitones = numSemitones + (scalesToAdd * 12)
-        if (grade < 0) {
-            totalSemitones *= -1;
+    gradeToChord(
+        grade: number,
+        density: number,
+        tonality: number, 
+        gap: number,
+        shiftStart: number,
+        shiftSize: number,
+        shiftValue: number,
+        decorationPattern: string,
+        decorationGap?: number
+    ): SoundBit[] {
+        var selectedGrades:OctavedGrade[] = this.getSelectedGrades(grade, density, gap);
+        var shiftedGrades:OctavedGrade[] = this.getShiftedGrades(selectedGrades, shiftStart, shiftSize, shiftValue)
+        var notes:SoundBit[];
+        if(decorationPattern === undefined || decorationPattern === ''){
+            notes =  this.octavedGradesToNotes(shiftedGrades);
+        }else{
+            var decoratedGrades:OctavedGrade[] =  this.getDecoratedGrades(shiftedGrades, gap, decorationPattern, decorationGap);
+            notes = this.octavedGradesToNotes(decoratedGrades);
         }
-        return totalSemitones;
+        if(tonality === undefined || tonality === 0){
+            return notes;
+        }else{
+            return this.getTunnedSoundBits(notes, tonality);
+        }        
     }
-    gradeToChord(grade: number, density: number, tonality: number, gap:number, shiftStart:number, shiftSize:number, shiftValue:number): number[] {
-        return this.getShiftedNotes(this.getSelectedNotes(grade, density, tonality,gap), shiftStart,shiftSize,shiftValue);
-    }
-    OLDgradeToChord(grade: number, density: number, tonality: number): number[] {
-        return this.getShiftedNotes(this.getSelectedNotes(grade, density, tonality,2), 1,1,-1);
-    }
-    getShiftedNotes(notes:number[], shiftStart:number, shiftSize:number, shiftValue:number): number[] {
-        for (var n = 0; n< shiftSize; n++) {
-            if(n+shiftStart > notes.length){
-                break;
-            }
-            notes[n+shiftStart]+=shiftValue*12;
-        }
-        return notes;
-    }
-
-    getSelectedNotes(rootNoteOrder: number, density: number, tonality: number, gap:number): number[] {
-        var chordNotes: number[] = [];
-        var noteShift = 0;
-        var tonalityShift = tonality;
-
-        var index = rootNoteOrder;
-        if (index >= this.getNumNotes()) {
-            index = index % this.getNumNotes();
-            noteShift += 12* (Math.floor(rootNoteOrder/this.getNumNotes()));
-        } 
-        if( index < 0){
-            index = Math.abs(index % this.getNumNotes());
-            noteShift -= 12* (Math.floor(Math.abs(rootNoteOrder)/this.getNumNotes()));
-        }
-        chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
-        for (var n = 0; n < density; n++) {
-            index += gap;
-            if (index >= this.getNumNotes()) {
-                index = index % this.getNumNotes();
-                noteShift += 12;
-            } 
-            if( index < 0){
-                index = this.getNumNotes() - Math.abs(index);
-                noteShift -= 12;
-            }
-            chordNotes.push(this.getNotePosition(index) + noteShift + tonalityShift);
+    octavedGradesToNotes(grades: OctavedGrade[]): SoundBit[] {
+        var chordNotes: SoundBit[] = [];
+        for (var n = 0; n < grades.length; n++) {
+            var grade = grades[n];
+            chordNotes.push(grade.toSoundBit());
         }
         return chordNotes;
     }
-    /**
-     * Return a chord with as density notes added to the root
-     */
-    getChordNotes(rootNoteOrder: number, density: number, tonality: number): number[] {
-        return this.getSelectedNotes(rootNoteOrder, density, tonality,4);
+    getDecoratedGrades(arpegioGrades: OctavedGrade[], baseGap:number, decorationPattern: string, decorationGap?: number): OctavedGrade[] {
+        var gap = decorationGap ?? baseGap;
+        var decoratedGrades:OctavedGrade[] =[]; 
+        var baseGrade = arpegioGrades[0];
+        let parser = new Parser(decorationPattern);
+        const tree = parser.parse();
+        let soundBits: SoundBit[] = [];
+        let decorationGrades:SoundBit[] = []; 
+        if (tree.ast) {
+            decorationGrades= parseBlock(tree.ast, "4n", soundBits);
+        }
+        for (var arpegioIndex = 0; arpegioIndex < arpegioGrades.length; arpegioIndex++) {
+            var grades: OctavedGrade[] = [];
+            var arpegioGrade = arpegioGrades[arpegioIndex];
+            for(var decorationIndex=0; decorationIndex<decorationGrades.length; decorationIndex++){
+                var decoratedGrade = new OctavedGrade(this,arpegioGrade.grade, arpegioGrade.octave, decorationGrades[decorationIndex].duration);
+                decoratedGrade.addGrade(decorationGrades[decorationIndex].note! * gap);
+                grades.push(decoratedGrade);
+            }
+            decoratedGrades= decoratedGrades.concat(grades);
+        }
+        return decoratedGrades;
     }
-    /**
-     * Returns the position of the nht note in the scale
-     */
-    getNotePosition(noteOrder: number): number {
-        return this.notes[noteOrder % 12];
+ 
+    getShiftedGrades(octavedGrades: OctavedGrade[], shiftStart: number, shiftSize: number, shiftValue: number): OctavedGrade[] {
+        for(const grade of octavedGrades){
+            grade
+        }
+        for (var n = 0; n < shiftSize; n++) {
+            if (n + shiftStart > octavedGrades.length) {
+                break;
+            }
+            octavedGrades[n + shiftStart].octave += shiftValue;
+        }
+        return octavedGrades;
     }
+    getTunnedSoundBits(soundBits: SoundBit[], tonality: number): SoundBit[] {
+        for (const soundBit of soundBits) {
+            soundBit.note! += tonality;
+        }
+        return soundBits;
+    }
+    getSelectedGrades(rootNoteOrder: number, density: number, gap: number): OctavedGrade[] {
+        var chordOctavedGrades: OctavedGrade[] = [];
+        var octave = 0;
+
+        var index = rootNoteOrder;
+        if (index >= this.getNumNotes()) {
+            octave += (Math.floor(index / this.getNumNotes()));
+            index = index % this.getNumNotes();
+        }
+        if (index < 0) {
+            octave -=  (Math.ceil(Math.abs(index) / this.getNumNotes()));
+            index = Math.abs(index % this.getNumNotes());
+        }
+        chordOctavedGrades.push(new OctavedGrade(this,index, octave, ''));
+
+        for (var n = 0; n < density; n++) {
+            index += gap;
+            if (index >= this.getNumNotes()) {
+                octave +=  (Math.floor(Math.abs(index) / this.getNumNotes()));
+                index = index % this.getNumNotes();
+            }
+            if (index < 0) { 
+                octave -=  (Math.floor(Math.abs(index) / this.getNumNotes()));
+                index = Math.abs(index % this.getNumNotes());
+            }
+            chordOctavedGrades.push(new OctavedGrade(this,index, octave, ''));
+        }
+        return chordOctavedGrades;  
+    }
+        
 
     /**
      * Returns the number of notes in this scale
@@ -86,7 +168,7 @@ export class Scale {
 
 }
 
- 
+
 
 export function getScaleByName(name: string): Scale {
     switch (name) {
@@ -98,10 +180,10 @@ export function getScaleByName(name: string): Scale {
         case 'TONES': return SCALES[5];
         case 'FULL': return SCALES[6];
     }
-    return SCALES[0]; 
+    return SCALES[0];
 }
-export function getScaleNames():string[]{
-    return ['WHITE','BLUE','RED','BLACK','PENTA','TONES','FULL'];
+export function getScaleNames(): string[] {
+    return ['WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'];
 }
 const SCALES: Scale[] = [
     new Scale([0, 2, 3, 5, 7, 9, 10]),

@@ -17,10 +17,10 @@ export class Note extends SoundBit{
     }
 }
 export class NoteGroup extends SoundBit{
-    notes:number[];
-    constructor(duration:string, notes:number[]){
+    soundBits:SoundBit[];
+    constructor(duration:string, soundBits:SoundBit[]){
         super(duration);
-        this.notes = notes;
+        this.soundBits = soundBits;
     }
 }
 export class Arpeggio extends NoteGroup{
