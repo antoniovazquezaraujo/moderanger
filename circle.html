@@ -120,11 +120,11 @@
     }
     var circles = [
         new Circle(0, 'tones', 'Gold', 6, 0, [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]),
-        new Circle(1, 'penta', 'YellowGreen', 6, 0, [1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0]),
-        new Circle(2, 'black', 'Black', 6, 0, [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]),
-        new Circle(3, 'red', 'FireBrick', 6, 0, [1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1]),
-        new Circle(4, 'blue', 'DodgerBlue', 6, 0, [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0]),
-        new Circle(5, 'white', 'Linen', 6, 0, [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0]),
+        new Circle(1, 'black', 'Black', 6, 0, [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]),
+        new Circle(2, 'red', 'FireBrick', 6, 0, [1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1]),
+        new Circle(3, 'blue', 'DodgerBlue', 6, 0, [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0]),
+        new Circle(4, 'white', 'Linen', 6, 0, [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0]),
+        new Circle(5, 'penta', 'YellowGreen', 6, 0, [1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0]),
     ];
     var circleOrder = [0, 1, 2, 3, 4, 5];
     var selectedCircle = 5;
@@ -182,9 +182,9 @@
                 if (keyName == ' ') {
                     playChord();
                 } if (keyName == 'ArrowDown') {
-                    selectNextCircle();
-                } else if (keyName == 'ArrowUp') {
                     selectPrevCircle();
+                } else if (keyName == 'ArrowUp') {
+                    selectNextCircle();
                 } else if (keyName == 'ArrowLeft') {
                     decChordStartNote();
                 } else if (keyName == 'ArrowRight') {
@@ -295,12 +295,14 @@
             labelX = CENTER_X + (CIRCLE_DEPTH * (numCircle + 1)) * Math.sin(angle * (circle.startSector + notes[note]) * Math.PI / 180)
             labelY = CENTER_Y - (CIRCLE_DEPTH * (numCircle + 1)) * Math.cos(angle * (circle.startSector + notes[note]) * Math.PI / 180)
             context.beginPath();
-            context.arc(labelX, labelY, 5, 0, Math.PI * 2, true);
+            context.arc(labelX, labelY, 15, 0, Math.PI * 2, true);
             if (note == 0) {
                 context.strokeStyle = 'Red';
             } else {
                 context.strokeStyle = 'Green';
             }
+            context.lineWidth = 5;
+            context.fillStyle = null;
             context.stroke();
         }
     }
@@ -327,12 +329,12 @@
         context.beginPath();
         context.arc(CENTER_X, CENTER_Y, radius, 0, Math.PI * 2, true);
         context.lineWidth = CIRCLE_DEPTH;
-        context.fill();
+        // context.fill();
     }
     function playClic() {
-        sound.noteOn(9, 80, 50)
-            .wait(100)
-            .noteOff(9, 80);
+        // sound.noteOn(9, 80, 50)
+        //     .wait(100)
+        //     .noteOff(9, 80);
     }
     function playChord() {
         var notes = getSelectedCircle().getChordNotes();
