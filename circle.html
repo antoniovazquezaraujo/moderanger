@@ -295,7 +295,8 @@
             labelX = CENTER_X + (CIRCLE_DEPTH * (numCircle + 1)) * Math.sin(angle * (circle.startSector + notes[note]) * Math.PI / 180)
             labelY = CENTER_Y - (CIRCLE_DEPTH * (numCircle + 1)) * Math.cos(angle * (circle.startSector + notes[note]) * Math.PI / 180)
             context.beginPath();
-            context.arc(labelX, labelY, 5, 0, Math.PI * 2, true);
+            context.arc(labelX, labelY, 2, 0, Math.PI * 2, true);
+            context.lineWidth = CIRCLE_DEPTH/2;
             if (note == 0) {
                 context.strokeStyle = 'Red';
             } else {
