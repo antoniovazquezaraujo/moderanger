@@ -1,4 +1,4 @@
-<canvas id="myCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
+<canvas id="myCanvas" width="850" height="850" style="border:1px solid #000000;"></canvas>
 <script src="JZZ.js"></script>
 <script src="JZZ.synth.Tiny.js"></script>
 <script>
@@ -295,9 +295,9 @@
             labelX = CENTER_X + (CIRCLE_DEPTH * (numCircle + 1)) * Math.sin(angle * (circle.startSector + notes[note]) * Math.PI / 180)
             labelY = CENTER_Y - (CIRCLE_DEPTH * (numCircle + 1)) * Math.cos(angle * (circle.startSector + notes[note]) * Math.PI / 180)
             context.beginPath();
-            context.arc(labelX, labelY, 2, 0, Math.PI * 2, true);
-            context.lineWidth = CIRCLE_DEPTH/2;
-
+            // context.arc(labelX, labelY, 2, 0, Math.PI * 2, true);
+            // context.lineWidth = CIRCLE_DEPTH/2;
+            context.arc(labelX, labelY, 15, 0, Math.PI * 2, true);
             if (note == 0) {
                 context.strokeStyle = 'Red';
             } else {
