@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "jasmine-test": "rimraf ./dist && tsc && jasmine",
-    "grammar": "tspeg src/app/model/grammar.peg src/app/model/parser.ts",
+    "block-grammar": "tspeg src/app/model/block.grammar.peg src/app/model/block.parser.ts",
+    "song-grammar": "tspeg src/app/model/song.grammar.peg src/app/model/song.parser.ts",
     "test": "ng test"
   },
   "private": true,
@@ -28,6 +29,7 @@
     "rxjs": "~7.4.0",
     "tone": "^14.8.26",
     "tslib": "^2.3.0",
+    "tspeg": "^3.3.1",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
@@ -48,5 +50,5 @@
     "karma-jasmine-html-reporter": "~1.7.0",
     "rimraf": "^3.0.2",
     "typescript": "^4.5.5"
-  } 
+  }
 }

@@ -1,0 +1,105 @@
+BEGIN_OBJECT := _ '{' _
+END_OBJECT := _ '}' _
+VALUE_SEPARATOR := _ ',' _
+NAME_SEPARATOR := _ ':' _
+_ := '\s*'
+INT := '0|[1-9][0-9]*'
+
+SONG:=
+  BEGIN_OBJECT
+    BLOCK {VALUE_SEPARATOR BLOCK}*
+  END_OBJECT
+BLOCK:=
+  BEGIN_OBJECT
+  {REPEAT}*
+  NOTES
+  {COMMANDS}*
+  {BLOCK}*
+  END_OBJECT
+
+REPEAT:=
+  'repeat' NAME_SEPARATOR INT
+
+COMMANDS:=
+  COMMAND VALUE_SEPARATOR {COMMAND}*
+
+COMMAND:=
+      'playmode'    NAME_SEPARATOR PLAYMODE_COMMAND_VALUE
+    | 'width'       NAME_SEPARATOR WIDTH_COMMAND_VALUE
+    | 'octave'      NAME_SEPARATOR OCTAVE_COMMAND_VALUE
+    | 'scale'       NAME_SEPARATOR SCALE_COMMAND_VALUE
+    | 'inversion'   NAME_SEPARATOR INVERSION_COMMAND_VALUE
+    | 'key'         NAME_SEPARATOR KEY_COMMAND_VALUE
+    | 'gap'         NAME_SEPARATOR GAP_COMMAND_VALUE
+    | 'shiftstart'  NAME_SEPARATOR SHIFTSTART_COMMAND_VALUE
+    | 'shiftsize'   NAME_SEPARATOR SHIFTSIZE_COMMAND_VALUE
+    | 'shiftvalue'  NAME_SEPARATOR SHIFTVALUE_COMMAND_VALUE
+    | 'pattern'     NAME_SEPARATOR PATTERN_COMMAND_VALUE
+    | 'pattern_gap' NAME_SEPARATOR PATTERN_GAP_COMMAND_VALUE
+
+PLAYMODE_COMMAND_VALUE:=
+      'chord'
+    | 'ascending'
+    | 'descending'
+    | 'asc_desc'
+    | 'desc_asc'
+    | 'even_asc_odd_asc'
+    | 'even_asc_odd_desc'
+    | 'even_desc_odd_desc'
+    | 'even_desc_odd_asc'
+    | 'odd_asc_even_asc'
+    | 'odd_asc_even_desc'
+    | 'odd_desc_even_desc'
+    | 'odd_desc_even_asc'
+    | 'random'
+
+WIDTH_COMMAND_VALUE:=
+  'width'  NAME_SEPARATOR INT
+
+OCTAVE_COMMAND_VALUE:=
+  'octave'  NAME_SEPARATOR INT
+
+SCALE_COMMAND_VALUE:=
+  'scale'  NAME_SEPARATOR
+  'white'|'blue'|'red'|'black'|'penta'|'tones'|'full'
+
+INVERSION_COMMAND_VALUE:=
+  'inversion'  NAME_SEPARATOR INT
+
+KEY_COMMAND_VALUE:=
+  'key'  NAME_SEPARATOR INT
+
+GAP_COMMAND_VALUE:=
+  'gap'  NAME_SEPARATOR INT
+
+SHIFTSTART_COMMAND_VALUE:=
+  'shiftstart'  NAME_SEPARATOR INT
+
+SHIFTSIZE_COMMAND_VALUE:=
+  'shiftsize'  NAME_SEPARATOR INT
+
+SHIFTVALUE_COMMAND_VALUE:=
+  'shiftvalue'  NAME_SEPARATOR INT
+
+PATTERN_COMMAND_VALUE:=
+  'pattern'  NAME_SEPARATOR INT {INT}*
+
+PATTERN_GAP_COMMAND_VALUE:=
+  'patterngap'  NAME_SEPARATOR INT
+
+
+NOTES:=
+    head = NOTES_CONTENT
+    tail = {NOTE_SEPARATOR content = NOTES}*
+NOTES_CONTENT:= noteGroup= {NOTE_GROUP} |  note={NOTE}
+NOTE:= duration = {DURATION}? _ simpleNote= SIMPLE_NOTE
+SIMPLE_NOTE:= silence={SILENCE_SIGN} | note={NOTE_VALUE}
+NOTE_GROUP:= duration= DURATION _ GROUP_START _ notes=NOTES _ GROUP_END
+GROUP_START:= '\('
+GROUP_END:= '\)'
+DURATION:= value = {DURATION_VALUE} DURATION_SIGN
+DURATION_VALUE:= '[0-9]+n\.?' | '[0-9]+m' | '[0-9]+t'
+NOTE_VALUE:= '-?[0-9]+'
+DURATION_SIGN:= ':'
+SILENCE_SIGN:= 's'
+NOTE_SEPARATOR:= ' '+
