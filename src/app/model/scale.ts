@@ -139,7 +139,7 @@ export class Scale {
         }
         if (index < 0) {
             octave -=  (Math.ceil(Math.abs(index) / this.getNumNotes()));
-            index = Math.abs(index % this.getNumNotes());
+            index = Math.abs((this.getNumNotes() )+ index)% this.getNumNotes();
         }
         chordOctavedGrades.push(new OctavedGrade(this,index, octave, ''));
 
@@ -151,7 +151,7 @@ export class Scale {
             }
             if (index < 0) { 
                 octave -=  (Math.floor(Math.abs(index) / this.getNumNotes()));
-                index = Math.abs(index % this.getNumNotes());
+                index = Math.abs((this.getNumNotes() )+ index)% this.getNumNotes();
             }
             chordOctavedGrades.push(new OctavedGrade(this,index, octave, ''));
         }
