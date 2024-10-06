@@ -8,6 +8,6 @@ export class MusicalInstrument{
     }
     triggerAttackRelease(notes: Frequency[] | Frequency, duration: Time | Time[], time?: Time, velocity?: NormalRange){
         this.instrument.triggerAttackRelease(notes, duration, time, velocity);
-    } 
-        
+    }
+ 
 }

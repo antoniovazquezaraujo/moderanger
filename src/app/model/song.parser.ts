@@ -2,38 +2,48 @@
 * INPUT GRAMMAR:
 * BEGIN_OBJECT := _ '{' _
 * END_OBJECT := _ '}' _
+* GROUP_START:= _ '\(' _
+* GROUP_END:= _ '\)' _
 * VALUE_SEPARATOR := _ ',' _
 * NAME_SEPARATOR := _ ':' _
-* _ := '\s*'
 * INT := '0|[1-9][0-9]*'
+* SILENCE_SIGN:= 's'
+* _ := '\s*'
 * SONG:=
 *   BEGIN_OBJECT
-*     BLOCK {VALUE_SEPARATOR BLOCK}*
+*     parts = PART {VALUE_SEPARATOR PART}*
 *   END_OBJECT
+* PART:=
+*     blocks= BLOCK {VALUE_SEPARATOR BLOCK}*
 * BLOCK:=
 *   BEGIN_OBJECT
-*   {REPEAT}*
-*   NOTES
-*   {COMMANDS}*
-*   {BLOCK}*
+*     head = BLOCK_CONTENT
+*     tail = {BLOCK}*
+*   END_OBJECT
+* BLOCK_CONTENT:=
+*   BEGIN_OBJECT
+*     repeat= {REPEAT}*
+*     noteGroup= NOTES
+*     commands= {COMMANDS}*
+*     blocks={BLOCK}*
 *   END_OBJECT
 * REPEAT:=
 *   'repeat' NAME_SEPARATOR INT
 * COMMANDS:=
 *   COMMAND VALUE_SEPARATOR {COMMAND}*
 * COMMAND:=
-*       'playmode'    NAME_SEPARATOR PLAYMODE_COMMAND_VALUE
-*     | 'width'       NAME_SEPARATOR WIDTH_COMMAND_VALUE
-*     | 'octave'      NAME_SEPARATOR OCTAVE_COMMAND_VALUE
-*     | 'scale'       NAME_SEPARATOR SCALE_COMMAND_VALUE
-*     | 'inversion'   NAME_SEPARATOR INVERSION_COMMAND_VALUE
-*     | 'key'         NAME_SEPARATOR KEY_COMMAND_VALUE
-*     | 'gap'         NAME_SEPARATOR GAP_COMMAND_VALUE
-*     | 'shiftstart'  NAME_SEPARATOR SHIFTSTART_COMMAND_VALUE
-*     | 'shiftsize'   NAME_SEPARATOR SHIFTSIZE_COMMAND_VALUE
-*     | 'shiftvalue'  NAME_SEPARATOR SHIFTVALUE_COMMAND_VALUE
-*     | 'pattern'     NAME_SEPARATOR PATTERN_COMMAND_VALUE
-*     | 'pattern_gap' NAME_SEPARATOR PATTERN_GAP_COMMAND_VALUE
+*       key='playmode'    NAME_SEPARATOR value= PLAYMODE_COMMAND_VALUE
+*     | key='width'       NAME_SEPARATOR value= WIDTH_COMMAND_VALUE
+*     | key='octave'      NAME_SEPARATOR value= OCTAVE_COMMAND_VALUE
+*     | key='scale'       NAME_SEPARATOR value= SCALE_COMMAND_VALUE
+*     | key='inversion'   NAME_SEPARATOR value= INVERSION_COMMAND_VALUE
+*     | key='key'         NAME_SEPARATOR value= KEY_COMMAND_VALUE
+*     | key='gap'         NAME_SEPARATOR value= GAP_COMMAND_VALUE
+*     | key='shiftstart'  NAME_SEPARATOR value= SHIFTSTART_COMMAND_VALUE
+*     | key='shiftsize'   NAME_SEPARATOR value= SHIFTSIZE_COMMAND_VALUE
+*     | key='shiftvalue'  NAME_SEPARATOR value= SHIFTVALUE_COMMAND_VALUE
+*     | key='pattern'     NAME_SEPARATOR value= PATTERN_COMMAND_VALUE
+*     | key='pattern_gap' NAME_SEPARATOR value= PATTERN_GAP_COMMAND_VALUE
 * PLAYMODE_COMMAND_VALUE:=
 *       'chord'
 *     | 'ascending'
@@ -50,43 +60,39 @@
 *     | 'odd_desc_even_asc'
 *     | 'random'
 * WIDTH_COMMAND_VALUE:=
-*   'width'  NAME_SEPARATOR INT
+*   key= 'width'  NAME_SEPARATOR value=INT
 * OCTAVE_COMMAND_VALUE:=
-*   'octave'  NAME_SEPARATOR INT
+*   key ='octave'  NAME_SEPARATOR value = INT
 * SCALE_COMMAND_VALUE:=
-*   'scale'  NAME_SEPARATOR
-*   'white'|'blue'|'red'|'black'|'penta'|'tones'|'full'
+*   key= 'scale'  
+*   NAME_SEPARATOR
+*   value= 'white'|'blue'|'red'|'black'|'penta'|'tones'|'full'
 * INVERSION_COMMAND_VALUE:=
-*   'inversion'  NAME_SEPARATOR INT
+*   key= 'inversion'  NAME_SEPARATOR value= INT
 * KEY_COMMAND_VALUE:=
-*   'key'  NAME_SEPARATOR INT
+*   key= 'key'  NAME_SEPARATOR value=INT
 * GAP_COMMAND_VALUE:=
-*   'gap'  NAME_SEPARATOR INT
+*   key='gap'  NAME_SEPARATOR value=INT
 * SHIFTSTART_COMMAND_VALUE:=
-*   'shiftstart'  NAME_SEPARATOR INT
+*   key='shiftstart'  NAME_SEPARATOR value=INT
 * SHIFTSIZE_COMMAND_VALUE:=
-*   'shiftsize'  NAME_SEPARATOR INT
+*   key= 'shiftsize'  NAME_SEPARATOR value= INT
 * SHIFTVALUE_COMMAND_VALUE:=
-*   'shiftvalue'  NAME_SEPARATOR INT
+*   key= 'shiftvalue'  NAME_SEPARATOR value= INT
 * PATTERN_COMMAND_VALUE:=
-*   'pattern'  NAME_SEPARATOR INT {INT}*
+*   key= 'pattern'  NAME_SEPARATOR value = INT {INT}*
 * PATTERN_GAP_COMMAND_VALUE:=
-*   'patterngap'  NAME_SEPARATOR INT
+*   key= 'patterngap'  NAME_SEPARATOR value= INT
 * NOTES:=
 *     head = NOTES_CONTENT
-*     tail = {NOTE_SEPARATOR content = NOTES}*
+*     tail = {_ content = NOTES}*
 * NOTES_CONTENT:= noteGroup= {NOTE_GROUP} |  note={NOTE}
 * NOTE:= duration = {DURATION}? _ simpleNote= SIMPLE_NOTE
 * SIMPLE_NOTE:= silence={SILENCE_SIGN} | note={NOTE_VALUE}
 * NOTE_GROUP:= duration= DURATION _ GROUP_START _ notes=NOTES _ GROUP_END
-* GROUP_START:= '\('
-* GROUP_END:= '\)'
-* DURATION:= value = {DURATION_VALUE} DURATION_SIGN
+* DURATION:= value = {DURATION_VALUE} NAME_SEPARATOR
 * DURATION_VALUE:= '[0-9]+n\.?' | '[0-9]+m' | '[0-9]+t'
 * NOTE_VALUE:= '-?[0-9]+'
-* DURATION_SIGN:= ':'
-* SILENCE_SIGN:= 's'
-* NOTE_SEPARATOR:= ' '+
 */
 type Nullable<T> = T | null;
 type $$RuleType<T> = () => Nullable<T>;
@@ -96,16 +102,23 @@ export interface ASTNodeIntf {
 export enum ASTKinds {
     BEGIN_OBJECT = "BEGIN_OBJECT",
     END_OBJECT = "END_OBJECT",
+    GROUP_START = "GROUP_START",
+    GROUP_END = "GROUP_END",
     VALUE_SEPARATOR = "VALUE_SEPARATOR",
     NAME_SEPARATOR = "NAME_SEPARATOR",
-    _ = "_",
     INT = "INT",
+    SILENCE_SIGN = "SILENCE_SIGN",
+    _ = "_",
     SONG = "SONG",
     SONG_$0 = "SONG_$0",
+    PART = "PART",
+    PART_$0 = "PART_$0",
     BLOCK = "BLOCK",
     BLOCK_$0 = "BLOCK_$0",
-    BLOCK_$1 = "BLOCK_$1",
-    BLOCK_$2 = "BLOCK_$2",
+    BLOCK_CONTENT = "BLOCK_CONTENT",
+    BLOCK_CONTENT_$0 = "BLOCK_CONTENT_$0",
+    BLOCK_CONTENT_$1 = "BLOCK_CONTENT_$1",
+    BLOCK_CONTENT_$2 = "BLOCK_CONTENT_$2",
     REPEAT = "REPEAT",
     COMMANDS = "COMMANDS",
     COMMANDS_$0 = "COMMANDS_$0",
@@ -166,17 +179,12 @@ export enum ASTKinds {
     SIMPLE_NOTE_$0 = "SIMPLE_NOTE_$0",
     SIMPLE_NOTE_$1 = "SIMPLE_NOTE_$1",
     NOTE_GROUP = "NOTE_GROUP",
-    GROUP_START = "GROUP_START",
-    GROUP_END = "GROUP_END",
     DURATION = "DURATION",
     DURATION_$0 = "DURATION_$0",
     DURATION_VALUE_1 = "DURATION_VALUE_1",
     DURATION_VALUE_2 = "DURATION_VALUE_2",
     DURATION_VALUE_3 = "DURATION_VALUE_3",
     NOTE_VALUE = "NOTE_VALUE",
-    DURATION_SIGN = "DURATION_SIGN",
-    SILENCE_SIGN = "SILENCE_SIGN",
-    NOTE_SEPARATOR = "NOTE_SEPARATOR",
 }
 export interface BEGIN_OBJECT {
     kind: ASTKinds.BEGIN_OBJECT;
@@ -184,26 +192,51 @@ export interface BEGIN_OBJECT {
 export interface END_OBJECT {
     kind: ASTKinds.END_OBJECT;
 }
+export interface GROUP_START {
+    kind: ASTKinds.GROUP_START;
+}
+export interface GROUP_END {
+    kind: ASTKinds.GROUP_END;
+}
 export interface VALUE_SEPARATOR {
     kind: ASTKinds.VALUE_SEPARATOR;
 }
 export interface NAME_SEPARATOR {
     kind: ASTKinds.NAME_SEPARATOR;
 }
-export type _ = string;
 export type INT = string;
+export type SILENCE_SIGN = string;
+export type _ = string;
 export interface SONG {
     kind: ASTKinds.SONG;
+    parts: PART;
 }
 export interface SONG_$0 {
     kind: ASTKinds.SONG_$0;
 }
+export interface PART {
+    kind: ASTKinds.PART;
+    blocks: BLOCK;
+}
+export interface PART_$0 {
+    kind: ASTKinds.PART_$0;
+}
 export interface BLOCK {
     kind: ASTKinds.BLOCK;
+    head: BLOCK_CONTENT;
+    tail: BLOCK_$0[];
 }
-export type BLOCK_$0 = REPEAT;
-export type BLOCK_$1 = COMMANDS;
-export type BLOCK_$2 = BLOCK;
+export type BLOCK_$0 = BLOCK;
+export interface BLOCK_CONTENT {
+    kind: ASTKinds.BLOCK_CONTENT;
+    repeat: BLOCK_CONTENT_$0[];
+    noteGroup: NOTES;
+    commands: BLOCK_CONTENT_$1[];
+    blocks: BLOCK_CONTENT_$2[];
+}
+export type BLOCK_CONTENT_$0 = REPEAT;
+export type BLOCK_CONTENT_$1 = COMMANDS;
+export type BLOCK_CONTENT_$2 = BLOCK;
 export interface REPEAT {
     kind: ASTKinds.REPEAT;
 }
@@ -214,39 +247,63 @@ export type COMMANDS_$0 = COMMAND;
 export type COMMAND = COMMAND_1 | COMMAND_2 | COMMAND_3 | COMMAND_4 | COMMAND_5 | COMMAND_6 | COMMAND_7 | COMMAND_8 | COMMAND_9 | COMMAND_10 | COMMAND_11 | COMMAND_12;
 export interface COMMAND_1 {
     kind: ASTKinds.COMMAND_1;
+    key: string;
+    value: PLAYMODE_COMMAND_VALUE;
 }
 export interface COMMAND_2 {
     kind: ASTKinds.COMMAND_2;
+    key: string;
+    value: WIDTH_COMMAND_VALUE;
 }
 export interface COMMAND_3 {
     kind: ASTKinds.COMMAND_3;
+    key: string;
+    value: OCTAVE_COMMAND_VALUE;
 }
 export interface COMMAND_4 {
     kind: ASTKinds.COMMAND_4;
+    key: string;
+    value: SCALE_COMMAND_VALUE;
 }
 export interface COMMAND_5 {
     kind: ASTKinds.COMMAND_5;
+    key: string;
+    value: INVERSION_COMMAND_VALUE;
 }
 export interface COMMAND_6 {
     kind: ASTKinds.COMMAND_6;
+    key: string;
+    value: KEY_COMMAND_VALUE;
 }
 export interface COMMAND_7 {
     kind: ASTKinds.COMMAND_7;
+    key: string;
+    value: GAP_COMMAND_VALUE;
 }
 export interface COMMAND_8 {
     kind: ASTKinds.COMMAND_8;
+    key: string;
+    value: SHIFTSTART_COMMAND_VALUE;
 }
 export interface COMMAND_9 {
     kind: ASTKinds.COMMAND_9;
+    key: string;
+    value: SHIFTSIZE_COMMAND_VALUE;
 }
 export interface COMMAND_10 {
     kind: ASTKinds.COMMAND_10;
+    key: string;
+    value: SHIFTVALUE_COMMAND_VALUE;
 }
 export interface COMMAND_11 {
     kind: ASTKinds.COMMAND_11;
+    key: string;
+    value: PATTERN_COMMAND_VALUE;
 }
 export interface COMMAND_12 {
     kind: ASTKinds.COMMAND_12;
+    key: string;
+    value: PATTERN_GAP_COMMAND_VALUE;
 }
 export type PLAYMODE_COMMAND_VALUE = PLAYMODE_COMMAND_VALUE_1 | PLAYMODE_COMMAND_VALUE_2 | PLAYMODE_COMMAND_VALUE_3 | PLAYMODE_COMMAND_VALUE_4 | PLAYMODE_COMMAND_VALUE_5 | PLAYMODE_COMMAND_VALUE_6 | PLAYMODE_COMMAND_VALUE_7 | PLAYMODE_COMMAND_VALUE_8 | PLAYMODE_COMMAND_VALUE_9 | PLAYMODE_COMMAND_VALUE_10 | PLAYMODE_COMMAND_VALUE_11 | PLAYMODE_COMMAND_VALUE_12 | PLAYMODE_COMMAND_VALUE_13 | PLAYMODE_COMMAND_VALUE_14;
 export type PLAYMODE_COMMAND_VALUE_1 = string;
@@ -265,13 +322,19 @@ export type PLAYMODE_COMMAND_VALUE_13 = string;
 export type PLAYMODE_COMMAND_VALUE_14 = string;
 export interface WIDTH_COMMAND_VALUE {
     kind: ASTKinds.WIDTH_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export interface OCTAVE_COMMAND_VALUE {
     kind: ASTKinds.OCTAVE_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export type SCALE_COMMAND_VALUE = SCALE_COMMAND_VALUE_1 | SCALE_COMMAND_VALUE_2 | SCALE_COMMAND_VALUE_3 | SCALE_COMMAND_VALUE_4 | SCALE_COMMAND_VALUE_5 | SCALE_COMMAND_VALUE_6 | SCALE_COMMAND_VALUE_7;
 export interface SCALE_COMMAND_VALUE_1 {
     kind: ASTKinds.SCALE_COMMAND_VALUE_1;
+    key: string;
+    value: string;
 }
 export type SCALE_COMMAND_VALUE_2 = string;
 export type SCALE_COMMAND_VALUE_3 = string;
@@ -281,28 +344,44 @@ export type SCALE_COMMAND_VALUE_6 = string;
 export type SCALE_COMMAND_VALUE_7 = string;
 export interface INVERSION_COMMAND_VALUE {
     kind: ASTKinds.INVERSION_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export interface KEY_COMMAND_VALUE {
     kind: ASTKinds.KEY_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export interface GAP_COMMAND_VALUE {
     kind: ASTKinds.GAP_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export interface SHIFTSTART_COMMAND_VALUE {
     kind: ASTKinds.SHIFTSTART_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export interface SHIFTSIZE_COMMAND_VALUE {
     kind: ASTKinds.SHIFTSIZE_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export interface SHIFTVALUE_COMMAND_VALUE {
     kind: ASTKinds.SHIFTVALUE_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export interface PATTERN_COMMAND_VALUE {
     kind: ASTKinds.PATTERN_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export type PATTERN_COMMAND_VALUE_$0 = INT;
 export interface PATTERN_GAP_COMMAND_VALUE {
     kind: ASTKinds.PATTERN_GAP_COMMAND_VALUE;
+    key: string;
+    value: INT;
 }
 export interface NOTES {
     kind: ASTKinds.NOTES;
@@ -346,8 +425,6 @@ export interface NOTE_GROUP {
     duration: DURATION;
     notes: NOTES;
 }
-export type GROUP_START = string;
-export type GROUP_END = string;
 export interface DURATION {
     kind: ASTKinds.DURATION;
     value: DURATION_$0;
@@ -358,9 +435,6 @@ export type DURATION_VALUE_1 = string;
 export type DURATION_VALUE_2 = string;
 export type DURATION_VALUE_3 = string;
 export type NOTE_VALUE = string;
-export type DURATION_SIGN = string;
-export type SILENCE_SIGN = string;
-export type NOTE_SEPARATOR = [string, ...string[]];
 export class Parser {
     private readonly input: string;
     private pos: PosInfo;
@@ -406,6 +480,34 @@ export class Parser {
                 return $$res;
             });
     }
+    public matchGROUP_START($$dpth: number, $$cr?: ErrorTracker): Nullable<GROUP_START> {
+        return this.run<GROUP_START>($$dpth,
+            () => {
+                let $$res: Nullable<GROUP_START> = null;
+                if (true
+                    && this.match_($$dpth + 1, $$cr) !== null
+                    && this.regexAccept(String.raw`(?:\()`, "", $$dpth + 1, $$cr) !== null
+                    && this.match_($$dpth + 1, $$cr) !== null
+                ) {
+                    $$res = {kind: ASTKinds.GROUP_START, };
+                }
+                return $$res;
+            });
+    }
+    public matchGROUP_END($$dpth: number, $$cr?: ErrorTracker): Nullable<GROUP_END> {
+        return this.run<GROUP_END>($$dpth,
+            () => {
+                let $$res: Nullable<GROUP_END> = null;
+                if (true
+                    && this.match_($$dpth + 1, $$cr) !== null
+                    && this.regexAccept(String.raw`(?:\))`, "", $$dpth + 1, $$cr) !== null
+                    && this.match_($$dpth + 1, $$cr) !== null
+                ) {
+                    $$res = {kind: ASTKinds.GROUP_END, };
+                }
+                return $$res;
+            });
+    }
     public matchVALUE_SEPARATOR($$dpth: number, $$cr?: ErrorTracker): Nullable<VALUE_SEPARATOR> {
         return this.run<VALUE_SEPARATOR>($$dpth,
             () => {
@@ -434,23 +536,27 @@ export class Parser {
                 return $$res;
             });
     }
-    public match_($$dpth: number, $$cr?: ErrorTracker): Nullable<_> {
-        return this.regexAccept(String.raw`(?:\s*)`, "", $$dpth + 1, $$cr);
-    }
     public matchINT($$dpth: number, $$cr?: ErrorTracker): Nullable<INT> {
         return this.regexAccept(String.raw`(?:0|[1-9][0-9]*)`, "", $$dpth + 1, $$cr);
+    }
+    public matchSILENCE_SIGN($$dpth: number, $$cr?: ErrorTracker): Nullable<SILENCE_SIGN> {
+        return this.regexAccept(String.raw`(?:s)`, "", $$dpth + 1, $$cr);
+    }
+    public match_($$dpth: number, $$cr?: ErrorTracker): Nullable<_> {
+        return this.regexAccept(String.raw`(?:\s*)`, "", $$dpth + 1, $$cr);
     }
     public matchSONG($$dpth: number, $$cr?: ErrorTracker): Nullable<SONG> {
         return this.run<SONG>($$dpth,
             () => {
+                let $scope$parts: Nullable<PART>;
                 let $$res: Nullable<SONG> = null;
                 if (true
                     && this.matchBEGIN_OBJECT($$dpth + 1, $$cr) !== null
-                    && this.matchBLOCK($$dpth + 1, $$cr) !== null
+                    && ($scope$parts = this.matchPART($$dpth + 1, $$cr)) !== null
                     && this.loop<SONG_$0>(() => this.matchSONG_$0($$dpth + 1, $$cr), 0, -1) !== null
                     && this.matchEND_OBJECT($$dpth + 1, $$cr) !== null
                 ) {
-                    $$res = {kind: ASTKinds.SONG, };
+                    $$res = {kind: ASTKinds.SONG, parts: $scope$parts};
                 }
                 return $$res;
             });
@@ -461,9 +567,36 @@ export class Parser {
                 let $$res: Nullable<SONG_$0> = null;
                 if (true
                     && this.matchVALUE_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchBLOCK($$dpth + 1, $$cr) !== null
+                    && this.matchPART($$dpth + 1, $$cr) !== null
                 ) {
                     $$res = {kind: ASTKinds.SONG_$0, };
+                }
+                return $$res;
+            });
+    }
+    public matchPART($$dpth: number, $$cr?: ErrorTracker): Nullable<PART> {
+        return this.run<PART>($$dpth,
+            () => {
+                let $scope$blocks: Nullable<BLOCK>;
+                let $$res: Nullable<PART> = null;
+                if (true
+                    && ($scope$blocks = this.matchBLOCK($$dpth + 1, $$cr)) !== null
+                    && this.loop<PART_$0>(() => this.matchPART_$0($$dpth + 1, $$cr), 0, -1) !== null
+                ) {
+                    $$res = {kind: ASTKinds.PART, blocks: $scope$blocks};
+                }
+                return $$res;
+            });
+    }
+    public matchPART_$0($$dpth: number, $$cr?: ErrorTracker): Nullable<PART_$0> {
+        return this.run<PART_$0>($$dpth,
+            () => {
+                let $$res: Nullable<PART_$0> = null;
+                if (true
+                    && this.matchVALUE_SEPARATOR($$dpth + 1, $$cr) !== null
+                    && this.matchBLOCK($$dpth + 1, $$cr) !== null
+                ) {
+                    $$res = {kind: ASTKinds.PART_$0, };
                 }
                 return $$res;
             });
@@ -471,27 +604,51 @@ export class Parser {
     public matchBLOCK($$dpth: number, $$cr?: ErrorTracker): Nullable<BLOCK> {
         return this.run<BLOCK>($$dpth,
             () => {
+                let $scope$head: Nullable<BLOCK_CONTENT>;
+                let $scope$tail: Nullable<BLOCK_$0[]>;
                 let $$res: Nullable<BLOCK> = null;
                 if (true
                     && this.matchBEGIN_OBJECT($$dpth + 1, $$cr) !== null
-                    && this.loop<BLOCK_$0>(() => this.matchBLOCK_$0($$dpth + 1, $$cr), 0, -1) !== null
-                    && this.matchNOTES($$dpth + 1, $$cr) !== null
-                    && this.loop<BLOCK_$1>(() => this.matchBLOCK_$1($$dpth + 1, $$cr), 0, -1) !== null
-                    && this.loop<BLOCK_$2>(() => this.matchBLOCK_$2($$dpth + 1, $$cr), 0, -1) !== null
+                    && ($scope$head = this.matchBLOCK_CONTENT($$dpth + 1, $$cr)) !== null
+                    && ($scope$tail = this.loop<BLOCK_$0>(() => this.matchBLOCK_$0($$dpth + 1, $$cr), 0, -1)) !== null
                     && this.matchEND_OBJECT($$dpth + 1, $$cr) !== null
                 ) {
-                    $$res = {kind: ASTKinds.BLOCK, };
+                    $$res = {kind: ASTKinds.BLOCK, head: $scope$head, tail: $scope$tail};
                 }
                 return $$res;
             });
     }
     public matchBLOCK_$0($$dpth: number, $$cr?: ErrorTracker): Nullable<BLOCK_$0> {
+        return this.matchBLOCK($$dpth + 1, $$cr);
+    }
+    public matchBLOCK_CONTENT($$dpth: number, $$cr?: ErrorTracker): Nullable<BLOCK_CONTENT> {
+        return this.run<BLOCK_CONTENT>($$dpth,
+            () => {
+                let $scope$repeat: Nullable<BLOCK_CONTENT_$0[]>;
+                let $scope$noteGroup: Nullable<NOTES>;
+                let $scope$commands: Nullable<BLOCK_CONTENT_$1[]>;
+                let $scope$blocks: Nullable<BLOCK_CONTENT_$2[]>;
+                let $$res: Nullable<BLOCK_CONTENT> = null;
+                if (true
+                    && this.matchBEGIN_OBJECT($$dpth + 1, $$cr) !== null
+                    && ($scope$repeat = this.loop<BLOCK_CONTENT_$0>(() => this.matchBLOCK_CONTENT_$0($$dpth + 1, $$cr), 0, -1)) !== null
+                    && ($scope$noteGroup = this.matchNOTES($$dpth + 1, $$cr)) !== null
+                    && ($scope$commands = this.loop<BLOCK_CONTENT_$1>(() => this.matchBLOCK_CONTENT_$1($$dpth + 1, $$cr), 0, -1)) !== null
+                    && ($scope$blocks = this.loop<BLOCK_CONTENT_$2>(() => this.matchBLOCK_CONTENT_$2($$dpth + 1, $$cr), 0, -1)) !== null
+                    && this.matchEND_OBJECT($$dpth + 1, $$cr) !== null
+                ) {
+                    $$res = {kind: ASTKinds.BLOCK_CONTENT, repeat: $scope$repeat, noteGroup: $scope$noteGroup, commands: $scope$commands, blocks: $scope$blocks};
+                }
+                return $$res;
+            });
+    }
+    public matchBLOCK_CONTENT_$0($$dpth: number, $$cr?: ErrorTracker): Nullable<BLOCK_CONTENT_$0> {
         return this.matchREPEAT($$dpth + 1, $$cr);
     }
-    public matchBLOCK_$1($$dpth: number, $$cr?: ErrorTracker): Nullable<BLOCK_$1> {
+    public matchBLOCK_CONTENT_$1($$dpth: number, $$cr?: ErrorTracker): Nullable<BLOCK_CONTENT_$1> {
         return this.matchCOMMANDS($$dpth + 1, $$cr);
     }
-    public matchBLOCK_$2($$dpth: number, $$cr?: ErrorTracker): Nullable<BLOCK_$2> {
+    public matchBLOCK_CONTENT_$2($$dpth: number, $$cr?: ErrorTracker): Nullable<BLOCK_CONTENT_$2> {
         return this.matchBLOCK($$dpth + 1, $$cr);
     }
     public matchREPEAT($$dpth: number, $$cr?: ErrorTracker): Nullable<REPEAT> {
@@ -544,13 +701,15 @@ export class Parser {
     public matchCOMMAND_1($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_1> {
         return this.run<COMMAND_1>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<PLAYMODE_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_1> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:playmode)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:playmode)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchPLAYMODE_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchPLAYMODE_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_1, };
+                    $$res = {kind: ASTKinds.COMMAND_1, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -558,13 +717,15 @@ export class Parser {
     public matchCOMMAND_2($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_2> {
         return this.run<COMMAND_2>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<WIDTH_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_2> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:width)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:width)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchWIDTH_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchWIDTH_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_2, };
+                    $$res = {kind: ASTKinds.COMMAND_2, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -572,13 +733,15 @@ export class Parser {
     public matchCOMMAND_3($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_3> {
         return this.run<COMMAND_3>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<OCTAVE_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_3> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:octave)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:octave)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchOCTAVE_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchOCTAVE_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_3, };
+                    $$res = {kind: ASTKinds.COMMAND_3, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -586,13 +749,15 @@ export class Parser {
     public matchCOMMAND_4($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_4> {
         return this.run<COMMAND_4>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<SCALE_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_4> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:scale)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:scale)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchSCALE_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchSCALE_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_4, };
+                    $$res = {kind: ASTKinds.COMMAND_4, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -600,13 +765,15 @@ export class Parser {
     public matchCOMMAND_5($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_5> {
         return this.run<COMMAND_5>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INVERSION_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_5> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:inversion)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:inversion)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINVERSION_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINVERSION_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_5, };
+                    $$res = {kind: ASTKinds.COMMAND_5, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -614,13 +781,15 @@ export class Parser {
     public matchCOMMAND_6($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_6> {
         return this.run<COMMAND_6>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<KEY_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_6> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:key)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:key)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchKEY_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchKEY_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_6, };
+                    $$res = {kind: ASTKinds.COMMAND_6, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -628,13 +797,15 @@ export class Parser {
     public matchCOMMAND_7($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_7> {
         return this.run<COMMAND_7>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<GAP_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_7> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:gap)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:gap)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchGAP_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchGAP_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_7, };
+                    $$res = {kind: ASTKinds.COMMAND_7, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -642,13 +813,15 @@ export class Parser {
     public matchCOMMAND_8($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_8> {
         return this.run<COMMAND_8>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<SHIFTSTART_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_8> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:shiftstart)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:shiftstart)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchSHIFTSTART_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchSHIFTSTART_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_8, };
+                    $$res = {kind: ASTKinds.COMMAND_8, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -656,13 +829,15 @@ export class Parser {
     public matchCOMMAND_9($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_9> {
         return this.run<COMMAND_9>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<SHIFTSIZE_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_9> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:shiftsize)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:shiftsize)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchSHIFTSIZE_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchSHIFTSIZE_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_9, };
+                    $$res = {kind: ASTKinds.COMMAND_9, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -670,13 +845,15 @@ export class Parser {
     public matchCOMMAND_10($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_10> {
         return this.run<COMMAND_10>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<SHIFTVALUE_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_10> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:shiftvalue)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:shiftvalue)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchSHIFTVALUE_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchSHIFTVALUE_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_10, };
+                    $$res = {kind: ASTKinds.COMMAND_10, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -684,13 +861,15 @@ export class Parser {
     public matchCOMMAND_11($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_11> {
         return this.run<COMMAND_11>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<PATTERN_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_11> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:pattern)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:pattern)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchPATTERN_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchPATTERN_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_11, };
+                    $$res = {kind: ASTKinds.COMMAND_11, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -698,13 +877,15 @@ export class Parser {
     public matchCOMMAND_12($$dpth: number, $$cr?: ErrorTracker): Nullable<COMMAND_12> {
         return this.run<COMMAND_12>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<PATTERN_GAP_COMMAND_VALUE>;
                 let $$res: Nullable<COMMAND_12> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:pattern_gap)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:pattern_gap)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchPATTERN_GAP_COMMAND_VALUE($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchPATTERN_GAP_COMMAND_VALUE($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.COMMAND_12, };
+                    $$res = {kind: ASTKinds.COMMAND_12, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -772,13 +953,15 @@ export class Parser {
     public matchWIDTH_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<WIDTH_COMMAND_VALUE> {
         return this.run<WIDTH_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<WIDTH_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:width)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:width)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.WIDTH_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.WIDTH_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -786,13 +969,15 @@ export class Parser {
     public matchOCTAVE_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<OCTAVE_COMMAND_VALUE> {
         return this.run<OCTAVE_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<OCTAVE_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:octave)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:octave)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.OCTAVE_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.OCTAVE_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -811,13 +996,15 @@ export class Parser {
     public matchSCALE_COMMAND_VALUE_1($$dpth: number, $$cr?: ErrorTracker): Nullable<SCALE_COMMAND_VALUE_1> {
         return this.run<SCALE_COMMAND_VALUE_1>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<string>;
                 let $$res: Nullable<SCALE_COMMAND_VALUE_1> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:scale)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:scale)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.regexAccept(String.raw`(?:white)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.regexAccept(String.raw`(?:white)`, "", $$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.SCALE_COMMAND_VALUE_1, };
+                    $$res = {kind: ASTKinds.SCALE_COMMAND_VALUE_1, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -843,13 +1030,15 @@ export class Parser {
     public matchINVERSION_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<INVERSION_COMMAND_VALUE> {
         return this.run<INVERSION_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<INVERSION_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:inversion)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:inversion)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.INVERSION_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.INVERSION_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -857,13 +1046,15 @@ export class Parser {
     public matchKEY_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<KEY_COMMAND_VALUE> {
         return this.run<KEY_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<KEY_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:key)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:key)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.KEY_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.KEY_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -871,13 +1062,15 @@ export class Parser {
     public matchGAP_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<GAP_COMMAND_VALUE> {
         return this.run<GAP_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<GAP_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:gap)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:gap)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.GAP_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.GAP_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -885,13 +1078,15 @@ export class Parser {
     public matchSHIFTSTART_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<SHIFTSTART_COMMAND_VALUE> {
         return this.run<SHIFTSTART_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<SHIFTSTART_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:shiftstart)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:shiftstart)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.SHIFTSTART_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.SHIFTSTART_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -899,13 +1094,15 @@ export class Parser {
     public matchSHIFTSIZE_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<SHIFTSIZE_COMMAND_VALUE> {
         return this.run<SHIFTSIZE_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<SHIFTSIZE_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:shiftsize)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:shiftsize)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.SHIFTSIZE_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.SHIFTSIZE_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -913,13 +1110,15 @@ export class Parser {
     public matchSHIFTVALUE_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<SHIFTVALUE_COMMAND_VALUE> {
         return this.run<SHIFTVALUE_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<SHIFTVALUE_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:shiftvalue)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:shiftvalue)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.SHIFTVALUE_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.SHIFTVALUE_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -927,14 +1126,16 @@ export class Parser {
     public matchPATTERN_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<PATTERN_COMMAND_VALUE> {
         return this.run<PATTERN_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<PATTERN_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:pattern)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:pattern)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                     && this.loop<PATTERN_COMMAND_VALUE_$0>(() => this.matchPATTERN_COMMAND_VALUE_$0($$dpth + 1, $$cr), 0, -1) !== null
                 ) {
-                    $$res = {kind: ASTKinds.PATTERN_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.PATTERN_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -945,13 +1146,15 @@ export class Parser {
     public matchPATTERN_GAP_COMMAND_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<PATTERN_GAP_COMMAND_VALUE> {
         return this.run<PATTERN_GAP_COMMAND_VALUE>($$dpth,
             () => {
+                let $scope$key: Nullable<string>;
+                let $scope$value: Nullable<INT>;
                 let $$res: Nullable<PATTERN_GAP_COMMAND_VALUE> = null;
                 if (true
-                    && this.regexAccept(String.raw`(?:patterngap)`, "", $$dpth + 1, $$cr) !== null
+                    && ($scope$key = this.regexAccept(String.raw`(?:patterngap)`, "", $$dpth + 1, $$cr)) !== null
                     && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
-                    && this.matchINT($$dpth + 1, $$cr) !== null
+                    && ($scope$value = this.matchINT($$dpth + 1, $$cr)) !== null
                 ) {
-                    $$res = {kind: ASTKinds.PATTERN_GAP_COMMAND_VALUE, };
+                    $$res = {kind: ASTKinds.PATTERN_GAP_COMMAND_VALUE, key: $scope$key, value: $scope$value};
                 }
                 return $$res;
             });
@@ -977,7 +1180,7 @@ export class Parser {
                 let $scope$content: Nullable<NOTES>;
                 let $$res: Nullable<NOTES_$0> = null;
                 if (true
-                    && this.matchNOTE_SEPARATOR($$dpth + 1, $$cr) !== null
+                    && this.match_($$dpth + 1, $$cr) !== null
                     && ($scope$content = this.matchNOTES($$dpth + 1, $$cr)) !== null
                 ) {
                     $$res = {kind: ASTKinds.NOTES_$0, content: $scope$content};
@@ -1100,12 +1303,6 @@ export class Parser {
                 return $$res;
             });
     }
-    public matchGROUP_START($$dpth: number, $$cr?: ErrorTracker): Nullable<GROUP_START> {
-        return this.regexAccept(String.raw`(?:\()`, "", $$dpth + 1, $$cr);
-    }
-    public matchGROUP_END($$dpth: number, $$cr?: ErrorTracker): Nullable<GROUP_END> {
-        return this.regexAccept(String.raw`(?:\))`, "", $$dpth + 1, $$cr);
-    }
     public matchDURATION($$dpth: number, $$cr?: ErrorTracker): Nullable<DURATION> {
         return this.run<DURATION>($$dpth,
             () => {
@@ -1113,7 +1310,7 @@ export class Parser {
                 let $$res: Nullable<DURATION> = null;
                 if (true
                     && ($scope$value = this.matchDURATION_$0($$dpth + 1, $$cr)) !== null
-                    && this.matchDURATION_SIGN($$dpth + 1, $$cr) !== null
+                    && this.matchNAME_SEPARATOR($$dpth + 1, $$cr) !== null
                 ) {
                     $$res = {kind: ASTKinds.DURATION, value: $scope$value};
                 }
@@ -1141,15 +1338,6 @@ export class Parser {
     }
     public matchNOTE_VALUE($$dpth: number, $$cr?: ErrorTracker): Nullable<NOTE_VALUE> {
         return this.regexAccept(String.raw`(?:-?[0-9]+)`, "", $$dpth + 1, $$cr);
-    }
-    public matchDURATION_SIGN($$dpth: number, $$cr?: ErrorTracker): Nullable<DURATION_SIGN> {
-        return this.regexAccept(String.raw`(?::)`, "", $$dpth + 1, $$cr);
-    }
-    public matchSILENCE_SIGN($$dpth: number, $$cr?: ErrorTracker): Nullable<SILENCE_SIGN> {
-        return this.regexAccept(String.raw`(?:s)`, "", $$dpth + 1, $$cr);
-    }
-    public matchNOTE_SEPARATOR($$dpth: number, $$cr?: ErrorTracker): Nullable<NOTE_SEPARATOR> {
-        return this.loopPlus<string>(() => this.regexAccept(String.raw`(?: )`, "", $$dpth + 1, $$cr));
     }
     public test(): boolean {
         const mrk = this.mark();

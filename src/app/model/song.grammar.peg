@@ -1,20 +1,34 @@
 BEGIN_OBJECT := _ '{' _
 END_OBJECT := _ '}' _
+GROUP_START:= _ '\(' _
+GROUP_END:= _ '\)' _
 VALUE_SEPARATOR := _ ',' _
 NAME_SEPARATOR := _ ':' _
-_ := '\s*'
 INT := '0|[1-9][0-9]*'
+SILENCE_SIGN:= 's'
+_ := '\s*'
+
 
 SONG:=
   BEGIN_OBJECT
-    BLOCK {VALUE_SEPARATOR BLOCK}*
+    parts = PART {VALUE_SEPARATOR PART}*
   END_OBJECT
+
+PART:=
+    blocks= BLOCK {VALUE_SEPARATOR BLOCK}*
+
 BLOCK:=
   BEGIN_OBJECT
-  {REPEAT}*
-  NOTES
-  {COMMANDS}*
-  {BLOCK}*
+    head = BLOCK_CONTENT
+    tail = {BLOCK}*
+  END_OBJECT
+
+BLOCK_CONTENT:=
+  BEGIN_OBJECT
+    repeat= {REPEAT}*
+    noteGroup= NOTES
+    commands= {COMMANDS}*
+    blocks={BLOCK}*
   END_OBJECT
 
 REPEAT:=
@@ -24,18 +38,18 @@ COMMANDS:=
   COMMAND VALUE_SEPARATOR {COMMAND}*
 
 COMMAND:=
-      'playmode'    NAME_SEPARATOR PLAYMODE_COMMAND_VALUE
-    | 'width'       NAME_SEPARATOR WIDTH_COMMAND_VALUE
-    | 'octave'      NAME_SEPARATOR OCTAVE_COMMAND_VALUE
-    | 'scale'       NAME_SEPARATOR SCALE_COMMAND_VALUE
-    | 'inversion'   NAME_SEPARATOR INVERSION_COMMAND_VALUE
-    | 'key'         NAME_SEPARATOR KEY_COMMAND_VALUE
-    | 'gap'         NAME_SEPARATOR GAP_COMMAND_VALUE
-    | 'shiftstart'  NAME_SEPARATOR SHIFTSTART_COMMAND_VALUE
-    | 'shiftsize'   NAME_SEPARATOR SHIFTSIZE_COMMAND_VALUE
-    | 'shiftvalue'  NAME_SEPARATOR SHIFTVALUE_COMMAND_VALUE
-    | 'pattern'     NAME_SEPARATOR PATTERN_COMMAND_VALUE
-    | 'pattern_gap' NAME_SEPARATOR PATTERN_GAP_COMMAND_VALUE
+      key='playmode'    NAME_SEPARATOR value= PLAYMODE_COMMAND_VALUE
+    | key='width'       NAME_SEPARATOR value= WIDTH_COMMAND_VALUE
+    | key='octave'      NAME_SEPARATOR value= OCTAVE_COMMAND_VALUE
+    | key='scale'       NAME_SEPARATOR value= SCALE_COMMAND_VALUE
+    | key='inversion'   NAME_SEPARATOR value= INVERSION_COMMAND_VALUE
+    | key='key'         NAME_SEPARATOR value= KEY_COMMAND_VALUE
+    | key='gap'         NAME_SEPARATOR value= GAP_COMMAND_VALUE
+    | key='shiftstart'  NAME_SEPARATOR value= SHIFTSTART_COMMAND_VALUE
+    | key='shiftsize'   NAME_SEPARATOR value= SHIFTSIZE_COMMAND_VALUE
+    | key='shiftvalue'  NAME_SEPARATOR value= SHIFTVALUE_COMMAND_VALUE
+    | key='pattern'     NAME_SEPARATOR value= PATTERN_COMMAND_VALUE
+    | key='pattern_gap' NAME_SEPARATOR value= PATTERN_GAP_COMMAND_VALUE
 
 PLAYMODE_COMMAND_VALUE:=
       'chord'
@@ -54,52 +68,48 @@ PLAYMODE_COMMAND_VALUE:=
     | 'random'
 
 WIDTH_COMMAND_VALUE:=
-  'width'  NAME_SEPARATOR INT
+  key= 'width'  NAME_SEPARATOR value=INT
 
 OCTAVE_COMMAND_VALUE:=
-  'octave'  NAME_SEPARATOR INT
+  key ='octave'  NAME_SEPARATOR value = INT
 
 SCALE_COMMAND_VALUE:=
-  'scale'  NAME_SEPARATOR
-  'white'|'blue'|'red'|'black'|'penta'|'tones'|'full'
+  key= 'scale'  
+  NAME_SEPARATOR
+  value= 'white'|'blue'|'red'|'black'|'penta'|'tones'|'full'
 
 INVERSION_COMMAND_VALUE:=
-  'inversion'  NAME_SEPARATOR INT
+  key= 'inversion'  NAME_SEPARATOR value= INT
 
 KEY_COMMAND_VALUE:=
-  'key'  NAME_SEPARATOR INT
+  key= 'key'  NAME_SEPARATOR value=INT
 
 GAP_COMMAND_VALUE:=
-  'gap'  NAME_SEPARATOR INT
+  key='gap'  NAME_SEPARATOR value=INT
 
 SHIFTSTART_COMMAND_VALUE:=
-  'shiftstart'  NAME_SEPARATOR INT
+  key='shiftstart'  NAME_SEPARATOR value=INT
 
 SHIFTSIZE_COMMAND_VALUE:=
-  'shiftsize'  NAME_SEPARATOR INT
+  key= 'shiftsize'  NAME_SEPARATOR value= INT
 
 SHIFTVALUE_COMMAND_VALUE:=
-  'shiftvalue'  NAME_SEPARATOR INT
+  key= 'shiftvalue'  NAME_SEPARATOR value= INT
 
 PATTERN_COMMAND_VALUE:=
-  'pattern'  NAME_SEPARATOR INT {INT}*
+  key= 'pattern'  NAME_SEPARATOR value = INT {INT}*
 
 PATTERN_GAP_COMMAND_VALUE:=
-  'patterngap'  NAME_SEPARATOR INT
+  key= 'patterngap'  NAME_SEPARATOR value= INT
 
 
 NOTES:=
     head = NOTES_CONTENT
-    tail = {NOTE_SEPARATOR content = NOTES}*
+    tail = {_ content = NOTES}*
 NOTES_CONTENT:= noteGroup= {NOTE_GROUP} |  note={NOTE}
 NOTE:= duration = {DURATION}? _ simpleNote= SIMPLE_NOTE
 SIMPLE_NOTE:= silence={SILENCE_SIGN} | note={NOTE_VALUE}
 NOTE_GROUP:= duration= DURATION _ GROUP_START _ notes=NOTES _ GROUP_END
-GROUP_START:= '\('
-GROUP_END:= '\)'
-DURATION:= value = {DURATION_VALUE} DURATION_SIGN
+DURATION:= value = {DURATION_VALUE} NAME_SEPARATOR
 DURATION_VALUE:= '[0-9]+n\.?' | '[0-9]+m' | '[0-9]+t'
 NOTE_VALUE:= '-?[0-9]+'
-DURATION_SIGN:= ':'
-SILENCE_SIGN:= 's'
-NOTE_SEPARATOR:= ' '+

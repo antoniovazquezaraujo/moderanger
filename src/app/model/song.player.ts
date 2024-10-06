@@ -8,7 +8,7 @@ import { arpeggiate, getPlayModeFromString, PlayMode } from './play.mode';
 import { Player } from "./player";
 import { ScaleTypes } from './scale';
 import { Song } from './song';
-import { parseBlock } from "./parser";
+import { parseBlock } from "./block.parser.utils";
 
 type PartSoundInfo = {
   soundBits: SoundBit[];

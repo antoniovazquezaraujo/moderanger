@@ -1,6 +1,6 @@
 import { SoundBit } from "./note";
 import { Parser } from "./block.parser";
-import { parseBlock } from "./parser";
+import { parseBlock } from "./block.parser.utils";
 
 export enum ScaleTypes {
   'WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'

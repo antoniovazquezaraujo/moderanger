@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { OctavedGrade, Scale } from './scale';
 
-describe('BlockComponent', () => {
+describe('Scales and octaves', () => {
   let scale: Scale;
   beforeEach(async () => {
     await TestBed.configureTestingModule({
