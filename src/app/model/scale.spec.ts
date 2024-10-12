@@ -1,22 +1,14 @@
-import { TestBed } from '@angular/core/testing';
 import { OctavedGrade, Scale } from './scale';
 
 describe('Scales and octaves', () => {
   let scale: Scale;
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [Scale]
-    })
-      .compileComponents();
-  });
 
-
-  it('should create the app', () => {
+  test('should create the app', () => {
     scale = new Scale([]);
     expect(scale).toBeTruthy();
   });
 
-  it('octavedGrade is working', () => {
+  test('octavedGrade is working', () => {
     scale = new Scale([0, 2, 3, 5, 7, 9, 10]);
     expect(true).toBeTruthy();
     console.log("-------------------------------------------------");
@@ -26,7 +18,7 @@ describe('Scales and octaves', () => {
       console.log("Grade: " + grade.grade + " Octave:" + grade.octave + " Note: " + grade.toNote());
     }
   })
-  it('scale methods are working', () => {
+  test('scale methods are working', () => {
     scale = new Scale([0, 2, 3, 5, 7, 9, 10]);
     console.log("-------------------------------------------------");
     // for (var grade = -10; grade < 10; grade++) {

@@ -1,4 +1,6 @@
 import { environment } from './environments/environment';
-import * as SongParser from './app/model/song.parser'
+import * as SongParserUtils from './app/model/song.parser.utils'
+import  * as SongParser  from './app/model/song';
 
-SongParser.parse("hola");
+SongParserUtils.parseSong("hola");
+
