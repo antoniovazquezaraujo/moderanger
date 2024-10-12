@@ -1,9 +1,0 @@
-<div class="container">
-    <p-accordion>
-        <div *ngFor="let part of parts">
-            <app-part [part]="part" (onDuplicatePart)="duplicatePart($event)" (onRemovePart)="removePart($event)"
-                (onPlayPart)="playPart($event)">
-            </app-part>
-        </div>
-    </p-accordion>
-</div>
