@@ -1,4 +1,4 @@
-import { Frequency, Loop, Time, Transport } from 'tone';
+import { Frequency, Loop, Time, Context, Transport } from 'tone';
 import { Block } from './block';
 import { Command, CommandType } from './command';
 import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';

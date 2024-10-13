@@ -8,8 +8,10 @@ export class Song {
     constructor(song?: Song){
         Object.assign(this, song);
     }
+    public addPart(part:Part){
+        this.parts.push(part);
+    }
  
-
     static getDefultInstrument():MusicalInstrument{
         return Song.instruments[0];
     }

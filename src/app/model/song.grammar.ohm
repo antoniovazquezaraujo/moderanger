@@ -1,0 +1,153 @@
+Arithmetic {
+SONG=
+  BEGIN_OBJECT
+    PART 
+    (VALUE_SEPARATOR PART)*
+  END_OBJECT
+
+PART=
+  BLOCK 
+  (VALUE_SEPARATOR BLOCK)*   
+     
+BLOCK=
+  BLOCK_CONTENT
+  (VALUE_SEPARATOR BLOCK_CONTENT)*
+    
+BLOCK_CONTENT=
+  BEGIN_OBJECT
+    REPEAT?
+     NOTES
+     COMMANDS?
+     BLOCK?
+  END_OBJECT
+    
+REPEAT=
+  "repeat" 
+  KEY_VALUE_SEPARATOR 
+  number
+ 
+COMMANDS =
+  COMMAND 
+  (VALUE_SEPARATOR COMMAND)*
+
+COMMAND =     
+  (  PLAYMODE_COMMAND_VALUE
+  | WIDTH_COMMAND_VALUE
+  | OCTAVE_COMMAND_VALUE
+  | SCALE_COMMAND_VALUE
+  | INVERSION_COMMAND_VALUE
+  | KEY_COMMAND_VALUE
+  | GAP_COMMAND_VALUE
+  | SHIFTSTART_COMMAND_VALUE
+  | SHIFTSIZE_COMMAND_VALUE
+  | SHIFTVALUE_COMMAND_VALUE
+  | PATTERN_COMMAND_VALUE
+  | PATTERN_GAP_COMMAND_VALUE
+  )
+
+PLAYMODE_COMMAND_VALUE =
+  "playmode"
+  KEY_VALUE_SEPARATOR    
+  ("chord"
+  | "ascending"
+  | "descending"
+  | "asc_desc"
+  | "desc_asc"
+  | "even_asc_odd_asc"
+  | "even_asc_odd_desc"
+  | "even_desc_odd_desc"
+  | "even_desc_odd_asc"
+  | "odd_asc_even_asc"
+  | "odd_asc_even_desc"
+  | "odd_desc_even_desc"
+  | "odd_desc_even_asc"
+  | "random"
+  )
+
+WIDTH_COMMAND_VALUE =
+  "width" KEY_VALUE_SEPARATOR number
+
+OCTAVE_COMMAND_VALUE =
+  "octave" KEY_VALUE_SEPARATOR number
+
+SCALE_COMMAND_VALUE =
+  "scale"  
+  KEY_VALUE_SEPARATOR
+  ("white"|"blue"|"red"|"black"|"penta"|"tones"|"full")
+
+INVERSION_COMMAND_VALUE =
+  "inversion" KEY_VALUE_SEPARATOR  number
+
+KEY_COMMAND_VALUE =
+  "key" KEY_VALUE_SEPARATOR number
+
+GAP_COMMAND_VALUE =
+  "gap" KEY_VALUE_SEPARATOR number
+
+SHIFTSTART_COMMAND_VALUE =
+  "shiftstart" KEY_VALUE_SEPARATOR number
+
+SHIFTSIZE_COMMAND_VALUE =
+  "shiftsize" KEY_VALUE_SEPARATOR number
+
+SHIFTVALUE_COMMAND_VALUE =
+  "shiftvalue" KEY_VALUE_SEPARATOR number
+
+PATTERN_COMMAND_VALUE =
+  "pattern" KEY_VALUE_SEPARATOR number number*
+
+PATTERN_GAP_COMMAND_VALUE =
+  "patterngap"  KEY_VALUE_SEPARATOR  number
+
+NOTES =
+  NOTES_CONTENT
+  (_  NOTES)*
+
+NOTES_CONTENT = 
+  NOTE_GROUP 
+  |  
+  NOTE
+
+NOTE = (DURATION)?  SIMPLE_NOTE
+
+SIMPLE_NOTE = 
+  SILENCE_SIGN 
+  | 
+  NOTE_VALUE
+
+NOTE_GROUP = 
+  DURATION 
+  GROUP_START 
+  NOTES 
+  GROUP_END
+
+DURATION = 
+	DURATION_VALUE 
+    KEY_VALUE_SEPARATOR
+
+DURATION_VALUE = 
+  number
+  ("n" | "m" | "t")
+
+NOTE_VALUE = "-"? number 
+
+BEGIN_OBJECT  = _ "{" _
+
+END_OBJECT  = _ "}" _
+
+GROUP_START = _ "(" _
+
+GROUP_END = _ ")" _
+
+VALUE_SEPARATOR  = _ "," _
+
+KEY_VALUE_SEPARATOR  = _ ":" _
+
+number  = digit+
+
+SILENCE_SIGN = "s"
+
+_   = space*
+ 
+    
+}
