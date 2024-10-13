@@ -1,5 +1,4 @@
 import { SoundBit } from "./note";
-import { Parser } from "./block.parser";
 import { parseBlock } from "./block.parser.utils";
 
 export enum ScaleTypes {
