@@ -2,7 +2,6 @@ import { Frequency, Loop, Time, Transport } from 'tone';
 import { Block } from './block';
 import { Command, CommandType } from './command';
 import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
-import { Parser } from "./block.parser";
 import { Part } from './part';
 import { arpeggiate, getPlayModeFromString, PlayMode } from './play.mode';
 import { Player } from "./player";

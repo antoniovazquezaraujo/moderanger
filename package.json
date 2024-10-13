@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "build": "tsc",
-    "start": "ts-node src/app/model/main.ts",
+    "start": "ts-node src/main/main.ts",
     "test": "jest",
-    "ohm": "ohm generateBundles --withTypes src/app/model"
+    "ohm": "ohm generateBundles --withTypes src/main/*.ohm"
   },
   "private": true,
   "dependencies": {
