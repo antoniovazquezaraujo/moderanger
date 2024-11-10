@@ -1,34 +1,42 @@
-Arithmetic {
+ModeRanger {
 SONG=
   BEGIN_OBJECT
-    PART 
-    (VALUE_SEPARATOR PART)*
+    PARTS
   END_OBJECT
 
+PARTS=
+  PART
+  (VALUE_SEPARATOR PART)*
+
 PART=
-  BLOCK 
-  (VALUE_SEPARATOR BLOCK)*   
-     
+  BEGIN_OBJECT
+    BLOCKS
+  END_OBJECT
+
+BLOCKS=
+  BLOCK
+  (VALUE_SEPARATOR BLOCK)*     
+
 BLOCK=
-  BLOCK_CONTENT
-  (VALUE_SEPARATOR BLOCK_CONTENT)*
+  BLOCK_CONTENT 
+  (VALUE_SEPARATOR BLOCK_CONTENT)* 
     
 BLOCK_CONTENT=
   BEGIN_OBJECT
-    REPEAT?
-     NOTES
-     COMMANDS?
-     BLOCK?
+    REPEAT? 
+     NOTES  
+     COMMANDS? 
+     BLOCK? 
   END_OBJECT
     
 REPEAT=
   "repeat" 
   KEY_VALUE_SEPARATOR 
-  number
+  number 
  
 COMMANDS =
   COMMAND 
-  (VALUE_SEPARATOR COMMAND)*
+  (VALUE_SEPARATOR COMMAND)* 
 
 COMMAND =     
   (  PLAYMODE_COMMAND_VALUE
@@ -65,18 +73,24 @@ PLAYMODE_COMMAND_VALUE =
   )
 
 WIDTH_COMMAND_VALUE =
-  "width" KEY_VALUE_SEPARATOR number
+  "width" 
+  KEY_VALUE_SEPARATOR 
+  number 
 
 OCTAVE_COMMAND_VALUE =
-  "octave" KEY_VALUE_SEPARATOR number
+  "octave" 
+  KEY_VALUE_SEPARATOR 
+  number 
 
 SCALE_COMMAND_VALUE =
   "scale"  
   KEY_VALUE_SEPARATOR
-  ("white"|"blue"|"red"|"black"|"penta"|"tones"|"full")
+  ("white"|"blue"|"red"|"black"|"penta"|"tones"|"full") 
 
 INVERSION_COMMAND_VALUE =
-  "inversion" KEY_VALUE_SEPARATOR  number
+  "inversion" 
+  KEY_VALUE_SEPARATOR  
+  number 
 
 KEY_COMMAND_VALUE =
   "key" KEY_VALUE_SEPARATOR number

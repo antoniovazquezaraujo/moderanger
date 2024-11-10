@@ -1,14 +1,33 @@
 {
   "compilerOptions": {
-    "module": "ESNext",  // o "ES6"
+    "noImplicitReturns": true,
+    "sourceMap": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitOverride": true,
+    "types": ["node", "jest"],
+    "typeRoots": ["../node_modules/@types","./src/types", "./types"],
     "moduleResolution": "node",
-    "target": "ESNext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "esNext",
+    "module": "esNext",
+    "lib": [
+      "esNext",
+      "dom"
+    ]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
 }
+
+
+
+

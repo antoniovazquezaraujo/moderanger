@@ -15,4 +15,7 @@ export class Part {
             this.block!.children = this.block?.children?.filter(t => t != block);
         }
     }
+    addBlock(block: Block){
+        this.block!.children.push(block);
+    }
 }
