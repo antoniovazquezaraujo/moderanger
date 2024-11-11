@@ -22,7 +22,7 @@ export class Player{
     decorationGap?:number=undefined;
     decorationPattern?:string=undefined;
     playMode: PlayMode= PlayMode.CHORD;
-    instrument:MusicalInstrument = Song.getDefultInstrument();
+    instrument:MusicalInstrument = Song.getDefaultInstrument();
    
     constructor(channel:number){
         this.channel=channel;

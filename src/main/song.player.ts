@@ -2,13 +2,13 @@ import { Frequency, Loop, Time, Context, Transport } from 'tone';
 import { Block } from './block';
 import { Command, CommandType } from './command';
 import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
-import { Parser } from "./block.parser";
+//import { Parser } from "./block.parser";
 import { Part } from './part';
 import { arpeggiate, getPlayModeFromString, PlayMode } from './play.mode';
 import { Player } from "./player";
 import { ScaleTypes } from './scale';
 import { Song } from './song';
-import { parseBlock } from "./block.parser.utils";
+//import { parseBlock } from "./block.parser.utils";
 
 type PartSoundInfo = {
   soundBits: SoundBit[];
@@ -67,9 +67,9 @@ export class SongPlayer {
   playBlock(block: Block, soundBits: SoundBit[], player: Player, repeatingTimes: number): SoundBit[] {
     if (repeatingTimes > 0) {
       soundBits = this.extractNotesToPlay(block, soundBits, player);
-      if (block.children.length > 0) {
+      if (block.blocks.length > 0) {
         let childrenSoundBits: SoundBit[] = [];
-        for (let child of block.children!) {
+        for (let child of block.blocks!) {
           childrenSoundBits = this.playBlock(child, childrenSoundBits, player, child.repeatingTimes);
         }
         soundBits = soundBits.concat(childrenSoundBits);
@@ -125,12 +125,12 @@ export class SongPlayer {
   }
 
   getRootNotes(block: Block, player: Player): SoundBit[] {
-    let parser = new Parser(block.blockContent?.notes);
-    const tree = parser.parse();
-    let soundBits: SoundBit[] = [];
-    if (tree.ast) {
-      return parseBlock(tree.ast, "4n", soundBits);
-    }
+    // let parser = new Parser(block.blockContent?.notes);
+    // const tree = parser.parse();
+    // let soundBits: SoundBit[] = [];
+    // if (tree.ast) {
+    //   return parseBlock(tree.ast, "4n", soundBits);
+    // }
     return [];
   }
   getSelectedNotes(player: Player): SoundBit[] {

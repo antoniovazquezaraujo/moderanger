@@ -11,8 +11,11 @@ export class Song {
     public addPart(part:Part){
         this.parts.push(part);
     }
+    public removePart(part:Part){
+        this.parts.splice(this.parts.indexOf(part),1);
+    }
  
-    static getDefultInstrument():MusicalInstrument{
+    static getDefaultInstrument():MusicalInstrument{
         return Song.instruments[0];
     }
 }

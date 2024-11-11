@@ -7,7 +7,7 @@ import { arpeggiate, getPlayModeFromString, PlayMode } from './play.mode';
 import { Player } from "./player";
 import { ScaleTypes } from './scale';
 import { Song } from './song';
-import { parseBlock } from "./block.parser.utils";
+//import { parseBlock } from "./block.parser.utils";
 class Main {
   public static run() {
     const result = new Song();

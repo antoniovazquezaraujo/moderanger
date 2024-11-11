@@ -18,27 +18,23 @@ BLOCKS=
   (VALUE_SEPARATOR BLOCK)*     
 
 BLOCK=
-  BLOCK_CONTENT 
-  (VALUE_SEPARATOR BLOCK_CONTENT)* 
-    
-BLOCK_CONTENT=
   BEGIN_OBJECT
     REPEAT? 
      NOTES  
      COMMANDS? 
      BLOCK? 
   END_OBJECT
-    
-REPEAT=
-  "repeat" 
-  KEY_VALUE_SEPARATOR 
-  number 
- 
-COMMANDS =
-  COMMAND 
-  (VALUE_SEPARATOR COMMAND)* 
 
-COMMAND =     
+REPEAT=
+  "repeat"
+  KEY_VALUE_SEPARATOR
+  number
+
+COMMANDS =
+  COMMAND
+  (VALUE_SEPARATOR COMMAND)*
+
+COMMAND =
   (  PLAYMODE_COMMAND_VALUE
   | WIDTH_COMMAND_VALUE
   | OCTAVE_COMMAND_VALUE
@@ -55,7 +51,7 @@ COMMAND =
 
 PLAYMODE_COMMAND_VALUE =
   "playmode"
-  KEY_VALUE_SEPARATOR    
+  KEY_VALUE_SEPARATOR
   ("chord"
   | "ascending"
   | "descending"
@@ -73,24 +69,24 @@ PLAYMODE_COMMAND_VALUE =
   )
 
 WIDTH_COMMAND_VALUE =
-  "width" 
-  KEY_VALUE_SEPARATOR 
-  number 
+  "width"
+  KEY_VALUE_SEPARATOR
+  number
 
 OCTAVE_COMMAND_VALUE =
-  "octave" 
-  KEY_VALUE_SEPARATOR 
-  number 
+  "octave"
+  KEY_VALUE_SEPARATOR
+  number
 
 SCALE_COMMAND_VALUE =
-  "scale"  
+  "scale"
   KEY_VALUE_SEPARATOR
-  ("white"|"blue"|"red"|"black"|"penta"|"tones"|"full") 
+  ("white"|"blue"|"red"|"black"|"penta"|"tones"|"full")
 
 INVERSION_COMMAND_VALUE =
-  "inversion" 
-  KEY_VALUE_SEPARATOR  
-  number 
+  "inversion"
+  KEY_VALUE_SEPARATOR
+  number
 
 KEY_COMMAND_VALUE =
   "key" KEY_VALUE_SEPARATOR number
@@ -117,33 +113,33 @@ NOTES =
   NOTES_CONTENT
   (_  NOTES)*
 
-NOTES_CONTENT = 
-  NOTE_GROUP 
-  |  
+NOTES_CONTENT =
+  NOTE_GROUP
+  |
   NOTE
 
 NOTE = (DURATION)?  SIMPLE_NOTE
 
-SIMPLE_NOTE = 
-  SILENCE_SIGN 
-  | 
+SIMPLE_NOTE =
+  SILENCE_SIGN
+  |
   NOTE_VALUE
 
-NOTE_GROUP = 
-  DURATION 
-  GROUP_START 
-  NOTES 
+NOTE_GROUP =
+  DURATION
+  GROUP_START
+  NOTES
   GROUP_END
 
-DURATION = 
-	DURATION_VALUE 
+DURATION =
+	DURATION_VALUE
     KEY_VALUE_SEPARATOR
 
-DURATION_VALUE = 
+DURATION_VALUE =
   number
   ("n" | "m" | "t")
 
-NOTE_VALUE = "-"? number 
+NOTE_VALUE = "-"? number
 
 BEGIN_OBJECT  = _ "{" _
 
@@ -159,9 +155,9 @@ KEY_VALUE_SEPARATOR  = _ ":" _
 
 number  = digit+
 
-SILENCE_SIGN = "s"
+SILENCE_SIGN = _"s"_
 
 _   = space*
- 
-    
+
+
 }

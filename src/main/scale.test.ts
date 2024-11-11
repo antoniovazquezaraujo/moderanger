@@ -1,4 +1,16 @@
 import { OctavedGrade, Scale } from './scale';
+import {describe, expect, test} from '@jest/globals';
+import { Frequency, Loop, Time, Transport } from 'tone';
+import { Block } from './block';
+import { Command, CommandType } from './command';
+import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
+import { Part } from './part';
+import { arpeggiate, getPlayModeFromString, PlayMode } from './play.mode';
+import { Player } from "./player";
+import { ScaleTypes } from './scale';
+
+import grammar from './song.grammar.ohm-bundle';
+import { Song } from './song';
 
 describe('Scales and octaves', () => {
   let scale: Scale;

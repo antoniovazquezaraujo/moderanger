@@ -1,5 +1,5 @@
 import { SoundBit } from "./note";
-import { parseBlock } from "./block.parser.utils";
+//import { parseBlock } from "./block.parser.utils";
 
 export enum ScaleTypes {
   'WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'
@@ -89,23 +89,23 @@ export class Scale {
     var gap = decorationGap ?? baseGap;
     var decoratedGrades: OctavedGrade[] = [];
     var baseGrade = arpegioGrades[0];
-    let parser = new Parser(decorationPattern);
-    const tree = parser.parse();
-    let soundBits: SoundBit[] = [];
-    let decorationGrades: SoundBit[] = [];
-    if (tree.ast) {
-      decorationGrades = parseBlock(tree.ast, "4n", soundBits);
-    }
-    for (var arpegioIndex = 0; arpegioIndex < arpegioGrades.length; arpegioIndex++) {
-      var grades: OctavedGrade[] = [];
-      var arpegioGrade = arpegioGrades[arpegioIndex];
-      for (var decorationIndex = 0; decorationIndex < decorationGrades.length; decorationIndex++) {
-        var decoratedGrade = new OctavedGrade(this, arpegioGrade.grade, arpegioGrade.octave, decorationGrades[decorationIndex].duration);
-        decoratedGrade.addGrade(decorationGrades[decorationIndex].note! * gap);
-        grades.push(decoratedGrade);
-      }
-      decoratedGrades = decoratedGrades.concat(grades);
-    }
+    // let parser = new Parser(decorationPattern);
+    // const tree = parser.parse();
+    // let soundBits: SoundBit[] = [];
+    // let decorationGrades: SoundBit[] = [];
+    // if (tree.ast) {
+    //   decorationGrades = parseBlock(tree.ast, "4n", soundBits);
+    // }
+    // for (var arpegioIndex = 0; arpegioIndex < arpegioGrades.length; arpegioIndex++) {
+    //   var grades: OctavedGrade[] = [];
+    //   var arpegioGrade = arpegioGrades[arpegioIndex];
+    //   for (var decorationIndex = 0; decorationIndex < decorationGrades.length; decorationIndex++) {
+    //     var decoratedGrade = new OctavedGrade(this, arpegioGrade.grade, arpegioGrade.octave, decorationGrades[decorationIndex].duration);
+    //     decoratedGrade.addGrade(decorationGrades[decorationIndex].note! * gap);
+    //     grades.push(decoratedGrade);
+    //   }
+    //   decoratedGrades = decoratedGrades.concat(grades);
+    // }
     return decoratedGrades;
   }
 
