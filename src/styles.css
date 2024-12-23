@@ -4,7 +4,7 @@
 @import "~primeng/resources/primeng.min.css";
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .container{
     display:flex;
@@ -13,11 +13,74 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     justify-content:flex-start;
     align-items:flex-start;
     align-content:flex-start;
- 
+    padding: 0px;
+    background-color: white!important;
+    background: white;
+    color: black!important;
+    
+  }
+  .p-component{
+    padding: 0px; 
+  }
+  .p-inputtext{
+    height:24px;
+    padding: 0px!important; 
   }
   
+  .p-element{
+    padding:0px;
+  }
+  .p-accordion-header-link{
+    background-color: white!important;
+    background: white;
+    color: black!important;
+
+  }
+  .p-inputwrapper{
+    padding:0px;
+  }
+  .p-button{
+    height:24px;
+    background-color: white!important;
+    background: white;
+    color: black!important;
+    border-color: black!important;
+
+  }
+  .p-button.p-button-secondary, .p-buttonset.p-button-secondary > .p-button, .p-splitbutton.p-button-secondary > .p-button{
+    background-color: white!important;
+    background: white;
+    color: black!important;
+
+  }
+  
+  .app-block-notes{
+    height:24px;
+  }
+  .p-inputnumber{
+    height:24px;
+    padding: 0px;
+
+  }
+   .p-dropdown{
+    height:24px;
+    padding: 0px;
+  }
  
-        
- 
-        
- 
+   .p-dropdown-items{
+    height:200px;
+    padding: 0px;
+    margin: 0px;
+    background-color: white!important;
+  }
+  
+  .p-dropdown-panel{
+    height:24px;
+    padding:0px;
+    background-color: white!important;
+
+  }
+ .ptree{
+  padding:0px;
+ }
+
