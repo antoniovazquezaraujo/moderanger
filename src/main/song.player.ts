@@ -67,9 +67,9 @@ export class SongPlayer {
   playBlock(block: Block, soundBits: SoundBit[], player: Player, repeatingTimes: number): SoundBit[] {
     if (repeatingTimes > 0) {
       soundBits = this.extractNotesToPlay(block, soundBits, player);
-      if (block.blocks.length > 0) {
+      if (block.children.length > 0) {
         let childrenSoundBits: SoundBit[] = [];
-        for (let child of block.blocks!) {
+        for (let child of block.children!) {
           childrenSoundBits = this.playBlock(child, childrenSoundBits, player, child.repeatingTimes);
         }
         soundBits = soundBits.concat(childrenSoundBits);
