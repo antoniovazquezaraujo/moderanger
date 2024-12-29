@@ -11,11 +11,12 @@ import {
   TerminalNode
 } from 'ohm-js';
 
-export interface ArithmeticActionDict<T> extends BaseActionDict<T> {
-  SONG?: (this: NonterminalNode, arg0: NonterminalNode, arg1: NonterminalNode, arg2: IterationNode, arg3: IterationNode, arg4: NonterminalNode) => T;
-  PART?: (this: NonterminalNode, arg0: NonterminalNode, arg1: IterationNode, arg2: IterationNode) => T;
-  BLOCK?: (this: NonterminalNode, arg0: NonterminalNode, arg1: IterationNode, arg2: IterationNode) => T;
-  BLOCK_CONTENT?: (this: NonterminalNode, arg0: NonterminalNode, arg1: IterationNode, arg2: NonterminalNode, arg3: IterationNode, arg4: IterationNode, arg5: NonterminalNode) => T;
+export interface ModeRangerActionDict<T> extends BaseActionDict<T> {
+  SONG?: (this: NonterminalNode, arg0: NonterminalNode, arg1: NonterminalNode, arg2: NonterminalNode) => T;
+  PARTS?: (this: NonterminalNode, arg0: NonterminalNode, arg1: IterationNode, arg2: IterationNode) => T;
+  PART?: (this: NonterminalNode, arg0: NonterminalNode, arg1: NonterminalNode, arg2: NonterminalNode) => T;
+  BLOCKS?: (this: NonterminalNode, arg0: NonterminalNode, arg1: IterationNode, arg2: IterationNode) => T;
+  BLOCK?: (this: NonterminalNode, arg0: NonterminalNode, arg1: IterationNode, arg2: NonterminalNode, arg3: IterationNode, arg4: IterationNode, arg5: NonterminalNode) => T;
   REPEAT?: (this: NonterminalNode, arg0: TerminalNode, arg1: NonterminalNode, arg2: NonterminalNode) => T;
   COMMANDS?: (this: NonterminalNode, arg0: NonterminalNode, arg1: IterationNode, arg2: IterationNode) => T;
   COMMAND?: (this: NonterminalNode, arg0: NonterminalNode) => T;
@@ -46,22 +47,22 @@ export interface ArithmeticActionDict<T> extends BaseActionDict<T> {
   VALUE_SEPARATOR?: (this: NonterminalNode, arg0: NonterminalNode, arg1: TerminalNode, arg2: NonterminalNode) => T;
   KEY_VALUE_SEPARATOR?: (this: NonterminalNode, arg0: NonterminalNode, arg1: TerminalNode, arg2: NonterminalNode) => T;
   number?: (this: NonterminalNode, arg0: IterationNode) => T;
-  SILENCE_SIGN?: (this: NonterminalNode, arg0: TerminalNode) => T;
+  SILENCE_SIGN?: (this: NonterminalNode, arg0: NonterminalNode, arg1: TerminalNode, arg2: NonterminalNode) => T;
   _?: (this: NonterminalNode, arg0: IterationNode) => T;
 }
 
-export interface ArithmeticSemantics extends Semantics {
-  addOperation<T>(name: string, actionDict: ArithmeticActionDict<T>): this;
-  extendOperation<T>(name: string, actionDict: ArithmeticActionDict<T>): this;
-  addAttribute<T>(name: string, actionDict: ArithmeticActionDict<T>): this;
-  extendAttribute<T>(name: string, actionDict: ArithmeticActionDict<T>): this;
+export interface ModeRangerSemantics extends Semantics {
+  addOperation<T>(name: string, actionDict: ModeRangerActionDict<T>): this;
+  extendOperation<T>(name: string, actionDict: ModeRangerActionDict<T>): this;
+  addAttribute<T>(name: string, actionDict: ModeRangerActionDict<T>): this;
+  extendAttribute<T>(name: string, actionDict: ModeRangerActionDict<T>): this;
 }
 
-export interface ArithmeticGrammar extends Grammar {
-  createSemantics(): ArithmeticSemantics;
-  extendSemantics(superSemantics: ArithmeticSemantics): ArithmeticSemantics;
+export interface ModeRangerGrammar extends Grammar {
+  createSemantics(): ModeRangerSemantics;
+  extendSemantics(superSemantics: ModeRangerSemantics): ModeRangerSemantics;
 }
 
-declare const grammar: ArithmeticGrammar;
+declare const grammar: ModeRangerGrammar;
 export default grammar;
 

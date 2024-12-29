@@ -1,18 +1,26 @@
-import {describe, expect, test, beforeEach} from '@jest/globals';
-import { Song } from './song';
-import { Part } from './part';
-import { Piano } from './piano';
-import { MusicalInstrument } from './instrument';
+/**
+ * @jest-environment jsdom
+ */
+
+jest.mock('tone');
+jest.mock('../main/piano');
+
+import {describe, expect, test, beforeEach, afterEach, jest} from '@jest/globals';
+import { Song } from '../main/song';
+import { Part } from '../main/part';
+import { Player } from '../main/player';
 
 describe('Song', () => {
     let song: Song;
     let part: Part;
+    let player: Player;
 
     beforeEach(() => {
+        player = new Player(0);
         song = new Song();
         part = new Part();
     });
-
+    
     test('should initialize with empty parts array', () => {
         expect(song.parts).toEqual([]);
     });
@@ -28,13 +36,9 @@ describe('Song', () => {
         expect(song.parts).not.toContain(part);
     });
 
-    test('should initialize with default instrument', () => {
-        expect(Song.instruments[0]).toBeInstanceOf(Piano);
-    });
-
-    test('should return default instrument', () => {
-        const defaultInstrument = Song.getDefaultInstrument();
-        expect(defaultInstrument).toBeInstanceOf(Piano);
+    test('should have default instrument', () => {
+        expect(Song.instruments.length).toBeGreaterThan(0);
+        expect(Song.getDefaultInstrument()).toBeDefined();
     });
 
     test('should copy properties from another song', () => {

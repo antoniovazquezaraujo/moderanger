@@ -1,4 +1,4 @@
-import { Frequency, Loop, Time, Context, Transport } from 'tone';
+import { Frequency, Loop, Time, Context, Transport, getTransport } from 'tone';
 import { Block } from './block';
 import { Command, CommandType } from './command';
 import { Arpeggio, Chord, Note, Rest, SoundBit } from './note';
@@ -26,44 +26,35 @@ export class SongPlayer {
   }
 
   stop() {
-    Transport.cancel();
-    Transport.stop();
+    getTransport().stop();
+    getTransport().start();
+    getTransport().bpm.value = 100;
+    getTransport().cancel();
+    getTransport().stop();
+  }
+  start(){
+    getTransport().start();
   }
 
   playSong(song: Song) {
-    Transport.start();
-    Transport.bpm.value = 100;
-    Transport.cancel();
-    Transport.stop();
     let channel = 0;
-    if (song.parts != null && song.parts.length > 0) {
-      let partSoundInfo: PartSoundInfo[] = [];
-      for (var part of song.parts) {
-        let player = new Player(channel++);
-        let partSoundBits: SoundBit[] = this.playPartBlocks(part, player);
-        partSoundInfo.push({ soundBits: partSoundBits, player: player, soundBitIndex: 0, arpeggioIndex: 0, pendingTurnsToPlay: 0 });
-      }
+    let partSoundInfo: PartSoundInfo[] = [];
+    for (const part of song.parts || []) {
+      let player = new Player(channel++);
+      let partSoundBits: SoundBit[] = this.playPartBlocks(part, player);
+      partSoundInfo.push({ soundBits: partSoundBits, player, soundBitIndex: 0, arpeggioIndex: 0, pendingTurnsToPlay: 0 });
+    }
+
+    if (partSoundInfo.length > 0) {
       this.playSoundBits(partSoundInfo);
-      Transport.start();
+      this.start();
     }
   }
 
-  playPart(part: Part, player: Player) {
-    Transport.start();
-    Transport.bpm.value = 100;
-    Transport.cancel();
-    Transport.stop();
-    let channel = 0;
-    let partSoundBits: SoundBit[] = this.playPartBlocks(part, player);
-    let partSoundInfo: PartSoundInfo[] = [];
-    partSoundInfo.push({ soundBits: partSoundBits, player: player, soundBitIndex: 0, arpeggioIndex: 0, pendingTurnsToPlay: 0 });
-    this.playSoundBits(partSoundInfo);
-    Transport.start();
-  }
   playPartBlocks(part: Part, player: Player): SoundBit[] {
-    let ret = this.playBlock(part.block, [], player, part.block.repeatingTimes);
-    return ret;
+    return this.playBlock(part.block, [], player, part.block.repeatingTimes);
   }
+  
   playBlock(block: Block, soundBits: SoundBit[], player: Player, repeatingTimes: number): SoundBit[] {
     if (repeatingTimes > 0) {
       soundBits = this.extractNotesToPlay(block, soundBits, player);
@@ -106,7 +97,6 @@ export class SongPlayer {
           let arpeggioSoundBits: SoundBit[] = notesToSoundBits(arpeggio, duration);
           let newArpeggio = new Arpeggio(duration, arpeggioSoundBits)
           soundBits = soundBits.concat(newArpeggio);
-          console.log("SoundBits:" + soundBits);
         }
       } else { // is a rest
         let chordNotes: SoundBit[] = [];
@@ -125,12 +115,6 @@ export class SongPlayer {
   }
 
   getRootNotes(block: Block, player: Player): SoundBit[] {
-    // let parser = new Parser(block.blockContent?.notes);
-    // const tree = parser.parse();
-    // let soundBits: SoundBit[] = [];
-    // if (tree.ast) {
-    //   return parseBlock(tree.ast, "4n", soundBits);
-    // }
     return [];
   }
   getSelectedNotes(player: Player): SoundBit[] {
