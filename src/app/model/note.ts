@@ -1,3 +1,12 @@
+export class NoteData {
+    type: 'note' | 'rest' | 'arpeggio' | 'chord'= 'note';
+    duration: string = '4t';
+    note?: number;
+    soundBits?: NoteData[]; // Para Arpeggios y Acordes
+    constructor(data?: Partial<NoteData>) {
+        Object.assign(this, data);
+    }
+}
 export class SoundBit {
         duration:string;
         note?:number|undefined;

@@ -1,4 +1,4 @@
-import { SoundBit } from "./note";
+import { NoteData } from "./note";
 import { Parser } from "./parser";
 import { parseBlock } from "./song.parser";
 
@@ -43,7 +43,7 @@ export class OctavedGrade{
         return this.scale.notes[this.grade]+((this.octave)*12);
     }
     toSoundBit(){
-        return new SoundBit(this.duration, this.toNote());
+        return new NoteData({duration:this.duration, note:this.toNote()});
     }
 }
 export class Scale {
@@ -62,10 +62,10 @@ export class Scale {
         shiftValue: number,
         decorationPattern: string,
         decorationGap?: number
-    ): SoundBit[] {
+    ): NoteData[] {
         var selectedGrades:OctavedGrade[] = this.getSelectedGrades(grade, density, gap);
         var shiftedGrades:OctavedGrade[] = this.getShiftedGrades(selectedGrades, shiftStart, shiftSize, shiftValue)
-        var notes:SoundBit[];
+        var notes:NoteData[];
         if(decorationPattern === undefined || decorationPattern === ''){
             notes =  this.octavedGradesToNotes(shiftedGrades);
         }else{
@@ -78,8 +78,8 @@ export class Scale {
             return this.getTunnedSoundBits(notes, tonality);
         }        
     }
-    octavedGradesToNotes(grades: OctavedGrade[]): SoundBit[] {
-        var chordNotes: SoundBit[] = [];
+    octavedGradesToNotes(grades: OctavedGrade[]): NoteData[] {
+        var chordNotes: NoteData[] = [];
         for (var n = 0; n < grades.length; n++) {
             var grade = grades[n];
             chordNotes.push(grade.toSoundBit());
@@ -92,8 +92,8 @@ export class Scale {
         var baseGrade = arpegioGrades[0];
         let parser = new Parser(decorationPattern);
         const tree = parser.parse();
-        let soundBits: SoundBit[] = [];
-        let decorationGrades:SoundBit[] = []; 
+        let soundBits: NoteData[] = [];
+        let decorationGrades:NoteData[] = []; 
         if (tree.ast) {
             decorationGrades= parseBlock(tree.ast, "4n", soundBits);
         }
@@ -122,7 +122,7 @@ export class Scale {
         }
         return octavedGrades;
     }
-    getTunnedSoundBits(soundBits: SoundBit[], tonality: number): SoundBit[] {
+    getTunnedSoundBits(soundBits: NoteData[], tonality: number): NoteData[] {
         for (const soundBit of soundBits) {
             soundBit.note! += tonality;
         }
