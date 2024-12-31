@@ -1,12 +1,10 @@
 import { Frequency, Loop, Time, Transport } from 'tone';
 import { Block } from './block';
-import { Command, CommandType } from './command';
 import { NoteData } from './note'; // Importa la nueva clase NoteData
 import { Parser } from "./parser";
 import { Part } from './part';
-import { arpeggiate, getPlayModeFromString, PlayMode } from './play.mode';
+import { arpeggiate, PlayMode } from './play.mode';
 import { Player } from "./player";
-import { ScaleTypes } from './scale';
 import { Song } from './song';
 import { parseBlock } from "./song.parser";
 
@@ -80,8 +78,8 @@ export class SongPlayer {
         return noteDatas;
     }
 
-    extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player): NoteData[] { // Changed parameter type
-        this.executeCommands(block, player);
+    extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player): NoteData[] {
+        player.executeCommands(block);
         noteDatas = noteDatas.concat(this.extractBlocknoteDatas(block, player));
         return noteDatas;
     }
@@ -139,56 +137,6 @@ export class SongPlayer {
         return noteDatasToPlay;
     }
 
-    executeCommands(block: Block, player: Player): void {
-        block.commands?.forEach(async command => {
-            this.executeCommand(block, command, player);
-        });
-    }
-
-    executeCommand(block: Block, command: Command, player: Player): void {
-        switch (command.commandType) {
-            case CommandType.GAP:
-                player.gap = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.SHIFTSTART:
-                player.shiftStart = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.SHIFTSIZE:
-                player.shiftSize = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.SHIFTVALUE:
-                player.shiftValue = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.PATTERN_GAP:
-                player.decorationGap = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.PATTERN:
-                player.decorationPattern = command.commandValue;
-                break;
-            case CommandType.PLAYMODE:
-                let mode: PlayMode = getPlayModeFromString(command.commandValue);
-                player.playMode = mode;
-                break;
-            case CommandType.WIDTH:
-                player.density = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.OCTAVE:
-                player.octave = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.SCALE:
-                let scale: ScaleTypes = command.commandValue as unknown as ScaleTypes;
-                player.selectScale(scale);
-                break;
-            case CommandType.INVERSION:
-                player.inversion = parseInt(command.commandValue, 10);
-                break;
-            case CommandType.KEY:
-                player.tonality = parseInt(command.commandValue, 10);
-                break;
-            default:
-                console.log("Error in command type");
-        }
-    }
     playnoteDatas(partSoundInfo: PartSoundInfo[]) {
         const loop = new Loop((time: any) => {
             for (let info of partSoundInfo) {

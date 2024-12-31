@@ -9,14 +9,14 @@ describe('NoteData', () => {
         expect(note.note).toBeUndefined();
         expect(note.noteDatas).toBeUndefined();
     });
-
+ 
     it('should create with partial data', () => {
         const note = new NoteData({
             type: 'chord',
             duration: '1/4',
             note: 60
         });
-        
+         
         expect(note.type).toBe('chord');
         expect(note.duration).toBe('1/4');
         expect(note.note).toBe(60);

@@ -44,28 +44,5 @@
     "ts-jest": "^29.2.5",
     "tspeg": "^3.3.2",
     "typescript": "^4.5.5"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "testMatch": [
-      "**/model/__tests__/**/*.jest.spec.ts"
-    ],
-    "moduleNameMapper": {
-      "^src/(.*)$": "<rootDir>/src/$1"
-    },
-    "testPathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/src/app/components/"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsconfig": "src/tsconfig.jest.json"
-      }
-    }
   }
 }

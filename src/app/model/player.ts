@@ -1,9 +1,11 @@
 import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
 import { MusicalInstrument } from "./instrument";
 import { NoteData } from "./note"; // Import the new NoteData class
-import { PlayMode } from "./play.mode";
+import { getPlayModeFromString, PlayMode } from "./play.mode";
 import { Scale, ScaleTypes, Tonality } from "./scale";
 import { Song } from "./song";
+import { Block } from "./block";
+import { Command, CommandType } from "./command";
 
 export class Player {
     channel: number = 0;
@@ -79,5 +81,11 @@ export class Player {
     }
     triggerAttackRelease(notes: Frequency[] | Frequency, duration: Time | Time[], time?: Time, velocity?: NormalRange) {
         this.instrument.triggerAttackRelease(notes, duration, time, velocity);
+    }
+
+    executeCommands(block: Block): void {
+        block.commands?.forEach(command => {
+            command.execute(this);
+        });
     }
 }

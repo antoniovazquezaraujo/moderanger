@@ -29,11 +29,13 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
   
   .p-element{
     padding:0px;
+    margin:0px;
   }
   .p-accordion-header-link{
     background-color: white!important;
     background: white;
     color: black!important;
+    height:14px;
 
   }
   .p-inputwrapper{
@@ -89,7 +91,14 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
   }
  .ptree{
-  padding:0px;
+  padding:0px!important;
+  height:14px!important;
+  margin:0px!important;
+ }
+ .p-tree-node-content{
+  padding:0px!important;
+  margin:0px!important;
+  height:14px!important;
  }
 
 .p-dropdown-items .p-dropdown-item {
@@ -102,5 +111,41 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .p-dropdown-panel {
     background-color: white !important;
+}
+
+.p-tree {
+  padding: 0px!important;
+  margin: 0px!important;
+}
+
+.p-tree-container {
+  padding: 0px!important;
+  margin: 0px!important;
+}
+
+.p-treenode {
+  padding: 0px!important;
+  margin: 0px!important;
+  line-height: 1!important;
+}
+
+.p-treenode-content {
+  padding: 0px 0px!important;
+  margin: 0px!important;
+  min-height: 14px!important;
+}
+
+.p-tree-wrapper {
+  line-height: 1!important;
+}
+
+.p-tree .p-tree-container .p-treenode .p-treenode-content {
+  padding: 0!important;
+  margin: 0!important;
+}
+
+.p-tree .p-tree-container .p-treenode {
+  padding: 0!important;
+  margin: 0!important;
 }
 
