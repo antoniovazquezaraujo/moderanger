@@ -11,9 +11,9 @@ import { Song } from './song';
 import { parseBlock } from "./song.parser";
 
 type PartSoundInfo = {
-    soundBits: NoteData[];
+    noteDatas: NoteData[];
     player: Player;
-    soundBitIndex: number;
+    noteDataIndex: number;
     arpeggioIndex: number;
     pendingTurnsToPlay: number;
 }
@@ -40,10 +40,10 @@ export class SongPlayer {
             let partSoundInfo: PartSoundInfo[] = [];
             for (var part of song.parts) {
                 let player = new Player(channel++);
-                let partSoundBits: NoteData[] = this.playPartBlocks(part, player); // Changed to NoteData[]
-                partSoundInfo.push({ soundBits: partSoundBits, player: player, soundBitIndex: 0, arpeggioIndex: 0, pendingTurnsToPlay: 0 });
+                let partnoteDatas: NoteData[] = this.playPartBlocks(part, player); // Changed to NoteData[]
+                partSoundInfo.push({ noteDatas: partnoteDatas, player: player, noteDataIndex: 0, arpeggioIndex: 0, pendingTurnsToPlay: 0 });
             }
-            this.playSoundBits(partSoundInfo);
+            this.playnoteDatas(partSoundInfo);
                 Transport.start();
         }
     }
@@ -54,10 +54,10 @@ export class SongPlayer {
         Transport.cancel();
         Transport.stop();
         let channel = 0;
-        let partSoundBits: NoteData[] = this.playPartBlocks(part, player);
+        let partnoteDatas: NoteData[] = this.playPartBlocks(part, player);
         let partSoundInfo: PartSoundInfo[] = [];
-        partSoundInfo.push({ soundBits: partSoundBits, player: player, soundBitIndex: 0, arpeggioIndex: 0, pendingTurnsToPlay: 0 });
-        this.playSoundBits(partSoundInfo);
+        partSoundInfo.push({ noteDatas: partnoteDatas, player: player, noteDataIndex: 0, arpeggioIndex: 0, pendingTurnsToPlay: 0 });
+        this.playnoteDatas(partSoundInfo);
         Transport.start();
     }
     playPartBlocks(part: Part, player: Player): NoteData[] { // Changed return type
@@ -65,61 +65,61 @@ export class SongPlayer {
         return ret;
     }
     
-    playBlock(block: Block, soundBits: NoteData[], player: Player, repeatingTimes: number): NoteData[] { // Changed parameter type
+    playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] { // Changed parameter type
         if (repeatingTimes > 0) {
-            soundBits = this.extractNotesToPlay(block, soundBits, player);            if (block.children.length > 0) {
-                let childrenSoundBits: NoteData[] = [];
+            noteDatas = this.extractNotesToPlay(block, noteDatas, player);            if (block.children.length > 0) {
+                let childrennoteDatas: NoteData[] = [];
                 for (let child of block.children!) {
-                    childrenSoundBits = this.playBlock(child, childrenSoundBits, player, child.repeatingTimes);
+                    childrennoteDatas = this.playBlock(child, childrennoteDatas, player, child.repeatingTimes);
                 }
-                soundBits = soundBits.concat(childrenSoundBits);
+                noteDatas = noteDatas.concat(childrennoteDatas);
             }
-            return this.playBlock(block, soundBits, player, repeatingTimes - 1);
+            return this.playBlock(block, noteDatas, player, repeatingTimes - 1);
         }
-        return soundBits;
+        return noteDatas;
     }
 
-    extractNotesToPlay(block: Block, soundBits: NoteData[], player: Player): NoteData[] { // Changed parameter type
+    extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player): NoteData[] { // Changed parameter type
         this.executeCommands(block, player);
-        soundBits = soundBits.concat(this.extractBlockSoundBits(block, player));
-        return soundBits;
+        noteDatas = noteDatas.concat(this.extractBlocknoteDatas(block, player));
+        return noteDatas;
     }
 
-    extractBlockSoundBits(block: Block, player: Player): NoteData[] { // Changed return type
-        let rootSoundBits: NoteData[] = this.getRootNotes(block, player); // Changed type
+    extractBlocknoteDatas(block: Block, player: Player): NoteData[] { // Changed return type
+        let rootnoteDatas: NoteData[] = this.getRootNotes(block, player); // Changed type
         let n = 0;
-        let soundBits: NoteData[] = []; // Changed type
-        for (let soundBit of rootSoundBits) {
-            let duration = soundBit.duration;
-            if (soundBit.type === 'note' && soundBit.note !== undefined) { // Check for note type and note property
-                let note = soundBit.note;
+        let noteDatas: NoteData[] = []; // Changed type
+        for (let noteData of rootnoteDatas) {
+            let duration = noteData.duration;
+            if (noteData.type === 'note' && noteData.note !== undefined) { // Check for note type and note property
+                let note = noteData.note;
                 player.selectedNote = note;
-                let noteSoundBits: NoteData[] = this.getSelectedNotes(player); // Changed type
-                let notes: number[] = this.soundBitsToNotes(noteSoundBits);
+                let notenoteDatas: NoteData[] = this.getSelectedNotes(player); // Changed type
+                let notes: number[] = this.noteDatasToNotes(notenoteDatas);
                 let seconds: number = Time(duration).toSeconds();
 
                 if (player.playMode === PlayMode.CHORD) {
-                    let chord: NoteData = { type: 'chord', duration: duration, soundBits: noteSoundBits }; // Create chord NoteData
-                    soundBits = soundBits.concat(chord);
+                    let chord: NoteData = { type: 'chord', duration: duration, noteDatas: notenoteDatas }; // Create chord NoteData
+                    noteDatas = noteDatas.concat(chord);
                 } else {
                     let arpeggio = arpeggiate(notes, player.playMode);
-                    let arpeggioSoundBits: NoteData[] = notesToSoundBits(arpeggio, duration); // Changed type
-                    let newArpeggio: NoteData = { type: 'arpeggio', duration: duration, soundBits: arpeggioSoundBits }; // Create arpeggio NoteData
-                    soundBits = soundBits.concat(newArpeggio);
-                    console.log("SoundBits:" + soundBits);
+                    let arpeggionoteDatas: NoteData[] = notesTonoteDatas(arpeggio, duration); // Changed type
+                    let newArpeggio: NoteData = { type: 'arpeggio', duration: duration, noteDatas: arpeggionoteDatas }; // Create arpeggio NoteData
+                    noteDatas = noteDatas.concat(newArpeggio);
+                    console.log("noteDatas:" + noteDatas);
                 }
-            } else if (soundBit.type === 'rest') { // Check for rest type
+            } else if (noteData.type === 'rest') { // Check for rest type
                 let chordNotes: NoteData[] = [];
                 chordNotes.push({ type: 'rest', duration: duration }); // Create rest NoteData
-                soundBits = soundBits.concat(chordNotes);
+                noteDatas = noteDatas.concat(chordNotes);
             }
         }
-        return soundBits;
+        return noteDatas;
     }
-    soundBitsToNotes(soundBits: NoteData[]): number[] { // Changed parameter type
+    noteDatasToNotes(noteDatas: NoteData[]): number[] { // Changed parameter type
         let notes: number[] = [];
-        for (const soundBit of soundBits) {
-            notes.push(soundBit.note!);
+        for (const noteData of noteDatas) {
+            notes.push(noteData.note!);
         }
         return notes;
     }
@@ -127,15 +127,15 @@ export class SongPlayer {
     getRootNotes(block: Block, player: Player): NoteData[] {
         let parser = new Parser(block.blockContent?.notes);
         const tree = parser.parse();
-        let soundBits: NoteData[] = [];
+        let noteDatas: NoteData[] = [];
         if (tree.ast) {
-            return parseBlock(tree.ast, "4n", soundBits);
+            return parseBlock(tree.ast, "4n", noteDatas);
         }
         return [];
     }
     getSelectedNotes(player: Player): NoteData[] { // Changed return type
-        let soundBitsToPlay = player.getSelectedNotes(player.getScale(), player.tonality);
-        return soundBitsToPlay;
+        let noteDatasToPlay = player.getSelectedNotes(player.getScale(), player.tonality);
+        return noteDatasToPlay;
     }
 
     executeCommands(block: Block, player: Player): void {
@@ -188,7 +188,7 @@ export class SongPlayer {
                 console.log("Error in command type");
         }
     }
-    playSoundBits(partSoundInfo: PartSoundInfo[]) {
+    playnoteDatas(partSoundInfo: PartSoundInfo[]) {
         const loop = new Loop((time: any) => {
             for (let info of partSoundInfo) {
                 this.playTurn(
@@ -204,11 +204,11 @@ export class SongPlayer {
     }
 
     playTurn(partSoundInfo: PartSoundInfo, interval: any, time: any) {
-        let soundBit: NoteData = partSoundInfo.soundBits[partSoundInfo.soundBitIndex]; // Changed type
-        if (soundBit === undefined) {
+        let noteData: NoteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex]; // Changed type
+        if (noteData === undefined) {
             return;
         }
-        let soundBitDuration = soundBit.duration;
+        let noteDataDuration = noteData.duration;
         let timeToPlay: boolean = false;
 
         if (partSoundInfo.pendingTurnsToPlay > 1) {
@@ -217,11 +217,11 @@ export class SongPlayer {
         } else {
             timeToPlay = true;
             let numTurnsNote: number = 0.0;
-            if(soundBit.type === 'arpeggio'){
-                let x: number = this.floatify(Time(soundBitDuration).toSeconds() / interval);
-                numTurnsNote = this.floatify(x / soundBit.soundBits!.length);
+            if(noteData.type === 'arpeggio'){
+                let x: number = this.floatify(Time(noteDataDuration).toSeconds() / interval);
+                numTurnsNote = this.floatify(x / noteData.noteDatas!.length);
             } else {
-                numTurnsNote = Time(soundBitDuration).toSeconds() / interval;
+                numTurnsNote = Time(noteDataDuration).toSeconds() / interval;
             }
 
             if (numTurnsNote > 0.0) {
@@ -232,28 +232,28 @@ export class SongPlayer {
         }
 
         if (timeToPlay) {
-            this.playPartSoundBits(partSoundInfo, time);
+            this.playPartnoteDatas(partSoundInfo, time);
         }
     }
     floatify(theNumber: number) {
         return parseFloat((theNumber).toFixed(10));
     }
-    playPartSoundBits(partSoundInfo: PartSoundInfo, time: any) {
-        let soundBit: NoteData = partSoundInfo.soundBits[partSoundInfo.soundBitIndex];
-        if (soundBit != null) {
-            let duration = soundBit.duration;
+    playPartnoteDatas(partSoundInfo: PartSoundInfo, time: any) {
+        let noteData: NoteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
+        if (noteData != null) {
+            let duration = noteData.duration;
             let notes: any = [];
             
-            if (soundBit.type === 'chord' && soundBit.soundBits) {
-                for (let note of soundBit.soundBits) {
+            if (noteData.type === 'chord' && noteData.noteDatas) {
+                for (let note of noteData.noteDatas) {
                     if (note.note !== undefined) {
                         notes.push(Frequency(note.note, "midi").toFrequency());
                     }
                 }
                 partSoundInfo.player.triggerAttackRelease(notes, duration, time);
-                partSoundInfo.soundBitIndex++;
-            } else if (soundBit.type === 'arpeggio' && soundBit.soundBits) {
-                let note = soundBit.soundBits[partSoundInfo.arpeggioIndex];
+                partSoundInfo.noteDataIndex++;
+            } else if (noteData.type === 'arpeggio' && noteData.noteDatas) {
+                let note = noteData.noteDatas[partSoundInfo.arpeggioIndex];
                 if (note && note.note !== undefined) {
                     partSoundInfo.player.triggerAttackRelease(
                         Frequency(note.note, "midi").toFrequency(),
@@ -262,35 +262,35 @@ export class SongPlayer {
                     );
                 }
                 partSoundInfo.arpeggioIndex++;
-                if (partSoundInfo.arpeggioIndex >= soundBit.soundBits.length) {
+                if (partSoundInfo.arpeggioIndex >= noteData.noteDatas.length) {
                     partSoundInfo.arpeggioIndex = 0;
-                    partSoundInfo.soundBitIndex++;
+                    partSoundInfo.noteDataIndex++;
                 }
-            } else if (soundBit.type === 'note' && soundBit.note !== undefined) {
+            } else if (noteData.type === 'note' && noteData.note !== undefined) {
                 partSoundInfo.player.triggerAttackRelease(
-                    Frequency(soundBit.note, "midi").toFrequency(),
+                    Frequency(noteData.note, "midi").toFrequency(),
                     duration,
                     time
                 );
-                partSoundInfo.soundBitIndex++;
-            } else if (soundBit.type === 'rest') {
-                partSoundInfo.soundBitIndex++;
+                partSoundInfo.noteDataIndex++;
+            } else if (noteData.type === 'rest') {
+                partSoundInfo.noteDataIndex++;
             }
 
-            if (partSoundInfo.soundBitIndex >= partSoundInfo.soundBits.length) {
-                partSoundInfo.soundBitIndex = 0;
+            if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length) {
+                partSoundInfo.noteDataIndex = 0;
                 partSoundInfo.arpeggioIndex = 0;
             }
         }
     }
 }
 
-function notesToSoundBits(arpeggio: number[], duration: string): NoteData[] { // Changed return type
-    var soundBitDuration: string = "16n"; //duration / arpeggio.length;
-    var soundBits: NoteData[] = []; // Changed type
+function notesTonoteDatas(arpeggio: number[], duration: string): NoteData[] { // Changed return type
+    var noteDataDuration: string = "16n"; //duration / arpeggio.length;
+    var noteDatas: NoteData[] = []; // Changed type
     for (const note of arpeggio) {
-        soundBits.push({ type: 'note', duration: soundBitDuration, note: note }); // Create NoteData object
+        noteDatas.push({ type: 'note', duration: noteDataDuration, note: note }); // Create NoteData object
     }
-    return soundBits;
+    return noteDatas;
 }
 

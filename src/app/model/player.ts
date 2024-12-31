@@ -10,7 +10,7 @@ export class Player {
     scale: ScaleTypes = ScaleTypes.WHITE;
     tonality: number = Tonality.D;
     timbre: number = 0;
-    soundBits: NoteData[] = []; // Changed to NoteData[]
+    noteDatas: NoteData[] = []; // Changed to NoteData[]
     selectedNote: number = 0;
     density: number = 0;
     inversion: number = 0;
@@ -30,44 +30,44 @@ export class Player {
     getSelectedNotes(scaleNum: ScaleTypes, tonality: number): NoteData[] { // Changed return type
         var scale = Scale.getScaleByName(scaleNum.toString());
         var tunnedNote = this.selectedNote;
-        var chordSoundBits: NoteData[] = this.generateNoteDataFromScale(scale, tunnedNote, tonality);
-        var octavedSoundBits = this.setOctave(chordSoundBits);
-        var invertedNotes = this.setInversion(octavedSoundBits);
+        var chordnoteDatas: NoteData[] = this.generateNoteDataFromScale(scale, tunnedNote, tonality);
+        var octavednoteDatas = this.setOctave(chordnoteDatas);
+        var invertedNotes = this.setInversion(octavednoteDatas);
         return invertedNotes;
     }
     generateNoteDataFromScale(scale: any, tunnedNote: number, tonality: number): NoteData[] {
         let notes: NoteData[] = [];
         var tunnedNote = this.selectedNote;
-        var chordSoundBits = scale.gradeToChord(tunnedNote, this.density, tonality, this.gap, this.shiftStart, this.shiftSize, this.shiftValue, this.decorationPattern!, this.decorationGap!);
-        var octavedSoundBits = this.setOctave(chordSoundBits);
-        var invertedNotes = this.setInversion(octavedSoundBits);
+        var chordnoteDatas = scale.gradeToChord(tunnedNote, this.density, tonality, this.gap, this.shiftStart, this.shiftSize, this.shiftValue, this.decorationPattern!, this.decorationGap!);
+        var octavednoteDatas = this.setOctave(chordnoteDatas);
+        var invertedNotes = this.setInversion(octavednoteDatas);
         return invertedNotes;
     }
 
     selectNotes(): void {
-        this.soundBits = this.getSelectedNotes(this.getScale(), this.tonality);
+        this.noteDatas = this.getSelectedNotes(this.getScale(), this.tonality);
     }
-    setInversion(soundBits: NoteData[]): NoteData[] { // Changed parameter type
-        var invertedSoundBits: NoteData[] = [];
-        for (var n = 0; n < soundBits.length; n++) {
-            var soundBit = soundBits[n];
-            if (n < this.inversion && soundBit.note !== undefined) { // Check for note property
-                soundBit.note += 12;
+    setInversion(noteDatas: NoteData[]): NoteData[] { // Changed parameter type
+        var invertednoteDatas: NoteData[] = [];
+        for (var n = 0; n < noteDatas.length; n++) {
+            var noteData = noteDatas[n];
+            if (n < this.inversion && noteData.note !== undefined) { // Check for note property
+                noteData.note += 12;
             }
-            invertedSoundBits.push(soundBit);
+            invertednoteDatas.push(noteData);
         }
-        return invertedSoundBits;
+        return invertednoteDatas;
     }
 
     setOctave(chordNotes: NoteData[]): NoteData[] { // Changed parameter type
-        var octavedSoundBits: NoteData[] = [];
-        for (var soundBit of chordNotes) {
-            if (soundBit.note !== undefined) { // Check for note property
-                soundBit.note += (this.octave * 12);
+        var octavednoteDatas: NoteData[] = [];
+        for (var noteData of chordNotes) {
+            if (noteData.note !== undefined) { // Check for note property
+                noteData.note += (this.octave * 12);
             }
-            octavedSoundBits.push(soundBit);
+            octavednoteDatas.push(noteData);
         }
-        return octavedSoundBits;
+        return octavednoteDatas;
     }
 
 

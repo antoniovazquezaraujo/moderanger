@@ -1,21 +1,21 @@
 // import * as Parser from './parser';
-import { Note, Rest, NoteData } from './note';
+import { NoteData } from './note';
 import { ASTKinds, BLOCK, BLOCK_CONTENT, NOTE, NOTE_GROUP, SIMPLE_NOTE } from './parser';
 
-export function parseBlock(block: BLOCK, duration: string, soundBits: NoteData[]): NoteData[] {
-    soundBits = parseBlockContent(block.head, duration, soundBits);
+export function parseBlock(block: BLOCK, duration: string, noteDatas: NoteData[]): NoteData[] {
+    noteDatas = parseBlockContent(block.head, duration, noteDatas);
     block.tail.forEach(t => {
-        soundBits = parseBlock(t.content, duration, soundBits);
+        noteDatas = parseBlock(t.content, duration, noteDatas);
     });
-    return soundBits;
+    return noteDatas;
 } 
  
-export function parseBlockContent(blockContent: BLOCK_CONTENT, duration:string, soundBits: NoteData[]): NoteData[] {
+export function parseBlockContent(blockContent: BLOCK_CONTENT, duration:string, noteDatas: NoteData[]): NoteData[] {
     if ((blockContent.kind === ASTKinds.BLOCK_CONTENT_2)) { //note
-        soundBits.push(parseNote(blockContent.note, duration));
-        return soundBits;
+        noteDatas.push(parseNote(blockContent.note, duration));
+        return noteDatas;
     } else { //note_group
-        return parseNoteGroup(blockContent.noteGroup, duration, soundBits);
+        return parseNoteGroup(blockContent.noteGroup, duration, noteDatas);
     }
 }
 export function parseNote(note: NOTE, duration:string): NoteData {
@@ -32,6 +32,6 @@ export function parseSimpleNote(simpleNote: SIMPLE_NOTE, theDuration: string): N
         return new NoteData({type:'rest', duration:theDuration});
     }
 }
-export function parseNoteGroup(noteGroup: NOTE_GROUP, duration:string, soundBits: NoteData[]): NoteData[] {
-    return parseBlock(noteGroup.block, noteGroup.duration.value, soundBits);
+export function parseNoteGroup(noteGroup: NOTE_GROUP, duration:string, noteDatas: NoteData[]): NoteData[] {
+    return parseBlock(noteGroup.block, noteGroup.duration.value, noteDatas);
 }
