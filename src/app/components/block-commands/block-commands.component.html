@@ -2,10 +2,10 @@
     <div class="container" *ngFor="let item of block!.commands">
         <p-dropdown appendTo="body" [options]="commandTypeNames" [(ngModel)]="item.commandType">
             <ng-template let-commandType pTemplate="selectedItem">
-                {{commandTypes[commandTypeNames[commandType]]}}
+                {{commandType}}
             </ng-template>
             <ng-template let-commandType pTemplate="item">
-                {{commandTypes[commandTypeNames[commandType]]}}
+                {{commandType}}
             </ng-template>
         </p-dropdown>
 

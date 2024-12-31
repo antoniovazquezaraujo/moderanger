@@ -13,10 +13,9 @@ import { getScaleNames } from 'src/app/model/scale';
 export class BlockCommandsComponent implements OnInit {
     @Input() block: Block = new Block();
 
-    commandTypes  = CommandType;
-    commandTypeNames:any[] = [];
- 
-    playModeValues:number[]=[];
+    commandTypeNames: string[] = [];
+    commandTypes = CommandType; // Asegúrate de que esto esté correcto
+     playModeValues:number[]=[];
     scaleValues:number[]=[];
     playModeNames: any[] ;
     scaleNames: any[]; 
@@ -27,7 +26,7 @@ export class BlockCommandsComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.commandTypeNames = Object.keys(CommandType).filter(f => !isNaN(Number(f)));
+        this.commandTypeNames = Object.values(CommandType).filter(value => String(value) !== '');
     }
 
     removeCommand(command: Command):void {

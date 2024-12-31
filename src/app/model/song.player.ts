@@ -145,7 +145,7 @@ export class SongPlayer {
     }
 
     executeCommand(block: Block, command: Command, player: Player): void {
-        switch (+command.commandType) {
+        switch (command.commandType) {
             case CommandType.GAP:
                 player.gap = parseInt(command.commandValue, 10);
                 break;
