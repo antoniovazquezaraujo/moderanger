@@ -239,29 +239,47 @@ export class SongPlayer {
         return parseFloat((theNumber).toFixed(10));
     }
     playPartSoundBits(partSoundInfo: PartSoundInfo, time: any) {
-        let soundBit: NoteData = partSoundInfo.soundBits[partSoundInfo.soundBitIndex]; // Changed type
+        let soundBit: NoteData = partSoundInfo.soundBits[partSoundInfo.soundBitIndex];
         if (soundBit != null) {
             let duration = soundBit.duration;
             let notes: any = [];
-            if (soundBit.type === 'chord') { // Check for chord type
-                for (let note of soundBit.soundBits!) { // Access soundBits property
-                    notes.push(Frequency(note.note!, "midi").toFrequency());
+            
+            if (soundBit.type === 'chord' && soundBit.soundBits) {
+                for (let note of soundBit.soundBits) {
+                    if (note.note !== undefined) {
+                        notes.push(Frequency(note.note, "midi").toFrequency());
+                    }
                 }
                 partSoundInfo.player.triggerAttackRelease(notes, duration, time);
                 partSoundInfo.soundBitIndex++;
-            } else if (soundBit.type === 'arpeggio') { // Check for arpeggio type
-                let seconds = Time(duration).toSeconds();
-                partSoundInfo.player.triggerAttackRelease(Frequency(soundBit.soundBits![partSoundInfo.arpeggioIndex].note!, "midi").toFrequency(), duration, time);
-                // ... (rest of the arpeggio handling remains largely the same) ...
-            } else if (soundBit.type === 'note') { // Check for note type
-                notes.push(Frequency(soundBit.note!, "midi").toFrequency());
-                partSoundInfo.player.triggerAttackRelease(soundBit.note!, soundBit.duration, time);
+            } else if (soundBit.type === 'arpeggio' && soundBit.soundBits) {
+                let note = soundBit.soundBits[partSoundInfo.arpeggioIndex];
+                if (note && note.note !== undefined) {
+                    partSoundInfo.player.triggerAttackRelease(
+                        Frequency(note.note, "midi").toFrequency(),
+                        duration,
+                        time
+                    );
+                }
+                partSoundInfo.arpeggioIndex++;
+                if (partSoundInfo.arpeggioIndex >= soundBit.soundBits.length) {
+                    partSoundInfo.arpeggioIndex = 0;
+                    partSoundInfo.soundBitIndex++;
+                }
+            } else if (soundBit.type === 'note' && soundBit.note !== undefined) {
+                partSoundInfo.player.triggerAttackRelease(
+                    Frequency(soundBit.note, "midi").toFrequency(),
+                    duration,
+                    time
+                );
                 partSoundInfo.soundBitIndex++;
-            } else if (soundBit.type === 'rest') { // Check for rest type
+            } else if (soundBit.type === 'rest') {
                 partSoundInfo.soundBitIndex++;
             }
-            if (partSoundInfo.soundBitIndex > partSoundInfo.soundBits.length - 1) {
+
+            if (partSoundInfo.soundBitIndex >= partSoundInfo.soundBits.length) {
                 partSoundInfo.soundBitIndex = 0;
+                partSoundInfo.arpeggioIndex = 0;
             }
         }
     }

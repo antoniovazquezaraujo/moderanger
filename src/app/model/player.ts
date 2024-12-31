@@ -2,7 +2,7 @@ import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
 import { MusicalInstrument } from "./instrument";
 import { NoteData } from "./note"; // Import the new NoteData class
 import { PlayMode } from "./play.mode";
-import { getScaleByName, ScaleTypes, Tonality } from "./scale";
+import { Scale, ScaleTypes, Tonality } from "./scale";
 import { Song } from "./song";
 
 export class Player {
@@ -28,7 +28,7 @@ export class Player {
         this.channel = channel;
     }
     getSelectedNotes(scaleNum: ScaleTypes, tonality: number): NoteData[] { // Changed return type
-        var scale = getScaleByName(scaleNum.toString());
+        var scale = Scale.getScaleByName(scaleNum.toString());
         var tunnedNote = this.selectedNote;
         var chordSoundBits: NoteData[] = this.generateNoteDataFromScale(scale, tunnedNote, tonality);
         var octavedSoundBits = this.setOctave(chordSoundBits);

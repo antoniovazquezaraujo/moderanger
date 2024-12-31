@@ -1,52 +1,44 @@
 import { NoteData } from "./note";
 import { Parser } from "./parser";
 import { parseBlock } from "./song.parser";
+import { OctavedGrade } from "./octaved-grade";
 
 export enum ScaleTypes {
     'WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'
 }
-export class OctavedGrade{
-    grade:number=0;
-    octave:number=0;
-    scale:Scale;
-    duration:string;
-    constructor(scale:Scale, grade:number, octave:number, duration:string){        
-        this.scale=scale;
-        this.addGradeAndOctave(grade, octave);
-        this.duration = duration;
-    }
-    addOctavedGrade(grade:OctavedGrade){
-        this.addGradeAndOctave(grade.grade, grade.octave);
-    }
-    addGradeAndOctave(grade:number, octave:number){
-        this.grade += grade;
-        this.octave+= octave;
-        if(this.grade >= this.scale.getNumNotes()){
-            this.octave+= Math.floor(this.grade / this.scale.getNumNotes());
-            this.grade = Math.abs(this.grade % this.scale.getNumNotes());
-        }else if(this.grade < 0){
-            this.octave-= Math.floor(this.grade / this.scale.getNumNotes());
-            this.grade = Math.abs(this.grade % this.scale.getNumNotes());
-        }
-    }
-    addGrade(grade:number){
-        this.grade += grade;
-        if(this.grade >= this.scale.getNumNotes()){
-            this.octave+= Math.floor(this.grade / this.scale.getNumNotes());
-            this.grade = Math.abs(this.grade % this.scale.getNumNotes());
-        }else if(this.grade <0){
-            this.octave+= Math.floor(this.grade / this.scale.getNumNotes());
-            this.grade = Math.abs((this.scale.getNumNotes() + this.grade) % this.scale.getNumNotes());
-        }
-    }   
-    toNote(){
-        return this.scale.notes[this.grade]+((this.octave)*12);
-    }
-    toSoundBit(){
-        return new NoteData({duration:this.duration, note:this.toNote()});
-    }
-}
+
 export class Scale {
+    static SCALES: Scale[] = [
+        new Scale([0, 2, 3, 5, 7, 9, 10]),
+        new Scale([0, 2, 4, 5, 7, 8, 10]),
+        new Scale([0, 1, 4, 5, 7, 8, 11]),
+        new Scale([1, 2, 4, 5, 7, 8, 10, 11]),
+        new Scale([0, 2, 5, 7, 10]),
+        new Scale([0, 2, 4, 6, 8, 10]),
+        new Scale([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+    ];
+
+    static getScaleByName(name: string): Scale {
+        switch (name) {
+            case 'WHITE': return Scale.SCALES[0];
+            case 'BLUE': return Scale.SCALES[1];
+            case 'RED': return Scale.SCALES[2];
+            case 'BLACK': return Scale.SCALES[3];
+            case 'PENTA': return Scale.SCALES[4];
+            case 'TONES': return Scale.SCALES[5];
+            case 'FULL': return Scale.SCALES[6];
+        }
+        return Scale.SCALES[0];
+    }
+
+    static getScaleNames(): string[] {
+        return ['WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'];
+    }
+
+    static getNoteName(noteOrder: number): string {
+        return Tonality[noteOrder % 12];
+    }
+
     notes: number[];
 
     constructor(notes: number[]) {
@@ -168,36 +160,6 @@ export class Scale {
 
 }
 
-
-
-export function getScaleByName(name: string): Scale {
-    switch (name) {
-        case 'WHITE': return SCALES[0];
-        case 'BLUE': return SCALES[1];
-        case 'RED': return SCALES[2];
-        case 'BLACK': return SCALES[3];
-        case 'PENTA': return SCALES[4];
-        case 'TONES': return SCALES[5];
-        case 'FULL': return SCALES[6];
-    }
-    return SCALES[0];
-}
-export function getScaleNames(): string[] {
-    return ['WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'];
-}
-const SCALES: Scale[] = [
-    new Scale([0, 2, 3, 5, 7, 9, 10]),
-    new Scale([0, 2, 4, 5, 7, 8, 10]),
-    new Scale([0, 1, 4, 5, 7, 8, 11]),
-    new Scale([1, 2, 4, 5, 7, 8, 10, 11]),
-    new Scale([0, 2, 5, 7, 10]),
-    new Scale([0, 2, 4, 6, 8, 10]),
-    new Scale([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-];
-
-export function getNoteName(noteOrder: number): string {
-    return Tonality[noteOrder % 12];
-}
 export enum Tonality {
     D = 0,
     e = 1,

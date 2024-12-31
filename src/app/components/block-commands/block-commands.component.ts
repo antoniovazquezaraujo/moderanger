@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
 import { getPlayModeNames } from 'src/app/model/play.mode';
-import { getScaleNames } from 'src/app/model/scale';
+import { Scale } from 'src/app/model/scale';
 
  
 @Component({
@@ -22,7 +22,7 @@ export class BlockCommandsComponent implements OnInit {
   
     constructor() {         
         this.playModeNames = getPlayModeNames();
-        this.scaleNames = getScaleNames();
+        this.scaleNames = Scale.getScaleNames();
     }
 
     ngOnInit(): void {
