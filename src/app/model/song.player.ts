@@ -67,7 +67,8 @@ export class SongPlayer {
     
     playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] { // Changed parameter type
         if (repeatingTimes > 0) {
-            noteDatas = this.extractNotesToPlay(block, noteDatas, player);            if (block.children.length > 0) {
+            noteDatas = this.extractNotesToPlay(block, noteDatas, player);            
+             if (block.children.length > 0) {
                 let childrennoteDatas: NoteData[] = [];
                 for (let child of block.children!) {
                     childrennoteDatas = this.playBlock(child, childrennoteDatas, player, child.repeatingTimes);

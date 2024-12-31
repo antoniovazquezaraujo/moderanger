@@ -14,7 +14,7 @@ export class Player {
     selectedNote: number = 0;
     density: number = 0;
     inversion: number = 0;
-    octave: number = 5;
+    octave: number = 2;
     gap: number = 2;
     shiftStart = 0;
     shiftSize = 0;
@@ -45,7 +45,7 @@ export class Player {
     }
 
     selectNotes(): void {
-        this.noteDatas = this.getSelectedNotes(this.getScale(), this.tonality);
+        this.noteDatas = [];//this.getSelectedNotes(this.getScale(), this.tonality);
     }
     setInversion(noteDatas: NoteData[]): NoteData[] { // Changed parameter type
         var invertednoteDatas: NoteData[] = [];
