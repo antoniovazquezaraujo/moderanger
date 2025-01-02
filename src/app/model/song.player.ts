@@ -104,7 +104,6 @@ export class SongPlayer {
                     let arpeggionoteDatas: NoteData[] = notesTonoteDatas(arpeggio, duration); // Changed type
                     let newArpeggio: NoteData = { type: 'arpeggio', duration: duration, noteDatas: arpeggionoteDatas }; // Create arpeggio NoteData
                     noteDatas = noteDatas.concat(newArpeggio);
-                    console.log("noteDatas:" + noteDatas);
                 }
             } else if (noteData.type === 'rest') { // Check for rest type
                 let chordNotes: NoteData[] = [];

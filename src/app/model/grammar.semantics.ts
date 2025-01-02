@@ -16,7 +16,12 @@ export const ModeRangerSemantics = {
     const notes = main['eval']();
     if (duration.numChildren > 0) {
       const dur = duration.sourceString.slice(0, -1); // remove the ':'
-      notes.forEach((note: NoteData) => note.duration = dur);
+      notes.forEach((note: NoteData) => {
+        // Solo asignar duración si no tiene una ya establecida o si tiene la duración por defecto
+        if (!note.duration || note.duration === '4t') {
+          note.duration = dur;
+        }
+      });
     }
     return notes;
   },
@@ -33,7 +38,7 @@ export const ModeRangerSemantics = {
     const value = parseInt(digits.sourceString);
     return new NoteData({
       type: 'note',
-      duration: '4n',
+      duration: '4t',
       note: minus.sourceString ? -value : value
     });
   },
