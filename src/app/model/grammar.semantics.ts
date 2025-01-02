@@ -5,11 +5,20 @@ type Node = ohm.Node;
 
 export const ModeRangerSemantics = {
   Main(list: Node) {
-    return list.asIteration().children.map((node: Node) => node['eval']());
+    return list.asIteration().children.map((node: Node) => node['eval']()).flat();
   },
 
   Element(e: Node) {
     return e['eval']();
+  },
+
+  Group(duration: Node, _open: Node, main: Node, _close: Node) {
+    const notes = main['eval']();
+    if (duration.numChildren > 0) {
+      const dur = duration.sourceString.slice(0, -1); // remove the ':'
+      notes.forEach((note: NoteData) => note.duration = dur);
+    }
+    return notes;
   },
 
   Note(duration: Node, num: Node) {
@@ -17,7 +26,7 @@ export const ModeRangerSemantics = {
     if (duration.numChildren > 0) {
       note.duration = duration.sourceString.slice(0, -1); // remove the ':'
     }
-    return note;
+    return [note];
   },
 
   number(minus: Node, digits: Node) {
