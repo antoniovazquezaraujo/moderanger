@@ -12,7 +12,7 @@ export const ModeRangerSemantics = {
     return e['eval']();
   },
 
-  Group(duration: Node, _open: Node, main: Node, _close: Node) {
+  Group(duration: Node, _open: Node, _space1: Node, main: Node, _space2: Node, _close: Node) {
     const notes = main['eval']();
     if (duration.numChildren > 0) {
       const dur = duration.sourceString.slice(0, -1); // remove the ':'

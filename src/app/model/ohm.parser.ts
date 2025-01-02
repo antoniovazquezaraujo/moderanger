@@ -3,9 +3,9 @@ import { NoteData } from './note';
 import { ModeRangerSemantics } from './grammar.semantics';
 
 const grammarSource = `ModeRanger {
-  Main = nonemptyListOf<Element, space>
+  Main = nonemptyListOf<Element, space+>
   Element = Group | Note
-  Group = duration? "(" Main ")"
+  Group = duration? "(" space* Main space* ")"
   Note = duration? number
   duration = digit+ ("n" | "t" | "m") ":"
   number = "-"? digit+
