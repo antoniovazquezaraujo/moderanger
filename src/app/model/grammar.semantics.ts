@@ -8,6 +8,18 @@ export const ModeRangerSemantics = {
     return list.asIteration().children.map((node: Node) => node['eval']());
   },
 
+  Element(e: Node) {
+    return e['eval']();
+  },
+
+  Note(duration: Node, num: Node) {
+    const note = num['eval']();
+    if (duration.numChildren > 0) {
+      note.duration = duration.sourceString.slice(0, -1); // remove the ':'
+    }
+    return note;
+  },
+
   number(minus: Node, digits: Node) {
     const value = parseInt(digits.sourceString);
     return new NoteData({
