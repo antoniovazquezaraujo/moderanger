@@ -1,30 +1,30 @@
-<div id="commands" class="container">
-    <div class="container" *ngFor="let item of block!.commands">
-        <p-dropdown appendTo="body" [options]="commandTypeNames" [(ngModel)]="item.commandType">
-            <ng-template let-commandType pTemplate="selectedItem">
-                {{commandType}}
-            </ng-template>
-            <ng-template let-commandType pTemplate="item">
-                {{commandType}}
-            </ng-template>
-        </p-dropdown>
-
-        <ng-container  class="container" [ngSwitch]="item.commandType">
-            <div *ngSwitchCase="commandTypes.PLAYMODE">
-                <p-dropdown class="commandType" appendTo="body" [options]="playModeNames" [(ngModel)]="item.commandValue"></p-dropdown>
-            </div>
-            <div *ngSwitchCase="commandTypes.SCALE">
-                <p-dropdown class="commandType" appendTo="body" [options]="scaleNames" [(ngModel)]="item.commandValue"></p-dropdown>
-            </div>
-            <div *ngSwitchCase="commandTypes.PATTERN">
-                <input type="text" class="patternValue" pInputText [(ngModel)]="item.commandValue"/>
-            </div>
-            <div *ngSwitchDefault>
-                <p-inputNumber class="commandValue" [(ngModel)]="item.commandValue" [showButtons]="true" [min]="-250" [max]="250" [size]="1">
-                </p-inputNumber>
+<div class="commands">
+    <div *ngFor="let command of block.commands" class="command">
+        <select [(ngModel)]="command.type">
+            <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
+        </select>
+        
+        <ng-container [ngSwitch]="command.type">
+            <select *ngSwitchCase="commandTypes.SCALE" [(ngModel)]="command.value">
+                <option *ngFor="let name of scaleNames" [value]="name">{{name}}</option>
+            </select>
+            
+            <select *ngSwitchCase="commandTypes.PLAYMODE" [(ngModel)]="command.value">
+                <option *ngFor="let name of playModeNames" [value]="name">{{name}}</option>
+            </select>
+            
+            <div *ngSwitchDefault class="value-input">
+                <input type="text" [(ngModel)]="command.value" 
+                       [placeholder]="command.isVariable ? 'Variable name' : 'Value'"
+                       (input)="handleValueInput($event, command)">
+                <label>
+                    <input type="checkbox" [(ngModel)]="command.isVariable">
+                    Variable
+                </label>
             </div>
         </ng-container>
-        <button pButton type="button" icon="pi pi-times" (click)="removeCommand(item)"></button>
+
+        <button (click)="removeCommand(command)">X</button>
     </div>
-    <button pButton type="button" icon="pi pi-plus" (click)="addCommand()"></button>
+    <button (click)="addCommand()">Add Command</button>
 </div>

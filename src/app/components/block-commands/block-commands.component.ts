@@ -3,8 +3,8 @@ import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
 import { getPlayModeNames } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
+import { VariableContext } from 'src/app/model/variable.context';
 
- 
 @Component({
     selector: 'app-block-commands',
     templateUrl: './block-commands.component.html',
@@ -12,13 +12,12 @@ import { Scale } from 'src/app/model/scale';
 })
 export class BlockCommandsComponent implements OnInit {
     @Input() block: Block = new Block();
+    @Input() variableContext?: VariableContext;
 
     commandTypeNames: string[] = [];
-    commandTypes = CommandType; // Asegúrate de que esto esté correcto
-     playModeValues:number[]=[];
-    scaleValues:number[]=[];
-    playModeNames: any[] ;
-    scaleNames: any[]; 
+    commandTypes = CommandType;
+    playModeNames: string[];
+    scaleNames: string[];
   
     constructor() {         
         this.playModeNames = getPlayModeNames();
@@ -26,15 +25,24 @@ export class BlockCommandsComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.commandTypeNames = Object.values(CommandType).filter(value => String(value) !== '');
+        this.commandTypeNames = Object.values(CommandType);
     }
 
-    removeCommand(command: Command):void {
-        this.block.commands = this.block.commands?.filter(t => t !== command);
-
+    removeCommand(command: Command): void {
+        if (this.block.commands) {
+            this.block.commands = this.block.commands.filter(t => t !== command);
+        }
     }
-    addCommand(){
-        this.block.commands?.push(new Command());
-    }     
 
+    addCommand(): void {
+        if (!this.block.commands) {
+            this.block.commands = [];
+        }
+        this.block.commands.push(new Command());
+    }
+
+    handleValueInput(event: Event, command: Command): void {
+        const input = event.target as HTMLInputElement;
+        command.setValue(input.value);
+    }
 }

@@ -81,14 +81,14 @@ export class Scale {
         var gap = decorationGap ?? baseGap;
         var decoratedGrades:OctavedGrade[] =[]; 
         var baseGrade = arpegioGrades[0];
-        let decorationGrades = parse(decorationPattern);
+        let decorationValues = decorationPattern.trim().split(/\s+/).map(n => ({ note: parseInt(n), duration: '4t' }));
         
         for (var arpegioIndex = 0; arpegioIndex < arpegioGrades.length; arpegioIndex++) {
             var grades: OctavedGrade[] = [];
             var arpegioGrade = arpegioGrades[arpegioIndex];
-            for(var decorationIndex=0; decorationIndex<decorationGrades.length; decorationIndex++){
-                var decoratedGrade = new OctavedGrade(this,arpegioGrade.grade, arpegioGrade.octave, decorationGrades[decorationIndex].duration);
-                decoratedGrade.addGrade(decorationGrades[decorationIndex].note! * gap);
+            for(var decorationIndex=0; decorationIndex<decorationValues.length; decorationIndex++){
+                var decoratedGrade = new OctavedGrade(this,arpegioGrade.grade, arpegioGrade.octave, decorationValues[decorationIndex].duration);
+                decoratedGrade.addGrade(decorationValues[decorationIndex].note! * gap);
                 grades.push(decoratedGrade);
             }
             decoratedGrades= decoratedGrades.concat(grades);

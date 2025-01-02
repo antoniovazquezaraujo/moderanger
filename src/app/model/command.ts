@@ -1,79 +1,63 @@
-import { Player } from "./player";
-import { getPlayModeFromString } from "./play.mode";
-import { ScaleTypes } from "./scale";
+import { VariableContext } from './variable.context';
 
 export enum CommandType {
-    PLAYMODE = "PLAYMODE",
-    WIDTH = "WIDTH",
-    OCTAVE = "OCTAVE",
-    SCALE = "SCALE",
-    INVERSION = "INVERSION",
-    KEY = "KEY",
-    GAP = "GAP",
-    SHIFTSTART = "SHIFTSTART",
-    SHIFTSIZE = "SHIFTSIZE",
-    SHIFTVALUE = "SHIFTVALUE",
-    PATTERN_GAP = "PATTERN_GAP",
-    PATTERN = "PATTERN"
+    SCALE = 'SCALE',
+    OCT = 'OCT',
+    GAP = 'GAP',
+    PLAYMODE = 'PLAYMODE',
+    WIDTH = 'WIDTH',
+    INVERSION = 'INVERSION',
+    KEY = 'KEY',
+    SHIFTSTART = 'SHIFTSTART',
+    SHIFTSIZE = 'SHIFTSIZE',
+    SHIFTVALUE = 'SHIFTVALUE',
+    PATTERN_GAP = 'PATTERN_GAP',
+    PATTERN = 'PATTERN'
 }
- 
+
 export class Command {
-    public commandType: CommandType = CommandType.PLAYMODE;
-    public commandValue: string = "";
-    
+    type: CommandType = CommandType.OCT;
+    value: string | number = 0;
+    isVariable: boolean = false;
+
     constructor(opts?: Partial<Command>) {
-        if (opts?.commandType != null) {
-            this.commandType = opts.commandType;
-        }
-        if (opts?.commandValue != null) {
-            this.commandValue = opts.commandValue;
-        }
+        if (opts?.type) this.type = opts.type;
+        if (opts?.value !== undefined) this.setValue(opts.value);
     }
 
-    public execute(player: Player): void {
-        switch (this.commandType) {
-            case CommandType.GAP:
-                player.gap = parseInt(this.commandValue, 10);
-                break;
-            case CommandType.SHIFTSTART:
-                player.shiftStart = parseInt(this.commandValue, 10);
-                break;
-            case CommandType.SHIFTSIZE:
-                player.shiftSize = parseInt(this.commandValue, 10);
-                break;
-            case CommandType.SHIFTVALUE:
-                player.shiftValue = parseInt(this.commandValue, 10);
-                break;
-            case CommandType.PATTERN_GAP:
-                player.decorationGap = parseInt(this.commandValue, 10);
-                break;
-            case CommandType.PATTERN:
-                player.decorationPattern = this.commandValue;
-                break;
-            case CommandType.PLAYMODE:
-                player.playMode = getPlayModeFromString(this.commandValue);
-                break;
-            case CommandType.WIDTH:
-                player.density = parseInt(this.commandValue, 10);
-                break;
-            case CommandType.OCTAVE:
-                player.octave = parseInt(this.commandValue, 10);
-                break;
-            case CommandType.SCALE:
-                player.selectScale(this.commandValue as unknown as ScaleTypes);
-                break;
-            case CommandType.INVERSION:
-                player.inversion = parseInt(this.commandValue, 10);
-                break;
-            case CommandType.KEY:
-                player.tonality = parseInt(this.commandValue, 10);
-                break;
-            default:
-                console.log("Error in command type");
+    getValue(context: VariableContext): number | string {
+        if (this.isVariable && typeof this.value === 'string') {
+            const varValue = context.getValue(this.value.substring(1)); // Remove $ prefix
+            return varValue !== undefined ? varValue : 0;
         }
+        return this.value;
     }
 
-    public toString = () : string => {
-        return `Command (${this.commandType} ${this.commandValue})`;
+    setVariable(name: string) {
+        this.value = '$' + name;
+        this.isVariable = true;
+    }
+
+    setValue(value: number | string) {
+        this.value = value;
+        this.isVariable = typeof value === 'string' && value.startsWith('$');
+    }
+
+    execute(player: any, context?: VariableContext): void {
+        const value = context ? this.getValue(context) : this.value;
+        switch (this.type) {
+            case CommandType.GAP: player.gap = Number(value); break;
+            case CommandType.OCT: player.octave = Number(value); break;
+            case CommandType.SCALE: player.selectScale(value); break;
+            case CommandType.PLAYMODE: player.playMode = value; break;
+            case CommandType.WIDTH: player.density = Number(value); break;
+            case CommandType.INVERSION: player.inversion = Number(value); break;
+            case CommandType.KEY: player.tonality = Number(value); break;
+            case CommandType.SHIFTSTART: player.shiftStart = Number(value); break;
+            case CommandType.SHIFTSIZE: player.shiftSize = Number(value); break;
+            case CommandType.SHIFTVALUE: player.shiftValue = Number(value); break;
+            case CommandType.PATTERN_GAP: player.decorationGap = Number(value); break;
+            case CommandType.PATTERN: player.decorationPattern = String(value); break;
+        }
     }
 }

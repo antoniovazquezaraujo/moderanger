@@ -4,54 +4,53 @@ import { ModeRangerSemantics } from './grammar.semantics';
 
 const grammarSource = `ModeRanger {
   Main = Song | CommandList
+  CommandList = Command+
   Song = Part+
-  Part = "part" space* partName space* "{" space* Block* space* "}"
+  Part = "part" spaces partName spaces "{" spaces Block* spaces "}"
   
-  Block = "block" space* blockName space* "{" space* BlockContent space* "}"
-  BlockContent = VarsSection? CommandList
+  Block = "block" spaces blockName spaces "{" spaces BlockContent spaces "}"
+  BlockContent = VarsSection? (Command | Note | Group)*
   
-  VarsSection = "vars" space* "{" space* VarDecl* space* "}"
-  VarDecl = "$" varName space* "=" space* VarValue
+  VarsSection = "vars" spaces "{" spaces VarDecl* spaces "}"
+  VarDecl = "$" varName spaces "=" spaces VarValue
   VarValue = number | ScaleType | duration
   
-  CommandList = nonemptyListOf<Command, space+>
-  Command = Note | Group | ConfigCmd | VarOp
-  
+  NumOrVar = number | VarRef
   Note = duration? NumOrVar
-  Group = duration? "(" space* CommandList space* ")"
+  Group = duration? "(" spaces (Note | Group)* spaces ")"
+  
+  Command = ConfigCmd | VarOp
   
   ConfigCmd = ScaleCmd | OctaveCmd | GapCmd | PlayModeCmd | WidthCmd | InversionCmd 
             | KeyCmd | ShiftStartCmd | ShiftSizeCmd | ShiftValueCmd | PatternGapCmd | PatternCmd
             
-  ScaleCmd = "SCALE" space* ScaleType
-  OctaveCmd = "OCT" space* NumOrVar
-  GapCmd = "GAP" space* NumOrVar
-  PlayModeCmd = "PLAYMODE" space* PlayMode
-  WidthCmd = "WIDTH" space* NumOrVar
-  InversionCmd = "INVERSION" space* NumOrVar
-  KeyCmd = "KEY" space* NumOrVar
-  ShiftStartCmd = "SHIFTSTART" space* NumOrVar
-  ShiftSizeCmd = "SHIFTSIZE" space* NumOrVar
-  ShiftValueCmd = "SHIFTVALUE" space* NumOrVar
-  PatternGapCmd = "PATTERN_GAP" space* NumOrVar
-  PatternCmd = "PATTERN" space* pattern
+  ScaleCmd = "SCALE" spaces ScaleType
+  OctaveCmd = "OCT" spaces NumOrVar
+  GapCmd = "GAP" spaces NumOrVar
+  PlayModeCmd = "PLAYMODE" spaces PlayMode
+  WidthCmd = "WIDTH" spaces NumOrVar
+  InversionCmd = "INVERSION" spaces NumOrVar
+  KeyCmd = "KEY" spaces NumOrVar
+  ShiftStartCmd = "SHIFTSTART" spaces NumOrVar
+  ShiftSizeCmd = "SHIFTSIZE" spaces NumOrVar
+  ShiftValueCmd = "SHIFTVALUE" spaces NumOrVar
+  PatternGapCmd = "PATTERN_GAP" spaces NumOrVar
+  PatternCmd = "PATTERN" spaces pattern
   
-  VarOp = "$" varName space* AssignOp space* VarValue?
+  VarOp = "$" varName spaces AssignOp spaces VarValue?
   AssignOp = "+=" | "-=" | "*=" | "++" | "--" | "="
   
-  NumOrVar = number | VarRef
   VarRef = "$" varName
   varName = letter (letter | digit)*
   partName = (~"{" any)+
   blockName = (~"{" any)+
   ScaleType = "WHITE" | "BLUE" | "RED" | "BLACK" | "PENTA" | "TONES" | "FULL"
   PlayMode = "NORMAL" | "RANDOM" | "REVERSE" | "BOUNCE"
-  pattern = (~space any)+
+  pattern = (~spaces any)+
   duration = digit+ ("n" | "t" | "m") ":"
   number = "-"? digit+
-  
-  space := " " | "\\t" | "\\n" | "\\r"
-}`;
+}
+`;
 
 let grammar: ohm.Grammar | null = null;
 
