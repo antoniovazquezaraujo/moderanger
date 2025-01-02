@@ -1,7 +1,6 @@
 import { NoteData } from "./note";
-import { Parser } from "./parser";
-import { parseBlock } from "./song.parser";
 import { OctavedGrade } from "./octaved-grade";
+import { parse } from "./ohm.parser";
 
 export enum ScaleTypes {
     'WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'
@@ -82,13 +81,8 @@ export class Scale {
         var gap = decorationGap ?? baseGap;
         var decoratedGrades:OctavedGrade[] =[]; 
         var baseGrade = arpegioGrades[0];
-        let parser = new Parser(decorationPattern);
-        const tree = parser.parse();
-        let noteDatas: NoteData[] = [];
-        let decorationGrades:NoteData[] = []; 
-        if (tree.ast) {
-            decorationGrades= parseBlock(tree.ast, "4n", noteDatas);
-        }
+        let decorationGrades = parse(decorationPattern);
+        
         for (var arpegioIndex = 0; arpegioIndex < arpegioGrades.length; arpegioIndex++) {
             var grades: OctavedGrade[] = [];
             var arpegioGrade = arpegioGrades[arpegioIndex];

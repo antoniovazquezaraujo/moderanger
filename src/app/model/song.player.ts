@@ -1,12 +1,11 @@
 import { Frequency, Loop, Time, Transport } from 'tone';
 import { Block } from './block';
-import { NoteData } from './note'; // Importa la nueva clase NoteData
-import { Parser } from "./parser";
+import { NoteData } from './note';
 import { Part } from './part';
 import { arpeggiate, PlayMode } from './play.mode';
 import { Player } from "./player";
 import { Song } from './song';
-import { parseBlock } from "./song.parser";
+import { parse } from "./ohm.parser";
 
 type PartSoundInfo = {
     noteDatas: NoteData[];
@@ -124,13 +123,7 @@ export class SongPlayer {
     }
 
     getRootNotes(block: Block, player: Player): NoteData[] {
-        let parser = new Parser(block.blockContent?.notes);
-        const tree = parser.parse();
-        let noteDatas: NoteData[] = [];
-        if (tree.ast) {
-            return parseBlock(tree.ast, "4n", noteDatas);
-        }
-        return [];
+        return parse(block.blockContent?.notes || '');
     }
     getSelectedNotes(player: Player): NoteData[] { // Changed return type
         let noteDatasToPlay = player.getSelectedNotes(player.getScale(), player.tonality);
