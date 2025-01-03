@@ -108,15 +108,21 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         command.isVariable = !wasVariable;
         
         if (!wasVariable && this.availableVariables.length > 0) {
-            // Cambiando de número a variable
+            // Cambiando a variable
             command.setVariable(this.availableVariables[0].value);
         } else if (wasVariable) {
-            // Cambiando de variable a número
+            // Cambiando de variable a valor normal
             if (typeof oldValue === 'string') {
-                const numValue = this.variableContext?.getValue(oldValue);
-                command.setValue(numValue !== undefined ? numValue : 0);
+                if (command.type === CommandType.PLAYMODE) {
+                    // Para PLAYMODE, establecer un modo válido
+                    command.setValue(this.playModeNames[0]);
+                } else {
+                    // Para otros tipos, obtener el valor numérico
+                    const numValue = this.variableContext?.getValue(oldValue);
+                    command.setValue(numValue !== undefined ? numValue : 0);
+                }
             } else {
-                command.setValue(0);
+                command.setValue(command.type === CommandType.PLAYMODE ? this.playModeNames[0] : 0);
             }
         }
         this.cdr.detectChanges();

@@ -6,9 +6,11 @@ import { Scale, ScaleTypes, Tonality } from "./scale";
 import { Song } from "./song";
 import { Block } from "./block";
 import { Command, CommandType } from "./command";
+import { Piano } from "./piano";
 
 export class Player {
-    channel: number = 0;
+    private static instruments: MusicalInstrument[] = [new Piano()];
+    channel: number;
     scale: ScaleTypes = ScaleTypes.WHITE;
     tonality: number = Tonality.D;
     timbre: number = 0;
@@ -24,11 +26,16 @@ export class Player {
     decorationGap?: number = undefined;
     decorationPattern?: string = undefined;
     playMode: PlayMode = PlayMode.CHORD;
-    instrument: MusicalInstrument = Song.getDefultInstrument();
+    instrument: MusicalInstrument = Player.getDefaultInstrument();
 
     constructor(channel: number) {
         this.channel = channel;
     }
+
+    static getDefaultInstrument(): MusicalInstrument {
+        return Player.instruments[0];
+    }
+
     getSelectedNotes(scaleNum: ScaleTypes, tonality: number): NoteData[] { // Changed return type
         var scale = Scale.getScaleByName(scaleNum.toString());
         var tunnedNote = this.selectedNote;

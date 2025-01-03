@@ -93,7 +93,7 @@ export class SongEditorComponent implements OnInit {
         this.songPlayer.stop();
     }
 
-    async playPart(part: Part) {
-        this.songPlayer.playPart(part, new Player(3));
+    playPart(part: Part): void {
+        this.songPlayer.playPart(part, new Player(3), this.song);
     }
 }

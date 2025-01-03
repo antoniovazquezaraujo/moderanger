@@ -1,14 +1,19 @@
-import { EventEmitter } from '@angular/core';
+import { Subject } from 'rxjs';
 
 export type VariableValue = number | string;
 
 export class VariableContext {
-    private variables: Map<string, VariableValue> = new Map();
-    public onVariablesChange = new EventEmitter<void>();
+    private variables = new Map<string, VariableValue>();
+    onVariablesChange = new Subject<void>();
 
-    setValue(name: string, value: VariableValue): void {
+    setVariable(name: string, value: VariableValue): void {
         this.variables.set(name, value);
-        this.onVariablesChange.emit();
+        this.onVariablesChange.next();
+    }
+
+    removeVariable(name: string): void {
+        this.variables.delete(name);
+        this.onVariablesChange.next();
     }
 
     getValue(name: string): VariableValue | undefined {
@@ -19,18 +24,8 @@ export class VariableContext {
         return this.variables.has(name);
     }
 
-    removeVariable(name: string): void {
-        this.variables.delete(name);
-        this.onVariablesChange.emit();
-    }
-
     getAllVariables(): Map<string, VariableValue> {
         return new Map(this.variables);
-    }
-
-    clear(): void {
-        this.variables.clear();
-        this.onVariablesChange.emit();
     }
 }
 

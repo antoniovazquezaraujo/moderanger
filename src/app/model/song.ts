@@ -1,35 +1,37 @@
-import { MusicalInstrument } from './instrument';
-import { Part } from './part';
-import { Piano } from './piano';
-import { VariableContext, VariableValue } from './variable.context';
+import { Block } from "./block";
+import { Part } from "./part";
+import { VariableContext, VariableValue } from "./variable.context";
 
 export class Song {
-    public parts: Part[] = [];
-    public static instruments: MusicalInstrument[] = [new Piano()];
-    public variableContext: VariableContext = new VariableContext();
+    parts: Part[] = [];
+    variableContext: VariableContext = new VariableContext();
 
     constructor(song?: any) {
         if (song) {
-            this.parts = song.parts || [];
-            // Restaurar el contexto de variables
-            this.variableContext = new VariableContext();
+            this.parts = song.parts?.map((part: any) => {
+                const newPart = new Part();
+                newPart.block = new Block(part);
+                return newPart;
+            }) || [];
+            
+            // Restore variable context
             if (song.variables) {
-                for (const [name, value] of Object.entries(song.variables)) {
-                    this.variableContext.setValue(name, value as VariableValue);
-                }
+                Object.entries(song.variables).forEach(([name, value]) => {
+                    this.variableContext.setVariable(name, value as VariableValue);
+                });
             }
         }
     }
 
-    static getDefultInstrument(): MusicalInstrument {
-        return Song.instruments[0];
-    }
-
-    // Método para serializar el song incluyendo las variables
     toJSON() {
+        const variables: { [key: string]: VariableValue } = {};
+        this.variableContext.getAllVariables().forEach((value, key) => {
+            variables[key] = value;
+        });
+
         return {
-            parts: this.parts,
-            variables: Object.fromEntries(this.variableContext.getAllVariables())
+            parts: this.parts.map(part => part.block),
+            variables
         };
     }
 }

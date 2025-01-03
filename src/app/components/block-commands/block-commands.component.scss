@@ -1,12 +1,15 @@
 :host ::ng-deep {
     .p-dropdown {
-        width: 120px !important;
-        flex: 0 0 120px !important;
+        min-width: 200px !important;
+        width: auto !important;
+        flex: 0 0 auto !important;
 
         .p-dropdown-label {
             padding-right: 2rem !important;
             text-align: right !important;
             direction: rtl !important;
+            width: auto !important;
+            white-space: nowrap !important;
         }
 
         .p-dropdown-trigger {
@@ -24,12 +27,22 @@
     }
 
     .p-dropdown-panel {
-        min-width: 200px !important;
+        min-width: 400px !important;
+        max-width: 600px !important;
+
+        .p-dropdown-items-wrapper {
+            width: 100% !important;
+        }
+
+        .p-dropdown-item {
+            width: 100% !important;
+            overflow: visible !important;
+        }
     }
 
     .p-inputnumber {
-        width: 120px !important;
-        flex: 0 0 120px !important;
+        width: 200px !important;
+        flex: 0 0 200px !important;
 
         .p-inputnumber-input {
             width: 100% !important;
@@ -71,7 +84,8 @@
 }
 
 .command-value {
-    width: 80px;
+    min-width: 200px;
+    width: auto;
 }
 
 .command-controls {

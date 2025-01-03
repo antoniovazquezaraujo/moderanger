@@ -5,9 +5,25 @@
         </select>
 
         <ng-container [ngSwitch]="command.type">
-            <select *ngSwitchCase="commandTypes.PLAYMODE" [(ngModel)]="command.value">
-                <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
-            </select>
+            <ng-container *ngSwitchCase="commandTypes.PLAYMODE">
+                <ng-container *ngIf="command.isVariable; else playModeSelect">
+                    <p-dropdown class="command-value" 
+                        [options]="availableVariables" 
+                        [ngModel]="getSelectedValue(command)"
+                        (ngModelChange)="handleValueInput($event, command)" 
+                        [showClear]="true"
+                        optionLabel="label"
+                        optionValue="value"
+                        [placeholder]="availableVariables.length ? 'Select variable' : 'No variables'"
+                        appendTo="body">
+                    </p-dropdown>
+                </ng-container>
+                <ng-template #playModeSelect>
+                    <select [(ngModel)]="command.value">
+                        <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+                    </select>
+                </ng-template>
+            </ng-container>
 
             <select *ngSwitchCase="commandTypes.SCALE" [(ngModel)]="command.value">
                 <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
@@ -43,7 +59,7 @@
 
         <div class="command-controls">
             <p-button (click)="toggleVariableMode(command, $event)" 
-                [disabled]="command.type === commandTypes.PLAYMODE || command.type === commandTypes.SCALE"
+                [disabled]="command.type === commandTypes.SCALE"
                 icon="pi pi-dollar">
             </p-button>
 
