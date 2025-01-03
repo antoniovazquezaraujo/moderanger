@@ -15,12 +15,11 @@
         placeholder="Value"
         class="variable-input"
         required>
-      <button 
+      <p-button 
         type="submit" 
-        class="add-btn" 
-        [disabled]="!varForm.form.valid">
-        Add Variable
-      </button>
+        [disabled]="!varForm.form.valid"
+        icon="pi pi-plus">
+      </p-button>
     </div>
   </form>
 
@@ -43,12 +42,11 @@
           (blur)="updateVariable(i)"
           class="variable-input"
           required>
-        <button 
+        <p-button 
           type="button" 
-          (click)="removeVariable(i)" 
-          class="remove-btn">
-          Remove
-        </button>
+          (click)="removeVariable(i)"
+          icon="pi pi-times">
+        </p-button>
       </div>
     </form>
   </div>

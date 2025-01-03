@@ -5,6 +5,8 @@
 
         .p-dropdown-label {
             padding-right: 2rem !important;
+            text-align: right !important;
+            direction: rtl !important;
         }
 
         .p-dropdown-trigger {
@@ -14,6 +16,10 @@
 
         .p-dropdown-clear-icon {
             right: 2rem !important;
+        }
+
+        .p-dropdown-items {
+            text-align: right !important;
         }
     }
 

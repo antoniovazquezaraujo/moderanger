@@ -1,59 +1,24 @@
 .variable-declaration {
   padding: 1rem;
-  
-  .new-variable-form,
-  .variable-item {
-    margin-bottom: 1rem;
+}
 
-    .input-group {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-  }
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
 
-  .variables-list {
-    margin-top: 1rem;
-  }
+.variable-input {
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  height: 24px;
+}
 
-  .variable-input {
-    flex: 1;
-    min-width: 0; // Prevents input from overflowing
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
+.variables-list {
+  margin-top: 1rem;
+}
 
-    &.ng-invalid.ng-touched {
-      border-color: #f44336;
-    }
-  }
-
-  button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    white-space: nowrap;
-    
-    &.add-btn {
-      background-color: #4CAF50;
-      color: white;
-
-      &:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-      }
-    }
-    
-    &.remove-btn {
-      background-color: #f44336;
-      color: white;
-    }
-
-    &:not(:disabled):hover {
-      opacity: 0.9;
-    }
-  }
+.variable-item {
+  margin-bottom: 0.5rem;
 } 
