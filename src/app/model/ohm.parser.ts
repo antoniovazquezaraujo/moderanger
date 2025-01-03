@@ -1,6 +1,7 @@
 import * as ohm from 'ohm-js';
 import { NoteData } from './note';
 import { ModeRangerSemantics } from './grammar.semantics';
+import { Song } from './song';
 
 const grammarSource = `ModeRanger {
   Main = Song | CommandList
@@ -12,13 +13,15 @@ const grammarSource = `ModeRanger {
   Block = "block" spaces blockName spaces "{" spaces BlockContent spaces "}"
   BlockContent = (Note | NoteGroup)* Operation*
   
+  Notes = (Note | NoteGroup)*
+  
   VarsSection = "vars" spaces "{" spaces VarDecl* spaces "}"
   VarDecl = "$" varName spaces "=" spaces VarValue
   VarValue = number | ScaleType | duration
   
   NumOrVar = number | VarRef
   Note = duration? NumOrVar
-  NoteGroup = duration? "(" spaces (Note | NoteGroup)* spaces ")"
+  NoteGroup = duration "(" spaces (Note | NoteGroup)* spaces ")"
   
   Operation = ConfigOperation | VarOperation
   
@@ -62,13 +65,38 @@ export function getGrammar(): ohm.Grammar {
   return grammar;
 }
 
-export function parse(input: string): NoteData[] {
+export function parseSong(input: string): Song {
+  if (!input) {
+    return new Song();
+  }
+
+  const grammar = getGrammar();
+  const match = grammar.match(input, 'Song');
+  
+  if (match.failed()) {
+    console.error('Parse error:', match.message);
+    console.error('Input was:', input);
+    throw new Error(`Parse failed: ${match.message}`);
+  }
+  
+  const semantics = grammar.createSemantics();
+  semantics.addOperation<any>('eval', ModeRangerSemantics);
+
+  try {
+    return semantics(match)['eval']();
+  } catch (e) {
+    console.error('Semantic evaluation error:', e);
+    throw e;
+  }
+}
+
+export function parseBlockNotes(input: string): NoteData[] {
   if (!input) {
     return [];
   }
 
   const grammar = getGrammar();
-  const match = grammar.match(input);
+  const match = grammar.match(input, 'Notes');
   
   if (match.failed()) {
     console.error('Parse error:', match.message);

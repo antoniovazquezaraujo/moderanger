@@ -8,16 +8,15 @@ export const ModeRangerSemantics = {
     return node['eval']();
   },
 
-  NoteList(first: Node, _space: Node, rest: Node) {
-    const notes = [first['eval'](), ...rest['eval']()];
-    return notes.map(n => new NoteData({ type: 'note', note: n, duration: '4t' }));
+  CommandList(node: Node) {
+    return node['eval']();
   },
 
   _iter(...children: Node[]) {
     return children.map(child => child['eval']());
   },
 
-  Song(parts: Node) {
+  Song(vars: Node, parts: Node) {
     return parts['eval']();
   },
 
@@ -29,8 +28,8 @@ export const ModeRangerSemantics = {
     return content['eval']();
   },
 
-  BlockContent(_vars: Node, cmds: Node) {
-    return cmds ? cmds['eval']() : [];
+  BlockContent(notes: Node, ops: Node) {
+    return [...(notes['eval']() || []), ...(ops['eval']() || [])];
   },
 
   VarsSection(_vars: Node, _sp1: Node, _open: Node, _sp2: Node, decls: Node, _sp3: Node, _close: Node) {
@@ -45,15 +44,11 @@ export const ModeRangerSemantics = {
     return new NoteData({ type: 'note', duration: '4t', note: 0 });
   },
 
-  CommandList(node: Node) {
-    return node['eval']();
-  },
-
   nonemptyListOf(first: Node, _sep: Node, rest: Node) {
     return [first['eval'](), ...rest['eval']()];
   },
 
-  Command(node: Node) {
+  Operation(node: Node) {
     return node['eval']();
   },
 
@@ -65,47 +60,61 @@ export const ModeRangerSemantics = {
     return note;
   },
 
-  ConfigCmd(node: Node) {
+  NoteGroup(duration: Node, _open: Node, _sp1: Node, notes: Node, _sp2: Node, _close: Node) {
+    const groupDuration = duration.sourceString.slice(0, -1); // remove the ':'
+    const evaluatedNotes = notes['eval']();
+    
+    // Apply group duration to notes that don't have their own duration
+    evaluatedNotes.forEach((note: NoteData) => {
+      if (!note.duration) {
+        note.duration = groupDuration;
+      }
+    });
+
+    return evaluatedNotes;
+  },
+
+  ConfigOperation(node: Node) {
     return node['eval']();
   },
 
-  OctaveCmd(_oct: Node, _space: Node, value: Node) {
+  OctaveOperation(_oct: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  GapCmd(_gap: Node, _space: Node, value: Node) {
+  GapOperation(_gap: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  WidthCmd(_width: Node, _space: Node, value: Node) {
+  WidthOperation(_width: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  InversionCmd(_inv: Node, _space: Node, value: Node) {
+  InversionOperation(_inv: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  KeyCmd(_key: Node, _space: Node, value: Node) {
+  KeyOperation(_key: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  ShiftStartCmd(_cmd: Node, _space: Node, value: Node) {
+  ShiftStartOperation(_cmd: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  ShiftSizeCmd(_cmd: Node, _space: Node, value: Node) {
+  ShiftSizeOperation(_cmd: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  ShiftValueCmd(_cmd: Node, _space: Node, value: Node) {
+  ShiftValueOperation(_cmd: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  PatternGapCmd(_cmd: Node, _space: Node, value: Node) {
+  PatternGapOperation(_cmd: Node, _space: Node, value: Node) {
     return value['eval']();
   },
 
-  ScaleCmd(_scale: Node, _space: Node, type: Node) {
+  ScaleOperation(_scale: Node, _space: Node, type: Node) {
     return new NoteData({ type: 'note', note: 0 });
   },
 

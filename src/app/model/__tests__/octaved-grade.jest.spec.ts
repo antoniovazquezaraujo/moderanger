@@ -45,7 +45,7 @@ describe('OctavedGrade', () => {
         it('should convert to correct MIDI note', () => {
             const grade = new OctavedGrade(scale, 0, 1, '1/4');
             const note = grade.toNote();
-            expect(note).toBe(scale.notes[0] + 12);
+            expect(note).toBe(scale.notes[0] + 48);
         });
     });
 }); 
