@@ -16,6 +16,10 @@ export const ModeRangerSemantics = {
     return children.map(child => child['eval']());
   },
 
+  Notes(notes: Node) {
+    return notes['eval']();
+  },
+
   Song(vars: Node, parts: Node) {
     return parts['eval']();
   },
@@ -54,24 +58,27 @@ export const ModeRangerSemantics = {
 
   Note(duration: Node, num: Node) {
     const note = num['eval']();
-    if (duration.numChildren > 0) {
-      note.duration = duration.sourceString.slice(0, -1); // remove the ':'
-    }
-    return note;
+    const noteDuration = duration.numChildren > 0 ? duration.sourceString.slice(0, -1) : '4t';
+    return new NoteData({
+      ...note,
+      duration: noteDuration
+    });
   },
 
   NoteGroup(duration: Node, _open: Node, _sp1: Node, notes: Node, _sp2: Node, _close: Node) {
-    const groupDuration = duration.sourceString.slice(0, -1); // remove the ':'
+    const groupDuration = duration.sourceString.slice(0, -1);
     const evaluatedNotes = notes['eval']();
+    const notesArray = Array.isArray(evaluatedNotes) ? evaluatedNotes : [evaluatedNotes];
     
-    // Apply group duration to notes that don't have their own duration
-    evaluatedNotes.forEach((note: NoteData) => {
-      if (!note.duration) {
-        note.duration = groupDuration;
+    return notesArray.map(note => {
+      if (note instanceof NoteData) {
+        return new NoteData({
+          ...note,
+          duration: note.duration === '4t' ? groupDuration : note.duration
+        });
       }
+      return note;
     });
-
-    return evaluatedNotes;
   },
 
   ConfigOperation(node: Node) {
@@ -122,7 +129,6 @@ export const ModeRangerSemantics = {
     const value = parseInt(digits.sourceString);
     return new NoteData({
       type: 'note',
-      duration: '4t',
       note: minus.sourceString ? -value : value
     });
   },

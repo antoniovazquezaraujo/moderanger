@@ -108,7 +108,17 @@ export function parseBlockNotes(input: string): NoteData[] {
   semantics.addOperation<any>('eval', ModeRangerSemantics);
 
   try {
-    return semantics(match)['eval']();
+    const result = semantics(match)['eval']();
+    // Flatten the result array recursively
+    const flattenArray = (arr: any[]): NoteData[] => {
+      return arr.reduce((flat: NoteData[], item: any) => {
+        if (Array.isArray(item)) {
+          return flat.concat(flattenArray(item));
+        }
+        return flat.concat(item);
+      }, []);
+    };
+    return flattenArray(result);
   } catch (e) {
     console.error('Semantic evaluation error:', e);
     throw e;

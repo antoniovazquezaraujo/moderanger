@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { parse } from '../ohm.parser';
+import { parseSong } from '../ohm.parser';
 import { NoteData } from '../note';
 
 describe('Variables', () => {
@@ -13,7 +13,7 @@ describe('Variables', () => {
           OCT $x
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -26,7 +26,7 @@ describe('Variables', () => {
           SCALE WHITE
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -39,7 +39,7 @@ describe('Variables', () => {
           4n: $note
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -56,7 +56,7 @@ describe('Variables', () => {
           SCALE BLUE
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
   });
@@ -71,7 +71,7 @@ describe('Variables', () => {
           OCT $x
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -84,7 +84,7 @@ describe('Variables', () => {
           OCT $x
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -97,7 +97,7 @@ describe('Variables', () => {
           OCT $x
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -110,7 +110,7 @@ describe('Variables', () => {
           OCT $x
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -123,7 +123,7 @@ describe('Variables', () => {
           OCT $x
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
   });
@@ -138,7 +138,7 @@ describe('Variables', () => {
           $note
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -153,7 +153,7 @@ describe('Variables', () => {
           GAP $gap
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
 
@@ -166,7 +166,7 @@ describe('Variables', () => {
           4n: $note
         }
       }`;
-      const result = parse(input);
+      const result = parseSong(input);
       expect(result).toBeTruthy();
     });
   });
@@ -180,7 +180,7 @@ describe('Variables', () => {
         block main {
         }
       }`;
-      expect(() => parse(input)).toThrow();
+      expect(() => parseSong(input)).toThrow();
     });
 
     it('should reject invalid assignment operator', () => {
@@ -192,7 +192,7 @@ describe('Variables', () => {
           $x /= 2
         }
       }`;
-      expect(() => parse(input)).toThrow();
+      expect(() => parseSong(input)).toThrow();
     });
   });
 });

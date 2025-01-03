@@ -1,29 +1,34 @@
-import * as jest from 'jest';
+export class Sampler {
+  private urls: any;
+  private baseUrl: string;
 
-const mockTone = {
-    start: jest.fn(),
-    Transport: {
-        start: jest.fn(),
-        stop: jest.fn(),
-        position: 0,
-        bpm: {
-            value: 120
-        },
-        schedule: jest.fn(),
-        scheduleRepeat: jest.fn(),
-        cancel: jest.fn()
-    },
-    Synth: jest.fn().mockImplementation(() => ({
-        toDestination: jest.fn().mockReturnThis(),
-        triggerAttackRelease: jest.fn()
-    })),
-    PolySynth: jest.fn().mockImplementation(() => ({
-        toDestination: jest.fn().mockReturnThis(),
-        triggerAttackRelease: jest.fn()
-    })),
-    now: jest.fn().mockReturnValue(0)
-};
+  constructor(config: { urls: any, baseUrl?: string }) {
+    this.urls = config.urls;
+    this.baseUrl = config.baseUrl || '';
+  }
 
-module.exports = mockTone;
-module.exports.default = mockTone;
-module.exports.__esModule = true; 
+  triggerAttackRelease(note: string | number, duration: string | number, time?: string | number) {}
+  
+  toDestination() {
+    return this;
+  }
+
+  dispose() {}
+}
+
+export class Time {
+  constructor(value: string) {}
+  toSeconds() { return 0; }
+}
+
+export class Frequency {
+  constructor(value: number, unit: string) {}
+  toFrequency() { return 440; }
+}
+
+export const Transport = {
+  start: () => {},
+  stop: () => {},
+  cancel: () => {},
+  bpm: { value: 120 }
+}; 
