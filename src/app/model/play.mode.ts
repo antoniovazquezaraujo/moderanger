@@ -51,7 +51,7 @@ export function arpeggiate(notes: number[], mode: PlayMode): number[] {
     if (!arpeggios || arpeggios.length === 0) {
         return notes;
     }
-    return arpeggios.reduce((acc, val) => acc.concat(val), []);
+    return arpeggios.flat();
 }
 export function getArpeggios(notes: number[], mode: PlayMode): number[][] {
     if (!notes || notes.length === 0) {
@@ -63,30 +63,59 @@ export function getArpeggios(notes: number[], mode: PlayMode): number[][] {
         case PlayMode.ASCENDING: 
             return [notes];
         case PlayMode.DESCENDING:
-            return [[...notes].reverse()];
+            return [notes.slice().reverse()];
         case PlayMode.ASC_DESC:
-            return [[...notes].slice(0, -2), [...notes].reverse()];
+            const ascending = notes.slice();
+            const descending = notes.slice().reverse();
+            return [ascending, descending];
         case PlayMode.DESC_ASC:
-            let [_, ...notesExceptFirstElement] = notes;
-            return [[...notes].reverse(), notesExceptFirstElement];
+            const desc = notes.slice().reverse();
+            const asc = notes.slice();
+            return [desc, asc];
         case PlayMode.EVEN_ASC_ODD_ASC:
-            return [notes.filter((value, index) => isEven(index)), notes.filter((value, index) => isOdd(index))];
+            return [
+                notes.filter((_, index) => isEven(index)),
+                notes.filter((_, index) => isOdd(index))
+            ];
         case PlayMode.EVEN_ASC_ODD_DESC:
-            return [notes.filter((value, index) => isEven(index)), notes.filter((value, index) => isOdd(index)).reverse()];
+            return [
+                notes.filter((_, index) => isEven(index)),
+                notes.filter((_, index) => isOdd(index)).reverse()
+            ];
         case PlayMode.EVEN_DESC_ODD_DESC:
-            return [notes.filter((value, index) => isEven(index)).reverse(), notes.filter((value, index) => isOdd(index)).reverse()];
+            return [
+                notes.filter((_, index) => isEven(index)).reverse(),
+                notes.filter((_, index) => isOdd(index)).reverse()
+            ];
         case PlayMode.EVEN_DESC_ODD_ASC:
-            return [notes.filter((value, index) => isEven(index)).reverse(), notes.filter((value, index) => isOdd(index))];
+            return [
+                notes.filter((_, index) => isEven(index)).reverse(),
+                notes.filter((_, index) => isOdd(index))
+            ];
         case PlayMode.ODD_ASC_EVEN_ASC:
-            return [notes.filter((value, index) => isOdd(index)), notes.filter((value, index) => isEven(index))];
+            return [
+                notes.filter((_, index) => isOdd(index)),
+                notes.filter((_, index) => isEven(index))
+            ];
         case PlayMode.ODD_ASC_EVEN_DESC:
-            return [notes.filter((value, index) => isOdd(index)), notes.filter((value, index) => isEven(index)).reverse()];
+            return [
+                notes.filter((_, index) => isOdd(index)),
+                notes.filter((_, index) => isEven(index)).reverse()
+            ];
         case PlayMode.ODD_DESC_EVEN_DESC:
-            return [notes.filter((value, index) => isOdd(index)).reverse(), notes.filter((value, index) => isEven(index)).reverse()];
+            return [
+                notes.filter((_, index) => isOdd(index)).reverse(),
+                notes.filter((_, index) => isEven(index)).reverse()
+            ];
         case PlayMode.ODD_DESC_EVEN_ASC:
-            return [notes.filter((value, index) => isOdd(index)).reverse(), notes.filter((value, index) => isEven(index))];
+            return [
+                notes.filter((_, index) => isOdd(index)).reverse(),
+                notes.filter((_, index) => isEven(index))
+            ];
         case PlayMode.RANDOM:
-            return [shuffle(notes)];
+            return [shuffle(notes.slice())];
+        default:
+            return [notes];
     }
 }
 export function shuffle(array: number[]): number[] {

@@ -1,4 +1,5 @@
 import { VariableContext } from './variable.context';
+import { getPlayModeFromString } from './play.mode';
 
 export enum CommandType {
     SCALE = 'SCALE',
@@ -46,14 +47,14 @@ export class Command {
     execute(player: any, context?: VariableContext): void {
         const rawValue = context ? this.getValue(context) : this.value;
         const value = this.type === CommandType.PATTERN ? String(rawValue) :
-                     this.type === CommandType.SCALE || this.type === CommandType.PLAYMODE ? rawValue :
+                     this.type === CommandType.SCALE ? rawValue :
                      Number(rawValue) || 0;  // Convert to number or default to 0 if NaN
 
         switch (this.type) {
             case CommandType.GAP: player.gap = value; break;
             case CommandType.OCT: player.octave = value; break;
             case CommandType.SCALE: player.selectScale(value); break;
-            case CommandType.PLAYMODE: player.playMode = value; break;
+            case CommandType.PLAYMODE: player.playMode = getPlayModeFromString(String(rawValue)); break;
             case CommandType.WIDTH: player.density = value; break;
             case CommandType.INVERSION: player.inversion = value; break;
             case CommandType.KEY: player.tonality = value; break;

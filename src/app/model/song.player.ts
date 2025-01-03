@@ -198,9 +198,10 @@ export class SongPlayer {
             } else if (noteData.type === 'arpeggio' && noteData.noteDatas) {
                 let note = noteData.noteDatas[partSoundInfo.arpeggioIndex];
                 if (note && note.note !== undefined && !isNaN(note.note)) {
+                    let noteDuration = Time(duration).toSeconds() / noteData.noteDatas.length;
                     partSoundInfo.player.triggerAttackRelease(
                         Frequency(note.note, "midi").toFrequency(),
-                        duration,
+                        noteDuration + "s",
                         time
                     );
                 }
@@ -228,11 +229,11 @@ export class SongPlayer {
     }
 }
 
-function notesTonoteDatas(arpeggio: number[], duration: string): NoteData[] { // Changed return type
-    var noteDataDuration: string = "16n"; //duration / arpeggio.length;
-    var noteDatas: NoteData[] = []; // Changed type
+function notesTonoteDatas(arpeggio: number[], duration: string): NoteData[] {
+    const noteDataDuration = duration;
+    var noteDatas: NoteData[] = [];
     for (const note of arpeggio) {
-        noteDatas.push({ type: 'note', duration: noteDataDuration, note: note }); // Create NoteData object
+        noteDatas.push({ type: 'note', duration: noteDataDuration, note: note });
     }
     return noteDatas;
 }
