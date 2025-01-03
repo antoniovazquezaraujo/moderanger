@@ -5,7 +5,7 @@ import { Part } from './part';
 import { arpeggiate, PlayMode } from './play.mode';
 import { Player } from "./player";
 import { Song } from './song';
-import { parseSong } from "./ohm.parser";
+import { parseSong, parseBlockNotes } from "./ohm.parser";
 
 type PartSoundInfo = {
     noteDatas: NoteData[];
@@ -122,7 +122,7 @@ export class SongPlayer {
     }
 
     getRootNotes(block: Block, player: Player): NoteData[] {
-        return parseSong(block.blockContent?.notes || '');
+        return parseBlockNotes(block.blockContent?.notes || '');
     }
     getSelectedNotes(player: Player): NoteData[] { // Changed return type
         let noteDatasToPlay = player.getSelectedNotes(player.getScale(), player.tonality);
