@@ -3,16 +3,18 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command } from 'src/app/model/command';
 import { Part } from 'src/app/model/part';
+import { VariableContext } from 'src/app/model/variable.context';
 
 @Component({
     selector: 'app-part',
     templateUrl: './part.component.html',
-    styleUrls: ['./part.component.css']
+    styleUrls: ['./part.component.scss']
 })
 export class PartComponent implements OnInit {
     treeControl = new NestedTreeControl<Block>(node => node.children);
 
     @Input() part!: Part;
+    @Input() variableContext?: VariableContext;
     @Output() onDuplicatePart: EventEmitter<any>;
     @Output() onRemovePart: EventEmitter<any>;
     @Output() onPlayPart: EventEmitter<any>;

@@ -11,6 +11,7 @@ import { SongEditorComponent } from './components/song-editor/song-editor.compon
 import { PartsComponent } from './components/parts/parts.component';
 import { PartComponent } from './components/part/part.component';
 import { SongComponent } from './components/song/song.component';
+import { VariableDeclarationComponent } from './components/variable-declaration/variable-declaration.component';
 import {ButtonModule} from 'primeng/button';
 import {TreeDragDropService} from 'primeng/api';
 import {InputTextModule} from 'primeng/inputtext';
@@ -19,6 +20,7 @@ import {DropdownModule} from 'primeng/dropdown';
 import {InputNumberModule} from 'primeng/inputnumber';
 import {AccordionModule} from 'primeng/accordion';
 import {InputTextareaModule} from 'primeng/inputtextarea';
+import {TooltipModule} from 'primeng/tooltip';
  
 @NgModule({
   declarations: [
@@ -29,7 +31,8 @@ import {InputTextareaModule} from 'primeng/inputtextarea';
     SongEditorComponent,
     PartsComponent,
     PartComponent,
-    SongComponent
+    SongComponent,
+    VariableDeclarationComponent
   ],
   imports: [
     FormsModule,
@@ -41,8 +44,9 @@ import {InputTextareaModule} from 'primeng/inputtextarea';
     KnobModule,
     DropdownModule,
     InputNumberModule,
-    AccordionModule ,
-    InputTextareaModule 
+    AccordionModule,
+    InputTextareaModule,
+    TooltipModule
   ],
   providers: [TreeDragDropService],
   bootstrap: [AppComponent]

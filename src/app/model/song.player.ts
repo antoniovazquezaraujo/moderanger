@@ -14,6 +14,7 @@ type PartSoundInfo = {
     arpeggioIndex: number;
     pendingTurnsToPlay: number;
 }
+
 export class SongPlayer {
     keyboardManagedPart?: Part;
     playingPlayer!: Player;
@@ -37,11 +38,11 @@ export class SongPlayer {
             let partSoundInfo: PartSoundInfo[] = [];
             for (var part of song.parts) {
                 let player = new Player(channel++);
-                let partnoteDatas: NoteData[] = this.playPartBlocks(part, player); // Changed to NoteData[]
+                let partnoteDatas: NoteData[] = this.playPartBlocks(part, player, song);
                 partSoundInfo.push({ noteDatas: partnoteDatas, player: player, noteDataIndex: 0, arpeggioIndex: 0, pendingTurnsToPlay: 0 });
             }
             this.playnoteDatas(partSoundInfo);
-                Transport.start();
+            Transport.start();
         }
     }
 
@@ -57,66 +58,73 @@ export class SongPlayer {
         this.playnoteDatas(partSoundInfo);
         Transport.start();
     }
-    playPartBlocks(part: Part, player: Player): NoteData[] { // Changed return type
-        let ret = this.playBlock(part.block, [], player, part.block.repeatingTimes);
+
+    playPartBlocks(part: Part, player: Player, song?: Song): NoteData[] {
+        let ret = this.playBlock(part.block, [], player, part.block.repeatingTimes, song?.variableContext);
         return ret;
     }
     
-    playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] { // Changed parameter type
+    playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number, variableContext?: any): NoteData[] {
         if (repeatingTimes > 0) {
-            noteDatas = this.extractNotesToPlay(block, noteDatas, player);            
-             if (block.children.length > 0) {
+            noteDatas = this.extractNotesToPlay(block, noteDatas, player, variableContext);            
+            if (block.children.length > 0) {
                 let childrennoteDatas: NoteData[] = [];
                 for (let child of block.children!) {
-                    childrennoteDatas = this.playBlock(child, childrennoteDatas, player, child.repeatingTimes);
+                    childrennoteDatas = this.playBlock(child, childrennoteDatas, player, child.repeatingTimes, variableContext);
                 }
                 noteDatas = noteDatas.concat(childrennoteDatas);
             }
-            return this.playBlock(block, noteDatas, player, repeatingTimes - 1);
+            return this.playBlock(block, noteDatas, player, repeatingTimes - 1, variableContext);
         }
         return noteDatas;
     }
 
-    extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player): NoteData[] {
-        player.executeCommands(block);
+    extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player, variableContext?: any): NoteData[] {
+        if (block.commands) {
+            for (const command of block.commands) {
+                command.execute(player, variableContext);
+            }
+        }
         noteDatas = noteDatas.concat(this.extractBlocknoteDatas(block, player));
         return noteDatas;
     }
 
-    extractBlocknoteDatas(block: Block, player: Player): NoteData[] { // Changed return type
-        let rootnoteDatas: NoteData[] = this.getRootNotes(block, player); // Changed type
-        let n = 0;
-        let noteDatas: NoteData[] = []; // Changed type
+    extractBlocknoteDatas(block: Block, player: Player): NoteData[] {
+        let rootnoteDatas: NoteData[] = this.getRootNotes(block, player);
+        let noteDatas: NoteData[] = [];
         for (let noteData of rootnoteDatas) {
             let duration = noteData.duration;
-            if (noteData.type === 'note' && noteData.note !== undefined) { // Check for note type and note property
+            if (noteData.type === 'note' && noteData.note !== undefined) {
                 let note = noteData.note;
                 player.selectedNote = note;
-                let notenoteDatas: NoteData[] = this.getSelectedNotes(player); // Changed type
+                let notenoteDatas: NoteData[] = this.getSelectedNotes(player);
                 let notes: number[] = this.noteDatasToNotes(notenoteDatas);
                 let seconds: number = Time(duration).toSeconds();
 
                 if (player.playMode === PlayMode.CHORD) {
-                    let chord: NoteData = { type: 'chord', duration: duration, noteDatas: notenoteDatas }; // Create chord NoteData
+                    let chord: NoteData = { type: 'chord', duration: duration, noteDatas: notenoteDatas };
                     noteDatas = noteDatas.concat(chord);
                 } else {
                     let arpeggio = arpeggiate(notes, player.playMode);
-                    let arpeggionoteDatas: NoteData[] = notesTonoteDatas(arpeggio, duration); // Changed type
-                    let newArpeggio: NoteData = { type: 'arpeggio', duration: duration, noteDatas: arpeggionoteDatas }; // Create arpeggio NoteData
+                    let arpeggionoteDatas: NoteData[] = notesTonoteDatas(arpeggio, duration);
+                    let newArpeggio: NoteData = { type: 'arpeggio', duration: duration, noteDatas: arpeggionoteDatas };
                     noteDatas = noteDatas.concat(newArpeggio);
                 }
-            } else if (noteData.type === 'rest') { // Check for rest type
+            } else if (noteData.type === 'rest') {
                 let chordNotes: NoteData[] = [];
-                chordNotes.push({ type: 'rest', duration: duration }); // Create rest NoteData
+                chordNotes.push({ type: 'rest', duration: duration });
                 noteDatas = noteDatas.concat(chordNotes);
             }
         }
         return noteDatas;
     }
-    noteDatasToNotes(noteDatas: NoteData[]): number[] { // Changed parameter type
+
+    noteDatasToNotes(noteDatas: NoteData[]): number[] {
         let notes: number[] = [];
         for (const noteData of noteDatas) {
-            notes.push(noteData.note!);
+            if (noteData.note !== undefined) {
+                notes.push(noteData.note);
+            }
         }
         return notes;
     }
@@ -124,7 +132,8 @@ export class SongPlayer {
     getRootNotes(block: Block, player: Player): NoteData[] {
         return parseBlockNotes(block.blockContent?.notes || '');
     }
-    getSelectedNotes(player: Player): NoteData[] { // Changed return type
+
+    getSelectedNotes(player: Player): NoteData[] {
         let noteDatasToPlay = player.getSelectedNotes(player.getScale(), player.tonality);
         return noteDatasToPlay;
     }
@@ -145,7 +154,7 @@ export class SongPlayer {
     }
 
     playTurn(partSoundInfo: PartSoundInfo, interval: any, time: any) {
-        let noteData: NoteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex]; // Changed type
+        let noteData: NoteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
         if (noteData === undefined) {
             return;
         }
@@ -158,9 +167,9 @@ export class SongPlayer {
         } else {
             timeToPlay = true;
             let numTurnsNote: number = 0.0;
-            if(noteData.type === 'arpeggio'){
+            if(noteData.type === 'arpeggio' && noteData.noteDatas){
                 let x: number = this.floatify(Time(noteDataDuration).toSeconds() / interval);
-                numTurnsNote = this.floatify(x / noteData.noteDatas!.length);
+                numTurnsNote = this.floatify(x / noteData.noteDatas.length);
             } else {
                 numTurnsNote = Time(noteDataDuration).toSeconds() / interval;
             }
@@ -176,9 +185,11 @@ export class SongPlayer {
             this.playPartnoteDatas(partSoundInfo, time);
         }
     }
+
     floatify(theNumber: number) {
         return parseFloat((theNumber).toFixed(10));
     }
+
     playPartnoteDatas(partSoundInfo: PartSoundInfo, time: any) {
         let noteData: NoteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
         if (noteData != null) {

@@ -20,7 +20,7 @@
   (onDragStart)="dragStart(block)" 
   (onDragEnd)="dragEnd()">
     <ng-template let-node pTemplate="default">
-    <div class="container"  >
+    <div class="container">
       <label for="repeatingTimes"> Block {{node.id}} </label>
       <p-inputNumber id="repeatingTimes" placeholder="Repeating times" [(ngModel)]="node.repeatingTimes" mode="decimal"
         [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal"
@@ -31,7 +31,11 @@
       <button pButton type="button" icon="pi pi-plus" (click)="addChild(node)"></button>
       <button pButton type="button" icon="pi pi-times" (click)="removeChild(node)"></button>
       <app-block-notes [blockContent]="node.blockContent"></app-block-notes>
-      <app-block-commands [block]="node" (removeCommand)="onRemoveCommand($event)"></app-block-commands>
+      <app-block-commands 
+        [block]="node" 
+        [variableContext]="variableContext"
+        (removeCommand)="onRemoveCommand($event)">
+      </app-block-commands>
     </div>
   </ng-template>
 </p-tree>

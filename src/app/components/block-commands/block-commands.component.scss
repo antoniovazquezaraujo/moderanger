@@ -1,0 +1,52 @@
+.commands {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .command {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+
+        select {
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background-color: #fff;
+            min-width: 120px;
+        }
+
+        .value-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex: 1;
+
+            :host ::ng-deep {
+                .p-dropdown {
+                    min-width: 200px;
+                    
+                    .p-dropdown-label {
+                        padding-right: 2rem;
+                    }
+                }
+
+                .p-inputnumber {
+                    min-width: 120px;
+                }
+            }
+        }
+
+        button {
+            &.p-button {
+                min-width: 2.5rem;
+                height: 2.5rem;
+                padding: 0;
+
+                &:not(:disabled):hover {
+                    opacity: 0.9;
+                }
+            }
+        }
+    }
+} 

@@ -1,0 +1,55 @@
+<div class="variable-declaration">
+  <form class="new-variable-form" (ngSubmit)="addVariable($event)" #varForm="ngForm">
+    <div class="input-group">
+      <input 
+        type="text" 
+        [(ngModel)]="newVariable.name" 
+        name="newVarName"
+        placeholder="Variable name"
+        class="variable-input"
+        required>
+      <input 
+        type="text" 
+        [(ngModel)]="newVariable.value" 
+        name="newVarValue"
+        placeholder="Value"
+        class="variable-input"
+        required>
+      <button 
+        type="submit" 
+        class="add-btn" 
+        [disabled]="!varForm.form.valid">
+        Add Variable
+      </button>
+    </div>
+  </form>
+
+  <div class="variables-list">
+    <form *ngFor="let variable of variables; let i = index" 
+          class="variable-item" 
+          #editForm="ngForm">
+      <div class="input-group">
+        <input 
+          type="text" 
+          [(ngModel)]="variable.name" 
+          [name]="'varName' + i"
+          (blur)="updateVariable(i)"
+          class="variable-input"
+          required>
+        <input 
+          type="text" 
+          [(ngModel)]="variable.value" 
+          [name]="'varValue' + i"
+          (blur)="updateVariable(i)"
+          class="variable-input"
+          required>
+        <button 
+          type="button" 
+          (click)="removeVariable(i)" 
+          class="remove-btn">
+          Remove
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

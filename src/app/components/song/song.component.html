@@ -1,5 +1,6 @@
 <app-parts 
     [parts] = "getParts() ||[]" 
+    [variableContext]="song.variableContext"
     (onRemovePart)="removePart($event)" 
     (onPlayPart)="playPart($event)">
 </app-parts> 

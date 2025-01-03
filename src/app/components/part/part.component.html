@@ -1,16 +1,20 @@
-<div class="container">
-  <p-accordionTab>
-    <ng-template class="p-accordion-header" pTemplate="header">
-      Part {{part.id}}
-    </ng-template>
-    <ng-template pTemplate="content">
-      <button pButton type="button" icon="pi pi-plus" (click)="onAddChild(part.block)"></button>
-      <button pButton type="button" icon="pi pi-play" (click)="playPart()"></button>
-      <button pButton type="button" icon="pi pi-copy" (click)="duplicatePart()"></button>
-      <button pButton type="button" icon="pi pi-times" (click)="removePart()"></button>
-      <app-block [(block)]="part.block" (onDuplicateBlock)="onDuplicateBlock($event)"
-        (onRemoveBlock)="onRemoveBlock($event)" (onAddChild)="onAddChild($event)">
-      </app-block>
-    </ng-template>
-  </p-accordionTab>
+<div class="part">
+    <div class="part-header">
+        <label>Part {{part.id}}</label>
+        <div class="part-controls">
+            <button pButton type="button" icon="pi pi-plus" (click)="onAddChild(part.block)" pTooltip="Add child block"></button>
+            <button pButton type="button" icon="pi pi-play" (click)="playPart()" pTooltip="Play part"></button>
+            <button pButton type="button" icon="pi pi-copy" (click)="duplicatePart()" pTooltip="Duplicate part"></button>
+            <button pButton type="button" icon="pi pi-times" (click)="removePart()" pTooltip="Remove part"></button>
+        </div>
+    </div>
+    <div class="part-content">
+        <app-block 
+            [(block)]="part.block" 
+            [variableContext]="variableContext"
+            (onDuplicateBlock)="onDuplicateBlock($event)" 
+            (onRemoveBlock)="onRemoveBlock($event)"
+            (onAddChild)="onAddChild($event)">
+        </app-block>
+    </div>
 </div>

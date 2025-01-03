@@ -2,15 +2,18 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Event } from '@angular/router';
 import { Block } from 'src/app/model/block';
 import { Command } from 'src/app/model/command';
+import { VariableContext } from 'src/app/model/variable.context';
+
 @Component({
   selector: 'app-block',
   templateUrl: './block.component.html',
   styleUrls: ['./block.component.css']
 })
 export class BlockComponent implements OnInit {
-  @Input() block:Block = new Block(); 
+  @Input() block: Block = new Block(); 
+  @Input() variableContext?: VariableContext;
     
-  @Output() blockChange:EventEmitter<Block>;
+  @Output() blockChange: EventEmitter<Block>;
   @Output() onDuplicateBlock: EventEmitter<any>;
   @Output() onRemoveBlock: EventEmitter<any>;
   @Output() onAddChild: EventEmitter<any>;
@@ -19,7 +22,7 @@ export class BlockComponent implements OnInit {
   @Input() onDragEnd: EventEmitter<any>;
   draggedBlock?: Block;
   
-  constructor( ) {
+  constructor() {
     this.onDuplicateBlock = new EventEmitter<any>();
     this.onRemoveBlock = new EventEmitter<any>();
     this.onAddChild = new EventEmitter<any>();
@@ -29,35 +32,39 @@ export class BlockComponent implements OnInit {
   }
  
   ngOnInit(): void {
-
   }
 
-  duplicateBlock(block:Block){
+  duplicateBlock(block: Block) {
     this.onDuplicateBlock.emit(block);
   }
-  removeChild(block:any){
+
+  removeChild(block: any) {
     this.removeChildFrom(this.block, block);
-   }
-   removeChildFrom(parent:Block, childToRemove:Block){
-    if(parent.children.length > 0){
-        parent.children = parent.children.filter(t => t!== childToRemove);
-        for(let child of parent.children){
-            this.removeChildFrom(child, childToRemove);
-        }
+  }
+
+  removeChildFrom(parent: Block, childToRemove: Block) {
+    if (parent.children.length > 0) {
+      parent.children = parent.children.filter(t => t !== childToRemove);
+      for (let child of parent.children) {
+        this.removeChildFrom(child, childToRemove);
+      }
     }  
-}
-  onRemoveCommand(command:any){
+  }
+
+  onRemoveCommand(command: any) {
     this.block.commands = this.block.commands.filter(t => t !== command);
   }
-  onAddCommand(block:Block){
-    block.commands.push(new Command( ));
+
+  onAddCommand(block: Block) {
+    block.commands.push(new Command());
   } 
-  addChild(block:Block){
+
+  addChild(block: Block) {
     this.onAddChild.emit(block);
     this.blockChange.emit(this.block);
   }
 
-  hasChildren () {
+  hasChildren() {
     return !!this.block!.children && this.block!.children.length > 0;
   }
   
@@ -65,7 +72,7 @@ export class BlockComponent implements OnInit {
     this.draggedBlock = block;
   }
 
-  drop(event:Event) {
+  drop(event: Event) {
     if (this.draggedBlock) {
     }
   }

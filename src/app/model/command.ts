@@ -18,7 +18,7 @@ export enum CommandType {
 
 export class Command {
     type: CommandType = CommandType.OCT;
-    value: string | number = 0;
+    private _value: string | number = 0;
     isVariable: boolean = false;
 
     constructor(opts?: Partial<Command>) {
@@ -26,29 +26,58 @@ export class Command {
         if (opts?.value !== undefined) this.setValue(opts.value);
     }
 
-    getValue(context: VariableContext): number | string {
-        if (this.isVariable && typeof this.value === 'string') {
-            const varValue = context.getValue(this.value.substring(1)); // Remove $ prefix
-            return varValue !== undefined ? varValue : 0;
+    get value(): string | number {
+        if (this.isVariable && typeof this._value === 'string') {
+            return this._value.startsWith('$') ? this._value.substring(1) : this._value;
         }
-        return this.value;
+        return this._value;
     }
 
-    setVariable(name: string) {
-        this.value = '$' + name;
+    set value(val: string | number) {
+        this.setValue(val);
+    }
+
+    getValue(context: VariableContext): number | string {
+        if (this.isVariable && typeof this._value === 'string') {
+            const varName = this._value.startsWith('$') ? this._value.substring(1) : this._value;
+            const varValue = context.getValue(varName);
+            return varValue !== undefined ? varValue : 0;
+        }
+        return this._value;
+    }
+
+    setVariable(name: string | null): void {
+        if (name === null || name === undefined || name === '') {
+            this.isVariable = false;
+            this._value = 0;
+            return;
+        }
+
+        this._value = name.startsWith('$') ? name : '$' + name;
         this.isVariable = true;
     }
 
-    setValue(value: number | string) {
-        this.value = value;
-        this.isVariable = typeof value === 'string' && value.startsWith('$');
+    setValue(value: number | string | null): void {
+        if (value === null || value === undefined) {
+            this._value = 0;
+            this.isVariable = false;
+            return;
+        }
+
+        if (typeof value === 'string' && value.startsWith('$')) {
+            this._value = value;
+            this.isVariable = true;
+        } else {
+            this._value = value;
+            this.isVariable = false;
+        }
     }
 
     execute(player: any, context?: VariableContext): void {
-        const rawValue = context ? this.getValue(context) : this.value;
+        const rawValue = context ? this.getValue(context) : this._value;
         const value = this.type === CommandType.PATTERN ? String(rawValue) :
                      this.type === CommandType.SCALE ? rawValue :
-                     Number(rawValue) || 0;  // Convert to number or default to 0 if NaN
+                     Number(rawValue) || 0;
 
         switch (this.type) {
             case CommandType.GAP: player.gap = value; break;

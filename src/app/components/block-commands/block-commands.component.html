@@ -27,15 +27,25 @@
                     </p-inputNumber>
                 </ng-container>
                 <ng-container *ngIf="command.isVariable">
-                    <input type="text" [(ngModel)]="command.value" 
-                        placeholder="Variable name"
-                        (input)="handleValueInput($event, command)">
+                    <p-dropdown 
+                        [ngModel]="getSelectedValue(command)"
+                        (ngModelChange)="handleValueInput($event, command)"
+                        [options]="availableVariables"
+                        optionLabel="label"
+                        optionValue="value"
+                        [placeholder]="availableVariables.length ? 'Select variable' : 'No variables'"
+                        [style]="{'width': '200px'}"
+                        appendTo="body"
+                        [showClear]="true">
+                    </p-dropdown>
                 </ng-container>
                 <button pButton type="button" 
-                    [icon]="command.isVariable ? 'pi pi-dollar' : 'pi pi-hashtag'"
+                    [icon]="command.isVariable ? 'pi pi-code' : 'pi pi-hashtag'"
                     [class.p-button-secondary]="!command.isVariable"
                     [class.p-button-success]="command.isVariable"
-                    (click)="command.isVariable = !command.isVariable">
+                    [pTooltip]="command.isVariable ? 'Using variable' : 'Using number'"
+                    [disabled]="command.isVariable && !availableVariables.length"
+                    (click)="toggleVariableMode(command, $event)">
                 </button>
             </div>
         </ng-container>
