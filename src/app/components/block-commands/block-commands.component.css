@@ -1,0 +1,27 @@
+.commands {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+}
+
+.command {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.value-input {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+select {
+    min-width: 100px;
+}
+
+input[type="text"] {
+    min-width: 100px;
+    padding: 4px;
+}

@@ -14,17 +14,33 @@
             </select>
             
             <div *ngSwitchDefault class="value-input">
-                <input type="text" [(ngModel)]="command.value" 
-                       [placeholder]="command.isVariable ? 'Variable name' : 'Value'"
-                       (input)="handleValueInput($event, command)">
-                <label>
-                    <input type="checkbox" [(ngModel)]="command.isVariable">
-                    Variable
-                </label>
+                <ng-container *ngIf="!command.isVariable">
+                    <p-inputNumber [(ngModel)]="command.value" 
+                        mode="decimal" [showButtons]="true" 
+                        buttonLayout="horizontal" 
+                        spinnerMode="horizontal"
+                        [size]="1"
+                        decrementButtonClass="p-button-secondary" 
+                        incrementButtonClass="p-button-secondary"
+                        incrementButtonIcon="pi pi-plus" 
+                        decrementButtonIcon="pi pi-minus">
+                    </p-inputNumber>
+                </ng-container>
+                <ng-container *ngIf="command.isVariable">
+                    <input type="text" [(ngModel)]="command.value" 
+                        placeholder="Variable name"
+                        (input)="handleValueInput($event, command)">
+                </ng-container>
+                <button pButton type="button" 
+                    [icon]="command.isVariable ? 'pi pi-dollar' : 'pi pi-hashtag'"
+                    [class.p-button-secondary]="!command.isVariable"
+                    [class.p-button-success]="command.isVariable"
+                    (click)="command.isVariable = !command.isVariable">
+                </button>
             </div>
         </ng-container>
 
-        <button (click)="removeCommand(command)">X</button>
+        <button pButton type="button" icon="pi pi-times" (click)="removeCommand(command)"></button>
     </div>
-    <button (click)="addCommand()">Add Command</button>
+    <button pButton type="button" icon="pi pi-plus" (click)="addCommand()"></button>
 </div>
