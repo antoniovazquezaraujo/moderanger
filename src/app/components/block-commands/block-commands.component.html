@@ -27,18 +27,31 @@
                     </p-dropdown>
                 </ng-container>
                 <ng-template #numberInput>
-                    <input class="command-value" type="number" [ngModel]="command.value"
-                        (ngModelChange)="handleValueInput($event, command)">
+                    <p-inputNumber class="command-value" 
+                        [(ngModel)]="command.value"
+                        mode="decimal"
+                        [showButtons]="true"
+                        buttonLayout="horizontal"
+                        [min]="-999"
+                        [max]="999"
+                        decrementButtonClass="p-button-secondary"
+                        incrementButtonClass="p-button-secondary"
+                        incrementButtonIcon="pi pi-plus"
+                        decrementButtonIcon="pi pi-minus">
+                    </p-inputNumber>
                 </ng-template>
             </ng-container>
         </ng-container>
 
-        <button class="variable-toggle" [class.active]="command.isVariable" (click)="toggleVariableMode(command, $event)">
-            $
-        </button>
+        <div class="command-controls">
+            <p-button (click)="toggleVariableMode(command, $event)" 
+                [disabled]="command.type === commandTypes.PLAYMODE || command.type === commandTypes.SCALE"
+                styleClass="p-button-secondary"
+                label="$">
+            </p-button>
 
-        <button class="remove-command" (click)="removeCommand(command)">×</button>
+            <p-button (click)="removeCommand(command)" icon="pi pi-times"></p-button>
+        </div>
     </div>
+    <p-button (click)="addCommand()" icon="pi pi-plus"></p-button>
 </div>
-
-<button class="remove-command" (click)="addCommand()">+</button>
