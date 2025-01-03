@@ -1,56 +1,44 @@
-<div class="commands">
+<div class="commands-container">
     <div *ngFor="let command of block.commands" class="command">
-        <select [(ngModel)]="command.type">
+        <select class="command-type" [(ngModel)]="command.type">
             <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
         </select>
-        
+
         <ng-container [ngSwitch]="command.type">
-            <select *ngSwitchCase="commandTypes.SCALE" [(ngModel)]="command.value">
-                <option *ngFor="let name of scaleNames" [value]="name">{{name}}</option>
-            </select>
-            
             <select *ngSwitchCase="commandTypes.PLAYMODE" [(ngModel)]="command.value">
-                <option *ngFor="let name of playModeNames" [value]="name">{{name}}</option>
+                <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
             </select>
-            
-            <div *ngSwitchDefault class="value-input">
-                <ng-container *ngIf="!command.isVariable">
-                    <p-inputNumber [(ngModel)]="command.value" 
-                        mode="decimal" [showButtons]="true" 
-                        buttonLayout="horizontal" 
-                        spinnerMode="horizontal"
-                        [size]="1"
-                        decrementButtonClass="p-button-secondary" 
-                        incrementButtonClass="p-button-secondary"
-                        incrementButtonIcon="pi pi-plus" 
-                        decrementButtonIcon="pi pi-minus">
-                    </p-inputNumber>
-                </ng-container>
-                <ng-container *ngIf="command.isVariable">
-                    <p-dropdown 
+
+            <select *ngSwitchCase="commandTypes.SCALE" [(ngModel)]="command.value">
+                <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
+            </select>
+
+            <ng-container *ngSwitchDefault>
+                <ng-container *ngIf="command.isVariable; else numberInput">
+                    <p-dropdown class="command-value" 
+                        [options]="availableVariables" 
                         [ngModel]="getSelectedValue(command)"
-                        (ngModelChange)="handleValueInput($event, command)"
-                        [options]="availableVariables"
+                        (ngModelChange)="handleValueInput($event, command)" 
+                        [showClear]="true"
                         optionLabel="label"
                         optionValue="value"
                         [placeholder]="availableVariables.length ? 'Select variable' : 'No variables'"
-                        [style]="{'width': '200px'}"
-                        appendTo="body"
-                        [showClear]="true">
+                        appendTo="body">
                     </p-dropdown>
                 </ng-container>
-                <button pButton type="button" 
-                    [icon]="command.isVariable ? 'pi pi-code' : 'pi pi-hashtag'"
-                    [class.p-button-secondary]="!command.isVariable"
-                    [class.p-button-success]="command.isVariable"
-                    [pTooltip]="command.isVariable ? 'Using variable' : 'Using number'"
-                    [disabled]="command.isVariable && !availableVariables.length"
-                    (click)="toggleVariableMode(command, $event)">
-                </button>
-            </div>
+                <ng-template #numberInput>
+                    <input class="command-value" type="number" [ngModel]="command.value"
+                        (ngModelChange)="handleValueInput($event, command)">
+                </ng-template>
+            </ng-container>
         </ng-container>
 
-        <button pButton type="button" icon="pi pi-times" (click)="removeCommand(command)"></button>
+        <button class="variable-toggle" [class.active]="command.isVariable" (click)="toggleVariableMode(command, $event)">
+            $
+        </button>
+
+        <button class="remove-command" (click)="removeCommand(command)">×</button>
     </div>
-    <button pButton type="button" icon="pi pi-plus" (click)="addCommand()"></button>
 </div>
+
+<button class="remove-command" (click)="addCommand()">+</button>

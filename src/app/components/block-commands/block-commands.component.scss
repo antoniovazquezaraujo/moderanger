@@ -1,52 +1,77 @@
-.commands {
+:host ::ng-deep {
+    .p-dropdown {
+        width: 120px !important;
+        flex: 0 0 120px !important;
+    }
+
+    .p-dropdown-panel {
+        min-width: 200px !important;
+    }
+}
+
+.commands-container {
     display: flex;
-    flex-direction: column;
+    flex-flow: row wrap;
     gap: 0.5rem;
+    align-items: center;
+}
 
-    .command {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
+.command {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 0.5rem;
+    align-items: center;
+}
 
-        select {
-            padding: 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            background-color: #fff;
-            min-width: 120px;
-        }
+.command-type {
+    width: 100px;
+}
 
-        .value-input {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            flex: 1;
+.command-value {
+    width: 80px;
+}
 
-            :host ::ng-deep {
-                .p-dropdown {
-                    min-width: 200px;
-                    
-                    .p-dropdown-label {
-                        padding-right: 2rem;
-                    }
-                }
+.variable-toggle {
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-shrink: 0;
+    min-width: 2rem;
 
-                .p-inputnumber {
-                    min-width: 120px;
-                }
-            }
-        }
+    &.active {
+        background-color: #e0e0e0;
+    }
+}
 
-        button {
-            &.p-button {
-                min-width: 2.5rem;
-                height: 2.5rem;
-                padding: 0;
+.remove-command {
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    background: none;
+    border: 1px solid #ff4444;
+    color: #ff4444;
+    border-radius: 4px;
+    flex-shrink: 0;
+    min-width: 2rem;
 
-                &:not(:disabled):hover {
-                    opacity: 0.9;
-                }
-            }
-        }
+    &:hover {
+        background-color: #ff4444;
+        color: white;
+    }
+}
+
+.add-command {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    background: none;
+    border: 1px solid #4CAF50;
+    color: #4CAF50;
+    border-radius: 4px;
+
+    &:hover {
+        background-color: #4CAF50;
+        color: white;
     }
 } 
