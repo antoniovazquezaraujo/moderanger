@@ -4,12 +4,13 @@ import { ModeRangerSemantics } from './grammar.semantics';
 
 const grammarSource = `ModeRanger {
   Main = Song | CommandList
-  CommandList = Command+
-  Song = Part+
+  CommandList = Operation+
+  
+  Song = VarsSection? Part+
   Part = "part" spaces partName spaces "{" spaces Block* spaces "}"
   
   Block = "block" spaces blockName spaces "{" spaces BlockContent spaces "}"
-  BlockContent = VarsSection? (Command | Note | Group)*
+  BlockContent = (Note | NoteGroup)* Operation*
   
   VarsSection = "vars" spaces "{" spaces VarDecl* spaces "}"
   VarDecl = "$" varName spaces "=" spaces VarValue
@@ -17,27 +18,27 @@ const grammarSource = `ModeRanger {
   
   NumOrVar = number | VarRef
   Note = duration? NumOrVar
-  Group = duration? "(" spaces (Note | Group)* spaces ")"
+  NoteGroup = duration? "(" spaces (Note | NoteGroup)* spaces ")"
   
-  Command = ConfigCmd | VarOp
+  Operation = ConfigOperation | VarOperation
   
-  ConfigCmd = ScaleCmd | OctaveCmd | GapCmd | PlayModeCmd | WidthCmd | InversionCmd 
-            | KeyCmd | ShiftStartCmd | ShiftSizeCmd | ShiftValueCmd | PatternGapCmd | PatternCmd
+  ConfigOperation = ScaleOperation | OctaveOperation | GapOperation | PlayModeOperation | WidthOperation | InversionOperation 
+            | KeyOperation | ShiftStartOperation | ShiftSizeOperation | ShiftValueOperation | PatternGapOperation | PatternOperation
             
-  ScaleCmd = "SCALE" spaces ScaleType
-  OctaveCmd = "OCT" spaces NumOrVar
-  GapCmd = "GAP" spaces NumOrVar
-  PlayModeCmd = "PLAYMODE" spaces PlayMode
-  WidthCmd = "WIDTH" spaces NumOrVar
-  InversionCmd = "INVERSION" spaces NumOrVar
-  KeyCmd = "KEY" spaces NumOrVar
-  ShiftStartCmd = "SHIFTSTART" spaces NumOrVar
-  ShiftSizeCmd = "SHIFTSIZE" spaces NumOrVar
-  ShiftValueCmd = "SHIFTVALUE" spaces NumOrVar
-  PatternGapCmd = "PATTERN_GAP" spaces NumOrVar
-  PatternCmd = "PATTERN" spaces pattern
+  ScaleOperation = "SCALE" spaces ScaleType
+  OctaveOperation = "OCT" spaces NumOrVar
+  GapOperation = "GAP" spaces NumOrVar
+  PlayModeOperation = "PLAYMODE" spaces PlayMode
+  WidthOperation = "WIDTH" spaces NumOrVar
+  InversionOperation = "INVERSION" spaces NumOrVar
+  KeyOperation = "KEY" spaces NumOrVar
+  ShiftStartOperation = "SHIFTSTART" spaces NumOrVar
+  ShiftSizeOperation = "SHIFTSIZE" spaces NumOrVar
+  ShiftValueOperation = "SHIFTVALUE" spaces NumOrVar
+  PatternGapOperation = "PATTERN_GAP" spaces NumOrVar
+  PatternOperation = "PATTERN" spaces pattern
   
-  VarOp = "$" varName spaces AssignOp spaces VarValue?
+  VarOperation = "$" varName spaces AssignOp spaces VarValue?
   AssignOp = "+=" | "-=" | "*=" | "++" | "--" | "="
   
   VarRef = "$" varName
@@ -46,7 +47,7 @@ const grammarSource = `ModeRanger {
   blockName = (~"{" any)+
   ScaleType = "WHITE" | "BLUE" | "RED" | "BLACK" | "PENTA" | "TONES" | "FULL"
   PlayMode = "NORMAL" | "RANDOM" | "REVERSE" | "BOUNCE"
-  pattern = (~spaces any)+
+  pattern = number (spaces number)*
   duration = digit+ ("n" | "t" | "m") ":"
   number = "-"? digit+
 }

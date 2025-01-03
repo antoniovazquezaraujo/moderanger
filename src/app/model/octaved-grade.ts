@@ -25,8 +25,29 @@ export class OctavedGrade {
      */
     constructor(scale: Scale, grade: number, octave: number, duration: string) {
         this.scale = scale;
-        this.addGradeAndOctave(grade, octave);
         this.duration = duration;
+        this.setGradeAndOctave(grade, octave);
+    }
+
+    /**
+     * Establece el grado y octava, asegurando que sean números válidos
+     */
+    private setGradeAndOctave(grade: number, octave: number) {
+        // Asegurar que los valores sean números válidos
+        const numericGrade = isNaN(Number(grade)) ? 0 : Number(grade);
+        const numericOctave = isNaN(Number(octave)) ? 0 : Number(octave);
+        
+        this.grade = numericGrade;
+        this.octave = numericOctave;
+        
+        // Normalizar el grado dentro del rango de la escala
+        if (this.grade >= this.scale.getNumNotes()) {
+            this.octave += Math.floor(this.grade / this.scale.getNumNotes());
+            this.grade = this.grade % this.scale.getNumNotes();
+        } else if (this.grade < 0) {
+            this.octave -= Math.ceil(Math.abs(this.grade) / this.scale.getNumNotes());
+            this.grade = (this.scale.getNumNotes() + (this.grade % this.scale.getNumNotes())) % this.scale.getNumNotes();
+        }
     }
 
     /**
@@ -44,15 +65,9 @@ export class OctavedGrade {
      * @param octave La octava a añadir
      */
     addGradeAndOctave(grade: number, octave: number) {
-        this.grade += grade;
-        this.octave += octave;
-        if (this.grade >= this.scale.getNumNotes()) {
-            this.octave += Math.floor(this.grade / this.scale.getNumNotes());
-            this.grade = Math.abs(this.grade % this.scale.getNumNotes());
-        } else if (this.grade < 0) {
-            this.octave -= Math.floor(this.grade / this.scale.getNumNotes());
-            this.grade = Math.abs(this.grade % this.scale.getNumNotes());
-        }
+        const currentGrade = this.grade;
+        const currentOctave = this.octave;
+        this.setGradeAndOctave(currentGrade + Number(grade), currentOctave + Number(octave));
     }
 
     /**
@@ -76,7 +91,28 @@ export class OctavedGrade {
      * @returns El número MIDI de la nota
      */
     toNote() {
-        return this.scale.notes[this.grade] + ((this.octave) * 12);
+        // Asegurar que el grado sea un número válido
+        const numericGrade = Number(this.grade);
+        const safeGrade = isNaN(numericGrade) ? 0 : numericGrade % this.scale.getNumNotes();
+        
+        console.log('Original grade:', this.grade);
+        console.log('Numeric grade:', numericGrade);
+        console.log('Safe grade:', safeGrade);
+        console.log('Scale notes:', this.scale.notes);
+        
+        // Obtener la nota base de la escala
+        const baseNote = this.scale.notes[safeGrade];
+        // Ajustar la octava para un rango más bajo
+        const octaveOffset = ((this.octave - 1) * 12);
+        // Usar un MIDI base más bajo
+        const midiBase = 48; // C3
+        const finalNote = baseNote + octaveOffset + midiBase;
+        
+        console.log('Base note from scale:', baseNote);
+        console.log('Octave offset:', octaveOffset);
+        console.log('Final MIDI note:', finalNote);
+        
+        return finalNote;
     }
 
     /**

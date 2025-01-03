@@ -44,20 +44,24 @@ export class Command {
     }
 
     execute(player: any, context?: VariableContext): void {
-        const value = context ? this.getValue(context) : this.value;
+        const rawValue = context ? this.getValue(context) : this.value;
+        const value = this.type === CommandType.PATTERN ? String(rawValue) :
+                     this.type === CommandType.SCALE || this.type === CommandType.PLAYMODE ? rawValue :
+                     Number(rawValue) || 0;  // Convert to number or default to 0 if NaN
+
         switch (this.type) {
-            case CommandType.GAP: player.gap = Number(value); break;
-            case CommandType.OCT: player.octave = Number(value); break;
+            case CommandType.GAP: player.gap = value; break;
+            case CommandType.OCT: player.octave = value; break;
             case CommandType.SCALE: player.selectScale(value); break;
             case CommandType.PLAYMODE: player.playMode = value; break;
-            case CommandType.WIDTH: player.density = Number(value); break;
-            case CommandType.INVERSION: player.inversion = Number(value); break;
-            case CommandType.KEY: player.tonality = Number(value); break;
-            case CommandType.SHIFTSTART: player.shiftStart = Number(value); break;
-            case CommandType.SHIFTSIZE: player.shiftSize = Number(value); break;
-            case CommandType.SHIFTVALUE: player.shiftValue = Number(value); break;
-            case CommandType.PATTERN_GAP: player.decorationGap = Number(value); break;
-            case CommandType.PATTERN: player.decorationPattern = String(value); break;
+            case CommandType.WIDTH: player.density = value; break;
+            case CommandType.INVERSION: player.inversion = value; break;
+            case CommandType.KEY: player.tonality = value; break;
+            case CommandType.SHIFTSTART: player.shiftStart = value; break;
+            case CommandType.SHIFTSIZE: player.shiftSize = value; break;
+            case CommandType.SHIFTVALUE: player.shiftValue = value; break;
+            case CommandType.PATTERN_GAP: player.decorationGap = value; break;
+            case CommandType.PATTERN: player.decorationPattern = value; break;
         }
     }
 }

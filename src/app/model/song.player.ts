@@ -187,15 +187,17 @@ export class SongPlayer {
             
             if (noteData.type === 'chord' && noteData.noteDatas) {
                 for (let note of noteData.noteDatas) {
-                    if (note.note !== undefined) {
+                    if (note.note !== undefined && !isNaN(note.note)) {
                         notes.push(Frequency(note.note, "midi").toFrequency());
                     }
                 }
-                partSoundInfo.player.triggerAttackRelease(notes, duration, time);
+                if (notes.length > 0) {
+                    partSoundInfo.player.triggerAttackRelease(notes, duration, time);
+                }
                 partSoundInfo.noteDataIndex++;
             } else if (noteData.type === 'arpeggio' && noteData.noteDatas) {
                 let note = noteData.noteDatas[partSoundInfo.arpeggioIndex];
-                if (note && note.note !== undefined) {
+                if (note && note.note !== undefined && !isNaN(note.note)) {
                     partSoundInfo.player.triggerAttackRelease(
                         Frequency(note.note, "midi").toFrequency(),
                         duration,

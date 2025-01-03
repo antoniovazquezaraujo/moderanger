@@ -41,14 +41,25 @@ export let isOdd = (t: number) => t % 2 === 1;
 export let isEven = (t: number) => t % 2 === 0;
 
 export function arpeggiate(notes: number[], mode: PlayMode): number[] {
-    return getArpeggios(notes, mode).reduce((acc, val) => {
-        return acc.concat(val);
-    }, []);
+    if (!notes || notes.length === 0) {
+        return [];
+    }
+    if (mode === PlayMode.CHORD) {
+        return notes;
+    }
+    const arpeggios = getArpeggios(notes, mode);
+    if (!arpeggios || arpeggios.length === 0) {
+        return notes;
+    }
+    return arpeggios.reduce((acc, val) => acc.concat(val), []);
 }
 export function getArpeggios(notes: number[], mode: PlayMode): number[][] {
+    if (!notes || notes.length === 0) {
+        return [[]];
+    }
     switch (mode) {
         case PlayMode.CHORD:
-            return [];
+            return [notes];
         case PlayMode.ASCENDING: 
             return [notes];
         case PlayMode.DESCENDING:

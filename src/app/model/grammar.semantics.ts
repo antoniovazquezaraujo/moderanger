@@ -8,6 +8,11 @@ export const ModeRangerSemantics = {
     return node['eval']();
   },
 
+  NoteList(first: Node, _space: Node, rest: Node) {
+    const notes = [first['eval'](), ...rest['eval']()];
+    return notes.map(n => new NoteData({ type: 'note', note: n, duration: '4t' }));
+  },
+
   _iter(...children: Node[]) {
     return children.map(child => child['eval']());
   },
