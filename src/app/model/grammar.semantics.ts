@@ -133,7 +133,9 @@ export const ModeRangerSemantics = {
     });
   },
 
-  _terminal() {
-    return null;
+  _terminal(this: { sourceString: string }): NoteData | null {
+    return this.sourceString === 's' 
+      ? new NoteData({ type: 'silence', duration: '4t' }) 
+      : null;
   }
 }; 

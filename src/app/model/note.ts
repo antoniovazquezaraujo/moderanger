@@ -1,5 +1,5 @@
 export class NoteData {
-    type: 'note' | 'rest' | 'arpeggio' | 'chord'= 'note';
+    type: 'note' | 'rest' | 'arpeggio' | 'chord' | 'silence' = 'note';
     duration: string = '4t';
     note?: number;
     noteDatas?: NoteData[]; // Para Arpeggios y Acordes

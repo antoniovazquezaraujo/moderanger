@@ -143,7 +143,7 @@ export class SongPlayer {
                     const arpeggioNoteDatas = this.notesToNoteDatas(arpeggio, duration);
                     noteDatas.push({ type: 'arpeggio', duration, noteDatas: arpeggioNoteDatas });
                 }
-            } else if (noteData.type === 'rest') {
+            } else if (noteData.type === 'rest' || noteData.type === 'silence') {
                 noteDatas.push({ type: 'rest', duration });
             }
         }

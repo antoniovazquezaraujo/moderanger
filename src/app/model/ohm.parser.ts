@@ -19,7 +19,7 @@ const grammarSource = `ModeRanger {
   VarDecl = "$" varName spaces "=" spaces VarValue
   VarValue = number | ScaleType | duration
   
-  NumOrVar = number | VarRef
+  NumOrVar = number | VarRef | "s"
   Note = duration? NumOrVar
   NoteGroup = duration "(" spaces (Note | NoteGroup)* spaces ")"
   
