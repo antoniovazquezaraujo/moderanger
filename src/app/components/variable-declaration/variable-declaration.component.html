@@ -6,11 +6,16 @@
             <option value="number">Number</option>
             <option value="playmode">Play Mode</option>
             <option value="melody">Melody</option>
+            <option value="scale">Scale</option>
         </select>
 
         <ng-container [ngSwitch]="newVariable.type">
             <select *ngSwitchCase="'playmode'" [(ngModel)]="newVariable.value" name="value" required>
                 <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+            </select>
+
+            <select *ngSwitchCase="'scale'" [(ngModel)]="newVariable.value" name="value" required>
+                <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
             </select>
 
             <p-inputNumber *ngSwitchCase="'number'" 
@@ -48,6 +53,12 @@
                     [(ngModel)]="variable.value" 
                     (ngModelChange)="updateVariable(i)">
                     <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+                </select>
+
+                <select *ngSwitchCase="'scale'" 
+                    [(ngModel)]="variable.value" 
+                    (ngModelChange)="updateVariable(i)">
+                    <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
                 </select>
 
                 <p-inputNumber *ngSwitchCase="'number'" 

@@ -119,11 +119,22 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 this.updateAvailableVariables();
                 const playModeVariables = this.availableVariables.filter(v => {
                     const value = this.variableContext?.getValue(v.value);
-                    return typeof value === 'string';
+                    return typeof value === 'string' && this.playModeNames.includes(value as string);
                 });
                 
                 if (playModeVariables.length > 0) {
                     command.setVariable(playModeVariables[0].value);
+                }
+            } else if (command.type === CommandType.SCALE) {
+                // Filtrar solo variables de tipo scale
+                this.updateAvailableVariables();
+                const scaleVariables = this.availableVariables.filter(v => {
+                    const value = this.variableContext?.getValue(v.value);
+                    return typeof value === 'string' && this.scaleNames.includes(value as string);
+                });
+                
+                if (scaleVariables.length > 0) {
+                    command.setVariable(scaleVariables[0].value);
                 }
             } else {
                 // Filtrar solo variables numéricas
@@ -143,15 +154,21 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             // Cambiando de variable a valor normal
             if (typeof oldValue === 'string') {
                 if (command.type === CommandType.PLAYMODE) {
-                    // Para PLAYMODE, establecer un modo válido
                     command.setValue(this.playModeNames[0]);
+                } else if (command.type === CommandType.SCALE) {
+                    command.setValue(this.scaleNames[0]);
                 } else {
-                    // Para otros tipos, obtener el valor numérico
                     const numValue = this.variableContext?.getValue(oldValue);
                     command.setValue(numValue !== undefined ? numValue : 0);
                 }
             } else {
-                command.setValue(command.type === CommandType.PLAYMODE ? this.playModeNames[0] : 0);
+                if (command.type === CommandType.PLAYMODE) {
+                    command.setValue(this.playModeNames[0]);
+                } else if (command.type === CommandType.SCALE) {
+                    command.setValue(this.scaleNames[0]);
+                } else {
+                    command.setValue(0);
+                }
             }
         }
         this.cdr.detectChanges();
@@ -201,6 +218,8 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             const value = this.variableContext?.getValue(v.value);
             if (command.type === CommandType.PLAYMODE) {
                 return typeof value === 'string' && this.playModeNames.includes(value);
+            } else if (command.type === CommandType.SCALE) {
+                return typeof value === 'string' && this.scaleNames.includes(value);
             } else {
                 return typeof value === 'number';
             }

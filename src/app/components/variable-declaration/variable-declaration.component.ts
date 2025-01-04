@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { VariableContext } from 'src/app/model/variable.context';
 import { getPlayModeNames } from 'src/app/model/play.mode';
+import { Scale } from 'src/app/model/scale';
 
 interface VariableDeclaration {
     name: string;
     value: string | number;
-    type: 'number' | 'playmode' | 'melody';
+    type: 'number' | 'playmode' | 'melody' | 'scale';
 }
 
 @Component({
@@ -27,6 +28,7 @@ export class VariableDeclarationComponent {
 
     variables: VariableDeclaration[] = [];
     playModeNames: string[] = getPlayModeNames();
+    scaleNames: string[] = Scale.getScaleNames();
 
     constructor() {
         this.updateVariablesList();
@@ -40,6 +42,8 @@ export class VariableDeclarationComponent {
                 value = this.newVariable.value;
             } else if (this.newVariable.type === 'melody') {
                 value = this.newVariable.value || '';
+            } else if (this.newVariable.type === 'scale') {
+                value = this.newVariable.value;
             } else {
                 value = Number(this.newVariable.value);
             }
@@ -68,6 +72,8 @@ export class VariableDeclarationComponent {
                 value = variable.value;
             } else if (variable.type === 'melody') {
                 value = variable.value || '';
+            } else if (variable.type === 'scale') {
+                value = variable.value;
             } else {
                 value = Number(variable.value);
             }
@@ -80,13 +86,18 @@ export class VariableDeclarationComponent {
     private updateVariablesList(): void {
         if (this.variableContext) {
             const variables = this.variableContext.getAllVariables();
-            this.variables = Array.from(variables.entries()).map(([name, value]) => ({
-                name,
-                value,
-                type: typeof value === 'string' ? 
-                    (this.playModeNames.includes(value) ? 'playmode' : 'melody') : 
-                    'number'
-            }));
+            this.variables = Array.from(variables.entries()).map(([name, value]) => {
+                if (typeof value === 'string') {
+                    if (this.playModeNames.includes(value)) {
+                        return { name, value, type: 'playmode' as const };
+                    } else if (this.scaleNames.includes(value)) {
+                        return { name, value, type: 'scale' as const };
+                    } else {
+                        return { name, value, type: 'melody' as const };
+                    }
+                }
+                return { name, value, type: 'number' as const };
+            });
         }
     }
 } 

@@ -51,9 +51,25 @@
                 </ng-template>
             </ng-container>
 
-            <select *ngSwitchCase="commandTypes.SCALE" [(ngModel)]="command.value">
-                <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
-            </select>
+            <ng-container *ngSwitchCase="commandTypes.SCALE">
+                <ng-container *ngIf="command.isVariable; else scaleSelect">
+                    <p-dropdown class="command-value" 
+                        [options]="getFilteredVariables(command)" 
+                        [ngModel]="getSelectedValue(command)"
+                        (ngModelChange)="handleValueInput($event, command)" 
+                        [showClear]="true"
+                        optionLabel="label"
+                        optionValue="value"
+                        [placeholder]="getFilteredVariables(command).length ? 'Select Scale variable' : 'No Scale variables'"
+                        appendTo="body">
+                    </p-dropdown>
+                </ng-container>
+                <ng-template #scaleSelect>
+                    <select [(ngModel)]="command.value">
+                        <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
+                    </select>
+                </ng-template>
+            </ng-container>
 
             <ng-container *ngSwitchDefault>
                 <ng-container *ngIf="command.isVariable; else numberInput">
@@ -85,7 +101,6 @@
 
         <div class="command-controls">
             <p-button (click)="toggleVariableMode(command, $event)" 
-                [disabled]="command.type === commandTypes.SCALE"
                 icon="pi pi-dollar">
             </p-button>
 

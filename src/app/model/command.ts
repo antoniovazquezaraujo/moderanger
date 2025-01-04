@@ -1,5 +1,5 @@
-import { VariableContext } from './variable.context';
-import { getPlayModeFromString } from './play.mode';
+import { VariableContext, ScaleType } from './variable.context';
+import { getPlayModeFromString, PlayMode } from './play.mode';
 
 export enum CommandType {
     SCALE = 'SCALE',
@@ -37,11 +37,22 @@ export class Command {
         this.setValue(val);
     }
 
-    getValue(context: VariableContext): number | string {
+    getValue(context: VariableContext): number | string | ScaleType | PlayMode {
         if (this.isVariable && typeof this._value === 'string') {
             const varName = this._value.startsWith('$') ? this._value.substring(1) : this._value;
             const varValue = context.getValue(varName);
-            return varValue !== undefined ? varValue : 0;
+            if (varValue !== undefined) {
+                // Si es una escala o modo de reproducción, asegurarse de que sea una cadena válida
+                if (this.type === CommandType.SCALE && typeof varValue === 'string') {
+                    return varValue.toUpperCase() as ScaleType;
+                }
+                if (this.type === CommandType.PLAYMODE && typeof varValue === 'string') {
+                    return getPlayModeFromString(varValue.toUpperCase());
+                }
+                return varValue;
+            }
+            return this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
+                   this.type === CommandType.PLAYMODE ? PlayMode.CHORD : 0;
         }
         return this._value;
     }
@@ -49,7 +60,8 @@ export class Command {
     setVariable(name: string | null): void {
         if (name === null || name === undefined || name === '') {
             this.isVariable = false;
-            this._value = 0;
+            this._value = this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
+                         this.type === CommandType.PLAYMODE ? PlayMode.CHORD : 0;
             return;
         }
 
@@ -57,9 +69,10 @@ export class Command {
         this.isVariable = true;
     }
 
-    setValue(value: number | string | null): void {
+    setValue(value: string | number | ScaleType | PlayMode | null): void {
         if (value === null || value === undefined) {
-            this._value = 0;
+            this._value = this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
+                         this.type === CommandType.PLAYMODE ? PlayMode.CHORD : 0;
             this.isVariable = false;
             return;
         }
@@ -68,22 +81,40 @@ export class Command {
             this._value = value;
             this.isVariable = true;
         } else {
-            this._value = value;
+            if (this.type === CommandType.SCALE && typeof value === 'string') {
+                this._value = value.toUpperCase() as ScaleType;
+            } else if (this.type === CommandType.PLAYMODE) {
+                if (typeof value === 'string') {
+                    this._value = getPlayModeFromString(value.toUpperCase());
+                } else {
+                    this._value = value;
+                }
+            } else {
+                this._value = value;
+            }
             this.isVariable = false;
         }
     }
 
     execute(player: any, context?: VariableContext): void {
         const rawValue = context ? this.getValue(context) : this._value;
-        const value = this.type === CommandType.PATTERN ? String(rawValue) :
-                     this.type === CommandType.SCALE ? rawValue :
-                     Number(rawValue) || 0;
+        let value: any;
+
+        if (this.type === CommandType.PATTERN) {
+            value = String(rawValue);
+        } else if (this.type === CommandType.SCALE) {
+            value = String(rawValue).toUpperCase();
+        } else if (this.type === CommandType.PLAYMODE) {
+            value = typeof rawValue === 'string' ? getPlayModeFromString(rawValue.toUpperCase()) : rawValue;
+        } else {
+            value = Number(rawValue) || 0;
+        }
 
         switch (this.type) {
             case CommandType.GAP: player.gap = value; break;
             case CommandType.OCT: player.octave = value; break;
             case CommandType.SCALE: player.selectScale(value); break;
-            case CommandType.PLAYMODE: player.playMode = getPlayModeFromString(String(rawValue)); break;
+            case CommandType.PLAYMODE: player.playMode = value; break;
             case CommandType.WIDTH: player.density = value; break;
             case CommandType.INVERSION: player.inversion = value; break;
             case CommandType.KEY: player.tonality = value; break;

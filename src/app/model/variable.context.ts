@@ -1,6 +1,7 @@
 import { Subject } from 'rxjs';
 
-export type VariableValue = number | string;
+export type ScaleType = 'WHITE' | 'BLUE' | 'RED' | 'BLACK' | 'PENTA' | 'TONES' | 'FULL';
+export type VariableValue = number | string | ScaleType;
 
 export class VariableContext {
     private variables = new Map<string, VariableValue>();
