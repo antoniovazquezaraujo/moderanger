@@ -71,6 +71,26 @@
                 </ng-template>
             </ng-container>
 
+            <ng-container *ngSwitchCase="commandTypes.PATTERN">
+                <ng-container *ngIf="command.isVariable; else patternInput">
+                    <p-dropdown class="command-value" 
+                        [options]="getFilteredVariables(command)" 
+                        [ngModel]="getSelectedValue(command)"
+                        (ngModelChange)="handleValueInput($event, command)" 
+                        [showClear]="true"
+                        optionLabel="label"
+                        optionValue="value"
+                        [placeholder]="getFilteredVariables(command).length ? 'Select pattern variable' : 'No pattern variables'"
+                        appendTo="body">
+                    </p-dropdown>
+                </ng-container>
+                <ng-template #patternInput>
+                    <input type="text" 
+                        [(ngModel)]="command.value"
+                        placeholder="Enter pattern notes (e.g. 1 2 3)">
+                </ng-template>
+            </ng-container>
+
             <ng-container *ngSwitchDefault>
                 <ng-container *ngIf="command.isVariable; else numberInput">
                     <p-dropdown class="command-value" 

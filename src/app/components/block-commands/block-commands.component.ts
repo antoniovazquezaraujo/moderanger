@@ -220,6 +220,8 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 return typeof value === 'string' && this.playModeNames.includes(value);
             } else if (command.type === CommandType.SCALE) {
                 return typeof value === 'string' && this.scaleNames.includes(value);
+            } else if (command.type === CommandType.PATTERN) {
+                return typeof value === 'string' && /[0-9]/.test(value);
             } else {
                 return typeof value === 'number';
             }
