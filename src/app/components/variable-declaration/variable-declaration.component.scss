@@ -1,24 +1,53 @@
-.variable-declaration {
-  padding: 1rem;
+.variables-container {
+    padding: 1rem;
 }
 
-.input-group {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
+.variable-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
 }
 
 .variable-input {
-  padding: 0.25rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  height: 24px;
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 24px;
+}
+
+input[type="text"], select {
+    @extend .variable-input;
+    min-width: 150px;
+}
+
+:host ::ng-deep .p-inputnumber {
+    width: 80px;
+
+    .p-inputnumber-input {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 .variables-list {
-  margin-top: 1rem;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .variable-item {
-  margin-bottom: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    .variable-name {
+        min-width: 150px;
+        font-weight: bold;
+    }
+
+    select {
+        min-width: 100px;
+    }
 } 

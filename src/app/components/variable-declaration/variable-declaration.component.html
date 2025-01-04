@@ -1,89 +1,63 @@
-<div class="variable-declaration">
-  <form class="new-variable-form" (ngSubmit)="addVariable($event)" #varForm="ngForm">
-    <div class="input-group">
-      <input 
-        type="text" 
-        [(ngModel)]="newVariable.name" 
-        name="newVarName"
-        placeholder="Variable name"
-        class="variable-input"
-        required>
-      <select 
-        [(ngModel)]="newVariable.type" 
-        name="newVarType"
-        class="variable-input"
-        required>
-        <option value="number">Number</option>
-        <option value="playmode">Play Mode</option>
-      </select>
-      <ng-container [ngSwitch]="newVariable.type">
-        <input *ngSwitchCase="'number'"
-          type="text" 
-          [(ngModel)]="newVariable.value" 
-          name="newVarValue"
-          placeholder="Value"
-          class="variable-input"
-          required>
-        <select *ngSwitchCase="'playmode'"
-          [(ngModel)]="newVariable.value"
-          name="newVarValue"
-          class="variable-input"
-          required>
-          <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+<div class="variables-container">
+    <form (submit)="addVariable($event)" class="variable-form" #varForm="ngForm">
+        <input type="text" [(ngModel)]="newVariable.name" name="name" placeholder="Variable name" required>
+        
+        <select [(ngModel)]="newVariable.type" name="type" required>
+            <option value="number">Number</option>
+            <option value="playmode">Play Mode</option>
         </select>
-      </ng-container>
-      <p-button 
-        type="submit" 
-        [disabled]="!varForm.form.valid"
-        icon="pi pi-plus">
-      </p-button>
-    </div>
-  </form>
 
-  <div class="variables-list">
-    <form *ngFor="let variable of variables; let i = index" 
-          class="variable-item" 
-          #editForm="ngForm">
-      <div class="input-group">
-        <input 
-          type="text" 
-          [(ngModel)]="variable.name" 
-          [name]="'varName' + i"
-          (blur)="updateVariable(i)"
-          class="variable-input"
-          required>
-        <select 
-          [(ngModel)]="variable.type" 
-          [name]="'varType' + i"
-          (change)="updateVariable(i)"
-          class="variable-input"
-          required>
-          <option value="number">Number</option>
-          <option value="playmode">Play Mode</option>
-        </select>
-        <ng-container [ngSwitch]="variable.type">
-          <input *ngSwitchCase="'number'"
-            type="text" 
-            [(ngModel)]="variable.value" 
-            [name]="'varValue' + i"
-            (blur)="updateVariable(i)"
-            class="variable-input"
-            required>
-          <select *ngSwitchCase="'playmode'"
-            [(ngModel)]="variable.value"
-            [name]="'varValue' + i"
-            (change)="updateVariable(i)"
-            class="variable-input"
-            required>
-            <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
-          </select>
+        <ng-container [ngSwitch]="newVariable.type">
+            <select *ngSwitchCase="'playmode'" [(ngModel)]="newVariable.value" name="value" required>
+                <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+            </select>
+
+            <p-inputNumber *ngSwitchCase="'number'" 
+                [(ngModel)]="newVariable.value" 
+                name="value"
+                mode="decimal"
+                [showButtons]="true"
+                buttonLayout="horizontal"
+                [min]="-999"
+                [max]="999"
+                incrementButtonIcon="pi pi-plus"
+                decrementButtonIcon="pi pi-minus">
+            </p-inputNumber>
         </ng-container>
-        <p-button 
-          type="button" 
-          (click)="removeVariable(i)"
-          icon="pi pi-times">
+
+        <p-button type="submit" 
+            [disabled]="!varForm.form.valid"
+            icon="pi pi-plus">
         </p-button>
-      </div>
     </form>
-  </div>
+
+    <div class="variables-list">
+        <div *ngFor="let variable of variables; let i = index" class="variable-item">
+            <span class="variable-name">{{variable.name}}</span>
+            
+            <ng-container [ngSwitch]="variable.type">
+                <select *ngSwitchCase="'playmode'" 
+                    [(ngModel)]="variable.value" 
+                    (ngModelChange)="updateVariable(i)">
+                    <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+                </select>
+
+                <p-inputNumber *ngSwitchCase="'number'" 
+                    [(ngModel)]="variable.value"
+                    (ngModelChange)="updateVariable(i)"
+                    mode="decimal"
+                    [showButtons]="true"
+                    buttonLayout="horizontal"
+                    [min]="-999"
+                    [max]="999"
+                    incrementButtonIcon="pi pi-plus"
+                    decrementButtonIcon="pi pi-minus">
+                </p-inputNumber>
+            </ng-container>
+
+            <p-button (click)="removeVariable(i)" 
+                icon="pi pi-times">
+            </p-button>
+        </div>
+    </div>
 </div> 
