@@ -30,6 +30,9 @@ export class Command {
         if (this.isVariable && typeof this._value === 'string') {
             return this._value.startsWith('$') ? this._value.substring(1) : this._value;
         }
+        if (this.type === CommandType.PLAYMODE && typeof this._value === 'number') {
+            return PlayMode[this._value];
+        }
         return this._value;
     }
 
