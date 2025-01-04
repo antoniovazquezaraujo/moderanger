@@ -77,21 +77,21 @@
     gap: 0.25rem;
     align-items: center;
     position: relative;
-}
 
-.command-type {
-    width: 100px;
-}
+    .command-type {
+        width: 100px;
+    }
 
-.command-value {
-    min-width: 80px;
-    width: auto;
-}
+    .command-value {
+        min-width: 80px;
+        width: auto;
+    }
 
-.command-controls {
-    display: flex;
-    gap: 0.25rem;
-    margin-left: 0.25rem;
+    .command-controls {
+        display: flex;
+        gap: 0.25rem;
+        margin-left: 0.25rem;
+    }
 }
 
 .notes-input {
@@ -101,7 +101,8 @@
     margin-right: 0.5rem;
 
     input {
-        width: 200px;
+        width: auto;
+        min-width: 200px;
         padding: 0.25rem;
         border: 1px solid #ccc;
         border-radius: 4px;
