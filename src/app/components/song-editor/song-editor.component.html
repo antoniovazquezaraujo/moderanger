@@ -1,45 +1,18 @@
 <div class="song-editor">
-  <div class="editor-section">
-    <app-song 
-      [song]="song" 
-      (onPlayPart)="playPart($event)">
-    </app-song>
-    <div class="controls">
-      <button pButton type="button" icon="pi pi-play" (click)="playSong()"></button>
-      <button pButton type="button" icon="pi pi-stop" (click)="stop()"></button>
-    </div>
-  </div>
-
-  <div class="editor-section">
-    <div class="tabs">
-      <div class="tab-buttons">
-        <button 
-          pButton 
-          [class.active]="activeTab === 'variables'"
-          (click)="setActiveTab('variables', $event)">
-          Variables
-        </button>
-        <button 
-          pButton 
-          [class.active]="activeTab === 'text'"
-          (click)="setActiveTab('text', $event)">
-          Song Text
-        </button>
-      </div>
-
-      <div class="tab-content">
-        <div class="variables-tab" [class.hidden]="activeTab !== 'variables'">
-          <app-variable-declaration [variableContext]="song.variableContext"></app-variable-declaration>
+    <div class="editor-section">
+        <app-song 
+            [song]="song" 
+            (onPlayPart)="playPart($event)">
+        </app-song>
+        <div class="controls">
+            <button pButton type="button" icon="pi pi-play" (click)="playSong()"></button>
+            <button pButton type="button" icon="pi pi-stop" (click)="stop()"></button>
         </div>
-        
-        <div class="text-tab" [class.hidden]="activeTab !== 'text'">
-          <textarea pInputTextarea [(ngModel)]="songAsText"></textarea>
-          <div class="text-controls">
-            <button pButton type="button" icon="pi pi-cloud-download" (click)="writeSong()"></button>  
-            <button pButton type="button" icon="pi pi-cloud-upload" (click)="readSong()"></button>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+
+    <div class="editor-section">
+        <div class="variables-section">
+            <app-variable-declaration [variableContext]="song.variableContext"></app-variable-declaration>
+        </div>
+    </div>
 </div>   

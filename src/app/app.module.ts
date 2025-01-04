@@ -21,34 +21,34 @@ import {InputNumberModule} from 'primeng/inputnumber';
 import {AccordionModule} from 'primeng/accordion';
 import {InputTextareaModule} from 'primeng/inputtextarea';
 import {TooltipModule} from 'primeng/tooltip';
- 
+
 @NgModule({
-  declarations: [
-    AppComponent,
-    BlockComponent,
-    BlockNotesComponent,
-    BlockCommandsComponent,
-    SongEditorComponent,
-    PartsComponent,
-    PartComponent,
-    SongComponent,
-    VariableDeclarationComponent
-  ],
-  imports: [
-    FormsModule,
-    BrowserModule,
-    BrowserAnimationsModule,
-    TreeModule,
-    ButtonModule,
-    InputTextModule,
-    KnobModule,
-    DropdownModule,
-    InputNumberModule,
-    AccordionModule,
-    InputTextareaModule,
-    TooltipModule
-  ],
-  providers: [TreeDragDropService],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        BlockComponent,
+        BlockNotesComponent,
+        BlockCommandsComponent,
+        SongEditorComponent,
+        PartsComponent,
+        PartComponent,
+        SongComponent,
+        VariableDeclarationComponent
+    ],
+    imports: [
+        FormsModule,
+        BrowserModule,
+        BrowserAnimationsModule,
+        TreeModule,
+        ButtonModule,
+        InputTextModule,
+        KnobModule,
+        DropdownModule,
+        InputNumberModule,
+        AccordionModule,
+        InputTextareaModule,
+        TooltipModule
+    ],
+    providers: [TreeDragDropService],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
