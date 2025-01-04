@@ -35,7 +35,11 @@ export class VariableDeclarationComponent {
     addVariable(event: Event): void {
         event.preventDefault();
         if (this.variableContext && this.newVariable.name) {
-            this.variableContext.setVariable(this.newVariable.name, this.newVariable.value);
+            const value = this.newVariable.type === 'playmode' ? 
+                this.newVariable.value : 
+                Number(this.newVariable.value);
+
+            this.variableContext.setVariable(this.newVariable.name, value);
             this.newVariable = { name: '', value: '', type: 'number' };
             this.updateVariablesList();
             this.variableAdded.emit();
@@ -54,7 +58,11 @@ export class VariableDeclarationComponent {
     updateVariable(index: number): void {
         const variable = this.variables[index];
         if (this.variableContext && variable) {
-            this.variableContext.setVariable(variable.name, variable.value);
+            const value = variable.type === 'playmode' ? 
+                variable.value : 
+                Number(variable.value);
+
+            this.variableContext.setVariable(variable.name, value);
             this.variableUpdated.emit();
         }
     }

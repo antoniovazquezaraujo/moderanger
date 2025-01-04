@@ -8,13 +8,13 @@
             <ng-container *ngSwitchCase="commandTypes.PLAYMODE">
                 <ng-container *ngIf="command.isVariable; else playModeSelect">
                     <p-dropdown class="command-value" 
-                        [options]="availableVariables" 
+                        [options]="getFilteredVariables(command)" 
                         [ngModel]="getSelectedValue(command)"
                         (ngModelChange)="handleValueInput($event, command)" 
                         [showClear]="true"
                         optionLabel="label"
                         optionValue="value"
-                        [placeholder]="availableVariables.length ? 'Select variable' : 'No variables'"
+                        [placeholder]="getFilteredVariables(command).length ? 'Select PlayMode variable' : 'No PlayMode variables'"
                         appendTo="body">
                     </p-dropdown>
                 </ng-container>
@@ -32,13 +32,13 @@
             <ng-container *ngSwitchDefault>
                 <ng-container *ngIf="command.isVariable; else numberInput">
                     <p-dropdown class="command-value" 
-                        [options]="availableVariables" 
+                        [options]="getFilteredVariables(command)" 
                         [ngModel]="getSelectedValue(command)"
                         (ngModelChange)="handleValueInput($event, command)" 
                         [showClear]="true"
                         optionLabel="label"
                         optionValue="value"
-                        [placeholder]="availableVariables.length ? 'Select variable' : 'No variables'"
+                        [placeholder]="getFilteredVariables(command).length ? 'Select number variable' : 'No number variables'"
                         appendTo="body">
                     </p-dropdown>
                 </ng-container>

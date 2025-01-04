@@ -26,6 +26,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     scaleNames: string[];
     availableVariables: VariableOption[] = [];
     private variablesSubscription?: Subscription;
+    private commandBeingConverted: Command | null = null;
   
     constructor(private cdr: ChangeDetectorRef) {         
         this.playModeNames = getPlayModeNames();
@@ -68,20 +69,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     private updateAvailableVariables(): void {
         if (this.variableContext) {
             const variables = this.variableContext.getAllVariables();
-            this.availableVariables = Array.from(variables.entries()).map(([name, value]) => ({
-                label: `${name} (${value})`,
-                value: name
-            }));
-            
-            // Actualizar los comandos que usan variables
-            if (this.block.commands) {
-                this.block.commands.forEach(command => {
-                    if (command.isVariable && !this.availableVariables.find(v => v.value === command.value)) {
-                        command.setValue(0);
-                        command.isVariable = false;
-                    }
-                });
-            }
+            this.availableVariables = Array.from(variables.entries())
+                .map(([name, value]) => ({
+                    label: `${name} (${value})`,
+                    value: name
+                }));
         }
     }
 
@@ -95,7 +87,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         if (!this.block.commands) {
             this.block.commands = [];
         }
-        this.block.commands.push(new Command());
+        const newCommand = new Command();
+        // Por defecto, crear como comando numérico
+        newCommand.type = CommandType.OCT;
+        newCommand.setValue(0);
+        this.block.commands.push(newCommand);
     }
 
     toggleVariableMode(command: Command, event: Event): void {
@@ -109,7 +105,34 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         
         if (!wasVariable && this.availableVariables.length > 0) {
             // Cambiando a variable
-            command.setVariable(this.availableVariables[0].value);
+            this.commandBeingConverted = command;
+            
+            // Determinar el tipo basado en el comando actual
+            if (command.type === CommandType.PLAYMODE) {
+                // Filtrar solo variables de tipo playmode
+                this.updateAvailableVariables();
+                const playModeVariables = this.availableVariables.filter(v => {
+                    const value = this.variableContext?.getValue(v.value);
+                    return typeof value === 'string';
+                });
+                
+                if (playModeVariables.length > 0) {
+                    command.setVariable(playModeVariables[0].value);
+                }
+            } else {
+                // Filtrar solo variables numéricas
+                this.updateAvailableVariables();
+                const numericVariables = this.availableVariables.filter(v => {
+                    const value = this.variableContext?.getValue(v.value);
+                    return typeof value === 'number';
+                });
+                
+                if (numericVariables.length > 0) {
+                    command.setVariable(numericVariables[0].value);
+                }
+            }
+            
+            this.commandBeingConverted = null;
         } else if (wasVariable) {
             // Cambiando de variable a valor normal
             if (typeof oldValue === 'string') {
@@ -163,5 +186,18 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             console.error('Error getting selected value:', error);
             return null;
         }
+    }
+
+    getFilteredVariables(command: Command): VariableOption[] {
+        if (!this.variableContext) return [];
+
+        return this.availableVariables.filter(v => {
+            const value = this.variableContext?.getValue(v.value);
+            if (command.type === CommandType.PLAYMODE) {
+                return typeof value === 'string';
+            } else {
+                return typeof value === 'number';
+            }
+        });
     }
 }
