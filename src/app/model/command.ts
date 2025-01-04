@@ -22,8 +22,17 @@ export class Command {
     isVariable: boolean = false;
 
     constructor(opts?: Partial<Command>) {
-        if (opts?.type) this.type = opts.type;
-        if (opts?.value !== undefined) this.setValue(opts.value);
+        if (opts) {
+            this.type = opts.type || CommandType.OCT;
+            this.isVariable = opts.isVariable || false;
+            if (opts.value !== undefined) {
+                if (this.isVariable && typeof opts.value === 'string') {
+                    this.setVariable(opts.value.startsWith('$') ? opts.value.substring(1) : opts.value);
+                } else {
+                    this.setValue(opts.value);
+                }
+            }
+        }
     }
 
     get value(): string | number {
@@ -75,7 +84,8 @@ export class Command {
     setValue(value: string | number | ScaleType | PlayMode | null): void {
         if (value === null || value === undefined) {
             this._value = this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
-                         this.type === CommandType.PLAYMODE ? PlayMode.CHORD : 0;
+                         this.type === CommandType.PLAYMODE ? PlayMode.CHORD :
+                         this.type === CommandType.PATTERN ? '' : 0;
             this.isVariable = false;
             return;
         }
@@ -85,15 +95,17 @@ export class Command {
             this.isVariable = true;
         } else {
             if (this.type === CommandType.SCALE && typeof value === 'string') {
-                this._value = value.toUpperCase() as ScaleType;
+                this._value = String(value).toUpperCase() as ScaleType;
             } else if (this.type === CommandType.PLAYMODE) {
                 if (typeof value === 'string') {
                     this._value = getPlayModeFromString(value.toUpperCase());
                 } else {
                     this._value = value;
                 }
+            } else if (this.type === CommandType.PATTERN && typeof value === 'string') {
+                this._value = String(value);
             } else {
-                this._value = value;
+                this._value = typeof value === 'number' ? Number(value) : value;
             }
             this.isVariable = false;
         }

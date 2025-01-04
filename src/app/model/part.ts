@@ -1,18 +1,25 @@
 import { Block } from "./block";
 export class Part {
     static _id: number = 0;
-
     id = Part._id++;
-    block: Block = new Block({});
+    name: string;
+    block: Block;
 
     constructor(opts?: Partial<Part>) {
-        if (opts?.block != null) {
-            this.block = new Block(opts.block);
-        }
+        this.name = opts?.name || '';
+        this.block = opts?.block ? new Block(opts.block) : new Block();
     }
+
     removeBlock(block: Block) {
         if (block?.children != null && block.children?.length > 0) {
-            this.block!.children = this.block?.children?.filter(t => t != block);
+            this.block.children = this.block.children?.filter(t => t !== block);
         }
+    }
+
+    clone(): Part {
+        const clonedPart = new Part();
+        clonedPart.name = this.name;
+        clonedPart.block = new Block(this.block);
+        return clonedPart;
     }
 }

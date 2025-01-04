@@ -136,6 +136,17 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 if (scaleVariables.length > 0) {
                     command.setVariable(scaleVariables[0].value);
                 }
+            } else if (command.type === CommandType.PATTERN) {
+                // Filtrar solo variables de tipo pattern
+                this.updateAvailableVariables();
+                const patternVariables = this.availableVariables.filter(v => {
+                    const value = this.variableContext?.getValue(v.value);
+                    return typeof value === 'string' && /[0-9]/.test(value);
+                });
+                
+                if (patternVariables.length > 0) {
+                    command.setVariable(patternVariables[0].value);
+                }
             } else {
                 // Filtrar solo variables numéricas
                 this.updateAvailableVariables();
@@ -157,15 +168,19 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                     command.setValue(this.playModeNames[0]);
                 } else if (command.type === CommandType.SCALE) {
                     command.setValue(this.scaleNames[0]);
+                } else if (command.type === CommandType.PATTERN) {
+                    command.setValue('');
                 } else {
                     const numValue = this.variableContext?.getValue(oldValue);
-                    command.setValue(numValue !== undefined ? numValue : 0);
+                    command.setValue(typeof numValue === 'number' ? numValue : 0);
                 }
             } else {
                 if (command.type === CommandType.PLAYMODE) {
                     command.setValue(this.playModeNames[0]);
                 } else if (command.type === CommandType.SCALE) {
                     command.setValue(this.scaleNames[0]);
+                } else if (command.type === CommandType.PATTERN) {
+                    command.setValue('');
                 } else {
                     command.setValue(0);
                 }
