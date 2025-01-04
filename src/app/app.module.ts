@@ -5,7 +5,6 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { BlockComponent } from './components/block/block.component';
-import { BlockNotesComponent } from './components/block-notes/block-notes.component';
 import { BlockCommandsComponent } from './components/block-commands/block-commands.component';
 import { SongEditorComponent } from './components/song-editor/song-editor.component';
 import { PartsComponent } from './components/parts/parts.component';
@@ -26,7 +25,6 @@ import {TooltipModule} from 'primeng/tooltip';
     declarations: [
         AppComponent,
         BlockComponent,
-        BlockNotesComponent,
         BlockCommandsComponent,
         SongEditorComponent,
         PartsComponent,
