@@ -7,7 +7,6 @@
   <button pButton type="button" icon="pi pi-copy" (click)="duplicateBlock(block)"></button>
     <button pButton type="button" icon="pi pi-plus" (click)="addChild(block)"></button>
     <button pButton type="button" icon="pi pi-times" (click)="removeChild(block)"></button>
-    <app-block-notes [blockContent]="block.blockContent"></app-block-notes>
     <app-block-commands [block]="block" (removeCommand)="onRemoveCommand($event)"></app-block-commands> -->
 
 <p-tree 
@@ -30,7 +29,6 @@
       <button pButton type="button" icon="pi pi-copy" (click)="duplicateBlock(node)"></button>
       <button pButton type="button" icon="pi pi-plus" (click)="addChild(node)"></button>
       <button pButton type="button" icon="pi pi-times" (click)="removeChild(node)"></button>
-      <app-block-notes [blockContent]="node.blockContent"></app-block-notes>
       <app-block-commands 
         [block]="node" 
         [variableContext]="variableContext"

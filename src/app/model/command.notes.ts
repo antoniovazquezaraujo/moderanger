@@ -1,7 +1,11 @@
 export class CommandNotes {
-    public notes:string='';
- 
-    constructor(data: Pick<CommandNotes, "notes" >) {
-        this.notes = data.notes;
+    notes: string = '';
+    isVariable: boolean = false;
+    variableName: string = '';
+
+    constructor(opts?: Partial<CommandNotes>) {
+        if (opts?.notes) this.notes = opts.notes;
+        if (opts?.isVariable) this.isVariable = opts.isVariable;
+        if (opts?.variableName) this.variableName = opts.variableName;
     }
 }

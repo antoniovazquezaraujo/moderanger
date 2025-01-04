@@ -5,6 +5,7 @@
         <select [(ngModel)]="newVariable.type" name="type" required>
             <option value="number">Number</option>
             <option value="playmode">Play Mode</option>
+            <option value="melody">Melody</option>
         </select>
 
         <ng-container [ngSwitch]="newVariable.type">
@@ -23,6 +24,13 @@
                 incrementButtonIcon="pi pi-plus"
                 decrementButtonIcon="pi pi-minus">
             </p-inputNumber>
+
+            <input *ngSwitchCase="'melody'" 
+                type="text" 
+                [(ngModel)]="newVariable.value" 
+                name="value"
+                placeholder="Enter notes (e.g. 1 2 3)"
+                required>
         </ng-container>
 
         <p-button type="submit" 
@@ -53,6 +61,12 @@
                     incrementButtonIcon="pi pi-plus"
                     decrementButtonIcon="pi pi-minus">
                 </p-inputNumber>
+
+                <input *ngSwitchCase="'melody'" 
+                    type="text" 
+                    [(ngModel)]="variable.value" 
+                    (blur)="updateVariable(i)"
+                    placeholder="Enter notes (e.g. 1 2 3)">
             </ng-container>
 
             <p-button (click)="removeVariable(i)" 

@@ -1,4 +1,30 @@
 <div class="commands-container">
+    <div class="notes-input">
+        <ng-container *ngIf="block.blockContent.isVariable; else notesInput">
+            <p-dropdown class="notes-value" 
+                [options]="getMelodyVariables()" 
+                [(ngModel)]="block.blockContent.variableName"
+                (ngModelChange)="handleMelodyVariableChange($event)" 
+                [showClear]="true"
+                optionLabel="label"
+                optionValue="value"
+                [placeholder]="getMelodyVariables().length ? 'Select melody variable' : 'No melody variables'"
+                appendTo="body">
+            </p-dropdown>
+        </ng-container>
+        <ng-template #notesInput>
+            <input type="text" 
+                [(ngModel)]="block.blockContent.notes" 
+                (ngModelChange)="handleNotesChange($event)"
+                placeholder="Enter notes (e.g. 1 2 3)">
+        </ng-template>
+        <div class="notes-controls">
+            <p-button (click)="toggleMelodyVariable($event)" 
+                icon="pi pi-dollar">
+            </p-button>
+        </div>
+    </div>
+
     <div *ngFor="let command of block.commands" class="command">
         <select class="command-type" [(ngModel)]="command.type">
             <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>

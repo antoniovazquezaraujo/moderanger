@@ -5,7 +5,7 @@ import { getPlayModeNames } from 'src/app/model/play.mode';
 interface VariableDeclaration {
     name: string;
     value: string | number;
-    type: 'number' | 'playmode';
+    type: 'number' | 'playmode' | 'melody';
 }
 
 @Component({
@@ -35,9 +35,14 @@ export class VariableDeclarationComponent {
     addVariable(event: Event): void {
         event.preventDefault();
         if (this.variableContext && this.newVariable.name) {
-            const value = this.newVariable.type === 'playmode' ? 
-                this.newVariable.value : 
-                Number(this.newVariable.value);
+            let value: any;
+            if (this.newVariable.type === 'playmode') {
+                value = this.newVariable.value;
+            } else if (this.newVariable.type === 'melody') {
+                value = this.newVariable.value || '';
+            } else {
+                value = Number(this.newVariable.value);
+            }
 
             this.variableContext.setVariable(this.newVariable.name, value);
             this.newVariable = { name: '', value: '', type: 'number' };
@@ -58,9 +63,14 @@ export class VariableDeclarationComponent {
     updateVariable(index: number): void {
         const variable = this.variables[index];
         if (this.variableContext && variable) {
-            const value = variable.type === 'playmode' ? 
-                variable.value : 
-                Number(variable.value);
+            let value: any;
+            if (variable.type === 'playmode') {
+                value = variable.value;
+            } else if (variable.type === 'melody') {
+                value = variable.value || '';
+            } else {
+                value = Number(variable.value);
+            }
 
             this.variableContext.setVariable(variable.name, value);
             this.variableUpdated.emit();
@@ -73,7 +83,9 @@ export class VariableDeclarationComponent {
             this.variables = Array.from(variables.entries()).map(([name, value]) => ({
                 name,
                 value,
-                type: typeof value === 'string' ? 'playmode' : 'number'
+                type: typeof value === 'string' ? 
+                    (this.playModeNames.includes(value) ? 'playmode' : 'melody') : 
+                    'number'
             }));
         }
     }

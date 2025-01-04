@@ -6,7 +6,11 @@ export class Block {
     id = Block._id++;
     label: string = '';
     commands: Command[] = [];
-    blockContent: CommandNotes = { notes: '' };
+    blockContent: CommandNotes = { 
+        notes: '',
+        isVariable: false,
+        variableName: ''
+    };
     pulse: number = 0;
     repeatingTimes: number = 1;
     children: Block[] = [];
@@ -15,7 +19,11 @@ export class Block {
         if (block) {
             this.label = block.label || '';
             this.commands = block.commands?.map((cmd: any) => new Command(cmd)) || [];
-            this.blockContent = new CommandNotes(block.blockContent || { notes: '' });
+            this.blockContent = new CommandNotes(block.blockContent || { 
+                notes: '',
+                isVariable: false,
+                variableName: ''
+            });
             this.pulse = block.pulse || 0;
             this.repeatingTimes = block.repeatingTimes || 1;
             this.children = block.children?.map((child: any) => new Block(child)) || [];

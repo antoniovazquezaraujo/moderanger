@@ -1,15 +1,15 @@
 :host ::ng-deep {
     .p-dropdown {
-        min-width: 200px !important;
-        width: auto !important;
-        flex: 0 0 auto !important;
+        width: 200px !important;
+        flex: 0 0 200px !important;
 
         .p-dropdown-label {
-            padding-right: 2rem !important;
-            text-align: right !important;
-            direction: rtl !important;
-            width: auto !important;
+            padding-right: 2.5rem !important;
+            text-align: left !important;
+            width: calc(100% - 2.5rem) !important;
             white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
         }
 
         .p-dropdown-trigger {
@@ -22,7 +22,7 @@
         }
 
         .p-dropdown-items {
-            text-align: right !important;
+            text-align: left !important;
         }
     }
 
@@ -91,5 +91,28 @@
 .command-controls {
     display: flex;
     gap: 0.25rem;
-    margin-left: 2rem;
+    margin-left: 0.25rem;
+}
+
+.notes-input {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    margin-right: 0.5rem;
+
+    input {
+        width: 200px;
+        padding: 0.25rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .notes-value {
+        width: 200px;
+    }
+
+    .notes-controls {
+        display: flex;
+        gap: 0.25rem;
+    }
 } 

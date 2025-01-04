@@ -61,6 +61,12 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         if (this.variableContext) {
             this.variablesSubscription = this.variableContext.onVariablesChange.subscribe(() => {
                 this.updateAvailableVariables();
+                if (this.block.blockContent.isVariable && this.block.blockContent.variableName) {
+                    const value = this.variableContext?.getValue(this.block.blockContent.variableName);
+                    if (typeof value === 'string') {
+                        this.block.blockContent.notes = value;
+                    }
+                }
                 this.cdr.detectChanges();
             });
         }
@@ -194,10 +200,78 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         return this.availableVariables.filter(v => {
             const value = this.variableContext?.getValue(v.value);
             if (command.type === CommandType.PLAYMODE) {
-                return typeof value === 'string';
+                return typeof value === 'string' && this.playModeNames.includes(value);
             } else {
                 return typeof value === 'number';
             }
         });
+    }
+
+    getMelodyVariables(): VariableOption[] {
+        if (!this.variableContext) return [];
+
+        return Array.from(this.variableContext.getAllVariables().entries())
+            .filter(([_, value]) => {
+                // Verificar que sea una cadena y que contenga números o medidas
+                if (typeof value !== 'string') return false;
+                // No incluir variables de PlayMode
+                if (this.playModeNames.includes(value)) return false;
+                // Verificar que la cadena contenga números o medidas
+                return /[0-9]/.test(value);
+            })
+            .map(([name, value]) => ({
+                label: `${name} (${value})`,
+                value: name
+            }));
+    }
+
+    toggleMelodyVariable(event: Event): void {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const wasVariable = this.block.blockContent.isVariable;
+        
+        this.block.blockContent.isVariable = !wasVariable;
+        
+        if (!wasVariable) {
+            const melodyVars = this.getMelodyVariables();
+            if (melodyVars.length > 0) {
+                this.block.blockContent.variableName = melodyVars[0].value;
+                const value = this.variableContext?.getValue(melodyVars[0].value);
+                if (typeof value === 'string') {
+                    this.block.blockContent.notes = value;
+                }
+            } else {
+                // Si no hay variables de melodía disponibles, revertir
+                this.block.blockContent.isVariable = false;
+            }
+        } else {
+            // Al cambiar de variable a valor directo, mantener las notas actuales
+            const currentNotes = this.block.blockContent.notes;
+            this.block.blockContent.variableName = '';
+            this.block.blockContent.notes = currentNotes;
+        }
+    }
+
+    handleMelodyVariableChange(variableName: string): void {
+        if (!variableName) {
+            // Si se limpia la selección, mantener el modo variable pero limpiar las notas
+            this.block.blockContent.notes = '';
+            return;
+        }
+
+        const value = this.variableContext?.getValue(variableName);
+        if (typeof value === 'string') {
+            // Asegurarse de que las notas se actualicen correctamente
+            this.block.blockContent.notes = value;
+            this.block.blockContent.variableName = variableName;
+        }
+    }
+
+    handleNotesChange(notes: string): void {
+        if (this.block.blockContent.isVariable && this.block.blockContent.variableName) {
+            // Si estamos en modo variable, actualizar el valor en el contexto
+            this.variableContext?.setVariable(this.block.blockContent.variableName, notes);
+        }
     }
 }
