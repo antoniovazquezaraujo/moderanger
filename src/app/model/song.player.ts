@@ -99,23 +99,33 @@ export class SongPlayer {
     }
 
     private playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number, variableContext?: any): NoteData[] {
-        let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
-        
-        if (block.children && block.children.length > 0) {
-            let childrenNoteDatas: NoteData[] = [];
-            for (const child of block.children) {
-                childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
-            }
-            blockNotes = blockNotes.concat(childrenNoteDatas);
-        }
-
         if (repeatingTimes === -1) {
             for (let i = 0; i < 1000; i++) {
-                noteDatas = noteDatas.concat([...blockNotes]);
+                let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
+                
+                if (block.children && block.children.length > 0) {
+                    let childrenNoteDatas: NoteData[] = [];
+                    for (const child of block.children) {
+                        childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
+                    }
+                    blockNotes = blockNotes.concat(childrenNoteDatas);
+                }
+                
+                noteDatas = noteDatas.concat(blockNotes);
             }
         } else if (repeatingTimes > 0) {
             for (let i = 0; i < repeatingTimes; i++) {
-                noteDatas = noteDatas.concat([...blockNotes]);
+                let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
+                
+                if (block.children && block.children.length > 0) {
+                    let childrenNoteDatas: NoteData[] = [];
+                    for (const child of block.children) {
+                        childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
+                    }
+                    blockNotes = blockNotes.concat(childrenNoteDatas);
+                }
+                
+                noteDatas = noteDatas.concat(blockNotes);
             }
         }
         

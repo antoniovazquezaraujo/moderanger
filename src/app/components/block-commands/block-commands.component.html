@@ -26,7 +26,7 @@
     </div>
 
     <div *ngFor="let command of block.commands" class="command">
-        <select class="command-type" [(ngModel)]="command.type">
+        <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
             <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
         </select>
 
@@ -49,6 +49,19 @@
                         <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
                     </select>
                 </ng-template>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="commandTypes.INCREMENT">
+                <p-dropdown class="command-value" 
+                    [options]="getFilteredVariables(command)" 
+                    [ngModel]="getSelectedValue(command)"
+                    (ngModelChange)="handleValueInput($event, command)" 
+                    [showClear]="true"
+                    optionLabel="label"
+                    optionValue="value"
+                    [placeholder]="getFilteredVariables(command).length ? 'Select variable to increment' : 'No numeric variables'"
+                    appendTo="body">
+                </p-dropdown>
             </ng-container>
 
             <ng-container *ngSwitchCase="commandTypes.SCALE">
@@ -120,7 +133,8 @@
         </ng-container>
 
         <div class="command-controls">
-            <p-button (click)="toggleVariableMode(command, $event)" 
+            <p-button *ngIf="command.type !== commandTypes.INCREMENT" 
+                (click)="toggleVariableMode(command, $event)" 
                 icon="pi pi-dollar">
             </p-button>
 

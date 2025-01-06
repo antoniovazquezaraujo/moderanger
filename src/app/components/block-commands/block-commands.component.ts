@@ -310,4 +310,15 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             this.variableContext?.setVariable(this.block.blockContent.variableName, notes);
         }
     }
+
+    onCommandTypeChange(command: Command): void {
+        if (command.type === CommandType.INCREMENT) {
+            command.isVariable = true;
+            // Si hay variables numéricas disponibles, seleccionar la primera
+            const numericVariables = this.getFilteredVariables(command);
+            if (numericVariables.length > 0) {
+                command.setVariable(numericVariables[0].value);
+            }
+        }
+    }
 }
