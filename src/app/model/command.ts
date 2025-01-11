@@ -28,7 +28,7 @@ export class Command {
             this.isVariable = opts.isVariable || false;
             if (opts.value !== undefined) {
                 if (this.isVariable && typeof opts.value === 'string') {
-                    this.setVariable(opts.value.startsWith('$') ? opts.value.substring(1) : opts.value);
+                    this.setVariable(opts.value);
                 } else {
                     this.setValue(opts.value);
                 }
@@ -38,7 +38,7 @@ export class Command {
 
     get value(): string | number {
         if (this.isVariable && typeof this._value === 'string') {
-            return this._value.startsWith('$') ? this._value.substring(1) : this._value;
+            return this._value.startsWith('$') ? this._value : '$' + this._value;
         }
         if (this.type === CommandType.PLAYMODE && typeof this._value === 'number') {
             return PlayMode[this._value];
@@ -55,13 +55,6 @@ export class Command {
             const varName = this._value.startsWith('$') ? this._value.substring(1) : this._value;
             const varValue = context.getValue(varName);
             if (varValue !== undefined) {
-                // Si es una escala o modo de reproducción, asegurarse de que sea una cadena válida
-                if (this.type === CommandType.SCALE && typeof varValue === 'string') {
-                    return varValue.toUpperCase() as ScaleType;
-                }
-                if (this.type === CommandType.PLAYMODE && typeof varValue === 'string') {
-                    return getPlayModeFromString(varValue.toUpperCase());
-                }
                 return varValue;
             }
             return this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
@@ -71,15 +64,12 @@ export class Command {
     }
 
     setVariable(name: string | null): void {
-        if (name === null || name === undefined || name === '') {
-            this.isVariable = false;
-            this._value = this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
-                         this.type === CommandType.PLAYMODE ? PlayMode.CHORD : 0;
+        if (!name) {
+            this.setValue(null);
             return;
         }
-
-        this._value = name.startsWith('$') ? name : '$' + name;
         this.isVariable = true;
+        this._value = name.startsWith('$') ? name : '$' + name;
     }
 
     setValue(value: string | number | ScaleType | PlayMode | null): void {
@@ -91,8 +81,8 @@ export class Command {
             return;
         }
 
-        if (typeof value === 'string' && value.startsWith('$')) {
-            this._value = value;
+        if (typeof value === 'string' && (value.startsWith('$') || this.isVariable)) {
+            this._value = value.startsWith('$') ? value : '$' + value;
             this.isVariable = true;
         } else {
             if (this.type === CommandType.SCALE && typeof value === 'string') {

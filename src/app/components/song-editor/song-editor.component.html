@@ -5,9 +5,10 @@
             (onPlayPart)="playPart($event)">
         </app-song>
         <div class="controls">
-            <button pButton type="button" icon="pi pi-play" (click)="playSong()"></button>
-            <button pButton type="button" icon="pi pi-stop" (click)="stop()"></button>
+            <button pButton icon="pi pi-play" (click)="play()" [disabled]="isPlaying"></button>
+            <button pButton icon="pi pi-stop" (click)="stop()" [disabled]="!isPlaying"></button>
         </div>
+        <app-metronome></app-metronome>
     </div>
 
     <div class="editor-section">

@@ -6,6 +6,7 @@ import { Block } from "./block";
 import { Transport, Loop, Time, Frequency } from "tone";
 import { PlayMode, arpeggiate } from "./play.mode";
 import { parseBlockNotes } from "./ohm.parser";
+import { Subject } from 'rxjs';
 
 type PartSoundInfo = {
     noteDatas: NoteData[];
@@ -20,6 +21,12 @@ export class SongPlayer {
     private _currentPart?: Part;
     private _currentBlock?: Block;
     private _currentSong?: Song;
+    private _beatCount: number = 0;
+    private _beatsPerBar: number = 4;
+    
+    // Observable para el metrónomo
+    private _metronome = new Subject<number>();
+    public metronome$ = this._metronome.asObservable();
 
     constructor() { }
 
@@ -42,6 +49,8 @@ export class SongPlayer {
         this._currentPart = undefined;
         this._currentBlock = undefined;
         this._currentSong = undefined;
+        this._beatCount = 0;
+        this._metronome.next(-1); // Indicamos que se detuvo
     }
 
     playSong(song: Song): void {
@@ -167,8 +176,15 @@ export class SongPlayer {
 
     private playNoteDatas(partSoundInfo: PartSoundInfo[]): void {
         this._isPlaying = true;
+        this._beatCount = 0;
 
         const loop = new Loop((time: any) => {
+            // Incrementamos el contador de pulsos cada 4 ticks (64n -> 16n para el metrónomo)
+            if (this._beatCount % 4 === 0) {
+                this._metronome.next(Math.floor(this._beatCount / 4) % this._beatsPerBar);
+            }
+            this._beatCount++;
+
             for (const info of partSoundInfo) {
                 if (info.noteDataIndex >= info.noteDatas.length && this._currentSong) {
                     const part = this._currentPart || this._currentSong.parts[partSoundInfo.indexOf(info)];

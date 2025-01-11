@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input } from '@angular/core';
 import { Keyboard } from 'src/app/model/keyboard';
 import { Part } from 'src/app/model/part';
 import { Player } from 'src/app/model/player';
@@ -13,37 +13,31 @@ import { start } from 'tone';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SongEditorComponent implements OnInit {
-    @HostListener('window:keyup', ['$event'])
-    keyUpEvent(event: KeyboardEvent) {
-        this.keyboard.onKeyUp(event.key);
-    }
+    @Input() song: Song = new Song();
+    isPlaying: boolean = false;
 
-    @HostListener('window:keydown', ['$event'])
-    keyDownEvent(event: KeyboardEvent) {
-        this.keyboard.onKeyDown(event.key);
-    }
-
-    public song: Song;
-    public keyboard: Keyboard;
-    songPlayer: SongPlayer;
-
-    constructor(private cdr: ChangeDetectorRef) {
-        this.songPlayer = new SongPlayer();
-        this.keyboard = new Keyboard(this.songPlayer);
-        this.song = new Song();
+    constructor(
+        private songPlayer: SongPlayer,
+        private cdr: ChangeDetectorRef
+    ) {
+        this.songPlayer.metronome$.subscribe(() => {
+            this.isPlaying = this.songPlayer.isPlaying;
+            this.cdr.detectChanges();
+        });
     }
 
     ngOnInit(): void {
         this.cdr.detectChanges();
     }
 
-    async playSong() {
-        await start();
+    play() {
         this.songPlayer.playSong(this.song);
+        this.isPlaying = true;
     }
 
-    async stop() {
+    stop() {
         this.songPlayer.stop();
+        this.isPlaying = false;
     }
 
     playPart(part: Part): void {

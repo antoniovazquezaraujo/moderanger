@@ -20,6 +20,8 @@ import {InputNumberModule} from 'primeng/inputnumber';
 import {AccordionModule} from 'primeng/accordion';
 import {InputTextareaModule} from 'primeng/inputtextarea';
 import {TooltipModule} from 'primeng/tooltip';
+import { MetronomeComponent } from './components/metronome/metronome.component';
+import { SongPlayer } from './model/song.player';
 
 @NgModule({
     declarations: [
@@ -30,7 +32,8 @@ import {TooltipModule} from 'primeng/tooltip';
         PartsComponent,
         PartComponent,
         SongComponent,
-        VariableDeclarationComponent
+        VariableDeclarationComponent,
+        MetronomeComponent
     ],
     imports: [
         FormsModule,
@@ -46,7 +49,7 @@ import {TooltipModule} from 'primeng/tooltip';
         InputTextareaModule,
         TooltipModule
     ],
-    providers: [TreeDragDropService],
+    providers: [TreeDragDropService, SongPlayer],
     bootstrap: [AppComponent]
 })
 export class AppModule { }
