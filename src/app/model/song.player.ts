@@ -182,7 +182,7 @@ export class SongPlayer {
             }
         });
 
-        loop.interval = "8n";
+        loop.interval = "64n";
         loop.iterations = Infinity;
         loop.start();
     }
@@ -208,7 +208,7 @@ export class SongPlayer {
             }
         } else {
             shouldPlay = true;
-            const durationInBeats = Time(noteData.duration).toSeconds() / Time("8n").toSeconds();
+            const durationInBeats = Time(noteData.duration).toSeconds() / Time("64n").toSeconds();
             let numTurns = Math.round(durationInBeats);
 
             if (noteData.type === 'arpeggio' && noteData.noteDatas) {
