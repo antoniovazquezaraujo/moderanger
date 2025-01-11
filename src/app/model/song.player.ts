@@ -22,7 +22,7 @@ export class SongPlayer {
     private _currentBlock?: Block;
     private _currentSong?: Song;
     private _beatCount: number = 0;
-    private _beatsPerBar: number = 4;
+    private _beatsPerBar: number = 32;
     
     // Observable para el metrónomo
     private _metronome = new Subject<number>();
