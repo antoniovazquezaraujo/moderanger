@@ -24,7 +24,7 @@ export class Block {
             this.commands = cloned.commands;
             this.blockContent = cloned.blockContent;
             this.pulse = cloned.pulse;
-            this.repeatingTimes = cloned.repeatingTimes;
+            this.repeatingTimes = Math.max(0, cloned.repeatingTimes);
             this.children = cloned.children;
         } else if (block) {
             // Si es un objeto plano, construir normalmente
@@ -36,7 +36,7 @@ export class Block {
                 variableName: ''
             });
             this.pulse = block.pulse || 0;
-            this.repeatingTimes = block.repeatingTimes || 1;
+            this.repeatingTimes = Math.max(0, block.repeatingTimes || 1);
             this.children = block.children?.map((child: any) => new Block(child)) || [];
         }
     }

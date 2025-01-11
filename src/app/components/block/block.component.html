@@ -23,7 +23,7 @@
       <label for="repeatingTimes"> Block {{node.id}} </label>
       <p-inputNumber id="repeatingTimes" placeholder="Repeating times" [(ngModel)]="node.repeatingTimes" mode="decimal"
         [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal"
-        [min]="-1" [max]="999"
+        [min]="0" [max]="999"
         decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary"
         incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" [size]="1">
       </p-inputNumber>

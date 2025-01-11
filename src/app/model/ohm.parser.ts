@@ -101,7 +101,7 @@ export function parseBlockNotes(input: string): NoteData[] {
   if (match.failed()) {
     console.error('Parse error:', match.message);
     console.error('Input was:', input);
-    throw new Error(`Parse failed: ${match.message}`);
+    throw new Error(`Parse failed: Duration must end with ":" - Example: "2n:" instead of "2n"\nError at ${match.message}`);
   }
   
   const semantics = grammar.createSemantics();
