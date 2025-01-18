@@ -44,11 +44,14 @@ export class SongPlayer {
     }
 
     stop(): void {
+        console.log("Stopping playback manually");
         Transport.cancel();
         Transport.stop();
         this._isPlaying = false;
         this._currentPart = undefined;
         this._currentBlock = undefined;
+        this._beatCount = 0;
+        this._metronome.next(0);
     }
 
     playSong(song: Song): void {
@@ -199,32 +202,32 @@ export class SongPlayer {
             this._metronome.next(this._beatCount % this._beatsPerBar);
             this._beatCount++;
             
-            let allFinished = true;
+            let hasActiveParts = false;
             
             for (const info of partSoundInfo) {
-                if (info.isInfiniteLoop && info.noteDataIndex >= info.noteDatas.length * 0.8) {
+                // Si es un loop infinito y llegamos al final, reiniciamos
+                if (info.isInfiniteLoop && info.noteDataIndex >= info.noteDatas.length) {
                     info.noteDataIndex = 0;
                     info.arpeggioIndex = 0;
                     info.pendingTurnsToPlay = 0;
                 }
 
-                if (info.isInfiniteLoop) {
-                    allFinished = false;
-                } else if (info.noteDataIndex >= info.noteDatas.length && info.pendingTurnsToPlay <= 0) {
-                    continue;
+                // Intentar reproducir el siguiente turno
+                if (this.playTurn(info, loop.interval, time)) {
+                    hasActiveParts = true;
                 }
-                
-                if (info.noteDataIndex < info.noteDatas.length || info.pendingTurnsToPlay > 0) {
-                    allFinished = false;
-                }
-                
-                this.playTurn(info, loop.interval, time);
             }
 
-            if (allFinished) {
+            // Si no hay partes activas, detenemos todo
+            if (!hasActiveParts) {
+                console.log("No active parts, stopping playback");
                 loop.stop();
                 Transport.stop();
                 this._isPlaying = false;
+                this._currentPart = undefined;
+                this._currentBlock = undefined;
+                this._beatCount = 0;
+                this._metronome.next(0);
             }
         });
 
@@ -233,18 +236,19 @@ export class SongPlayer {
         loop.start();
     }
 
-    private playTurn(partSoundInfo: PartSoundInfo, interval: any, time: any): void {
+    private playTurn(partSoundInfo: PartSoundInfo, interval: any, time: any): boolean {
         if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length && !partSoundInfo.isInfiniteLoop) {
-            return;
+            return false;
         }
 
         const noteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
-        if (!noteData) return;
+        if (!noteData) return false;
 
         let timeToPlay = false;
 
         if (partSoundInfo.pendingTurnsToPlay > 1) {
             partSoundInfo.pendingTurnsToPlay--;
+            return true;
         } else {
             timeToPlay = true;
             let numTurnsNote = 0;
@@ -262,6 +266,8 @@ export class SongPlayer {
         if (timeToPlay) {
             this.playNoteData(partSoundInfo, time);
         }
+
+        return true;
     }
 
     private playNoteData(partSoundInfo: PartSoundInfo, time: any): void {
