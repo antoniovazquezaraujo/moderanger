@@ -1,20 +1,20 @@
 import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
 import { MusicalInstrument } from "./instrument";
-import { NoteData } from "./note"; // Import the new NoteData class
+import { NoteData } from "./note";
 import { getPlayModeFromString, PlayMode } from "./play.mode";
 import { Scale, ScaleTypes, Tonality } from "./scale";
 import { Song } from "./song";
 import { Block } from "./block";
 import { Command, CommandType } from "./command";
-import { Piano } from "./piano";
+import { InstrumentType, InstrumentFactory } from "./instruments";
 
 export class Player {
-    private static instruments: MusicalInstrument[] = [new Piano()];
+    private static defaultInstrument = InstrumentFactory.createInstrument(InstrumentType.PIANO);
     channel: number;
     scale: ScaleTypes = ScaleTypes.WHITE;
     tonality: number = Tonality.D;
     timbre: number = 0;
-    noteDatas: NoteData[] = []; // Changed to NoteData[]
+    noteDatas: NoteData[] = [];
     selectedNote: number = 0;
     density: number = 0;
     inversion: number = 0;
@@ -26,17 +26,25 @@ export class Player {
     decorationGap?: number = undefined;
     decorationPattern?: string = undefined;
     playMode: PlayMode = PlayMode.CHORD;
-    instrument: MusicalInstrument = Player.getDefaultInstrument();
+    instrument: MusicalInstrument;
+    instrumentType: InstrumentType = InstrumentType.PIANO;
 
-    constructor(channel: number) {
+    constructor(channel: number, instrumentType: InstrumentType = InstrumentType.PIANO) {
         this.channel = channel;
+        this.instrumentType = instrumentType;
+        this.instrument = InstrumentFactory.createInstrument(instrumentType);
     }
 
     static getDefaultInstrument(): MusicalInstrument {
-        return Player.instruments[0];
+        return Player.defaultInstrument;
     }
 
-    getSelectedNotes(scaleNum: ScaleTypes, tonality: number): NoteData[] { // Changed return type
+    setInstrument(type: InstrumentType): void {
+        this.instrumentType = type;
+        this.instrument = InstrumentFactory.createInstrument(type);
+    }
+
+    getSelectedNotes(scaleNum: ScaleTypes, tonality: number): NoteData[] {
         var scale = Scale.getScaleByName(scaleNum.toString());
         var tunnedNote = this.selectedNote;
         var chordnoteDatas: NoteData[] = this.generateNoteDataFromScale(scale, tunnedNote, tonality);
@@ -56,11 +64,11 @@ export class Player {
     selectNotes(): void {
         this.noteDatas = [];//this.getSelectedNotes(this.getScale(), this.tonality);
     }
-    setInversion(noteDatas: NoteData[]): NoteData[] { // Changed parameter type
+    setInversion(noteDatas: NoteData[]): NoteData[] {
         var invertednoteDatas: NoteData[] = [];
         for (var n = 0; n < noteDatas.length; n++) {
             var noteData = noteDatas[n];
-            if (n < this.inversion && noteData.note !== undefined) { // Check for note property
+            if (n < this.inversion && noteData.note !== undefined) {
                 noteData.note += 12;
             }
             invertednoteDatas.push(noteData);
@@ -68,10 +76,10 @@ export class Player {
         return invertednoteDatas;
     }
 
-    setOctave(chordNotes: NoteData[]): NoteData[] { // Changed parameter type
+    setOctave(chordNotes: NoteData[]): NoteData[] {
         var octavednoteDatas: NoteData[] = [];
         for (var noteData of chordNotes) {
-            if (noteData.note !== undefined) { // Check for note property
+            if (noteData.note !== undefined) {
                 noteData.note += (this.octave * 12);
             }
             octavednoteDatas.push(noteData);

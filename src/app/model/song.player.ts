@@ -7,6 +7,7 @@ import { Transport, Loop, Time, Frequency } from "tone";
 import { PlayMode, arpeggiate } from "./play.mode";
 import { parseBlockNotes } from "./ohm.parser";
 import { Subject } from 'rxjs';
+import { InstrumentType, InstrumentFactory } from "./instruments";
 
 type PartSoundInfo = {
     noteDatas: NoteData[];
@@ -14,19 +15,19 @@ type PartSoundInfo = {
     noteDataIndex: number;
     arpeggioIndex: number;
     pendingTurnsToPlay: number;
+    isInfiniteLoop: boolean;
 }
 
 export class SongPlayer {
     private _isPlaying: boolean = false;
     private _currentPart?: Part;
     private _currentBlock?: Block;
-    private _currentSong?: Song;
-    private _beatCount: number = 0;
-    private _beatsPerBar: number = 32;
-    
-    // Observable para el metrónomo
     private _metronome = new Subject<number>();
-    public metronome$ = this._metronome.asObservable();
+    private _beatCount = 0;
+    private _beatsPerBar = 32;
+
+    metronome$ = this._metronome.asObservable();
+    private _player = InstrumentFactory.createInstrument(InstrumentType.PIANO);
 
     constructor() { }
 
@@ -48,31 +49,28 @@ export class SongPlayer {
         this._isPlaying = false;
         this._currentPart = undefined;
         this._currentBlock = undefined;
-        this._currentSong = undefined;
-        this._beatCount = 0;
-        this._metronome.next(-1); // Indicamos que se detuvo
     }
 
     playSong(song: Song): void {
-        Transport.stop();
-        Transport.cancel();
+        Transport.start();
         Transport.bpm.value = 100;
-
-        this._currentSong = song;
+        Transport.cancel();
+        Transport.stop();
 
         if (song.parts && song.parts.length > 0) {
             let channel = 0;
             let partSoundInfo: PartSoundInfo[] = [];
 
             for (const part of song.parts) {
-                const player = new Player(channel++);
+                const player = new Player(channel++, part.instrumentType);
                 const noteData = this.playPartBlocks(part.block, player, song);
                 partSoundInfo.push({ 
                     noteDatas: noteData, 
                     player, 
                     noteDataIndex: 0, 
                     arpeggioIndex: 0, 
-                    pendingTurnsToPlay: 0
+                    pendingTurnsToPlay: 0,
+                    isInfiniteLoop: part.block.repeatingTimes === -1
                 });
             }
 
@@ -82,13 +80,15 @@ export class SongPlayer {
     }
 
     playPart(part: Part, player: Player, song: Song): void {
-        Transport.stop();
-        Transport.cancel();
+        Transport.start();
         Transport.bpm.value = 100;
+        Transport.cancel();
+        Transport.stop();
 
         this._currentPart = part;
         this._currentBlock = part.block;
-        this._currentSong = song;
+
+        player.setInstrument(part.instrumentType);
 
         const noteData = this.playPartBlocks(part.block, player, song);
         const partSoundInfo: PartSoundInfo[] = [{
@@ -96,7 +96,8 @@ export class SongPlayer {
             player,
             noteDataIndex: 0,
             arpeggioIndex: 0,
-            pendingTurnsToPlay: 0
+            pendingTurnsToPlay: 0,
+            isInfiniteLoop: part.block.repeatingTimes === -1
         }];
 
         this.playNoteDatas(partSoundInfo);
@@ -108,18 +109,35 @@ export class SongPlayer {
     }
 
     private playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number, variableContext?: any): NoteData[] {
-        for (let i = 0; i < repeatingTimes; i++) {
-            let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
-            
-            if (block.children && block.children.length > 0) {
-                let childrenNoteDatas: NoteData[] = [];
-                for (const child of block.children) {
-                    childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
+        if (repeatingTimes === -1) {
+            const repetitions = 100;
+            for (let i = 0; i < repetitions; i++) {
+                let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
+                
+                if (block.children && block.children.length > 0) {
+                    let childrenNoteDatas: NoteData[] = [];
+                    for (const child of block.children) {
+                        childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
+                    }
+                    blockNotes = blockNotes.concat(childrenNoteDatas);
                 }
-                blockNotes = blockNotes.concat(childrenNoteDatas);
+                
+                noteDatas = noteDatas.concat(blockNotes);
             }
-            
-            noteDatas = noteDatas.concat(blockNotes);
+        } else if (repeatingTimes > 0) {
+            for (let i = 0; i < repeatingTimes; i++) {
+                let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
+                
+                if (block.children && block.children.length > 0) {
+                    let childrenNoteDatas: NoteData[] = [];
+                    for (const child of block.children) {
+                        childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
+                    }
+                    blockNotes = blockNotes.concat(childrenNoteDatas);
+                }
+                
+                noteDatas = noteDatas.concat(blockNotes);
+            }
         }
         
         return noteDatas;
@@ -177,65 +195,71 @@ export class SongPlayer {
     private playNoteDatas(partSoundInfo: PartSoundInfo[]): void {
         this._isPlaying = true;
         this._beatCount = 0;
-
         const loop = new Loop((time: any) => {
-            // Incrementamos el contador de pulsos cada 4 ticks (64n -> 16n para el metrónomo)
-            if (this._beatCount % 4 === 0) {
-                this._metronome.next(Math.floor(this._beatCount / 4) % this._beatsPerBar);
-            }
+            this._metronome.next(this._beatCount % this._beatsPerBar);
             this._beatCount++;
-
+            
+            let allFinished = true;
+            
             for (const info of partSoundInfo) {
-                if (info.noteDataIndex >= info.noteDatas.length && this._currentSong) {
-                    const part = this._currentPart || this._currentSong.parts[partSoundInfo.indexOf(info)];
-                    info.noteDatas = this.playPartBlocks(part.block, info.player, this._currentSong);
+                if (info.isInfiniteLoop && info.noteDataIndex >= info.noteDatas.length * 0.8) {
                     info.noteDataIndex = 0;
                     info.arpeggioIndex = 0;
                     info.pendingTurnsToPlay = 0;
                 }
+
+                if (info.isInfiniteLoop) {
+                    allFinished = false;
+                } else if (info.noteDataIndex >= info.noteDatas.length && info.pendingTurnsToPlay <= 0) {
+                    continue;
+                }
                 
-                this.playTurn(info, time);
+                if (info.noteDataIndex < info.noteDatas.length || info.pendingTurnsToPlay > 0) {
+                    allFinished = false;
+                }
+                
+                this.playTurn(info, loop.interval, time);
+            }
+
+            if (allFinished) {
+                loop.stop();
+                Transport.stop();
+                this._isPlaying = false;
             }
         });
 
-        loop.interval = "64n";
+        loop.interval = "48n";
         loop.iterations = Infinity;
         loop.start();
     }
 
-    private playTurn(partSoundInfo: PartSoundInfo, time: number): void {
-        if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length) {
+    private playTurn(partSoundInfo: PartSoundInfo, interval: any, time: any): void {
+        if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length && !partSoundInfo.isInfiniteLoop) {
             return;
         }
 
         const noteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
         if (!noteData) return;
 
-        let shouldPlay = false;
+        let timeToPlay = false;
 
-        if (partSoundInfo.pendingTurnsToPlay > 0) {
+        if (partSoundInfo.pendingTurnsToPlay > 1) {
             partSoundInfo.pendingTurnsToPlay--;
-            if (partSoundInfo.pendingTurnsToPlay === 0) {
-                if (noteData.type !== 'arpeggio' || 
-                    partSoundInfo.arpeggioIndex >= (noteData.noteDatas?.length || 0) - 1) {
-                    partSoundInfo.noteDataIndex++;
-                    partSoundInfo.arpeggioIndex = 0;
-                }
-            }
         } else {
-            shouldPlay = true;
-            const durationInBeats = Time(noteData.duration).toSeconds() / Time("64n").toSeconds();
-            let numTurns = Math.round(durationInBeats);
+            timeToPlay = true;
+            let numTurnsNote = 0;
 
             if (noteData.type === 'arpeggio' && noteData.noteDatas) {
-                numTurns = Math.max(noteData.noteDatas.length, numTurns);
-                numTurns = Math.ceil(numTurns / noteData.noteDatas.length) * noteData.noteDatas.length;
+                const x = Time(noteData.duration).toSeconds() / interval;
+                numTurnsNote = x / noteData.noteDatas.length;
+            } else {
+                numTurnsNote = Time(noteData.duration).toSeconds() / interval;
             }
 
-            partSoundInfo.pendingTurnsToPlay = numTurns - 1;
+            partSoundInfo.pendingTurnsToPlay = Math.floor(numTurnsNote);
         }
 
-        if (shouldPlay) {
+        if (timeToPlay) {
             this.playNoteData(partSoundInfo, time);
         }
     }
@@ -254,6 +278,7 @@ export class SongPlayer {
             if (notes.length > 0) {
                 partSoundInfo.player.triggerAttackRelease(notes, duration, time);
             }
+            partSoundInfo.noteDataIndex++;
 
         } else if (noteData.type === 'arpeggio' && noteData.noteDatas) {
             const note = noteData.noteDatas[partSoundInfo.arpeggioIndex];
@@ -269,6 +294,7 @@ export class SongPlayer {
             partSoundInfo.arpeggioIndex++;
             if (partSoundInfo.arpeggioIndex >= noteData.noteDatas.length) {
                 partSoundInfo.arpeggioIndex = 0;
+                partSoundInfo.noteDataIndex++;
             }
 
         } else if (noteData.type === 'note' && noteData.note !== undefined) {
@@ -277,6 +303,10 @@ export class SongPlayer {
                 duration,
                 time
             );
+            partSoundInfo.noteDataIndex++;
+
+        } else if (noteData.type === 'rest') {
+            partSoundInfo.noteDataIndex++;
         }
     }
 }

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { InstrumentFactory } from './model/instruments';
 
 @Component({
   selector: 'app-root',
@@ -8,8 +9,8 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'moderanger';
  
-  constructor(){
- 
+  constructor() {
+    // Preload piano samples as soon as the app starts
+    InstrumentFactory.preloadPiano();
   }
-
 }

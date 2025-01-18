@@ -41,6 +41,6 @@ export class SongEditorComponent implements OnInit {
     }
 
     playPart(part: Part): void {
-        this.songPlayer.playPart(part, new Player(3), this.song);
+        this.songPlayer.playPart(part, new Player(0), this.song);
     }
 }

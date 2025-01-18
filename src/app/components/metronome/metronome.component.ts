@@ -46,7 +46,7 @@ export class MetronomeComponent implements OnInit, OnDestroy {
     constructor(private songPlayer: SongPlayer) {}
 
     ngOnInit() {
-        this.subscription = this.songPlayer.metronome$.subscribe(beat => {
+        this.subscription = this.songPlayer.metronome$.subscribe((beat: number) => {
             this.currentBeat = beat;
         });
     }
