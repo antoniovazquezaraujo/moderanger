@@ -17,7 +17,8 @@ export class PartComponent implements OnInit {
         { label: 'Piano', value: InstrumentType.PIANO },
         { label: 'Bass', value: InstrumentType.BASS },
         { label: 'Strings', value: InstrumentType.STRINGS },
-        { label: 'Synth', value: InstrumentType.SYNTH }
+        { label: 'Synth', value: InstrumentType.SYNTH },
+        { label: 'Drums', value: InstrumentType.DRUMS }
     ];
 
     @Input() part!: Part;

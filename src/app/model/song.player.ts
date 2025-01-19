@@ -275,11 +275,12 @@ export class SongPlayer {
         if (!noteData) return;
 
         const duration = noteData.duration;
+        const isDrums = partSoundInfo.player.instrumentType === InstrumentType.DRUMS;
 
         if (noteData.type === 'chord' && noteData.noteDatas) {
             const notes = noteData.noteDatas
                 .filter(note => note.note !== undefined && !isNaN(note.note))
-                .map(note => Frequency(note.note!, "midi").toFrequency());
+                .map(note => isDrums ? note.note! : Frequency(note.note!, "midi").toFrequency());
 
             if (notes.length > 0) {
                 partSoundInfo.player.triggerAttackRelease(notes, duration, time);
@@ -291,7 +292,7 @@ export class SongPlayer {
             if (note && note.note !== undefined && !isNaN(note.note)) {
                 const noteDuration = Time(duration).toSeconds() / noteData.noteDatas.length;
                 partSoundInfo.player.triggerAttackRelease(
-                    Frequency(note.note, "midi").toFrequency(),
+                    isDrums ? note.note : Frequency(note.note, "midi").toFrequency(),
                     noteDuration + "s",
                     time
                 );
@@ -305,7 +306,7 @@ export class SongPlayer {
 
         } else if (noteData.type === 'note' && noteData.note !== undefined) {
             partSoundInfo.player.triggerAttackRelease(
-                Frequency(noteData.note, "midi").toFrequency(),
+                isDrums ? noteData.note : Frequency(noteData.note, "midi").toFrequency(),
                 duration,
                 time
             );
