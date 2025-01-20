@@ -2,13 +2,6 @@
     <div class="part-header">
         <div class="part-info">
             <label>Part {{part.id}}</label>
-            <p-dropdown [options]="instrumentTypes" [(ngModel)]="part.instrumentType" 
-                       (onChange)="onInstrumentSelected($event.value)"
-                       optionLabel="label"
-                       optionValue="value"
-                       [style]="{'width': '150px'}"
-                       placeholder="Select instrument">
-            </p-dropdown>
         </div>
         <div class="part-controls">
             <button pButton type="button" icon="pi pi-plus" (click)="onAddChild(part.block)" pTooltip="Add child block"></button>

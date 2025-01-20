@@ -9,7 +9,7 @@ import { Command, CommandType } from "./command";
 import { InstrumentType, InstrumentFactory } from "./instruments";
 
 export class Player {
-    private static defaultInstrument = InstrumentFactory.createInstrument(InstrumentType.PIANO);
+    private static defaultInstrument = InstrumentFactory.getInstrument(InstrumentType.PIANO);
     channel: number;
     scale: ScaleTypes = ScaleTypes.WHITE;
     tonality: number = Tonality.D;
@@ -26,13 +26,13 @@ export class Player {
     decorationGap?: number = undefined;
     decorationPattern?: string = undefined;
     playMode: PlayMode = PlayMode.CHORD;
-    instrument: MusicalInstrument;
     instrumentType: InstrumentType = InstrumentType.PIANO;
+    private instrument: MusicalInstrument;
 
     constructor(channel: number, instrumentType: InstrumentType = InstrumentType.PIANO) {
         this.channel = channel;
         this.instrumentType = instrumentType;
-        this.instrument = InstrumentFactory.createInstrument(instrumentType);
+        this.instrument = InstrumentFactory.getInstrument(instrumentType);
     }
 
     static getDefaultInstrument(): MusicalInstrument {
@@ -41,7 +41,7 @@ export class Player {
 
     setInstrument(type: InstrumentType): void {
         this.instrumentType = type;
-        this.instrument = InstrumentFactory.createInstrument(type);
+        this.instrument = InstrumentFactory.getInstrument(type);
     }
 
     getSelectedNotes(scaleNum: ScaleTypes, tonality: number): NoteData[] {
