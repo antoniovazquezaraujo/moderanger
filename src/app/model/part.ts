@@ -5,15 +5,17 @@ import { VariableContext } from "./variable.context";
 export class Part {
     static _id: number = 0;
     id = Part._id++;
-    name: string;
+    name: string = '';
     block: Block = new Block();
     instrumentType: InstrumentType = InstrumentType.PIANO;
     private variableContext?: VariableContext;
 
-    constructor(opts?: Partial<Part>) {
-        this.name = opts?.name || '';
-        this.block = opts?.block ? new Block(opts.block) : new Block();
-        this.instrumentType = opts?.instrumentType || InstrumentType.PIANO;
+    constructor(part?: any) {
+        if (part) {
+            this.name = part.name || '';
+            this.block = new Block(part.block);
+            this.instrumentType = part.instrumentType || InstrumentType.PIANO;
+        }
     }
 
     setVariableContext(context: VariableContext) {

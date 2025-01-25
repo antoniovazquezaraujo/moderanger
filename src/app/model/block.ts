@@ -11,7 +11,6 @@ export class Block {
     pulse: number = 0;
     repeatingTimes: number = 1;
     children: Block[] = [];
-    private variableContext?: VariableContext;
 
     constructor(block?: any) {
         this.blockContent = new BlockContent();
@@ -43,9 +42,7 @@ export class Block {
     }
 
     setVariableContext(context: VariableContext) {
-        this.variableContext = context;
         this.blockContent.setVariableContext(context);
-        
         // Propagar el contexto a los bloques hijos
         this.children.forEach(child => child.setVariableContext(context));
     }

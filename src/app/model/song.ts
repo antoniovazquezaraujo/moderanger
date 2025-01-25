@@ -14,11 +14,11 @@ export class Song {
 
     constructor(song?: any) {
         if (song) {
-            this.parts = song.parts?.map((part: any) => {
-                const newPart = new Part();
-                newPart.block = new Block(part);
-                return newPart;
-            }) || [];
+            this.parts = song.parts?.map((part: any) => new Part(part)) || [];
+            // Asegurarse de que todos los bloques usen el mismo contexto de variables
+            this.parts.forEach(part => {
+                part.block.setVariableContext(this.variableContext);
+            });
             
             // Restore variable context
             if (song.variables) {

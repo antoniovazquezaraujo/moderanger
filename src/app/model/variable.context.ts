@@ -28,19 +28,4 @@ export class VariableContext {
     getAllVariables(): Map<string, VariableValue> {
         return new Map(this.variables);
     }
-}
-
-export class BlockVariableContext extends VariableContext {
-    private parent?: VariableContext;
-
-    constructor(parent?: VariableContext) {
-        super();
-        this.parent = parent;
-    }
-
-    override getValue(name: string): VariableValue | undefined {
-        return this.hasVariable(name) 
-            ? super.getValue(name) 
-            : this.parent?.getValue(name);
-    }
 } 
