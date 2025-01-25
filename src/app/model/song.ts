@@ -26,6 +26,21 @@ export class Song {
                     this.variableContext.setVariable(name, value as VariableValue);
                 });
             }
+
+            // Propagar el contexto de variables a todas las partes
+            this.parts.forEach(part => part.setVariableContext(this.variableContext));
+        }
+    }
+
+    addPart(part: Part) {
+        this.parts.push(part);
+        part.setVariableContext(this.variableContext);
+    }
+
+    removePart(part: Part) {
+        const index = this.parts.indexOf(part);
+        if (index !== -1) {
+            this.parts.splice(index, 1);
         }
     }
 

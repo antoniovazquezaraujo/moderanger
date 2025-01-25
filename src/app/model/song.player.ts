@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import { Player } from "./player";
 import { Song } from "./song";
 import { NoteData } from "./note";
@@ -18,6 +19,9 @@ type PartSoundInfo = {
     isInfiniteLoop: boolean;
 }
 
+@Injectable({
+    providedIn: 'root'
+})
 export class SongPlayer {
     private _isPlaying: boolean = false;
     private _currentPart?: Part;
@@ -25,6 +29,8 @@ export class SongPlayer {
     private _metronome = new Subject<number>();
     private _beatCount = 0;
     private _beatsPerBar = 32;
+    private _songRepetitions = 1;
+    private _currentRepetition = 0;
 
     metronome$ = this._metronome.asObservable();
     private _player = InstrumentFactory.getInstrument(InstrumentType.PIANO);
@@ -43,6 +49,14 @@ export class SongPlayer {
         return this._currentBlock;
     }
 
+    get songRepetitions(): number {
+        return this._songRepetitions;
+    }
+
+    set songRepetitions(value: number) {
+        this._songRepetitions = value > 0 ? value : 1;
+    }
+
     stop(): void {
         console.log("Stopping playback manually");
         Transport.cancel();
@@ -51,6 +65,7 @@ export class SongPlayer {
         this._currentPart = undefined;
         this._currentBlock = undefined;
         this._beatCount = 0;
+        this._currentRepetition = 0;
         this._metronome.next(0);
     }
 
@@ -198,11 +213,17 @@ export class SongPlayer {
     private playNoteDatas(partSoundInfo: PartSoundInfo[]): void {
         this._isPlaying = true;
         this._beatCount = 0;
+        this._currentRepetition = 0;
+        let waitingForLastNote = false;
+        let lastNoteEndTime = 0;
+        let nextRepetitionPrepared = false;
+
         const loop = new Loop((time: any) => {
             this._metronome.next(this._beatCount % this._beatsPerBar);
             this._beatCount++;
             
             let hasActiveParts = false;
+            let allPartsFinished = true;
             
             for (const info of partSoundInfo) {
                 // Si es un loop infinito y llegamos al final, reiniciamos
@@ -215,18 +236,59 @@ export class SongPlayer {
                 // Intentar reproducir el siguiente turno
                 if (this.playTurn(info, loop.interval, time)) {
                     hasActiveParts = true;
+                    if (info.noteDataIndex < info.noteDatas.length) {
+                        allPartsFinished = false;
+                    }
                 }
             }
 
-            // Si no hay partes activas, detenemos todo
-            if (!hasActiveParts) {
-                console.log("No active parts, stopping playback");
+            // Si todas las partes han terminado pero quedan repeticiones
+            if (allPartsFinished && !waitingForLastNote) {
+                // Calcular el tiempo que necesitamos esperar para la última nota o silencio
+                const lastNote = this.findLastPlayedNote(partSoundInfo);
+                if (lastNote) {
+                    waitingForLastNote = true;
+                    // Esperamos el tiempo completo de la nota o silencio
+                    lastNoteEndTime = time + Time(lastNote.duration).toSeconds();
+                }
+            }
+
+            // Si estamos esperando que termine la última nota o silencio
+            if (waitingForLastNote) {
+                if (time < lastNoteEndTime) {
+                    return; // Seguimos esperando
+                }
+                // La última nota o silencio ha terminado
+                waitingForLastNote = false;
+                nextRepetitionPrepared = false;
+                
+                // Preparar la siguiente repetición después de que la nota o silencio haya terminado
+                if (this._currentRepetition < this._songRepetitions - 1) {
+                    this._currentRepetition++;
+                    console.log(`Starting repetition ${this._currentRepetition + 1} of ${this._songRepetitions}`);
+                    // Reiniciar todas las partes
+                    for (const info of partSoundInfo) {
+                        info.noteDataIndex = 0;
+                        info.arpeggioIndex = 0;
+                        info.pendingTurnsToPlay = 0;
+                    }
+                    hasActiveParts = true;
+                } else {
+                    hasActiveParts = false;
+                }
+            }
+
+            // Si no hay partes activas o hemos completado todas las repeticiones, detenemos todo
+            if (!hasActiveParts || (allPartsFinished && !waitingForLastNote && this._currentRepetition >= this._songRepetitions)) {
+                console.log("Playback finished");
                 loop.stop();
                 Transport.stop();
+                Transport.cancel();
                 this._isPlaying = false;
                 this._currentPart = undefined;
                 this._currentBlock = undefined;
                 this._beatCount = 0;
+                this._currentRepetition = 0;
                 this._metronome.next(0);
             }
         });
@@ -234,6 +296,22 @@ export class SongPlayer {
         loop.interval = "48n";
         loop.iterations = Infinity;
         loop.start();
+    }
+
+    private findLastPlayedNote(partSoundInfo: PartSoundInfo[]): NoteData | undefined {
+        let lastNote: NoteData | undefined;
+        
+        for (const info of partSoundInfo) {
+            if (info.noteDataIndex > 0 && info.noteDatas.length > 0) {
+                const lastNoteIndex = info.noteDataIndex - 1;
+                const note = info.noteDatas[lastNoteIndex];
+                if (note) {
+                    lastNote = note;
+                }
+            }
+        }
+        
+        return lastNote;
     }
 
     private playTurn(partSoundInfo: PartSoundInfo, interval: any, time: any): boolean {

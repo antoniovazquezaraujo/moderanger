@@ -1,21 +1,21 @@
-import { Command } from "./command";
-import { CommandNotes } from "./command.notes";
+import { BlockContent } from './block.content';
+import { Command } from './command';
+import { VariableContext } from './variable.context';
 
 export class Block {
     static _id: number = 0;
     id = Block._id++;
     label: string = '';
     commands: Command[] = [];
-    blockContent: CommandNotes = { 
-        notes: '',
-        isVariable: false,
-        variableName: ''
-    };
+    blockContent: BlockContent;
     pulse: number = 0;
     repeatingTimes: number = 1;
     children: Block[] = [];
+    private variableContext?: VariableContext;
 
     constructor(block?: any) {
+        this.blockContent = new BlockContent();
+        
         if (block instanceof Block) {
             // Si es un Block, usar clone
             const cloned = block.clone();
@@ -30,20 +30,30 @@ export class Block {
             // Si es un objeto plano, construir normalmente
             this.label = block.label || '';
             this.commands = block.commands?.map((cmd: any) => new Command(cmd)) || [];
-            this.blockContent = new CommandNotes(block.blockContent || { 
-                notes: '',
-                isVariable: false,
-                variableName: ''
-            });
+            this.children = block.children?.map((child: any) => new Block(child)) || [];
+            
+            if (block.blockContent) {
+                this.blockContent.notes = block.blockContent.notes || '';
+                this.blockContent.isVariable = block.blockContent.isVariable || false;
+                this.blockContent.variableName = block.blockContent.variableName || '';
+            }
             this.pulse = block.pulse || 0;
             this.repeatingTimes = Math.max(0, block.repeatingTimes || 1);
-            this.children = block.children?.map((child: any) => new Block(child)) || [];
         }
     }
 
+    setVariableContext(context: VariableContext) {
+        this.variableContext = context;
+        this.blockContent.setVariableContext(context);
+        
+        // Propagar el contexto a los bloques hijos
+        this.children.forEach(child => child.setVariableContext(context));
+    }
+
     removeBlock(block: Block) {
-        if (block?.children != null && block.children?.length > 0) {
-            this.children = this.children?.filter(t => t != block);
+        const index = this.children.indexOf(block);
+        if (index !== -1) {
+            this.children.splice(index, 1);
         }
     }
 
@@ -57,11 +67,11 @@ export class Block {
         clonedBlock.repeatingTimes = this.repeatingTimes;
         
         // Clonar blockContent
-        clonedBlock.blockContent = {
-            notes: this.blockContent.notes,
-            isVariable: this.blockContent.isVariable,
-            variableName: this.blockContent.variableName
-        };
+        const clonedContent = new BlockContent();
+        clonedContent.notes = this.blockContent.notes;
+        clonedContent.isVariable = this.blockContent.isVariable;
+        clonedContent.variableName = this.blockContent.variableName;
+        clonedBlock.blockContent = clonedContent;
         
         // Clonar commands
         clonedBlock.commands = this.commands.map(command => new Command({
@@ -74,5 +84,13 @@ export class Block {
         clonedBlock.children = this.children.map(child => child.clone());
         
         return clonedBlock;
+    }
+
+    toJSON() {
+        return {
+            commands: this.commands,
+            children: this.children,
+            blockContent: this.blockContent
+        };
     }
 }

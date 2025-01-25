@@ -1,12 +1,14 @@
 import { Block } from "./block";
 import { InstrumentType } from "./instruments";
+import { VariableContext } from "./variable.context";
 
 export class Part {
     static _id: number = 0;
     id = Part._id++;
     name: string;
-    block: Block;
-    instrumentType: InstrumentType;
+    block: Block = new Block();
+    instrumentType: InstrumentType = InstrumentType.PIANO;
+    private variableContext?: VariableContext;
 
     constructor(opts?: Partial<Part>) {
         this.name = opts?.name || '';
@@ -14,10 +16,13 @@ export class Part {
         this.instrumentType = opts?.instrumentType || InstrumentType.PIANO;
     }
 
+    setVariableContext(context: VariableContext) {
+        this.variableContext = context;
+        this.block.setVariableContext(context);
+    }
+
     removeBlock(block: Block) {
-        if (block?.children != null && block.children?.length > 0) {
-            this.block.children = this.block.children?.filter(t => t !== block);
-        }
+        this.block.removeBlock(block);
     }
 
     clone(): Part {
@@ -26,5 +31,13 @@ export class Part {
         clonedPart.block = new Block(this.block);
         clonedPart.instrumentType = this.instrumentType;
         return clonedPart;
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            block: this.block,
+            instrumentType: this.instrumentType
+        };
     }
 }
