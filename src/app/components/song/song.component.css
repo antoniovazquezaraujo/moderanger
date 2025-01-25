@@ -1,0 +1,23 @@
+.p-d-flex {
+    display: flex;
+}
+
+.p-ai-center {
+    align-items: center;
+}
+
+.p-mt-3 {
+    margin-top: 1rem;
+}
+
+.p-mr-2 {
+    margin-right: 0.5rem;
+}
+
+.p-ml-2 {
+    margin-left: 0.5rem;
+}
+
+.p-ml-3 {
+    margin-left: 1rem;
+}
