@@ -334,8 +334,29 @@ export class SongPlayer {
         } else {
             timeToPlay = true;
             // Calculamos el número de turnos basado en la duración de la nota
-            const numTurnsNote = Time(noteData.duration).toSeconds() / interval;
-            partSoundInfo.pendingTurnsToPlay = Math.floor(numTurnsNote);
+            const totalDuration = Time(noteData.duration).toSeconds();
+
+            if (noteData.type === 'note' && noteData.note !== undefined) {
+                // Para notas que serán arpegios, dividimos la duración entre el número de notas
+                const noteNoteDatas = partSoundInfo.player.getSelectedNotes(
+                    partSoundInfo.player.scale, 
+                    partSoundInfo.player.tonality
+                );
+                const notes = this.noteDatasToNotes(noteNoteDatas);
+                const arpeggio = arpeggiate(notes, partSoundInfo.player.playMode);
+
+                if (partSoundInfo.player.playMode !== PlayMode.CHORD && arpeggio.length > 0) {
+                    // Si es un arpegio, cada nota dura una fracción del total
+                    const noteDuration = totalDuration / arpeggio.length;
+                    partSoundInfo.pendingTurnsToPlay = Math.floor(noteDuration / interval);
+                } else {
+                    // Si es un acorde o una nota simple, dura el tiempo completo
+                    partSoundInfo.pendingTurnsToPlay = Math.floor(totalDuration / interval);
+                }
+            } else {
+                // Para comandos y silencios, usamos la duración normal
+                partSoundInfo.pendingTurnsToPlay = Math.floor(totalDuration / interval);
+            }
         }
 
         if (timeToPlay) {
