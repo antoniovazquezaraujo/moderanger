@@ -10,12 +10,10 @@ import { VariableContext } from 'src/app/model/variable.context';
 export class PartsComponent implements OnInit {
     @Input() parts: Part[] = [];
     @Input() variableContext?: VariableContext;
-    @Output() onRemovePart: EventEmitter<any>;
-    @Output() onPlayPart: EventEmitter<any>;
+    @Output() onRemovePart: EventEmitter<Part>;
 
     constructor() {
-        this.onRemovePart = new EventEmitter<any>();
-        this.onPlayPart = new EventEmitter<any>();
+        this.onRemovePart = new EventEmitter<Part>();
     }
 
     ngOnInit(): void {
@@ -27,9 +25,5 @@ export class PartsComponent implements OnInit {
 
     removePart(part: Part) {
         this.onRemovePart.emit(part);
-    }
-
-    playPart(part: Part) {
-        this.onPlayPart.emit(part);
     }
 }

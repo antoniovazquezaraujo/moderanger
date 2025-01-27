@@ -1,19 +1,19 @@
 .commands {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    padding: 10px;
+    gap: 8px;
+    padding: 8px;
 }
 
 .command {
     display: flex;
-    gap: 5px;
+    gap: 8px;
     align-items: center;
 }
 
 .value-input {
     display: flex;
-    gap: 5px;
+    gap: 8px;
     align-items: center;
 }
 
@@ -24,4 +24,46 @@ select {
 input[type="text"] {
     min-width: 100px;
     padding: 4px;
+}
+
+.commands-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+.notes-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notes-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+button {
+    margin: 0 2px;
+}
+
+.command-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.commands-container > p-button:last-child {
+    margin-top: 8px;
+}
+
+.add-command-button {
+    margin-top: 8px !important;
+}
+
+.add-command-wrapper {
+    display: flex;
+    margin-top: 16px;
 }

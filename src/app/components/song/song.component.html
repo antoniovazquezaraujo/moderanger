@@ -1,18 +1,19 @@
 <app-parts 
     [parts] = "getParts() ||[]" 
     [variableContext]="song.variableContext"
-    (onRemovePart)="removePart($event)" 
-    (onPlayPart)="playPart($event)">
+    (onRemovePart)="removePart($event)">
 </app-parts> 
 
 <div class="p-d-flex p-ai-center p-mt-3">
     <button pButton type="button" icon="pi pi-plus" (click)="addPart()" class="p-mr-2">
     </button>
-    <span class="p-ml-3">Repeticiones:</span>
+    <span class="p-ml-3">Repeat:</span>
     <p-inputNumber [(ngModel)]="repetitions" [min]="1" [max]="100" [showButtons]="true" buttonLayout="horizontal" 
         spinnerMode="horizontal" [inputId]="'repetitions'" [step]="1" 
         decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary" 
         incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" 
-        class="p-ml-2" [style]="{'width': '150px'}">
+        class="p-ml-2">
     </p-inputNumber>
+    <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
+    <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>
 </div>

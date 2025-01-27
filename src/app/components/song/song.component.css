@@ -17,7 +17,27 @@
 .p-ml-2 {
     margin-left: 0.5rem;
 }
-
+ 
 .p-ml-3 {
     margin-left: 1rem;
+}
+
+:host ::ng-deep .p-inputnumber {
+    width: 70px !important;
+}
+
+:host ::ng-deep .p-inputnumber-input {
+    padding: 2px !important;
+    font-size: 14px;
+    width: 30px !important;
+    text-align: center;
+}
+
+:host ::ng-deep .p-inputnumber-button {
+    padding: 2px !important;
+    width: 20px !important;
+}
+
+:host ::ng-deep .p-inputnumber-button-icon {
+    font-size: 0.8rem !important;
 }

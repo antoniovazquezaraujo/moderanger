@@ -11,11 +11,9 @@ import { SongPlayer } from 'src/app/model/song.player';
 export class SongComponent implements OnInit {
 
     @Input() song: Song = new Song();
-    @Output() onPlayPart: EventEmitter<Part>;
     repetitions: number = 1;
 
     constructor(private songPlayer: SongPlayer) {
-        this.onPlayPart = new EventEmitter<Part>();
     }
 
     ngOnInit(): void {
@@ -35,8 +33,12 @@ export class SongComponent implements OnInit {
         }
     }
 
-    playPart(part: Part) {
+    playSong() {
         this.songPlayer.songRepetitions = this.repetitions;
-        this.onPlayPart.emit(part);
+        this.songPlayer.playSong(this.song);
+    }
+
+    stopSong() {
+        this.songPlayer.stop();
     }
 }

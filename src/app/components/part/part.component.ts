@@ -15,14 +15,12 @@ export class PartComponent implements OnInit {
 
     @Input() part!: Part;
     @Input() variableContext?: VariableContext;
-    @Output() onDuplicatePart: EventEmitter<any>;
-    @Output() onRemovePart: EventEmitter<any>;
-    @Output() onPlayPart: EventEmitter<any>;
+    @Output() onDuplicatePart: EventEmitter<Part>;
+    @Output() onRemovePart: EventEmitter<Part>;
 
     constructor() {
-        this.onDuplicatePart = new EventEmitter<any>();
-        this.onRemovePart = new EventEmitter<any>();
-        this.onPlayPart = new EventEmitter<any>();
+        this.onDuplicatePart = new EventEmitter<Part>();
+        this.onRemovePart = new EventEmitter<Part>();
     }
 
     hasChildren(index: number, block: Block): boolean {
@@ -58,9 +56,5 @@ export class PartComponent implements OnInit {
 
     removePart() {
         this.onRemovePart.emit(this.part);
-    }
-
-    playPart() {
-        this.onPlayPart.emit(this.part);
     }
 }
