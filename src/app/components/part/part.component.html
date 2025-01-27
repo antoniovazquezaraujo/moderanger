@@ -4,6 +4,8 @@
             <button pButton type="button" icon="pi pi-plus" (click)="onAddChild(part.block)" pTooltip="Add child block"></button>
             <button pButton type="button" icon="pi pi-copy" (click)="duplicatePart()" pTooltip="Duplicate part"></button>
             <button pButton type="button" icon="pi pi-times" (click)="removePart()" pTooltip="Remove part"></button>
+            <button pButton type="button" icon="pi pi-play" (click)="playPart()" pTooltip="Play part"></button>
+            <button pButton type="button" icon="pi pi-stop" (click)="stopPart()" pTooltip="Stop part"></button>
         </div>
         <div class="part-info">
             <label>Part {{part.id}}</label>
