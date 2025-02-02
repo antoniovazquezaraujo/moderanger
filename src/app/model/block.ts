@@ -1,6 +1,6 @@
 import { BlockContent } from './block.content';
 import { Command } from './command';
-import { Operation } from './operation';
+import { BaseOperation, IncrementOperation, DecrementOperation, AssignOperation } from './operation';
 import { VariableContext } from './variable.context';
 
 export class Block {
@@ -13,7 +13,7 @@ export class Block {
     repeatingTimes: number = 1;
     children: Block[] = [];
     private variableContext?: VariableContext;
-    operations: Operation[] = [];
+    operations: BaseOperation[] = [];
 
     constructor(block?: any) {
         this.blockContent = new BlockContent();
@@ -35,7 +35,18 @@ export class Block {
             this.label = block.label || '';
             this.commands = block.commands?.map((cmd: any) => new Command(cmd)) || [];
             this.children = block.children?.map((child: any) => new Block(child)) || [];
-            this.operations = block.operations?.map((op: any) => new Operation(op.type, op.variableName, op.value)) || [];
+            this.operations = block.operations?.map((op: any) => {
+                switch (op.type) {
+                    case 'INCREMENT':
+                        return new IncrementOperation(op.variableName, op.value);
+                    case 'DECREMENT':
+                        return new DecrementOperation(op.variableName, op.value);
+                    case 'ASSIGN':
+                        return new AssignOperation(op.variableName, op.value);
+                    default:
+                        throw new Error(`Unknown operation type: ${op.type}`);
+                }
+            }) || [];
             console.log(`Initialized block with operations: ${JSON.stringify(this.operations)}`);
             
             if (block.blockContent) {
@@ -89,7 +100,17 @@ export class Block {
         clonedBlock.children = this.children.map(child => child.clone());
         
         // Clonar operations
-        clonedBlock.operations = this.operations.map(operation => new Operation(operation.type, operation.variableName, operation.value));
+        clonedBlock.operations = this.operations.map(operation => {
+            if (operation instanceof IncrementOperation) {
+                return new IncrementOperation(operation.variableName, operation.value);
+            } else if (operation instanceof DecrementOperation) {
+                return new DecrementOperation(operation.variableName, operation.value);
+            } else if (operation instanceof AssignOperation) {
+                return new AssignOperation(operation.variableName, operation.value);
+            } else {
+                throw new Error(`Unknown operation type: ${operation.constructor.name}`);
+            }
+        });
         
         return clonedBlock;
     }

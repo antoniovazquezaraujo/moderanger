@@ -9,9 +9,8 @@ import { PlayMode, arpeggiate } from "./play.mode";
 import { parseBlockNotes } from "./ohm.parser";
 import { Subject } from 'rxjs';
 import { InstrumentType, InstrumentFactory } from "./instruments";
-import { Operation } from './operation';
 import { VariableContext } from './variable.context';
-import { OperationType } from './operation';
+import { BaseOperation, IncrementOperation, DecrementOperation, AssignOperation } from './operation';
 
 type PartSoundInfo = {
     noteDatas: NoteData[];
@@ -154,28 +153,14 @@ export class SongPlayer {
             const variableName = operation.variableName;
             if (variableContext && variableName) {
                 const currentValue = variableContext.getValue(variableName);
-                console.log(`Before operation: ${operation.type}, ${variableName} = ${currentValue}`);
+                console.log(`Before operation: ${operation.constructor.name}, ${variableName} = ${currentValue}`);
                 if (typeof currentValue === 'number') {
-                    switch (operation.type) {
-                        case OperationType.INCREMENT:
-                            const newValue = currentValue + operation.value;
-                            variableContext.setVariable(variableName, newValue);
-                            console.log(`Incremented ${variableName} from ${currentValue} to ${newValue}`);
-                            break;
-                        case OperationType.DECREMENT:
-                            variableContext.setVariable(variableName, currentValue - operation.value);
-                            console.log(`Decremented ${variableName} to ${currentValue - operation.value}`);
-                            break;
-                        case OperationType.ASSIGN:
-                            variableContext.setVariable(variableName, operation.value);
-                            console.log(`Assigned ${variableName} to ${operation.value}`);
-                            break;
-                    }
+                    operation.execute(variableContext);
                 } else {
                     console.warn(`Variable ${variableName} is not a number or is undefined.`);
                 }
             } else {
-                console.warn(`Variable context or variable name is undefined for operation: ${operation.type}`);
+                console.warn(`Variable context or variable name is undefined for operation: ${operation.constructor.name}`);
             }
         }
     }

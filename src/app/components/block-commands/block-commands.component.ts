@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
-import { Operation, OperationType } from 'src/app/model/operation';
+import { OperationType } from 'src/app/model/operation';
 import { getPlayModeNames } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
 import { VariableContext } from 'src/app/model/variable.context';
@@ -31,8 +31,16 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     operationTypes = OperationType;
     operationTypeNames: string[] = Object.values(OperationType);
     selectedElementType: 'command' | 'operation' = 'command';
-    selectedOperationType: OperationType = OperationType.INCREMENT;
-  
+    selectedOperationType: OperationType | null = null;
+    showOperationControls: boolean = false;
+    selectedVariable: string | null = null;
+    selectedValue: string | null = null;
+
+    // Initialize operations array
+    operations: { type: OperationType, value: number }[] = [];
+
+    operationDropdownOptions = this.operationTypeNames.map(type => ({ label: type, value: type }));
+
     constructor(private cdr: ChangeDetectorRef) {         
         this.playModeNames = getPlayModeNames();
         this.scaleNames = Scale.getScaleNames();
@@ -105,12 +113,8 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             newCommand.setValue(0);
             this.block.commands.push(newCommand);
         } else if (type === 'operation') {
-            if (!this.block.operations) {
-                this.block.operations = [];
-            }
-            const newOperation = new Operation(this.selectedOperationType, 'variableName', 1);
-            this.block.operations.push(newOperation);
-            console.log('Adding new operation:', newOperation);
+            this.operations.push({ type: this.selectedOperationType!, value: 0 });
+            console.log('Adding new operation:', this.selectedOperationType);
         }
     }
 
@@ -325,7 +329,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    onCommandTypeChange(command: Command | Operation): void {
+    onCommandTypeChange(command: Command | OperationType): void {
         if (command instanceof Command && command.type === this.commandTypes.OCT) {
             // Lógica para comandos de tipo OCT
             command.isVariable = true;
@@ -333,25 +337,20 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             if (numericVariables.length > 0) {
                 command.setVariable(numericVariables[0].value);
             }
-        } else if (command instanceof Operation && command.type === this.operationTypes.INCREMENT) {
+        } else if (command === this.operationTypes.INCREMENT) {
             // Lógica para operaciones de tipo INCREMENT
-            const variableName = command.variableName;
+            const variableName = command;
             if (this.variableContext && variableName) {
                 const currentValue = this.variableContext.getValue(variableName);
                 if (typeof currentValue === 'number') {
-                    this.variableContext.setVariable(variableName, currentValue + command.value);
+                    this.variableContext.setVariable(variableName, currentValue + 1);
                 }
             }
         }
     }
 
     addOperation(): void {
-        if (!this.block.operations) {
-            this.block.operations = [];
-        }
-        const newOperation = new Operation(OperationType.INCREMENT, 'variableName', 1); // Example operation
-        this.block.operations.push(newOperation);
-        console.log('Added new operation:', newOperation);
+        this.operations.push({ type: OperationType.INCREMENT, value: 0 });
     }
 
     isCommand(element: any): boolean {
@@ -359,6 +358,13 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     isOperation(element: any): boolean {
-        return element instanceof Operation;
+        return typeof element === 'object' && 'type' in element && element.type in this.operationTypes;
+    }
+
+    onOperationTypeChange(): void {
+        // Logic to handle operation type change
+        // For now, just reset selectedVariable and selectedValue
+        this.selectedVariable = null;
+        this.selectedValue = null;
     }
 }

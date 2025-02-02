@@ -9,6 +9,7 @@ import { Command, CommandType } from "./command";
 import { InstrumentType, InstrumentFactory } from "./instruments";
 import { VariableContext } from "./variable.context";
 import { OperationType } from './operation';
+import { IncrementOperation, DecrementOperation, AssignOperation } from './operation';
 
 export class Player {
     private static defaultInstrument = InstrumentFactory.getInstrument(InstrumentType.PIANO);
@@ -112,18 +113,18 @@ export class Player {
             if (variableContext && variableName) {
                 const currentValue = variableContext.getValue(variableName);
                 if (typeof currentValue === 'number') {
-                    switch (operation.type) {
-                        case OperationType.INCREMENT:
-                            variableContext.setVariable(variableName, currentValue + operation.value);
-                            break;
-                        case OperationType.DECREMENT:
-                            variableContext.setVariable(variableName, currentValue - operation.value);
-                            break;
-                        case OperationType.ASSIGN:
-                            variableContext.setVariable(variableName, operation.value);
-                            break;
+                    if (operation instanceof IncrementOperation) {
+                        variableContext.setVariable(variableName, currentValue + operation.value);
+                    } else if (operation instanceof DecrementOperation) {
+                        variableContext.setVariable(variableName, currentValue - operation.value);
+                    } else if (operation instanceof AssignOperation) {
+                        variableContext.setVariable(variableName, operation.value);
                     }
+                } else {
+                    console.warn(`Variable ${variableName} is not a number or is undefined.`);
                 }
+            } else {
+                console.warn(`Variable context or variable name is undefined for operation: ${operation.constructor.name}`);
             }
         });
     }

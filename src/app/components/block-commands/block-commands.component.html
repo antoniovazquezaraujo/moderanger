@@ -149,15 +149,25 @@
             <div class="add-command-wrapper">
                 <p-button class="add-command-button" (click)="addElement('command')" icon="pi pi-plus" label="Add Command"></p-button>
             </div>
+            <!-- Dynamic Operation Controls -->
+            <div class="operation-controls">
+                <!-- Removed the button from here -->
+            </div>
         </div>
     </div>
 
-    <!-- Second Row: Dropdown for operation types -->
+    <!-- Second Row: Add Operation Button and Controls -->
     <div class="second-row">
-        <p-dropdown 
-            [options]="operationTypeNames"
-            [(ngModel)]="selectedOperationType" 
-            placeholder="Select Operation Type">
-        </p-dropdown>
+        <p-button *ngIf="!showOperationControls" icon="pi pi-plus" label="Add Operation" (click)="showOperationControls = true"></p-button>
+        <div *ngIf="showOperationControls" class="operation-item">
+            <p-dropdown [options]="operationDropdownOptions" [(ngModel)]="selectedOperationType" placeholder="Select operation type" (onChange)="onOperationTypeChange()" appendTo="body"></p-dropdown>
+            <ng-container *ngIf="selectedOperationType === 'INCREMENT'">
+                <p-dropdown [options]="availableVariables" [(ngModel)]="selectedVariable" placeholder="Select variable to increment" appendTo="body"></p-dropdown>
+            </ng-container>
+            <ng-container *ngIf="selectedOperationType === 'ASSIGN'">
+                <p-dropdown [options]="availableVariables" [(ngModel)]="selectedVariable" placeholder="Select variable to assign" appendTo="body"></p-dropdown>
+                <p-dropdown [options]="availableVariables" [(ngModel)]="selectedValue" placeholder="Select value to assign" appendTo="body"></p-dropdown>
+            </ng-container>
+        </div>
     </div>
 </div>

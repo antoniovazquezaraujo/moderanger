@@ -5,33 +5,47 @@ export enum OperationType {
     DECREMENT = 'DECREMENT',
     ASSIGN = 'ASSIGN'
 }
-export class Operation {
-    type: OperationType = OperationType.INCREMENT;
+
+export abstract class BaseOperation {
     variableName: string;
     value: number;
 
-    constructor(type: OperationType, variableName: string, value: number) {
-        this.type = type;
+    constructor(variableName: string, value: number) {
         this.variableName = variableName;
         this.value = value;
     }
 
+    abstract execute(context: VariableContext): void;
+}
+
+export class IncrementOperation extends BaseOperation {
     execute(context: VariableContext): void {
         const currentValue = context.getValue(this.variableName);
         if (currentValue === undefined || typeof currentValue !== 'number') {
             console.warn(`Variable ${this.variableName} is undefined or not a number.`);
             return;
         }
-        switch (this.type) {
-            case OperationType.INCREMENT:
-                context.setVariable(this.variableName, currentValue + this.value);
-                break;
-            case OperationType.DECREMENT:
-                context.setVariable(this.variableName, currentValue - this.value);
-                break;
-            case OperationType.ASSIGN:
-                context.setVariable(this.variableName, this.value);
-                break;
-        }
+        context.setVariable(this.variableName, currentValue + this.value);
     }
 }
+
+export class DecrementOperation extends BaseOperation {
+    execute(context: VariableContext): void {
+        const currentValue = context.getValue(this.variableName);
+        if (currentValue === undefined || typeof currentValue !== 'number') {
+            console.warn(`Variable ${this.variableName} is undefined or not a number.`);
+            return;
+        }
+        context.setVariable(this.variableName, currentValue - this.value);
+    }
+}
+
+export class AssignOperation extends BaseOperation {
+    execute(context: VariableContext): void {
+        context.setVariable(this.variableName, this.value);
+    }
+}
+
+// Usage example:
+// const operation = new IncrementOperation('x', 5);
+// operation.execute(context);
