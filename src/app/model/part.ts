@@ -6,29 +6,32 @@ export class Part {
     static _id: number = 0;
     id = Part._id++;
     name: string;
-    block: Block = new Block();
+    blocks: Block[] = [new Block()];
     instrumentType: InstrumentType = InstrumentType.PIANO;
     private variableContext?: VariableContext;
 
     constructor(opts?: Partial<Part>) {
         this.name = opts?.name || '';
-        this.block = opts?.block ? new Block(opts.block) : new Block();
+        this.blocks = opts?.blocks ? opts.blocks.map(block => new Block(block)) : [new Block()];
         this.instrumentType = opts?.instrumentType || InstrumentType.PIANO;
     }
 
     setVariableContext(context: VariableContext) {
         this.variableContext = context;
-        this.block.setVariableContext(context);
+        this.blocks.forEach(block => block.setVariableContext(context));
     }
 
     removeBlock(block: Block) {
-        this.block.removeBlock(block);
+        const index = this.blocks.indexOf(block);
+        if (index !== -1) {
+            this.blocks.splice(index, 1);
+        }
     }
 
     clone(): Part {
         const clonedPart = new Part();
         clonedPart.name = this.name;
-        clonedPart.block = new Block(this.block);
+        clonedPart.blocks = this.blocks.map(block => new Block(block));
         clonedPart.instrumentType = this.instrumentType;
         return clonedPart;
     }
@@ -36,7 +39,7 @@ export class Part {
     toJSON() {
         return {
             id: this.id,
-            block: this.block,
+            blocks: this.blocks,
             instrumentType: this.instrumentType
         };
     }

@@ -7,6 +7,8 @@ import { Song } from "./song";
 import { Block } from "./block";
 import { Command, CommandType } from "./command";
 import { InstrumentType, InstrumentFactory } from "./instruments";
+import { VariableContext } from "./variable.context";
+import { OperationType } from './operation';
 
 export class Player {
     private static defaultInstrument = InstrumentFactory.getInstrument(InstrumentType.PIANO);
@@ -101,6 +103,28 @@ export class Player {
     executeCommands(block: Block): void {
         block.commands?.forEach(command => {
             command.execute(this);
+        });
+    }
+
+    executeOperations(block: Block, variableContext: VariableContext): void {
+        block.operations?.forEach(operation => {
+            const variableName = operation.variableName;
+            if (variableContext && variableName) {
+                const currentValue = variableContext.getValue(variableName);
+                if (typeof currentValue === 'number') {
+                    switch (operation.type) {
+                        case OperationType.INCREMENT:
+                            variableContext.setVariable(variableName, currentValue + operation.value);
+                            break;
+                        case OperationType.DECREMENT:
+                            variableContext.setVariable(variableName, currentValue - operation.value);
+                            break;
+                        case OperationType.ASSIGN:
+                            variableContext.setVariable(variableName, operation.value);
+                            break;
+                    }
+                }
+            }
         });
     }
 }

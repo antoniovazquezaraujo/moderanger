@@ -27,7 +27,16 @@
 
     <div *ngFor="let command of block.commands" class="command">
         <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
-            <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
+            <ng-container *ngIf="isCommand(command)">
+                <optgroup label="Commands">
+                    <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
+                </optgroup>
+            </ng-container>
+            <ng-container *ngIf="isOperation(command)">
+                <optgroup label="Operations">
+                    <option *ngFor="let type of operationTypeNames" [value]="type">{{type}}</option>
+                </optgroup>
+            </ng-container>
         </select>
 
         <ng-container [ngSwitch]="command.type">
@@ -51,9 +60,9 @@
                 </ng-template>
             </ng-container>
 
-            <ng-container *ngSwitchCase="commandTypes.INCREMENT">
+            <ng-container *ngSwitchCase="operationTypes.INCREMENT">
                 <p-dropdown class="command-value" 
-                    [options]="getFilteredVariables(command)" 
+                    [options]="[{ label: 'INCREMENT', value: 'INCREMENT' }, { label: 'DECREMENT', value: 'DECREMENT' }, { label: 'ASSIGN', value: 'ASSIGN' }]" 
                     [ngModel]="getSelectedValue(command)"
                     (ngModelChange)="handleValueInput($event, command)" 
                     [showClear]="true"
@@ -133,7 +142,7 @@
         </ng-container>
 
         <div class="command-controls">
-            <p-button *ngIf="command.type !== commandTypes.INCREMENT" 
+            <p-button *ngIf="command.type !== commandTypes.SCALE && command.type !== commandTypes.PLAYMODE && command.type !== commandTypes.PATTERN" 
                 (click)="toggleVariableMode(command, $event)" 
                 icon="pi pi-dollar">
             </p-button>
@@ -142,6 +151,9 @@
         </div>
     </div>
     <div class="add-command-wrapper">
-        <p-button class="add-command-button" (click)="addCommand()" icon="pi pi-plus"></p-button>
+        <p-button class="add-command-button" (click)="addElement('command')" icon="pi pi-plus" label="Add Command"></p-button>
+    </div>
+    <div class="add-operation-wrapper">
+        <p-button class="add-operation-button" (click)="addElement('operation')" icon="pi pi-plus" label="Add Operation"></p-button>
     </div>
 </div>

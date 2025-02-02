@@ -8,6 +8,7 @@ export class VariableContext {
     onVariablesChange = new Subject<void>();
 
     setVariable(name: string, value: VariableValue): void {
+        console.log(`Setting variable: ${name} to value: ${value}`);
         this.variables.set(name, value);
         this.onVariablesChange.next();
     }

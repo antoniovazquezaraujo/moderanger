@@ -9,6 +9,9 @@ import { PlayMode, arpeggiate } from "./play.mode";
 import { parseBlockNotes } from "./ohm.parser";
 import { Subject } from 'rxjs';
 import { InstrumentType, InstrumentFactory } from "./instruments";
+import { Operation } from './operation';
+import { VariableContext } from './variable.context';
+import { OperationType } from './operation';
 
 type PartSoundInfo = {
     noteDatas: NoteData[];
@@ -70,6 +73,7 @@ export class SongPlayer {
     }
 
     playSong(song: Song): void {
+        console.log('Starting to play song');
         Transport.start();
         Transport.bpm.value = 100;
         Transport.cancel();
@@ -80,15 +84,22 @@ export class SongPlayer {
             let partSoundInfo: PartSoundInfo[] = [];
 
             for (const part of song.parts) {
+                console.log(`Executing block operations for part: ${part.name}`);
+                part.blocks.forEach(block => this.executeRecursiveBlockOperations(block, song.variableContext));
+            }
+
+            for (const part of song.parts) {
                 const player = new Player(channel++, part.instrumentType);
-                const noteData = this.playPartBlocks(part.block, player, song);
-                partSoundInfo.push({ 
-                    noteDatas: noteData, 
-                    player, 
-                    noteDataIndex: 0, 
-                    arpeggioIndex: 0, 
-                    pendingTurnsToPlay: 0,
-                    isInfiniteLoop: part.block.repeatingTimes === -1
+                part.blocks.forEach(block => {
+                    const noteData = this.playPartBlocks(block, player, song);
+                    partSoundInfo.push({ 
+                        noteDatas: noteData, 
+                        player, 
+                        noteDataIndex: 0, 
+                        arpeggioIndex: 0, 
+                        pendingTurnsToPlay: 0,
+                        isInfiniteLoop: block.repeatingTimes === -1
+                    });
                 });
             }
 
@@ -96,29 +107,40 @@ export class SongPlayer {
             Transport.start();
         }
     }
+    private executeRecursiveBlockOperations(block: Block, variableContext: VariableContext){
+        this.executeBlockOperations(block, variableContext);
+        if (block.children && block.children.length > 0) {
+            for (const child of block.children) {
+                this.executeRecursiveBlockOperations(child, variableContext);
+            }
+        }
+    }
 
     playPart(part: Part, player: Player, song: Song): void {
+        console.log(`Starting to play part: ${part.name}`);
         Transport.start();
         Transport.bpm.value = 100;
         Transport.cancel();
         Transport.stop();
 
         this._currentPart = part;
-        this._currentBlock = part.block;
+        this._currentBlock = part.blocks[0]; // Assuming you want to start with the first block
 
         player.setInstrument(part.instrumentType);
 
-        const noteData = this.playPartBlocks(part.block, player, song);
-        const partSoundInfo: PartSoundInfo[] = [{
-            noteDatas: noteData,
-            player,
-            noteDataIndex: 0,
-            arpeggioIndex: 0,
-            pendingTurnsToPlay: 0,
-            isInfiniteLoop: part.block.repeatingTimes === -1
-        }];
+        part.blocks.forEach(block => {
+            const noteData = this.playPartBlocks(block, player, song);
+            const partSoundInfo: PartSoundInfo = {
+                noteDatas: noteData,
+                player,
+                noteDataIndex: 0,
+                arpeggioIndex: 0,
+                pendingTurnsToPlay: 0,
+                isInfiniteLoop: block.repeatingTimes === -1
+            };
+            this.playNoteDatas([partSoundInfo]);
+        });
 
-        this.playNoteDatas(partSoundInfo);
         Transport.start();
     }
 
@@ -126,36 +148,52 @@ export class SongPlayer {
         return this.playBlock(block, [], player, block.repeatingTimes, song.variableContext);
     }
 
+    private executeBlockOperations(block: Block, variableContext: VariableContext): void {
+        console.log('Current variables and values:', Array.from(variableContext.getAllVariables().entries()));
+        for (const operation of block.operations) {
+            const variableName = operation.variableName;
+            if (variableContext && variableName) {
+                const currentValue = variableContext.getValue(variableName);
+                console.log(`Before operation: ${operation.type}, ${variableName} = ${currentValue}`);
+                if (typeof currentValue === 'number') {
+                    switch (operation.type) {
+                        case OperationType.INCREMENT:
+                            const newValue = currentValue + operation.value;
+                            variableContext.setVariable(variableName, newValue);
+                            console.log(`Incremented ${variableName} from ${currentValue} to ${newValue}`);
+                            break;
+                        case OperationType.DECREMENT:
+                            variableContext.setVariable(variableName, currentValue - operation.value);
+                            console.log(`Decremented ${variableName} to ${currentValue - operation.value}`);
+                            break;
+                        case OperationType.ASSIGN:
+                            variableContext.setVariable(variableName, operation.value);
+                            console.log(`Assigned ${variableName} to ${operation.value}`);
+                            break;
+                    }
+                } else {
+                    console.warn(`Variable ${variableName} is not a number or is undefined.`);
+                }
+            } else {
+                console.warn(`Variable context or variable name is undefined for operation: ${operation.type}`);
+            }
+        }
+    }
+
     private playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number, variableContext?: any): NoteData[] {
-        if (repeatingTimes === -1) {
-            const repetitions = 100;
-            for (let i = 0; i < repetitions; i++) {
-                let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
-                
-                if (block.children && block.children.length > 0) {
-                    let childrenNoteDatas: NoteData[] = [];
-                    for (const child of block.children) {
-                        childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
-                    }
-                    blockNotes = blockNotes.concat(childrenNoteDatas);
+        // Luego generar y reproducir las notas
+        for (let i = 0; i < repeatingTimes; i++) {
+            let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
+            
+            if (block.children && block.children.length > 0) {
+                let childrenNoteDatas: NoteData[] = [];
+                for (const child of block.children) {
+                    childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
                 }
-                
-                noteDatas = noteDatas.concat(blockNotes);
+                blockNotes = blockNotes.concat(childrenNoteDatas);
             }
-        } else if (repeatingTimes > 0) {
-            for (let i = 0; i < repeatingTimes; i++) {
-                let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
-                
-                if (block.children && block.children.length > 0) {
-                    let childrenNoteDatas: NoteData[] = [];
-                    for (const child of block.children) {
-                        childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
-                    }
-                    blockNotes = blockNotes.concat(childrenNoteDatas);
-                }
-                
-                noteDatas = noteDatas.concat(blockNotes);
-            }
+            
+            noteDatas = noteDatas.concat(blockNotes);
         }
         
         return noteDatas;

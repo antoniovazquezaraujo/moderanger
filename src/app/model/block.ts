@@ -1,5 +1,6 @@
 import { BlockContent } from './block.content';
 import { Command } from './command';
+import { Operation } from './operation';
 import { VariableContext } from './variable.context';
 
 export class Block {
@@ -12,6 +13,7 @@ export class Block {
     repeatingTimes: number = 1;
     children: Block[] = [];
     private variableContext?: VariableContext;
+    operations: Operation[] = [];
 
     constructor(block?: any) {
         this.blockContent = new BlockContent();
@@ -26,11 +28,15 @@ export class Block {
             this.pulse = cloned.pulse;
             this.repeatingTimes = Math.max(0, cloned.repeatingTimes);
             this.children = cloned.children;
+            this.operations = cloned.operations;
+            console.log(`Cloned block with operations: ${JSON.stringify(this.operations)}`);
         } else if (block) {
             // Si es un objeto plano, construir normalmente
             this.label = block.label || '';
             this.commands = block.commands?.map((cmd: any) => new Command(cmd)) || [];
             this.children = block.children?.map((child: any) => new Block(child)) || [];
+            this.operations = block.operations?.map((op: any) => new Operation(op.type, op.variableName, op.value)) || [];
+            console.log(`Initialized block with operations: ${JSON.stringify(this.operations)}`);
             
             if (block.blockContent) {
                 this.blockContent.notes = block.blockContent.notes || '';
@@ -40,6 +46,7 @@ export class Block {
             this.pulse = block.pulse || 0;
             this.repeatingTimes = Math.max(0, block.repeatingTimes || 1);
         }
+        console.log(`Block created with ID: ${this.id}, Label: ${this.label}, Operations: ${JSON.stringify(this.operations)}`);
     }
 
     setVariableContext(context: VariableContext) {
@@ -59,8 +66,6 @@ export class Block {
 
     clone(): Block {
         const clonedBlock = new Block();
-        
-        // Copiar propiedades básicas
         clonedBlock.id = Block._id++;
         clonedBlock.label = this.label;
         clonedBlock.pulse = this.pulse;
@@ -82,6 +87,9 @@ export class Block {
         
         // Clonar children recursivamente
         clonedBlock.children = this.children.map(child => child.clone());
+        
+        // Clonar operations
+        clonedBlock.operations = this.operations.map(operation => new Operation(operation.type, operation.variableName, operation.value));
         
         return clonedBlock;
     }

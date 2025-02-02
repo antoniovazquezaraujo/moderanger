@@ -16,7 +16,7 @@ export class Song {
         if (song) {
             this.parts = song.parts?.map((part: any) => {
                 const newPart = new Part();
-                newPart.block = new Block(part);
+                newPart.blocks = part.blocks.map((block: any) => new Block(block));
                 return newPart;
             }) || [];
             
@@ -51,7 +51,7 @@ export class Song {
         });
 
         return {
-            parts: this.parts.map(part => part.block),
+            parts: this.parts.map(part => part.blocks),
             variables
         };
     }

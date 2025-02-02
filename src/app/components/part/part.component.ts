@@ -22,6 +22,8 @@ export class PartComponent implements OnInit {
     @Output() onDuplicatePart: EventEmitter<Part>;
     @Output() onRemovePart: EventEmitter<Part>;
 
+    currentBlock: Block = new Block();
+
     constructor(private songPlayer: SongPlayer) {
         this.onDuplicatePart = new EventEmitter<Part>();
         this.onRemovePart = new EventEmitter<Part>();
@@ -31,27 +33,52 @@ export class PartComponent implements OnInit {
         return (block.children && block?.children.length > 0) as boolean;
     }
 
+    ensureUniqueBlocks() {
+        const uniqueBlocks = Array.from(new Set(this.part.blocks.map(block => block.id)))
+            .map(id => this.part.blocks.find(block => block.id === id));
+        this.part.blocks = uniqueBlocks.filter(block => block !== undefined) as Block[];
+        console.log('Ensured unique blocks:', this.part.blocks);
+    }
+
     onDuplicateBlock(block: Block) {
         let copy = new Block(block);
-        this.part.block.children.push(copy);
+        const index = this.part.blocks.indexOf(block);
+        if (index !== -1) {
+            this.part.blocks[index].children.push(copy);
+            this.ensureUniqueBlocks();
+            console.log('Block duplicated:', copy);
+            console.log('Current blocks:', this.part.blocks);
+        }
     }
 
     onRemoveBlock(block: Block) {
         this.part.removeBlock(block);
     }
 
-    onAddNewCommand() {
-        this.part.block.commands.push(new Command());
+    onAddNewCommand(block: Block) {
+        const index = this.part.blocks.indexOf(block);
+        if (index !== -1) {
+            this.part.blocks[index].commands.push(new Command());
+        }
     }
 
     onAddChild(block: Block) {
-        block.children.push(new Block({}));
+        const newBlock = new Block({});
+        block.children.push(newBlock);
+        this.ensureUniqueBlocks();
+        console.log('Child block added:', newBlock);
+        console.log('Current blocks:', this.part.blocks);
     }
 
     onRemoveCommand(block: Block) {
     }
 
     ngOnInit(): void {
+        if (this.part.blocks.length > 0) {
+            this.currentBlock = this.part.blocks[0];
+        }
+        this.ensureUniqueBlocks();
+        console.log('Initial blocks:', this.part.blocks);
     }
 
     duplicatePart() {
@@ -73,5 +100,9 @@ export class PartComponent implements OnInit {
 
     stopPart() {
         this.songPlayer.stop();
+    }
+
+    setCurrentBlock(block: Block) {
+        this.currentBlock = block;
     }
 }

@@ -13,8 +13,7 @@ export enum CommandType {
     SHIFTSIZE = 'SHIFTSIZE',
     SHIFTVALUE = 'SHIFTVALUE',
     PATTERN_GAP = 'PATTERN_GAP',
-    PATTERN = 'PATTERN',
-    INCREMENT = 'INCREMENT'
+    PATTERN = 'PATTERN'
 }
 
 export class Command {
@@ -129,15 +128,10 @@ export class Command {
             case CommandType.SHIFTVALUE: player.shiftValue = value; break;
             case CommandType.PATTERN_GAP: player.decorationGap = value; break;
             case CommandType.PATTERN: player.decorationPattern = value; break;
-            case CommandType.INCREMENT:
-                if (this.isVariable && context && typeof this._value === 'string') {
-                    const varName = this._value.startsWith('$') ? this._value.substring(1) : this._value;
-                    const currentValue = context.getValue(varName);
-                    if (typeof currentValue === 'number') {
-                        context.setVariable(varName, currentValue + 1);
-                    }
-                }
-                break;
         }
     }
 }
+
+
+
+

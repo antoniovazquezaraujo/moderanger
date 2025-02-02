@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
+import { Operation, OperationType } from 'src/app/model/operation';
 import { getPlayModeNames } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
 import { VariableContext } from 'src/app/model/variable.context';
@@ -27,6 +28,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     availableVariables: VariableOption[] = [];
     private variablesSubscription?: Subscription;
     private commandBeingConverted: Command | null = null;
+    operationTypes = OperationType;
+    operationTypeNames: string[] = [];
+    selectedElementType: 'command' | 'operation' = 'command';
+    selectedOperationType: OperationType = OperationType.INCREMENT;
   
     constructor(private cdr: ChangeDetectorRef) {         
         this.playModeNames = getPlayModeNames();
@@ -35,6 +40,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit(): void {
         this.commandTypeNames = Object.values(CommandType);
+        this.operationTypeNames = Object.values(OperationType);
         this.updateAvailableVariables();
         this.subscribeToVariableChanges();
     }
@@ -89,15 +95,23 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    addCommand(): void {
-        if (!this.block.commands) {
-            this.block.commands = [];
+    addElement(type: 'command' | 'operation'): void {
+        if (type === 'command') {
+            if (!this.block.commands) {
+                this.block.commands = [];
+            }
+            const newCommand = new Command();
+            newCommand.type = CommandType.OCT;
+            newCommand.setValue(0);
+            this.block.commands.push(newCommand);
+        } else if (type === 'operation') {
+            if (!this.block.operations) {
+                this.block.operations = [];
+            }
+            const newOperation = new Operation(this.selectedOperationType, 'variableName', 1);
+            this.block.operations.push(newOperation);
+            console.log('Adding new operation:', newOperation);
         }
-        const newCommand = new Command();
-        // Por defecto, crear como comando numérico
-        newCommand.type = CommandType.OCT;
-        newCommand.setValue(0);
-        this.block.commands.push(newCommand);
     }
 
     toggleVariableMode(command: Command, event: Event): void {
@@ -311,14 +325,40 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    onCommandTypeChange(command: Command): void {
-        if (command.type === CommandType.INCREMENT) {
+    onCommandTypeChange(command: Command | Operation): void {
+        if (command instanceof Command && command.type === this.commandTypes.OCT) {
+            // Lógica para comandos de tipo OCT
             command.isVariable = true;
-            // Si hay variables numéricas disponibles, seleccionar la primera
             const numericVariables = this.getFilteredVariables(command);
             if (numericVariables.length > 0) {
                 command.setVariable(numericVariables[0].value);
             }
+        } else if (command instanceof Operation && command.type === this.operationTypes.INCREMENT) {
+            // Lógica para operaciones de tipo INCREMENT
+            const variableName = command.variableName;
+            if (this.variableContext && variableName) {
+                const currentValue = this.variableContext.getValue(variableName);
+                if (typeof currentValue === 'number') {
+                    this.variableContext.setVariable(variableName, currentValue + command.value);
+                }
+            }
         }
+    }
+
+    addOperation(): void {
+        if (!this.block.operations) {
+            this.block.operations = [];
+        }
+        const newOperation = new Operation(OperationType.INCREMENT, 'variableName', 1); // Example operation
+        this.block.operations.push(newOperation);
+        console.log('Added new operation:', newOperation);
+    }
+
+    isCommand(element: any): boolean {
+        return element instanceof Command;
+    }
+
+    isOperation(element: any): boolean {
+        return element instanceof Operation;
     }
 }
