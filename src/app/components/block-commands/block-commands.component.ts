@@ -29,7 +29,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     private variablesSubscription?: Subscription;
     private commandBeingConverted: Command | null = null;
     operationTypes = OperationType;
-    operationTypeNames: string[] = [];
+    operationTypeNames: string[] = Object.values(OperationType);
     selectedElementType: 'command' | 'operation' = 'command';
     selectedOperationType: OperationType = OperationType.INCREMENT;
   

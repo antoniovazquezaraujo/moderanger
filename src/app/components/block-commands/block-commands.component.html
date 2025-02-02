@@ -1,159 +1,163 @@
-<div class="commands-container">
-    <div class="notes-input">
-        <ng-container *ngIf="block.blockContent.isVariable; else notesInput">
-            <p-dropdown class="notes-value" 
-                [options]="getMelodyVariables()" 
-                [(ngModel)]="block.blockContent.variableName"
-                (ngModelChange)="handleMelodyVariableChange($event)" 
-                [showClear]="true"
-                optionLabel="label"
-                optionValue="value"
-                [placeholder]="getMelodyVariables().length ? 'Select melody variable' : 'No melody variables'"
-                appendTo="body">
-            </p-dropdown>
-        </ng-container>
-        <ng-template #notesInput>
-            <input type="text" 
-                [(ngModel)]="block.blockContent.notes" 
-                (ngModelChange)="handleNotesChange($event)"
-                placeholder="Enter notes (e.g. 1 2 3)">
-        </ng-template>
-        <div class="notes-controls">
-            <p-button (click)="toggleMelodyVariable($event)" 
-                icon="pi pi-dollar">
-            </p-button>
-        </div>
-    </div>
-
-    <div *ngFor="let command of block.commands" class="command">
-        <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
-            <ng-container *ngIf="isCommand(command)">
-                <optgroup label="Commands">
-                    <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
-                </optgroup>
-            </ng-container>
-            <ng-container *ngIf="isOperation(command)">
-                <optgroup label="Operations">
-                    <option *ngFor="let type of operationTypeNames" [value]="type">{{type}}</option>
-                </optgroup>
-            </ng-container>
-        </select>
-
-        <ng-container [ngSwitch]="command.type">
-            <ng-container *ngSwitchCase="commandTypes.PLAYMODE">
-                <ng-container *ngIf="command.isVariable; else playModeSelect">
-                    <p-dropdown class="command-value" 
-                        [options]="getFilteredVariables(command)" 
-                        [ngModel]="getSelectedValue(command)"
-                        (ngModelChange)="handleValueInput($event, command)" 
+<div class="block-container">
+    <!-- First Row: Existing controls -->
+    <div class="first-row">
+        <div class="commands-container">
+            <div class="notes-input">
+                <ng-container *ngIf="block.blockContent.isVariable; else notesInput">
+                    <p-dropdown class="notes-value" 
+                        [options]="getMelodyVariables()" 
+                        [(ngModel)]="block.blockContent.variableName"
+                        (ngModelChange)="handleMelodyVariableChange($event)" 
                         [showClear]="true"
                         optionLabel="label"
                         optionValue="value"
-                        [placeholder]="getFilteredVariables(command).length ? 'Select PlayMode variable' : 'No PlayMode variables'"
+                        [placeholder]="getMelodyVariables().length ? 'Select melody variable' : 'No melody variables'"
                         appendTo="body">
                     </p-dropdown>
                 </ng-container>
-                <ng-template #playModeSelect>
-                    <select [(ngModel)]="command.value">
-                        <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
-                    </select>
-                </ng-template>
-            </ng-container>
-
-            <ng-container *ngSwitchCase="operationTypes.INCREMENT">
-                <p-dropdown class="command-value" 
-                    [options]="[{ label: 'INCREMENT', value: 'INCREMENT' }, { label: 'DECREMENT', value: 'DECREMENT' }, { label: 'ASSIGN', value: 'ASSIGN' }]" 
-                    [ngModel]="getSelectedValue(command)"
-                    (ngModelChange)="handleValueInput($event, command)" 
-                    [showClear]="true"
-                    optionLabel="label"
-                    optionValue="value"
-                    [placeholder]="getFilteredVariables(command).length ? 'Select variable to increment' : 'No numeric variables'"
-                    appendTo="body">
-                </p-dropdown>
-            </ng-container>
-
-            <ng-container *ngSwitchCase="commandTypes.SCALE">
-                <ng-container *ngIf="command.isVariable; else scaleSelect">
-                    <p-dropdown class="command-value" 
-                        [options]="getFilteredVariables(command)" 
-                        [ngModel]="getSelectedValue(command)"
-                        (ngModelChange)="handleValueInput($event, command)" 
-                        [showClear]="true"
-                        optionLabel="label"
-                        optionValue="value"
-                        [placeholder]="getFilteredVariables(command).length ? 'Select Scale variable' : 'No Scale variables'"
-                        appendTo="body">
-                    </p-dropdown>
-                </ng-container>
-                <ng-template #scaleSelect>
-                    <select [(ngModel)]="command.value">
-                        <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
-                    </select>
-                </ng-template>
-            </ng-container>
-
-            <ng-container *ngSwitchCase="commandTypes.PATTERN">
-                <ng-container *ngIf="command.isVariable; else patternInput">
-                    <p-dropdown class="command-value" 
-                        [options]="getFilteredVariables(command)" 
-                        [ngModel]="getSelectedValue(command)"
-                        (ngModelChange)="handleValueInput($event, command)" 
-                        [showClear]="true"
-                        optionLabel="label"
-                        optionValue="value"
-                        [placeholder]="getFilteredVariables(command).length ? 'Select pattern variable' : 'No pattern variables'"
-                        appendTo="body">
-                    </p-dropdown>
-                </ng-container>
-                <ng-template #patternInput>
+                <ng-template #notesInput>
                     <input type="text" 
-                        [(ngModel)]="command.value"
-                        placeholder="Enter pattern notes (e.g. 1 2 3)">
+                        [(ngModel)]="block.blockContent.notes" 
+                        (ngModelChange)="handleNotesChange($event)"
+                        placeholder="Enter notes (e.g. 1 2 3)">
                 </ng-template>
-            </ng-container>
+                <div class="notes-controls">
+                    <p-button (click)="toggleMelodyVariable($event)" 
+                        icon="pi pi-dollar">
+                    </p-button>
+                </div>
+            </div>
 
-            <ng-container *ngSwitchDefault>
-                <ng-container *ngIf="command.isVariable; else numberInput">
-                    <p-dropdown class="command-value" 
-                        [options]="getFilteredVariables(command)" 
-                        [ngModel]="getSelectedValue(command)"
-                        (ngModelChange)="handleValueInput($event, command)" 
-                        [showClear]="true"
-                        optionLabel="label"
-                        optionValue="value"
-                        [placeholder]="getFilteredVariables(command).length ? 'Select number variable' : 'No number variables'"
-                        appendTo="body">
-                    </p-dropdown>
+            <div *ngFor="let command of block.commands" class="command">
+                <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
+                    <optgroup label="Commands">
+                        <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
+                    </optgroup>
+                </select>
+
+                <ng-container [ngSwitch]="command.type">
+                    <ng-container *ngSwitchCase="commandTypes.PLAYMODE">
+                        <ng-container *ngIf="command.isVariable; else playModeSelect">
+                            <p-dropdown class="command-value" 
+                                [options]="getFilteredVariables(command)" 
+                                [ngModel]="getSelectedValue(command)"
+                                (ngModelChange)="handleValueInput($event, command)" 
+                                [showClear]="true"
+                                optionLabel="label"
+                                optionValue="value"
+                                [placeholder]="getFilteredVariables(command).length ? 'Select PlayMode variable' : 'No PlayMode variables'"
+                                appendTo="body">
+                            </p-dropdown>
+                        </ng-container>
+                        <ng-template #playModeSelect>
+                            <select [(ngModel)]="command.value">
+                                <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+                            </select>
+                        </ng-template>
+                    </ng-container>
+
+                    <ng-container *ngSwitchCase="operationTypes.INCREMENT">
+                        <p-dropdown class="command-value" 
+                            [options]="[{ label: 'INCREMENT', value: 'INCREMENT' }, { label: 'DECREMENT', value: 'DECREMENT' }, { label: 'ASSIGN', value: 'ASSIGN' }]" 
+                            [ngModel]="getSelectedValue(command)"
+                            (ngModelChange)="handleValueInput($event, command)" 
+                            [showClear]="true"
+                            optionLabel="label"
+                            optionValue="value"
+                            [placeholder]="getFilteredVariables(command).length ? 'Select variable to increment' : 'No numeric variables'"
+                            appendTo="body">
+                        </p-dropdown>
+                    </ng-container>
+
+                    <ng-container *ngSwitchCase="commandTypes.SCALE">
+                        <ng-container *ngIf="command.isVariable; else scaleSelect">
+                            <p-dropdown class="command-value" 
+                                [options]="getFilteredVariables(command)" 
+                                [ngModel]="getSelectedValue(command)"
+                                (ngModelChange)="handleValueInput($event, command)" 
+                                [showClear]="true"
+                                optionLabel="label"
+                                optionValue="value"
+                                [placeholder]="getFilteredVariables(command).length ? 'Select Scale variable' : 'No Scale variables'"
+                                appendTo="body">
+                            </p-dropdown>
+                        </ng-container>
+                        <ng-template #scaleSelect>
+                            <select [(ngModel)]="command.value">
+                                <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
+                            </select>
+                        </ng-template>
+                    </ng-container>
+
+                    <ng-container *ngSwitchCase="commandTypes.PATTERN">
+                        <ng-container *ngIf="command.isVariable; else patternInput">
+                            <p-dropdown class="command-value" 
+                                [options]="getFilteredVariables(command)" 
+                                [ngModel]="getSelectedValue(command)"
+                                (ngModelChange)="handleValueInput($event, command)" 
+                                [showClear]="true"
+                                optionLabel="label"
+                                optionValue="value"
+                                [placeholder]="getFilteredVariables(command).length ? 'Select pattern variable' : 'No pattern variables'"
+                                appendTo="body">
+                            </p-dropdown>
+                        </ng-container>
+                        <ng-template #patternInput>
+                            <input type="text" 
+                                [(ngModel)]="command.value"
+                                placeholder="Enter pattern notes (e.g. 1 2 3)">
+                        </ng-template>
+                    </ng-container>
+
+                    <ng-container *ngSwitchDefault>
+                        <ng-container *ngIf="command.isVariable; else numberInput">
+                            <p-dropdown class="command-value" 
+                                [options]="getFilteredVariables(command)" 
+                                [ngModel]="getSelectedValue(command)"
+                                (ngModelChange)="handleValueInput($event, command)" 
+                                [showClear]="true"
+                                optionLabel="label"
+                                optionValue="value"
+                                [placeholder]="getFilteredVariables(command).length ? 'Select number variable' : 'No number variables'"
+                                appendTo="body">
+                            </p-dropdown>
+                        </ng-container>
+                        <ng-template #numberInput>
+                            <p-inputNumber class="command-value" 
+                                [(ngModel)]="command.value"
+                                mode="decimal"
+                                [showButtons]="true"
+                                buttonLayout="horizontal"
+                                [min]="-999"
+                                [max]="999"
+                                incrementButtonIcon="pi pi-plus"
+                                decrementButtonIcon="pi pi-minus">
+                            </p-inputNumber>
+                        </ng-template>
+                    </ng-container>
                 </ng-container>
-                <ng-template #numberInput>
-                    <p-inputNumber class="command-value" 
-                        [(ngModel)]="command.value"
-                        mode="decimal"
-                        [showButtons]="true"
-                        buttonLayout="horizontal"
-                        [min]="-999"
-                        [max]="999"
-                        incrementButtonIcon="pi pi-plus"
-                        decrementButtonIcon="pi pi-minus">
-                    </p-inputNumber>
-                </ng-template>
-            </ng-container>
-        </ng-container>
 
-        <div class="command-controls">
-            <p-button *ngIf="command.type !== commandTypes.SCALE && command.type !== commandTypes.PLAYMODE && command.type !== commandTypes.PATTERN" 
-                (click)="toggleVariableMode(command, $event)" 
-                icon="pi pi-dollar">
-            </p-button>
+                <div class="command-controls">
+                    <p-button *ngIf="command.type !== commandTypes.SCALE && command.type !== commandTypes.PLAYMODE && command.type !== commandTypes.PATTERN" 
+                        (click)="toggleVariableMode(command, $event)" 
+                        icon="pi pi-dollar">
+                    </p-button>
 
-            <p-button (click)="removeCommand(command)" icon="pi pi-times"></p-button>
+                    <p-button (click)="removeCommand(command)" icon="pi pi-times"></p-button>
+                </div>
+            </div>
+            <div class="add-command-wrapper">
+                <p-button class="add-command-button" (click)="addElement('command')" icon="pi pi-plus" label="Add Command"></p-button>
+            </div>
         </div>
     </div>
-    <div class="add-command-wrapper">
-        <p-button class="add-command-button" (click)="addElement('command')" icon="pi pi-plus" label="Add Command"></p-button>
-    </div>
-    <div class="add-operation-wrapper">
-        <p-button class="add-operation-button" (click)="addElement('operation')" icon="pi pi-plus" label="Add Operation"></p-button>
+
+    <!-- Second Row: Dropdown for operation types -->
+    <div class="second-row">
+        <p-dropdown 
+            [options]="operationTypeNames"
+            [(ngModel)]="selectedOperationType" 
+            placeholder="Select Operation Type">
+        </p-dropdown>
     </div>
 </div>

@@ -6,7 +6,7 @@ export enum OperationType {
     ASSIGN = 'ASSIGN'
 }
 export class Operation {
-    type: OperationType;
+    type: OperationType = OperationType.INCREMENT;
     variableName: string;
     value: number;
 
