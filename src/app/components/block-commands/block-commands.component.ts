@@ -6,6 +6,7 @@ import { getPlayModeNames } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
 import { VariableContext } from 'src/app/model/variable.context';
 import { Subscription } from 'rxjs';
+import { IncrementOperation, DecrementOperation, AssignOperation } from 'src/app/model/operation';
 
 interface VariableOption {
     label: string;
@@ -37,7 +38,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     selectedValue: string | null = null;
 
     // Initialize operations array
-    operations: { type: OperationType, value: number }[] = [];
+    operations: { type: OperationType, variableName: string, value: number }[] = [];
 
     operationDropdownOptions = this.operationTypeNames.map(type => ({ label: type, value: type }));
 
@@ -47,10 +48,19 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     ngOnInit(): void {
+        console.log('BlockCommandsComponent initialized.');
         this.commandTypeNames = Object.values(CommandType);
         this.operationTypeNames = Object.values(OperationType);
+        
+        // Asegurarse de que haya al menos una variable numérica por defecto
+        if (this.variableContext && !this.variableContext.hasVariable('counter')) {
+            this.variableContext.setVariable('counter', 0);
+        }
+        
         this.updateAvailableVariables();
         this.subscribeToVariableChanges();
+        // Set a default operation type
+        this.selectedOperationType = this.operationTypeNames[0] as OperationType;
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -94,6 +104,22 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                     label: `${name} (${value})`,
                     value: name
                 }));
+            
+            // Si no hay variables disponibles, crear una por defecto
+            if (this.availableVariables.length === 0 && this.variableContext) {
+                this.variableContext.setVariable('counter', 0);
+                this.availableVariables = [{
+                    label: 'counter (0)',
+                    value: 'counter'
+                }];
+            }
+
+            if (!this.selectedVariable && this.availableVariables.length > 0) {
+                this.selectedVariable = this.availableVariables[0].value;
+            }
+            
+            console.log('Available variables updated:', this.availableVariables);
+            console.log('Selected variable:', this.selectedVariable);
         }
     }
 
@@ -104,6 +130,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     addElement(type: 'command' | 'operation'): void {
+        console.log('addElement called with type:', type);
         if (type === 'command') {
             if (!this.block.commands) {
                 this.block.commands = [];
@@ -112,10 +139,72 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             newCommand.type = CommandType.OCT;
             newCommand.setValue(0);
             this.block.commands.push(newCommand);
+            this.cdr.detectChanges();
         } else if (type === 'operation') {
-            this.operations.push({ type: this.selectedOperationType!, value: 0 });
-            console.log('Adding new operation:', this.selectedOperationType);
+            // Initialize default values if not set
+            if (!this.selectedOperationType) {
+                this.selectedOperationType = OperationType.INCREMENT;
+            }
+            
+            // If no variable is selected and we have available variables, select the first one
+            if (!this.selectedVariable && this.availableVariables.length > 0) {
+                this.selectedVariable = this.availableVariables[0].value;
+            }
+
+            if (!this.selectedVariable) {
+                console.warn('No variables available for operations.');
+                return;
+            }
+
+            const newOperation = { 
+                type: this.selectedOperationType, 
+                variableName: this.selectedVariable, 
+                value: 1 // Cambiado de 0 a 1 para que el incremento/decremento sea más intuitivo
+            };
+            
+            if (!this.operations) {
+                this.operations = [];
+            }
+            
+            this.operations = [...this.operations, newOperation];
+            
+            // Actualizar las operaciones en el bloque
+            this.updateBlockOperations();
+            
+            console.log('Added new operation:', newOperation);
+            console.log('Current operations:', this.operations);
+            this.cdr.detectChanges();
         }
+    }
+
+    private updateBlockOperations(): void {
+        if (!this.block.operations) {
+            this.block.operations = [];
+        }
+        
+        this.block.operations = this.operations.map(op => {
+            switch (op.type) {
+                case OperationType.INCREMENT:
+                    return new IncrementOperation(op.variableName, op.value || 1);
+                case OperationType.DECREMENT:
+                    return new DecrementOperation(op.variableName, op.value || 1);
+                case OperationType.ASSIGN:
+                    return new AssignOperation(op.variableName, op.value || 0);
+                default:
+                    throw new Error(`Unknown operation type: ${op.type}`);
+            }
+        });
+
+        // Asegurarse de que el bloque tenga acceso al contexto de variables
+        if (this.variableContext) {
+            this.block.setVariableContext(this.variableContext);
+        }
+    }
+
+    removeOperation(index: number): void {
+        this.operations = this.operations.filter((_, i) => i !== index);
+        this.updateBlockOperations();
+        this.cdr.detectChanges();
     }
 
     toggleVariableMode(command: Command, event: Event): void {
@@ -307,6 +396,13 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
+    onVariableSelected(value: string): void {
+        console.log('Variable selected:', value);
+        this.selectedVariable = value;
+        this.updateBlockOperations();
+        this.cdr.detectChanges();
+    }
+
     handleMelodyVariableChange(variableName: string): void {
         if (!variableName) {
             // Si se limpia la selección, mantener el modo variable pero limpiar las notas
@@ -337,9 +433,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             if (numericVariables.length > 0) {
                 command.setVariable(numericVariables[0].value);
             }
-        } else if (command === this.operationTypes.INCREMENT) {
+        } else if (typeof command === 'string' && command === this.operationTypes.INCREMENT) {
             // Lógica para operaciones de tipo INCREMENT
-            const variableName = command;
+            const variableName = this.selectedVariable;
             if (this.variableContext && variableName) {
                 const currentValue = this.variableContext.getValue(variableName);
                 if (typeof currentValue === 'number') {
@@ -350,7 +446,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     addOperation(): void {
-        this.operations.push({ type: OperationType.INCREMENT, value: 0 });
+        this.operations.push({ type: OperationType.INCREMENT, variableName: '', value: 0 });
     }
 
     isCommand(element: any): boolean {
@@ -366,5 +462,12 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         // For now, just reset selectedVariable and selectedValue
         this.selectedVariable = null;
         this.selectedValue = null;
+    }
+
+    logSelectedVariableChange(event: any): void {
+        console.log('Dropdown change event triggered:', event);
+        console.log('Selected Variable changed:', event);
+        this.selectedVariable = event;
+        console.log('Updated selectedVariable:', this.selectedVariable);
     }
 }

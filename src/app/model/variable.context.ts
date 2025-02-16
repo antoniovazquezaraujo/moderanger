@@ -11,6 +11,7 @@ export class VariableContext {
         console.log(`Setting variable: ${name} to value: ${value}`);
         this.variables.set(name, value);
         this.onVariablesChange.next();
+        console.log('Variables changed:', Array.from(this.variables.entries()));
     }
 
     removeVariable(name: string): void {

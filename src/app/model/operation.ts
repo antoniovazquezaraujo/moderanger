@@ -21,11 +21,14 @@ export abstract class BaseOperation {
 export class IncrementOperation extends BaseOperation {
     execute(context: VariableContext): void {
         const currentValue = context.getValue(this.variableName);
+        console.log(`Executing IncrementOperation for variable: ${this.variableName}, current value: ${currentValue}`);
         if (currentValue === undefined || typeof currentValue !== 'number') {
             console.warn(`Variable ${this.variableName} is undefined or not a number.`);
             return;
         }
-        context.setVariable(this.variableName, currentValue + this.value);
+        const newValue = currentValue + this.value;
+        context.setVariable(this.variableName, newValue);
+        console.log(`Variable ${this.variableName} incremented to: ${newValue}`);
     }
 }
 

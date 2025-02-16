@@ -64,6 +64,44 @@ button {
 }
 
 .add-command-wrapper {
-    display: flex;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.second-row {
     margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.operation-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+}
+
+.operation-item p-dropdown {
+    min-width: 150px;
+}
+
+.operation-item p-inputNumber {
+    width: 120px;
+}
+
+/* Make sure buttons are visible */
+:host ::ng-deep .p-button {
+    margin: 2px;
+    min-height: 32px;
+}
+
+:host ::ng-deep .p-button-icon {
+    font-size: 14px;
+}
+
+:host ::ng-deep .p-button-label {
+    font-weight: 500;
 }

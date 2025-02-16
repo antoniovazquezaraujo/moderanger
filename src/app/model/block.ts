@@ -16,6 +16,7 @@ export class Block {
     operations: BaseOperation[] = [];
 
     constructor(block?: any) {
+        console.log('Initializing Block with input:', block);
         this.blockContent = new BlockContent();
         
         if (block instanceof Block) {
@@ -66,6 +67,44 @@ export class Block {
         
         // Propagar el contexto a los bloques hijos
         this.children.forEach(child => child.setVariableContext(context));
+    }
+
+    executeOperations(): void {
+        if (!this.variableContext) {
+            console.warn('No variable context available for executing operations');
+            return;
+        }
+
+        console.log(`Executing operations for block ${this.id}:`, this.operations);
+        this.operations.forEach(operation => {
+            try {
+                operation.execute(this.variableContext!);
+                // Obtener el valor actual después de la operación para logging
+                const currentValue = this.variableContext!.getValue(operation.variableName);
+                console.log(`Operation executed: ${operation.constructor.name} on ${operation.variableName}, new value: ${currentValue}`);
+            } catch (error) {
+                console.error(`Error executing operation:`, error);
+            }
+        });
+    }
+
+    // Método para ejecutar el bloque
+    execute(): void {
+        if (this.variableContext) {
+            // Ejecutar el bloque tantas veces como indique repeatingTimes
+            for (let i = 0; i < this.repeatingTimes; i++) {
+                // Ejecutar las operaciones al inicio de cada repetición
+                this.executeOperations();
+                
+                // Ejecutar los comandos si es necesario
+                // ... código existente para ejecutar comandos ...
+
+                // Ejecutar bloques hijos si hay
+                this.children.forEach(child => child.execute());
+            }
+        } else {
+            console.warn('No variable context available for block execution');
+        }
     }
 
     removeBlock(block: Block) {

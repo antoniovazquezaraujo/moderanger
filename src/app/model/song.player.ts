@@ -106,8 +106,18 @@ export class SongPlayer {
             Transport.start();
         }
     }
-    private executeRecursiveBlockOperations(block: Block, variableContext: VariableContext){
-        this.executeBlockOperations(block, variableContext);
+    private executeRecursiveBlockOperations(block: Block, variableContext: VariableContext) {
+        if (!variableContext) {
+            console.warn('Variable context is undefined in executeRecursiveBlockOperations');
+            return;
+        }
+
+        // Asegurarse de que el bloque tenga el contexto de variables
+        block.setVariableContext(variableContext);
+        
+        // No ejecutamos las operaciones aquí, se ejecutarán durante el playBlock
+        
+        // Configurar el contexto de variables para los bloques hijos
         if (block.children && block.children.length > 0) {
             for (const child of block.children) {
                 this.executeRecursiveBlockOperations(child, variableContext);
@@ -144,44 +154,57 @@ export class SongPlayer {
     }
 
     private playPartBlocks(block: Block, player: Player, song: Song): NoteData[] {
+        console.log('Executing playPartBlocks for block:', block);
         return this.playBlock(block, [], player, block.repeatingTimes, song.variableContext);
     }
 
     private executeBlockOperations(block: Block, variableContext: VariableContext): void {
-        console.log('Current variables and values:', Array.from(variableContext.getAllVariables().entries()));
-        for (const operation of block.operations) {
-            const variableName = operation.variableName;
-            if (variableContext && variableName) {
-                const currentValue = variableContext.getValue(variableName);
-                console.log(`Before operation: ${operation.constructor.name}, ${variableName} = ${currentValue}`);
-                if (typeof currentValue === 'number') {
-                    operation.execute(variableContext);
-                } else {
-                    console.warn(`Variable ${variableName} is not a number or is undefined.`);
-                }
-            } else {
-                console.warn(`Variable context or variable name is undefined for operation: ${operation.constructor.name}`);
+        if (!variableContext) {
+            console.warn('Variable context is undefined.');
+            return;
+        }
+
+        console.log('Executing block operations. Current variables:', Array.from(variableContext.getAllVariables().entries()));
+        
+        // Asegurarse de que el bloque tenga el contexto de variables
+        block.setVariableContext(variableContext);
+        
+        // Ejecutar las operaciones del bloque
+        block.executeOperations();
+
+        // Ejecutar operaciones en bloques hijos
+        if (block.children && block.children.length > 0) {
+            for (const child of block.children) {
+                this.executeBlockOperations(child, variableContext);
             }
         }
     }
 
     private playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number, variableContext?: any): NoteData[] {
-        // Luego generar y reproducir las notas
+        console.log(`Playing block with ${repeatingTimes} repetitions`);
+        let resultNoteDatas: NoteData[] = [];
+
+        // Ejecutar las operaciones antes de cada repetición
         for (let i = 0; i < repeatingTimes; i++) {
-            let blockNotes = this.extractNotesToPlay(block, [], player, variableContext);
-            
-            if (block.children && block.children.length > 0) {
-                let childrenNoteDatas: NoteData[] = [];
-                for (const child of block.children) {
-                    childrenNoteDatas = this.playBlock(child, childrenNoteDatas, player, child.repeatingTimes, variableContext);
-                }
-                blockNotes = blockNotes.concat(childrenNoteDatas);
+            if (variableContext) {
+                block.setVariableContext(variableContext);
+                block.executeOperations();
             }
-            
-            noteDatas = noteDatas.concat(blockNotes);
+
+            // Extraer y agregar las notas para esta repetición
+            const blockNoteDatas = this.extractNotesToPlay(block, noteDatas, player, variableContext);
+            resultNoteDatas = resultNoteDatas.concat(blockNoteDatas);
+
+            // Ejecutar los bloques hijos recursivamente
+            if (block.children && block.children.length > 0) {
+                for (const child of block.children) {
+                    const childNoteDatas = this.playBlock(child, resultNoteDatas, player, child.repeatingTimes, variableContext);
+                    resultNoteDatas = resultNoteDatas.concat(childNoteDatas);
+                }
+            }
         }
-        
-        return noteDatas;
+
+        return resultNoteDatas;
     }
 
     private extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player, variableContext?: any): NoteData[] {
