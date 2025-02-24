@@ -52,11 +52,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         this.commandTypeNames = Object.values(CommandType);
         this.operationTypeNames = Object.values(OperationType);
         
-        // Asegurarse de que haya al menos una variable numérica por defecto
-        if (this.variableContext && !this.variableContext.hasVariable('counter')) {
-            this.variableContext.setVariable('counter', 0);
-        }
-        
         this.updateAvailableVariables();
         this.subscribeToVariableChanges();
         
@@ -112,15 +107,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                     label: `${name} (${value})`,
                     value: name
                 }));
-            
-            // Si no hay variables disponibles, crear una por defecto
-            if (this.availableVariables.length === 0 && this.variableContext) {
-                this.variableContext.setVariable('counter', 0);
-                this.availableVariables = [{
-                    label: 'counter (0)',
-                    value: 'counter'
-                }];
-            }
 
             if (!this.selectedVariable && this.availableVariables.length > 0) {
                 this.selectedVariable = this.availableVariables[0].value;
