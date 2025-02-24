@@ -169,7 +169,7 @@
             </p-button>
         </div>
         <div *ngFor="let operation of operations; let i = index" class="operation-item">
-            <p-dropdown [options]="operationDropdownOptions" [(ngModel)]="operation.type" placeholder="Select operation type" appendTo="body"></p-dropdown>
+            <p-dropdown [options]="operationDropdownOptions" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()" placeholder="Select operation type" appendTo="body"></p-dropdown>
             <p-dropdown [options]="availableVariables" [(ngModel)]="operation.variableName" (ngModelChange)="onVariableSelected($event)" placeholder="Select variable" appendTo="body"></p-dropdown>
             <ng-container *ngIf="operation.type === 'ASSIGN'">
                 <p-inputNumber [(ngModel)]="operation.value" mode="decimal" [showButtons]="true" buttonLayout="horizontal" [min]="-999" [max]="999"></p-inputNumber>

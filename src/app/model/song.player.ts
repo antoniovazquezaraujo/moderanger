@@ -82,10 +82,6 @@ export class SongPlayer {
             let channel = 0;
             let partSoundInfo: PartSoundInfo[] = [];
 
-            for (const part of song.parts) {
-                console.log(`Executing block operations for part: ${part.name}`);
-                part.blocks.forEach(block => this.executeRecursiveBlockOperations(block, song.variableContext));
-            }
 
             for (const part of song.parts) {
                 const player = new Player(channel++, part.instrumentType);
@@ -99,6 +95,10 @@ export class SongPlayer {
                         pendingTurnsToPlay: 0,
                         isInfiniteLoop: block.repeatingTimes === -1
                     });
+                    for (const part of song.parts) {
+                        console.log(`Executing block operations for part: ${part.name}`);
+                        part.blocks.forEach(block => this.executeRecursiveBlockOperations(block, song.variableContext));
+                    }        
                 });
             }
 

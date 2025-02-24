@@ -48,7 +48,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     ngOnInit(): void {
-        console.log('BlockCommandsComponent initialized.');
+        console.log('BlockCommandsComponent initialized with block:', this.block);
         this.commandTypeNames = Object.values(CommandType);
         this.operationTypeNames = Object.values(OperationType);
         
@@ -59,6 +59,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         
         this.updateAvailableVariables();
         this.subscribeToVariableChanges();
+        
+        // Inicializar las operaciones desde el bloque
+        this.initializeOperationsFromBlock();
+        
         // Set a default operation type
         this.selectedOperationType = this.operationTypeNames[0] as OperationType;
     }
@@ -67,8 +71,12 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         if (changes['variableContext']) {
             this.updateAvailableVariables();
             this.subscribeToVariableChanges();
-            this.cdr.detectChanges();
         }
+        if (changes['block'] && !changes['block'].firstChange) {
+            console.log('Block changed:', changes['block'].currentValue);
+            this.initializeOperationsFromBlock();
+        }
+        this.cdr.detectChanges();
     }
 
     ngOnDestroy(): void {
@@ -458,10 +466,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     onOperationTypeChange(): void {
-        // Logic to handle operation type change
-        // For now, just reset selectedVariable and selectedValue
-        this.selectedVariable = null;
-        this.selectedValue = null;
+        // Actualizar las operaciones en el bloque después de cambiar el tipo
+        this.updateBlockOperations();
+        this.cdr.detectChanges();
     }
 
     logSelectedVariableChange(event: any): void {
@@ -469,5 +476,19 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         console.log('Selected Variable changed:', event);
         this.selectedVariable = event;
         console.log('Updated selectedVariable:', this.selectedVariable);
+    }
+
+    private initializeOperationsFromBlock(): void {
+        console.log('Initializing operations from block:', this.block.operations);
+        this.operations = this.block.operations.map(operation => {
+            return {
+                type: operation instanceof IncrementOperation ? OperationType.INCREMENT :
+                      operation instanceof DecrementOperation ? OperationType.DECREMENT :
+                      OperationType.ASSIGN,
+                variableName: operation.variableName,
+                value: operation.value
+            };
+        });
+        console.log('Initialized operations:', this.operations);
     }
 }

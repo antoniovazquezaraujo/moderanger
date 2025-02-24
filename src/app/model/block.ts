@@ -20,19 +20,45 @@ export class Block {
         this.blockContent = new BlockContent();
         
         if (block instanceof Block) {
-            // Si es un Block, usar clone
-            const cloned = block.clone();
-            this.id = cloned.id;
-            this.label = cloned.label;
-            this.commands = cloned.commands;
-            this.blockContent = cloned.blockContent;
-            this.pulse = cloned.pulse;
-            this.repeatingTimes = Math.max(0, cloned.repeatingTimes);
-            this.children = cloned.children;
-            this.operations = cloned.operations;
+            // Si es un Block, copiar directamente sus propiedades
+            this.id = Block._id++;
+            this.label = block.label;
+            this.commands = block.commands.map(command => new Command({
+                type: command.type,
+                value: command.value,
+                isVariable: command.isVariable
+            }));
+            
+            // Clonar blockContent
+            const clonedContent = new BlockContent();
+            clonedContent.notes = block.blockContent.notes;
+            clonedContent.isVariable = block.blockContent.isVariable;
+            clonedContent.variableName = block.blockContent.variableName;
+            this.blockContent = clonedContent;
+            
+            this.pulse = block.pulse;
+            this.repeatingTimes = Math.max(0, block.repeatingTimes);
+            this.children = block.children.map(child => new Block(child));
+            
+            // Clonar operations
+            this.operations = block.operations.map(operation => {
+                if (operation instanceof IncrementOperation) {
+                    return new IncrementOperation(operation.variableName, operation.value);
+                } else if (operation instanceof DecrementOperation) {
+                    return new DecrementOperation(operation.variableName, operation.value);
+                } else if (operation instanceof AssignOperation) {
+                    return new AssignOperation(operation.variableName, operation.value);
+                } else {
+                    throw new Error(`Unknown operation type: ${operation.constructor.name}`);
+                }
+            });
+            
             console.log(`Cloned block with operations: ${JSON.stringify(this.operations)}`);
-        } else if (block) {
-            // Si es un objeto plano, construir normalmente
+            return;
+        }
+        
+        // Si es un objeto plano, construir normalmente
+        if (block) {
             this.label = block.label || '';
             this.commands = block.commands?.map((cmd: any) => new Command(cmd)) || [];
             this.children = block.children?.map((child: any) => new Block(child)) || [];
@@ -156,9 +182,22 @@ export class Block {
 
     toJSON() {
         return {
+            id: this.id,
+            label: this.label,
             commands: this.commands,
             children: this.children,
-            blockContent: this.blockContent
+            blockContent: this.blockContent,
+            pulse: this.pulse,
+            repeatingTimes: this.repeatingTimes,
+            operations: this.operations.map(operation => {
+                return {
+                    type: operation instanceof IncrementOperation ? 'INCREMENT' :
+                          operation instanceof DecrementOperation ? 'DECREMENT' :
+                          operation instanceof AssignOperation ? 'ASSIGN' : 'UNKNOWN',
+                    variableName: operation.variableName,
+                    value: operation.value
+                };
+            })
         };
     }
 }

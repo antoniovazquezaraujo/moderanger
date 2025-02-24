@@ -40,6 +40,7 @@ export class DecrementOperation extends BaseOperation {
             return;
         }
         context.setVariable(this.variableName, currentValue - this.value);
+        console.log(`Variable ${this.variableName} decremented to: ${context.getValue(this.variableName)}`);
     }
 }
 

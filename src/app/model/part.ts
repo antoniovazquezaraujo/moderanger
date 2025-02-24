@@ -12,8 +12,23 @@ export class Part {
 
     constructor(opts?: Partial<Part>) {
         this.name = opts?.name || '';
-        this.blocks = opts?.blocks ? opts.blocks.map(block => new Block(block)) : [new Block()];
+        
+        // Solo crear un bloque por defecto si no se proporcionan bloques
+        if (opts?.blocks) {
+            this.blocks = opts.blocks.map(block => {
+                const newBlock = block instanceof Block ? block.clone() : new Block(block);
+                console.log(`Creating block with operations:`, newBlock.operations);
+                return newBlock;
+            });
+        } else {
+            this.blocks = [new Block()];
+        }
+        
         this.instrumentType = opts?.instrumentType || InstrumentType.PIANO;
+        
+        this.blocks.forEach(block => {
+            console.log(`Block ${block.id} operations:`, block.operations);
+        });
     }
 
     setVariableContext(context: VariableContext) {
@@ -29,10 +44,21 @@ export class Part {
     }
 
     clone(): Part {
-        const clonedPart = new Part();
-        clonedPart.name = this.name;
-        clonedPart.blocks = this.blocks.map(block => new Block(block));
-        clonedPart.instrumentType = this.instrumentType;
+        // Crear una parte sin bloques iniciales
+        const clonedPart = new Part({
+            name: this.name,
+            blocks: [], // Inicializar con array vacío
+            instrumentType: this.instrumentType
+        });
+        
+        // Clonar los bloques existentes
+        clonedPart.blocks = this.blocks.map(block => {
+            const clonedBlock = block.clone();
+            console.log(`Cloning block ${block.id} with operations:`, block.operations);
+            console.log(`Cloned block ${clonedBlock.id} has operations:`, clonedBlock.operations);
+            return clonedBlock;
+        });
+        
         return clonedPart;
     }
 
