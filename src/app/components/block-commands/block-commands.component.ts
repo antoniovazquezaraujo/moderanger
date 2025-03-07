@@ -49,8 +49,16 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit(): void {
         console.log('BlockCommandsComponent initialized with block:', this.block);
+        console.log('Variable context provided:', !!this.variableContext);
         this.commandTypeNames = Object.values(CommandType);
         this.operationTypeNames = Object.values(OperationType);
+        
+        // Verificar si hay un contexto de variables, si no hay, intentar obtener la instancia singleton
+        if (!this.variableContext) {
+            console.log('No variable context provided, attempting to get instance');
+            this.variableContext = VariableContext.getInstance();
+            console.log('Variable context after getting instance:', !!this.variableContext);
+        }
         
         this.updateAvailableVariables();
         this.subscribeToVariableChanges();
@@ -100,8 +108,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private updateAvailableVariables(): void {
+        console.log('Updating available variables, variable context exists:', !!this.variableContext);
         if (this.variableContext) {
             const variables = this.variableContext.getAllVariables();
+            console.log('Raw variables from context:', variables);
             this.availableVariables = Array.from(variables.entries())
                 .map(([name, value]) => ({
                     label: `${name} (${value})`,
@@ -135,6 +145,15 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             this.block.commands.push(newCommand);
             this.cdr.detectChanges();
         } else if (type === 'operation') {
+            // Verificar si tenemos contexto de variables, si no lo tenemos, intentar obtenerlo
+            if (!this.variableContext) {
+                console.log('No variable context in addElement, getting instance');
+                this.variableContext = VariableContext.getInstance();
+                if (this.variableContext) {
+                    this.block.setVariableContext(this.variableContext);
+                }
+            }
+            
             // Initialize default values if not set
             if (!this.selectedOperationType) {
                 this.selectedOperationType = OperationType.INCREMENT;
@@ -145,14 +164,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 this.selectedVariable = this.availableVariables[0].value;
             }
 
-            if (!this.selectedVariable) {
-                console.warn('No variables available for operations.');
-                return;
-            }
-
             const newOperation = { 
-                type: this.selectedOperationType, 
-                variableName: this.selectedVariable, 
+                type: this.selectedOperationType || OperationType.INCREMENT, 
+                variableName: this.selectedVariable || '', 
                 value: 1 // Cambiado de 0 a 1 para que el incremento/decremento sea más intuitivo
             };
             
@@ -177,13 +191,17 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         }
         
         this.block.operations = this.operations.map(op => {
+            // Si el nombre de la variable está vacío, aún así crear la operación
+            // El usuario puede seleccionar una variable más tarde
+            const variableName = op.variableName || '';
+            
             switch (op.type) {
                 case OperationType.INCREMENT:
-                    return new IncrementOperation(op.variableName, op.value || 1);
+                    return new IncrementOperation(variableName, op.value || 1);
                 case OperationType.DECREMENT:
-                    return new DecrementOperation(op.variableName, op.value || 1);
+                    return new DecrementOperation(variableName, op.value || 1);
                 case OperationType.ASSIGN:
-                    return new AssignOperation(op.variableName, op.value || 0);
+                    return new AssignOperation(variableName, op.value || 0);
                 default:
                     throw new Error(`Unknown operation type: ${op.type}`);
             }

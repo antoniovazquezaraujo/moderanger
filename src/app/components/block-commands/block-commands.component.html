@@ -151,7 +151,7 @@
             </div>
             <!-- Dynamic Operation Controls -->
             <div class="operation-controls">
-                <!-- Removed the button from here -->
+                <!-- Eliminar botón duplicado -->
             </div>
         </div>
     </div>
@@ -163,8 +163,6 @@
                 icon="pi pi-plus" 
                 label="Add Operation" 
                 (click)="addElement('operation')" 
-                [disabled]="availableVariables.length === 0"
-                [pTooltip]="availableVariables.length === 0 ? 'No hay variables disponibles para operaciones' : ''"
                 tooltipPosition="top">
             </p-button>
         </div>

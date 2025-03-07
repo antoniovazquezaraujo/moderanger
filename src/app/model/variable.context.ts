@@ -6,6 +6,16 @@ export type VariableValue = number | string | ScaleType;
 export class VariableContext {
     private variables = new Map<string, VariableValue>();
     onVariablesChange = new Subject<void>();
+    
+    // Implementación del patrón Singleton
+    private static instance: VariableContext;
+    
+    public static getInstance(): VariableContext {
+        if (!VariableContext.instance) {
+            VariableContext.instance = new VariableContext();
+        }
+        return VariableContext.instance;
+    }
 
     setVariable(name: string, value: VariableValue): void {
         console.log(`Setting variable: ${name} to value: ${value}`);
