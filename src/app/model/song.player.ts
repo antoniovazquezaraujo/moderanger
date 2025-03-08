@@ -18,7 +18,6 @@ type PartSoundInfo = {
     noteDataIndex: number;
     arpeggioIndex: number;
     pendingTurnsToPlay: number;
-    isInfiniteLoop: boolean;
 }
 
 @Injectable({
@@ -70,37 +69,6 @@ export class SongPlayer {
         this._currentRepetition = 0;
         this._metronome.next(0);
     }
-
-    playSong(song: Song): void {
-
-        Transport.start();
-        Transport.bpm.value = 100;
-        Transport.cancel();
-        Transport.stop();
-
-        if (song.parts && song.parts.length > 0) {
-            let channel = 0;
-            let partSoundInfo: PartSoundInfo[] = [];
-
-
-            for (const part of song.parts) {
-                const player = new Player(channel++, part.instrumentType);
-                part.blocks.forEach(block => {
-                    const noteData = this.playBlock(block, [], player, block.repeatingTimes);
-                    partSoundInfo.push({
-                        noteDatas: noteData,
-                        player,
-                        noteDataIndex: 0,
-                        arpeggioIndex: 0,
-                        pendingTurnsToPlay: 0,
-                        isInfiniteLoop: block.repeatingTimes === -1
-                    });
-                });
-            }
-            this.playNoteDatas(partSoundInfo);
-        }
-        Transport.start();
-    }
     playPart(part: Part, player: Player, song: Song): void {
 
         Transport.start();
@@ -114,14 +82,13 @@ export class SongPlayer {
         player.setInstrument(part.instrumentType);
 
         part.blocks.forEach(block => {
-            const noteData = this.playBlock(block, [], player, block.repeatingTimes);
+            const noteData = this.extractBlockNotes(block, [], player, block.repeatingTimes);
             const partSoundInfo: PartSoundInfo = {
                 noteDatas: noteData,
                 player,
                 noteDataIndex: 0,
                 arpeggioIndex: 0,
                 pendingTurnsToPlay: 0,
-                isInfiniteLoop: block.repeatingTimes === -1
             };
             this.playNoteDatas([partSoundInfo]);
         });
@@ -129,24 +96,51 @@ export class SongPlayer {
         Transport.start();
     }
 
+    playSong(song: Song): void {
 
+        Transport.start();
+        Transport.bpm.value = 100;
+        Transport.cancel();
+        Transport.stop();
+
+        if (song.parts && song.parts.length > 0) {
+            let channel = 0;
+            let partSoundInfo: PartSoundInfo[] = [];
+            for (const part of song.parts) {
+                const player = new Player(channel++, part.instrumentType);
+                this.extractPartNotes(part, player, partSoundInfo);
+            }
+            this.playNoteDatas(partSoundInfo);
+        }
+        Transport.start();
+    }
+    extractPartNotes(part: Part, player: Player, partSoundInfo: PartSoundInfo[]) {
+        part.blocks.forEach(block => {
+            const noteData = this.extractBlockNotes(block, [], player, block.repeatingTimes);
+            partSoundInfo.push({
+                noteDatas: noteData,
+                player,
+                noteDataIndex: 0,
+                arpeggioIndex: 0,
+                pendingTurnsToPlay: 0,
+            });
+        });
+    }
 
     private executeBlockOperations(block: Block): void {
         block.executeBlockOperations();
     }
 
-    private playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] {
-
+    private extractBlockNotes(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] {
         let resultNoteDatas: NoteData[] = [];
-
         for (let i = 0; i < repeatingTimes; i++) {
             this.executeBlockOperations(block);
             const blockNoteDatas = this.extractNotesToPlay(block, noteDatas, player);
             resultNoteDatas = resultNoteDatas.concat(blockNoteDatas);
-            
+           
             if (block.children && block.children.length > 0) {
                 for (const child of block.children) {
-                    const childNoteDatas = this.playBlock(child, [], player, child.repeatingTimes);
+                    const childNoteDatas = this.extractBlockNotes(child, [], player, child.repeatingTimes);
                     resultNoteDatas = resultNoteDatas.concat(childNoteDatas);
                 }
             }
@@ -219,14 +213,6 @@ export class SongPlayer {
             let allPartsFinished = true;
 
             for (const info of partSoundInfo) {
-                // Si es un loop infinito y llegamos al final, reiniciamos
-                if (info.isInfiniteLoop && info.noteDataIndex >= info.noteDatas.length) {
-                    info.noteDataIndex = 0;
-                    info.arpeggioIndex = 0;
-                    info.pendingTurnsToPlay = 0;
-                }
-
-                // Intentar reproducir el siguiente turno
                 if (this.playTurn(info, loop.interval, time)) {
                     hasActiveParts = true;
                     if (info.noteDataIndex < info.noteDatas.length) {
@@ -308,7 +294,7 @@ export class SongPlayer {
     }
 
     private playTurn(partSoundInfo: PartSoundInfo, interval: any, time: any): boolean {
-        if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length && !partSoundInfo.isInfiniteLoop) {
+        if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length ) {
             return false;
         }
 
