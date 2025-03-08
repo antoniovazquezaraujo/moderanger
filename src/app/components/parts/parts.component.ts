@@ -9,7 +9,6 @@ import { VariableContext } from 'src/app/model/variable.context';
 })
 export class PartsComponent implements OnInit {
     @Input() parts: Part[] = [];
-    @Input() variableContext?: VariableContext;
     @Output() onRemovePart: EventEmitter<Part>;
 
     constructor() {

@@ -18,7 +18,6 @@ export class PartComponent implements OnInit {
     treeControl = new NestedTreeControl<Block>(node => node.children);
 
     @Input() part!: Part;
-    @Input() variableContext?: VariableContext;
     @Output() onDuplicatePart: EventEmitter<Part>;
     @Output() onRemovePart: EventEmitter<Part>;
 

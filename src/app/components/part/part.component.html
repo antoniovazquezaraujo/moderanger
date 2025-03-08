@@ -18,7 +18,6 @@
         <ng-container *ngFor="let block of part.blocks">
             <app-block 
                 [block]="block" 
-                [variableContext]="variableContext"
                 (onDuplicateBlock)="onDuplicateBlock($event)" 
                 (onRemoveBlock)="onRemoveBlock($event)"
                 (onAddChild)="onAddChild($event)">

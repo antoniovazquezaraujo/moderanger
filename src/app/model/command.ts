@@ -35,21 +35,21 @@ export class Command {
         }
     }
 
-    get value(): string | number {
-        if (this.isVariable && typeof this._value === 'string') {
-            return this._value.startsWith('$') ? this._value : '$' + this._value;
-        }
-        if (this.type === CommandType.PLAYMODE && typeof this._value === 'number') {
-            return PlayMode[this._value];
-        }
-        return this._value;
-    }
+    // get value(): string | number {
+    //     if (this.isVariable && typeof this._value === 'string') {
+    //         return this._value.startsWith('$') ? this._value : '$' + this._value;
+    //     }
+    //     if (this.type === CommandType.PLAYMODE && typeof this._value === 'number') {
+    //         return PlayMode[this._value];
+    //     }
+    //     return this._value;
+    // }
 
-    set value(val: string | number) {
-        this.setValue(val);
-    }
+    // set value(val: string | number) {
+    //     this.setValue(val);
+    // }
 
-    getValue(): number | string | ScaleType | PlayMode {
+    get value(): number | string | ScaleType | PlayMode {
         if (this.isVariable && typeof this._value === 'string') {
             const varName = this._value.startsWith('$') ? this._value.substring(1) : this._value;
             const varValue = VariableContext.getValue(varName);
@@ -71,7 +71,12 @@ export class Command {
         this._value = name.startsWith('$') ? name : '$' + name;
     }
 
+
     setValue(value: string | number | ScaleType | PlayMode | null): void {
+        this.value = value;
+    }
+    
+    set value(value: string | number | ScaleType | PlayMode | null) {
         if (value === null || value === undefined) {
             this._value = this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
                          this.type === CommandType.PLAYMODE ? PlayMode.CHORD :
@@ -101,8 +106,8 @@ export class Command {
         }
     }
 
-    execute(player: any, context?: VariableContext): void {
-        const rawValue = context ? this.getValue() : this._value;
+    execute(player: any): void {
+        const rawValue = this.value;
         let value: any;
 
         if (this.type === CommandType.PATTERN) {

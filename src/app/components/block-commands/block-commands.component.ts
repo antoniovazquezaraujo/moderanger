@@ -61,10 +61,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['variableContext']) {
-            this.updateAvailableVariables();
-            this.subscribeToVariableChanges();
-        }
+        // if (changes['variableContext']) {
+        //     this.updateAvailableVariables();
+        //     this.subscribeToVariableChanges();
+        // }
         if (changes['block'] && !changes['block'].firstChange) {
             console.log('Block changed:', changes['block'].currentValue);
             this.initializeOperationsFromBlock();

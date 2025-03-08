@@ -11,7 +11,6 @@ import { VariableContext } from 'src/app/model/variable.context';
 })
 export class BlockComponent implements OnInit {
   @Input() block: Block = new Block(); 
-  @Input() variableContext?: VariableContext;
     
   @Output() blockChange: EventEmitter<Block>;
   @Output() onDuplicateBlock: EventEmitter<any>;

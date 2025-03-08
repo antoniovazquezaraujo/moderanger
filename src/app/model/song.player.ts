@@ -98,8 +98,8 @@ export class SongPlayer {
                 });
             }
             this.playNoteDatas(partSoundInfo);
-            Transport.start();
         }
+        Transport.start();
     }
     playPart(part: Part, player: Player, song: Song): void {
 
