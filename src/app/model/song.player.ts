@@ -97,7 +97,6 @@ export class SongPlayer {
     }
 
     playSong(song: Song): void {
-        console.log('Iniciando playSong');
         Transport.start();
         Transport.bpm.value = 100;
         Transport.cancel();
@@ -105,48 +104,38 @@ export class SongPlayer {
 
         if (song.parts && song.parts.length > 0) {
             let channel = 0;
-            
-            // 1. Crear estructura para cada parte con sus bloques extendidos
+
             const partStates = song.parts.map(part => {
-                // Crear un player para esta parte
                 const player = new Player(channel++, part.instrumentType);
-                
-                // Crear una lista plana de "unidades de ejecución" para esta parte
-                // Una unidad es una repetición específica de un bloque específico
-                const executionUnits: { 
-                    block: Block, 
-                    repetitionIndex: number, 
+
+                const executionUnits: {
+                    block: Block,
+                    repetitionIndex: number,
                     childLevel: number,
                     parentBlock?: Block
                 }[] = [];
-                
-                // Función recursiva para añadir bloques y sus hijos
+
                 const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
-                    // Para cada repetición del bloque
                     for (let i = 0; i < block.repeatingTimes; i++) {
-                        // Añadir la repetición del bloque
                         executionUnits.push({
                             block,
                             repetitionIndex: i,
                             childLevel,
                             parentBlock
                         });
-                        
-                        // Importante: Si tiene hijos, añadirlos inmediatamente después de cada repetición
+
                         if (block.children && block.children.length > 0) {
-                            // Añadir todos los bloques hijos y sus repeticiones
                             for (const childBlock of block.children) {
                                 addBlockAndChildren(childBlock, childLevel + 1, block);
                             }
                         }
                     }
                 };
-                
-                // Añadir todos los bloques principales y sus hijos
+
                 for (const block of part.blocks) {
                     addBlockAndChildren(block);
                 }
-                
+
                 return {
                     part,
                     player,
@@ -156,84 +145,44 @@ export class SongPlayer {
                     extractedNotes: [] as NoteData[]
                 };
             });
-            
-            console.log('Estados de partes creados:');
-            for (const state of partStates) {
-                console.log(`- Parte "${state.part.name || 'sin nombre'}": ${state.executionUnits.length} unidades de ejecución`);
-                
-                // Mostrar detalle de las unidades para depuración
-                console.log('  Desglose de unidades:');
-                for (let i = 0; i < state.executionUnits.length; i++) {
-                    const unit = state.executionUnits[i];
-                    const blockType = unit.childLevel === 0 ? 'Principal' : `Hijo nivel ${unit.childLevel}`;
-                    console.log(`  ${i+1}. Bloque ${blockType}, Rep ${unit.repetitionIndex + 1}/${unit.block.repeatingTimes}`);
-                }
-            }
-            
-            // 2. Ejecutar turnos alternando entre partes, cada turno procesa una unidad
+
             let allFinished = false;
-            
+
             while (!allFinished) {
                 allFinished = true;
-                
-                // Procesar una unidad de cada parte
+
                 for (const state of partStates) {
-                    // Si esta parte ya terminó, continuar
                     if (state.isFinished) {
                         continue;
                     }
-                    
+
                     allFinished = false;
-                    
-                    // Obtener la unidad actual
+
                     const unit = state.executionUnits[state.currentUnitIndex];
-                    
+
                     if (unit) {
                         const { block, repetitionIndex, childLevel, parentBlock } = unit;
-                        
-                        const blockLabel = childLevel > 0
-                            ? `bloque hijo (nivel ${childLevel})`
-                            : `bloque principal ${state.part.blocks.indexOf(block)}`;
-                        
-                        console.log(`===== TURNO: Parte "${state.part.name || 'sin nombre'}", ${blockLabel}, repetición ${repetitionIndex + 1}/${block.repeatingTimes} =====`);
-                        
-                        // Ejecutar comandos del bloque
                         if (block.commands && block.commands.length > 0) {
-                            console.log(`Ejecutando ${block.commands.length} comandos`);
                             for (const command of block.commands) {
-                                console.log(` - Comando: ${command.constructor.name}`);
                                 command.execute(state.player);
                             }
                         }
-                        
-                        // Ejecutar operaciones del bloque
-                        console.log('Ejecutando operaciones del bloque');
                         block.executeBlockOperations();
-                        
-                        // Extraer notas para esta repetición
+
                         const blockNotes = this.extractJustBlockNotes(block, state.player);
-                        console.log(`Extraídas ${blockNotes.length} notas`);
-                        
-                        // Añadir las notas a la colección
                         state.extractedNotes = state.extractedNotes.concat(blockNotes);
-                        
-                        // Avanzar a la siguiente unidad
                         state.currentUnitIndex++;
-                        
-                        // Verificar si la parte ha terminado
+
                         if (state.currentUnitIndex >= state.executionUnits.length) {
                             state.isFinished = true;
-                            console.log(`¡Parte "${state.part.name || 'sin nombre'}" ha completado todas sus unidades de ejecución!`);
                         }
                     }
                 }
-                
-                console.log('-----------------------------------');
+
             }
-            
-            // 3. Preparar PartSoundInfo para reproducción
+
             const partSoundInfo: PartSoundInfo[] = [];
-            
+
             for (const state of partStates) {
                 if (state.extractedNotes.length > 0) {
                     partSoundInfo.push({
@@ -245,24 +194,13 @@ export class SongPlayer {
                     });
                 }
             }
-            
-            // Mostrar resumen
-            console.log('Resumen de notas extraídas:');
-            for (let i = 0; i < partStates.length; i++) {
-                console.log(`- Parte ${i+1}: ${partStates[i].extractedNotes.length} notas extraídas`);
-            }
-            
-            // 4. Reproducir las notas con el sistema original
+
             this.playNoteDatas(partSoundInfo);
         }
-        
+
         Transport.start();
     }
-    
-    /**
-     * Extrae solo las notas de un bloque, sin ejecutar comandos ni operaciones
-     * (asume que ya se han ejecutado)
-     */
+
     private extractJustBlockNotes(block: Block, player: Player): NoteData[] {
         const rootNoteDatas = parseBlockNotes(block.blockContent.notes);
         const noteDatas: NoteData[] = [];
@@ -271,9 +209,7 @@ export class SongPlayer {
             const duration = noteData.duration;
 
             if (noteData.type === 'note' && noteData.note !== undefined) {
-                // Aplicamos la nota seleccionada al player
                 player.selectedNote = noteData.note;
-                // Obtenemos las notas resultantes basadas en la escala y tonalidad actual
                 const noteNoteDatas = player.getSelectedNotes(player.scale, player.tonality);
                 const notes = this.noteDatasToNotes(noteNoteDatas);
 
@@ -298,40 +234,25 @@ export class SongPlayer {
 
     private extractBlockNotes(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] {
         let resultNoteDatas: NoteData[] = [];
-        
-        console.log(`  Extrayendo notas de bloque con ${repeatingTimes} repeticiones`);
-        
+
+
         for (let i = 0; i < repeatingTimes; i++) {
-            console.log(`  - Repetición ${i + 1}/${repeatingTimes}`);
-            
-            // Ejecutar las operaciones del bloque para esta repetición
+
             this.executeBlockOperations(block);
-            
-            // Extraer las notas para esta repetición
+
             const blockNoteDatas = this.extractNotesToPlay(block, [], player);
-            console.log(`    * Extraídas ${blockNoteDatas.length} notas en esta repetición`);
-            
-            // Añadir las notas al resultado
+
             resultNoteDatas = resultNoteDatas.concat(blockNoteDatas);
-           
-            // Procesar bloques hijos (si hay)
+
             if (block.children && block.children.length > 0) {
-                console.log(`    * Procesando ${block.children.length} bloques hijos`);
-                
+
                 for (const child of block.children) {
-                    console.log(`      > Procesando bloque hijo (repeats: ${child.repeatingTimes})`);
-                    
-                    // Extraer notas de los bloques hijos con sus propias repeticiones
                     const childNoteDatas = this.extractBlockNotes(child, [], player, child.repeatingTimes);
-                    console.log(`      > Extraídas ${childNoteDatas.length} notas del bloque hijo`);
-                    
-                    // Añadir las notas al resultado
                     resultNoteDatas = resultNoteDatas.concat(childNoteDatas);
                 }
             }
         }
-        
-        console.log(`  Total: ${resultNoteDatas.length} notas extraídas de este bloque y sus hijos`);
+
         return resultNoteDatas;
     }
 
@@ -357,8 +278,7 @@ export class SongPlayer {
     }
 
     private playNoteDatas(partSoundInfo: PartSoundInfo[]): void {
-        console.log(`Iniciando reproducción de ${partSoundInfo.length} conjuntos de notas`);
-        
+
         this._isPlaying = true;
         this._beatCount = 0;
         this._currentRepetition = 0;
@@ -387,7 +307,6 @@ export class SongPlayer {
                 if (lastNote) {
                     waitingForLastNote = true;
                     lastNoteEndTime = time + Time(lastNote.duration).toSeconds();
-                    console.log(`Esperando a que termine la última nota (duración: ${lastNote.duration})`);
                 }
             }
 
@@ -400,9 +319,7 @@ export class SongPlayer {
 
                 if (this._currentRepetition < this._songRepetitions - 1) {
                     this._currentRepetition++;
-                    console.log(`Iniciando repetición ${this._currentRepetition + 1}/${this._songRepetitions}`);
 
-                    // Reiniciar todas las partes
                     for (const info of partSoundInfo) {
                         info.noteDataIndex = 0;
                         info.arpeggioIndex = 0;
@@ -415,7 +332,6 @@ export class SongPlayer {
             }
 
             if (!hasActiveParts || (allPartsFinished && !waitingForLastNote && this._currentRepetition >= this._songRepetitions)) {
-                console.log(`Finalizando reproducción`);
                 loop.stop();
                 Transport.stop();
                 Transport.cancel();
@@ -431,7 +347,6 @@ export class SongPlayer {
         loop.interval = "48n";
         loop.iterations = Infinity;
         loop.start();
-        console.log(`Loop de reproducción iniciado con intervalo ${loop.interval}`);
     }
 
     private findLastPlayedNote(partSoundInfo: PartSoundInfo[]): NoteData | undefined {
@@ -451,7 +366,7 @@ export class SongPlayer {
     }
 
     private playTurn(partSoundInfo: PartSoundInfo, interval: any, time: any): boolean {
-        if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length ) {
+        if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length) {
             return false;
         }
 
@@ -496,7 +411,6 @@ export class SongPlayer {
                 .map(note => Frequency(note.note!, "midi").toFrequency());
 
             if (notes.length > 0) {
-                console.log(`Reproduciendo acorde con ${notes.length} notas (duración: ${duration})`);
                 partSoundInfo.player.triggerAttackRelease(notes, duration, time);
             }
             partSoundInfo.noteDataIndex++;
@@ -505,7 +419,6 @@ export class SongPlayer {
             const note = noteData.noteDatas[partSoundInfo.arpeggioIndex];
             if (note && note.note !== undefined && !isNaN(note.note)) {
                 const noteDuration = Time(duration).toSeconds() / noteData.noteDatas.length;
-                console.log(`Reproduciendo nota de arpegio: ${note.note} (duración: ${noteDuration}s)`);
                 partSoundInfo.player.triggerAttackRelease(
                     Frequency(note.note, "midi").toFrequency(),
                     noteDuration + "s",
@@ -520,7 +433,6 @@ export class SongPlayer {
             }
 
         } else if (noteData.type === 'note' && noteData.note !== undefined) {
-            console.log(`Reproduciendo nota: ${noteData.note} (duración: ${duration})`);
             partSoundInfo.player.triggerAttackRelease(
                 Frequency(noteData.note, "midi").toFrequency(),
                 duration,
@@ -529,7 +441,6 @@ export class SongPlayer {
             partSoundInfo.noteDataIndex++;
 
         } else if (noteData.type === 'rest') {
-            console.log(`Silencio (duración: ${duration})`);
             partSoundInfo.noteDataIndex++;
         }
     }
