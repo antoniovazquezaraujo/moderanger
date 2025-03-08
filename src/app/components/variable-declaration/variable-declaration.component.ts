@@ -15,7 +15,6 @@ interface VariableDeclaration {
     styleUrls: ['./variable-declaration.component.scss']
 })
 export class VariableDeclarationComponent {
-    @Input() variableContext?: VariableContext;
     @Output() variableAdded = new EventEmitter<void>();
     @Output() variableRemoved = new EventEmitter<void>();
     @Output() variableUpdated = new EventEmitter<void>();
@@ -36,7 +35,7 @@ export class VariableDeclarationComponent {
 
     addVariable(event: Event): void {
         event.preventDefault();
-        if (this.variableContext && this.newVariable.name) {
+        if ( this.newVariable.name) {
             let value: any;
             if (this.newVariable.type === 'playmode') {
                 value = this.newVariable.value;
@@ -48,7 +47,7 @@ export class VariableDeclarationComponent {
                 value = Number(this.newVariable.value);
             }
 
-            this.variableContext.setVariable(this.newVariable.name, value);
+            VariableContext.setValue(this.newVariable.name, value);
             this.newVariable = { name: '', value: '', type: 'number' };
             this.updateVariablesList();
             this.variableAdded.emit();
@@ -57,8 +56,8 @@ export class VariableDeclarationComponent {
 
     removeVariable(index: number): void {
         const variable = this.variables[index];
-        if (this.variableContext && variable) {
-            this.variableContext.removeVariable(variable.name);
+        if (VariableContext && variable) {
+            VariableContext.removeValue(variable.name);
             this.updateVariablesList();
             this.variableRemoved.emit();
         }
@@ -66,7 +65,7 @@ export class VariableDeclarationComponent {
 
     updateVariable(index: number): void {
         const variable = this.variables[index];
-        if (this.variableContext && variable) {
+        if (VariableContext && variable) {
             let value: any;
             if (variable.type === 'playmode') {
                 value = variable.value;
@@ -78,14 +77,14 @@ export class VariableDeclarationComponent {
                 value = Number(variable.value);
             }
 
-            this.variableContext.setVariable(variable.name, value);
+            VariableContext.setValue(variable.name, value);
             this.variableUpdated.emit();
         }
     }
 
     private updateVariablesList(): void {
-        if (this.variableContext) {
-            const variables = this.variableContext.getAllVariables();
+        if (VariableContext) {
+            const variables = VariableContext.context;
             this.variables = Array.from(variables.entries()).map(([name, value]) => {
                 if (typeof value === 'string') {
                     if (this.playModeNames.includes(value)) {

@@ -32,7 +32,6 @@
       <button pButton type="button" icon="pi pi-times" (click)="removeChild(node)"></button>
       <app-block-commands 
         [block]="node" 
-        [variableContext]="variableContext"
         (removeCommand)="onRemoveCommand($event)">
       </app-block-commands>
     </div>

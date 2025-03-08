@@ -107,18 +107,18 @@ export class Player {
         });
     }
 
-    executeOperations(block: Block, variableContext: VariableContext): void {
+    executeOperations(block: Block): void {
         block.operations?.forEach(operation => {
             const variableName = operation.variableName;
-            if (variableContext && variableName) {
-                const currentValue = variableContext.getValue(variableName);
+            if (variableName) {
+                const currentValue = VariableContext.getValue(variableName);
                 if (typeof currentValue === 'number') {
                     if (operation instanceof IncrementOperation) {
-                        variableContext.setVariable(variableName, currentValue + operation.value);
+                        VariableContext.setValue(variableName, currentValue + operation.value);
                     } else if (operation instanceof DecrementOperation) {
-                        variableContext.setVariable(variableName, currentValue - operation.value);
+                        VariableContext.setValue(variableName, currentValue - operation.value);
                     } else if (operation instanceof AssignOperation) {
-                        variableContext.setVariable(variableName, operation.value);
+                        VariableContext.setValue(variableName, operation.value);
                     }
                 } else {
                     console.warn(`Variable ${variableName} is not a number or is undefined.`);

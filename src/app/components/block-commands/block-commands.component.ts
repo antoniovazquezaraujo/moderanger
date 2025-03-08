@@ -20,7 +20,6 @@ interface VariableOption {
 })
 export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() block: Block = new Block();
-    @Input() variableContext?: VariableContext;
 
     commandTypeNames: string[] = [];
     commandTypes = CommandType;
@@ -49,24 +48,15 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit(): void {
         console.log('BlockCommandsComponent initialized with block:', this.block);
-        console.log('Variable context provided:', !!this.variableContext);
         this.commandTypeNames = Object.values(CommandType);
         this.operationTypeNames = Object.values(OperationType);
         
-        // Verificar si hay un contexto de variables, si no hay, intentar obtener la instancia singleton
-        if (!this.variableContext) {
-            console.log('No variable context provided, attempting to get instance');
-            this.variableContext = VariableContext.getInstance();
-            console.log('Variable context after getting instance:', !!this.variableContext);
-        }
-        
+       
         this.updateAvailableVariables();
         this.subscribeToVariableChanges();
         
-        // Inicializar las operaciones desde el bloque
         this.initializeOperationsFromBlock();
         
-        // Set a default operation type
         this.selectedOperationType = this.operationTypeNames[0] as OperationType;
     }
 
@@ -93,25 +83,20 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             this.variablesSubscription.unsubscribe();
         }
         
-        if (this.variableContext) {
-            this.variablesSubscription = this.variableContext.onVariablesChange.subscribe(() => {
+            this.variablesSubscription = VariableContext.onVariablesChange.subscribe(() => {
                 this.updateAvailableVariables();
                 if (this.block.blockContent.isVariable && this.block.blockContent.variableName) {
-                    const value = this.variableContext?.getValue(this.block.blockContent.variableName);
+                    const value = VariableContext.getValue(this.block.blockContent.variableName);
                     if (typeof value === 'string') {
                         this.block.blockContent.notes = value;
                     }
                 }
                 this.cdr.detectChanges();
             });
-        }
     }
 
     private updateAvailableVariables(): void {
-        console.log('Updating available variables, variable context exists:', !!this.variableContext);
-        if (this.variableContext) {
-            const variables = this.variableContext.getAllVariables();
-            console.log('Raw variables from context:', variables);
+            const variables = VariableContext.context;
             this.availableVariables = Array.from(variables.entries())
                 .map(([name, value]) => ({
                     label: `${name} (${value})`,
@@ -122,9 +107,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 this.selectedVariable = this.availableVariables[0].value;
             }
             
-            console.log('Available variables updated:', this.availableVariables);
-            console.log('Selected variable:', this.selectedVariable);
-        }
     }
 
     removeCommand(command: Command): void {
@@ -145,21 +127,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             this.block.commands.push(newCommand);
             this.cdr.detectChanges();
         } else if (type === 'operation') {
-            // Verificar si tenemos contexto de variables, si no lo tenemos, intentar obtenerlo
-            if (!this.variableContext) {
-                console.log('No variable context in addElement, getting instance');
-                this.variableContext = VariableContext.getInstance();
-                if (this.variableContext) {
-                    this.block.setVariableContext(this.variableContext);
-                }
-            }
             
-            // Initialize default values if not set
             if (!this.selectedOperationType) {
                 this.selectedOperationType = OperationType.INCREMENT;
             }
             
-            // If no variable is selected and we have available variables, select the first one
             if (!this.selectedVariable && this.availableVariables.length > 0) {
                 this.selectedVariable = this.availableVariables[0].value;
             }
@@ -176,7 +148,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             
             this.operations = [...this.operations, newOperation];
             
-            // Actualizar las operaciones en el bloque
             this.updateBlockOperations();
             
             console.log('Added new operation:', newOperation);
@@ -191,8 +162,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         }
         
         this.block.operations = this.operations.map(op => {
-            // Si el nombre de la variable está vacío, aún así crear la operación
-            // El usuario puede seleccionar una variable más tarde
             const variableName = op.variableName || '';
             
             switch (op.type) {
@@ -207,10 +176,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             }
         });
 
-        // Asegurarse de que el bloque tenga acceso al contexto de variables
-        if (this.variableContext) {
-            this.block.setVariableContext(this.variableContext);
-        }
     }
 
     removeOperation(index: number): void {
@@ -237,7 +202,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 // Filtrar solo variables de tipo playmode
                 this.updateAvailableVariables();
                 const playModeVariables = this.availableVariables.filter(v => {
-                    const value = this.variableContext?.getValue(v.value);
+                    const value = VariableContext.getValue(v.value);
                     return typeof value === 'string' && this.playModeNames.includes(value as string);
                 });
                 
@@ -248,7 +213,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 // Filtrar solo variables de tipo scale
                 this.updateAvailableVariables();
                 const scaleVariables = this.availableVariables.filter(v => {
-                    const value = this.variableContext?.getValue(v.value);
+                    const value = VariableContext.getValue(v.value);
                     return typeof value === 'string' && this.scaleNames.includes(value as string);
                 });
                 
@@ -259,7 +224,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 // Filtrar solo variables de tipo pattern
                 this.updateAvailableVariables();
                 const patternVariables = this.availableVariables.filter(v => {
-                    const value = this.variableContext?.getValue(v.value);
+                    const value = VariableContext.getValue(v.value);
                     return typeof value === 'string' && /[0-9]/.test(value);
                 });
                 
@@ -270,7 +235,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 // Filtrar solo variables numéricas
                 this.updateAvailableVariables();
                 const numericVariables = this.availableVariables.filter(v => {
-                    const value = this.variableContext?.getValue(v.value);
+                    const value =VariableContext.getValue(v.value);
                     return typeof value === 'number';
                 });
                 
@@ -290,7 +255,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 } else if (command.type === CommandType.PATTERN) {
                     command.setValue('');
                 } else {
-                    const numValue = this.variableContext?.getValue(oldValue);
+                    const numValue = VariableContext.getValue(oldValue);
                     command.setValue(typeof numValue === 'number' ? numValue : 0);
                 }
             } else {
@@ -315,7 +280,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                     command.isVariable = false;
                     command.setValue(0);
                 } else {
-                    // Si es un evento del dropdown, event.value contendrá el nombre de la variable
                     const variableName = typeof event === 'object' ? event.value : event;
                     command.setVariable(variableName);
                 }
@@ -346,10 +310,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getFilteredVariables(command: Command): VariableOption[] {
-        if (!this.variableContext) return [];
 
         return this.availableVariables.filter(v => {
-            const value = this.variableContext?.getValue(v.value);
+            const value = VariableContext.getValue(v.value);
             if (command.type === CommandType.PLAYMODE) {
                 return typeof value === 'string' && this.playModeNames.includes(value);
             } else if (command.type === CommandType.SCALE) {
@@ -363,15 +326,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getMelodyVariables(): VariableOption[] {
-        if (!this.variableContext) return [];
 
-        return Array.from(this.variableContext.getAllVariables().entries())
+        return Array.from(VariableContext.context.entries())
             .filter(([_, value]) => {
-                // Verificar que sea una cadena y que contenga números o medidas
                 if (typeof value !== 'string') return false;
-                // No incluir variables de PlayMode
                 if (this.playModeNames.includes(value)) return false;
-                // Verificar que la cadena contenga números o medidas
                 return /[0-9]/.test(value);
             })
             .map(([name, value]) => ({
@@ -392,16 +351,14 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             const melodyVars = this.getMelodyVariables();
             if (melodyVars.length > 0) {
                 this.block.blockContent.variableName = melodyVars[0].value;
-                const value = this.variableContext?.getValue(melodyVars[0].value);
+                const value = VariableContext.getValue(melodyVars[0].value);
                 if (typeof value === 'string') {
                     this.block.blockContent.notes = value;
                 }
             } else {
-                // Si no hay variables de melodía disponibles, revertir
                 this.block.blockContent.isVariable = false;
             }
         } else {
-            // Al cambiar de variable a valor directo, mantener las notas actuales
             const currentNotes = this.block.blockContent.notes;
             this.block.blockContent.variableName = '';
             this.block.blockContent.notes = currentNotes;
@@ -417,14 +374,12 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     handleMelodyVariableChange(variableName: string): void {
         if (!variableName) {
-            // Si se limpia la selección, mantener el modo variable pero limpiar las notas
             this.block.blockContent.notes = '';
             return;
         }
 
-        const value = this.variableContext?.getValue(variableName);
+        const value =VariableContext.getValue(variableName);
         if (typeof value === 'string') {
-            // Asegurarse de que las notas se actualicen correctamente
             this.block.blockContent.notes = value;
             this.block.blockContent.variableName = variableName;
         }
@@ -432,26 +387,23 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     handleNotesChange(notes: string): void {
         if (this.block.blockContent.isVariable && this.block.blockContent.variableName) {
-            // Si estamos en modo variable, actualizar el valor en el contexto
-            this.variableContext?.setVariable(this.block.blockContent.variableName, notes);
+            VariableContext.setValue(this.block.blockContent.variableName, notes);
         }
     }
 
     onCommandTypeChange(command: Command | OperationType): void {
         if (command instanceof Command && command.type === this.commandTypes.OCT) {
-            // Lógica para comandos de tipo OCT
             command.isVariable = true;
             const numericVariables = this.getFilteredVariables(command);
             if (numericVariables.length > 0) {
                 command.setVariable(numericVariables[0].value);
             }
         } else if (typeof command === 'string' && command === this.operationTypes.INCREMENT) {
-            // Lógica para operaciones de tipo INCREMENT
             const variableName = this.selectedVariable;
-            if (this.variableContext && variableName) {
-                const currentValue = this.variableContext.getValue(variableName);
+            if ( variableName) {
+                const currentValue = VariableContext.getValue(variableName);
                 if (typeof currentValue === 'number') {
-                    this.variableContext.setVariable(variableName, currentValue + 1);
+                    VariableContext.setValue(variableName, currentValue + 1);
                 }
             }
         }
@@ -470,7 +422,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     onOperationTypeChange(): void {
-        // Actualizar las operaciones en el bloque después de cambiar el tipo
         this.updateBlockOperations();
         this.cdr.detectChanges();
     }

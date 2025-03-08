@@ -8,33 +8,19 @@ export class Song {
     static getDefultInstrument() {
         return Song.instruments[0];
     }
-
     parts: Part[] = [];
-    variableContext: VariableContext = new VariableContext();
 
-    constructor(song?: any) {
-        if (song) {
-            this.parts = song.parts?.map((part: any) => {
-                const newPart = new Part();
-                newPart.blocks = part.blocks.map((block: any) => new Block(block));
-                return newPart;
-            }) || [];
-            
-            // Restore variable context
-            if (song.variables) {
-                Object.entries(song.variables).forEach(([name, value]) => {
-                    this.variableContext.setVariable(name, value as VariableValue);
-                });
-            }
+    constructor() {
 
-            // Propagar el contexto de variables a todas las partes
-            this.parts.forEach(part => part.setVariableContext(this.variableContext));
-        }
+    }
+    clone():Song{
+        const clonedSong = new Song();
+        clonedSong.parts = this.parts.map(part => part.clone());
+        return clonedSong;
     }
 
     addPart(part: Part) {
         this.parts.push(part);
-        part.setVariableContext(this.variableContext);
     }
 
     removePart(part: Part) {
@@ -45,14 +31,8 @@ export class Song {
     }
 
     toJSON() {
-        const variables: { [key: string]: VariableValue } = {};
-        this.variableContext.getAllVariables().forEach((value, key) => {
-            variables[key] = value;
-        });
-
         return {
-            parts: this.parts.map(part => part.blocks),
-            variables
+            parts: this.parts.map(part => part.blocks)
         };
     }
 }

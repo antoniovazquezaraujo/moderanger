@@ -14,7 +14,7 @@ describe('Part', () => {
         
         expect(part1.id).toBe(0);
         expect(part2.id).toBe(1);
-        expect(part1.block).toBeDefined();
+        expect(part1.blocks).toBeDefined();
     });
 
     // it('should create with provided block', () => {
@@ -37,10 +37,10 @@ describe('Part', () => {
 
     it('should handle removing non-existent block', () => {
         const part = new Part();
-        const blockToRemove = new Block({});
+        const blockToRemove = new Block();
         
         // Should not throw error
         part.removeBlock(blockToRemove);
-        expect(part.block.children).toHaveLength(0);
+        expect(part.blocks).toHaveLength(1);
     });
 }); 

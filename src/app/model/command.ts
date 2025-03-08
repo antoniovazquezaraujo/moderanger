@@ -49,10 +49,10 @@ export class Command {
         this.setValue(val);
     }
 
-    getValue(context: VariableContext): number | string | ScaleType | PlayMode {
+    getValue(): number | string | ScaleType | PlayMode {
         if (this.isVariable && typeof this._value === 'string') {
             const varName = this._value.startsWith('$') ? this._value.substring(1) : this._value;
-            const varValue = context.getValue(varName);
+            const varValue = VariableContext.getValue(varName);
             if (varValue !== undefined) {
                 return varValue;
             }
@@ -102,7 +102,7 @@ export class Command {
     }
 
     execute(player: any, context?: VariableContext): void {
-        const rawValue = context ? this.getValue(context) : this._value;
+        const rawValue = context ? this.getValue() : this._value;
         let value: any;
 
         if (this.type === CommandType.PATTERN) {

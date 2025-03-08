@@ -20,7 +20,7 @@ export class PartsComponent implements OnInit {
     }
 
     onDuplicatePart(part: Part) {
-        this.parts.push(new Part(part));
+        this.parts.push(part.clone());
     }
 
     removePart(part: Part) {

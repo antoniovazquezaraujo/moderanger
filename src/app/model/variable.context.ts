@@ -4,55 +4,28 @@ export type ScaleType = 'WHITE' | 'BLUE' | 'RED' | 'BLACK' | 'PENTA' | 'TONES' |
 export type VariableValue = number | string | ScaleType;
 
 export class VariableContext {
-    private variables = new Map<string, VariableValue>();
-    onVariablesChange = new Subject<void>();
+    static context = new Map<string, VariableValue>();
+    static onVariablesChange = new Subject<void>();
     
     // Implementación del patrón Singleton
     private static instance: VariableContext;
     
-    public static getInstance(): VariableContext {
-        if (!VariableContext.instance) {
-            VariableContext.instance = new VariableContext();
-        }
-        return VariableContext.instance;
+    static setValue(name: string, value: VariableValue): void {        
+        VariableContext.context.set(name, value);
+        VariableContext.onVariablesChange.next();        
     }
 
-    setVariable(name: string, value: VariableValue): void {
-        console.log(`Setting variable: ${name} to value: ${value}`);
-        this.variables.set(name, value);
-        this.onVariablesChange.next();
-        console.log('Variables changed:', Array.from(this.variables.entries()));
+    static removeValue(name: string): void {
+        VariableContext.context.delete(name);
+        VariableContext.onVariablesChange.next();
     }
 
-    removeVariable(name: string): void {
-        this.variables.delete(name);
-        this.onVariablesChange.next();
+    static getValue(name: string): VariableValue | undefined {
+        return VariableContext.context.get(name);
     }
 
-    getValue(name: string): VariableValue | undefined {
-        return this.variables.get(name);
+    static hasValue(name: string): boolean {
+        return VariableContext.context.has(name);
     }
 
-    hasVariable(name: string): boolean {
-        return this.variables.has(name);
-    }
-
-    getAllVariables(): Map<string, VariableValue> {
-        return new Map(this.variables);
-    }
 }
-
-export class BlockVariableContext extends VariableContext {
-    private parent?: VariableContext;
-
-    constructor(parent?: VariableContext) {
-        super();
-        this.parent = parent;
-    }
-
-    override getValue(name: string): VariableValue | undefined {
-        return this.hasVariable(name) 
-            ? super.getValue(name) 
-            : this.parent?.getValue(name);
-    }
-} 

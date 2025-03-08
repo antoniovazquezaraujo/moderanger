@@ -41,14 +41,61 @@ export class PartComponent implements OnInit {
     }
 
     onDuplicateBlock(block: Block) {
-        let copy = new Block(block);
-        const index = this.part.blocks.indexOf(block);
-        if (index !== -1) {
-            this.part.blocks[index].children.push(copy);
-            this.ensureUniqueBlocks();
-            console.log('Block duplicated:', copy);
-            console.log('Current blocks:', this.part.blocks);
+        console.log('Duplicating block:', block);
+        
+        // Crear una copia completa del bloque usando el constructor o el método clone
+        let copy = block.clone();
+        
+        // Buscar el índice del bloque original en los bloques principales de la parte
+        const blockIndex = this.part.blocks.findIndex(b => b.id === block.id);
+        
+        if (blockIndex !== -1) {
+            // Si el bloque está en la lista principal de bloques de la parte,
+            // añadir la copia justo después del bloque original
+            this.part.blocks.splice(blockIndex + 1, 0, copy);
+        } else {
+            // Si el bloque es un bloque hijo, tenemos que encontrar su padre
+            let found = false;
+            
+            // Función recursiva para encontrar el padre y añadir la copia
+            const findParentAndAddCopy = (parentBlock: Block, childBlock: Block): boolean => {
+                // Buscar entre los hijos directos
+                const childIndex = parentBlock.children.findIndex(child => child.id === childBlock.id);
+                
+                if (childIndex !== -1) {
+                    // Si lo encontramos, añadir la copia como hermano
+                    parentBlock.children.splice(childIndex + 1, 0, copy);
+                    return true;
+                }
+                
+                // Si no lo encontramos, buscar recursivamente en cada hijo
+                for (const child of parentBlock.children) {
+                    if (findParentAndAddCopy(child, childBlock)) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            };
+            
+            // Buscar en todos los bloques de la parte
+            for (const rootBlock of this.part.blocks) {
+                if (findParentAndAddCopy(rootBlock, block)) {
+                    found = true;
+                    break;
+                }
+            }
+            
+            // Si no encontramos el padre, añadir el bloque al final de la lista principal
+            if (!found) {
+                this.part.blocks.push(copy);
+            }
         }
+        
+        
+        this.ensureUniqueBlocks();
+        console.log('Block duplicated:', copy);
+        console.log('Current blocks:', this.part.blocks);
     }
 
     onRemoveBlock(block: Block) {
@@ -63,7 +110,7 @@ export class PartComponent implements OnInit {
     }
 
     onAddChild(block: Block) {
-        const newBlock = new Block({});
+        const newBlock = new Block();
         block.children.push(newBlock);
         this.ensureUniqueBlocks();
         console.log('Child block added:', newBlock);
@@ -92,9 +139,6 @@ export class PartComponent implements OnInit {
     playPart() {
         const player = new Player(0, this.part.instrumentType || InstrumentType.PIANO);
         const dummySong = new Song();
-        if (this.variableContext) {
-            dummySong.variableContext = this.variableContext;
-        }
         this.songPlayer.playPart(this.part, player, dummySong);
     }
 

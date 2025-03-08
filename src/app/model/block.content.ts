@@ -6,7 +6,6 @@ export class BlockContent {
     private _isVariable: boolean = false;
     private _variableName: string = '';
     private variableSubscription?: Subscription;
-    private variableContext?: VariableContext;
 
     constructor() {
     }
@@ -41,30 +40,21 @@ export class BlockContent {
         }
     }
 
-    setVariableContext(context: VariableContext) {
-        this.variableContext = context;
-        if (this.isVariable && this.variableName) {
-            this.subscribeToVariable();
-        }
-    }
 
     private subscribeToVariable() {
         this.unsubscribeFromVariables();
-        if (this.variableContext) {
-            // Actualizar valor inicial
-            const value = this.variableContext.getValue(this.variableName);
+            const value = VariableContext.getValue(this.variableName);
             if (typeof value === 'string') {
                 this._notes = value;
             }
 
             // Suscribirse a cambios
-            this.variableSubscription = this.variableContext.onVariablesChange.subscribe(() => {
-                const value = this.variableContext?.getValue(this.variableName);
+            this.variableSubscription = VariableContext.onVariablesChange.subscribe(() => {
+                const value = VariableContext?.getValue(this.variableName);
                 if (typeof value === 'string') {
                     this._notes = value;
                 }
             });
-        }
     }
 
     private unsubscribeFromVariables() {

@@ -60,7 +60,7 @@ export class SongPlayer {
     }
 
     stop(): void {
-        console.log("Stopping playback manually");
+
         Transport.cancel();
         Transport.stop();
         this._isPlaying = false;
@@ -72,7 +72,7 @@ export class SongPlayer {
     }
 
     playSong(song: Song): void {
-        console.log('Starting to play song');
+
         Transport.start();
         Transport.bpm.value = 100;
         Transport.cancel();
@@ -86,47 +86,23 @@ export class SongPlayer {
             for (const part of song.parts) {
                 const player = new Player(channel++, part.instrumentType);
                 part.blocks.forEach(block => {
-                    const noteData = this.playPartBlocks(block, player, song);
-                    partSoundInfo.push({ 
-                        noteDatas: noteData, 
-                        player, 
-                        noteDataIndex: 0, 
-                        arpeggioIndex: 0, 
+                    const noteData = this.playBlock(block, [], player, block.repeatingTimes);
+                    partSoundInfo.push({
+                        noteDatas: noteData,
+                        player,
+                        noteDataIndex: 0,
+                        arpeggioIndex: 0,
                         pendingTurnsToPlay: 0,
                         isInfiniteLoop: block.repeatingTimes === -1
                     });
-                    for (const part of song.parts) {
-                        console.log(`Executing block operations for part: ${part.name}`);
-                        part.blocks.forEach(block => this.executeRecursiveBlockOperations(block, song.variableContext));
-                    }        
                 });
             }
-
             this.playNoteDatas(partSoundInfo);
             Transport.start();
         }
     }
-    private executeRecursiveBlockOperations(block: Block, variableContext: VariableContext) {
-        if (!variableContext) {
-            console.warn('Variable context is undefined in executeRecursiveBlockOperations');
-            return;
-        }
-
-        // Asegurarse de que el bloque tenga el contexto de variables
-        block.setVariableContext(variableContext);
-        
-        // No ejecutamos las operaciones aquí, se ejecutarán durante el playBlock
-        
-        // Configurar el contexto de variables para los bloques hijos
-        if (block.children && block.children.length > 0) {
-            for (const child of block.children) {
-                this.executeRecursiveBlockOperations(child, variableContext);
-            }
-        }
-    }
-
     playPart(part: Part, player: Player, song: Song): void {
-        console.log(`Starting to play part: ${part.name}`);
+
         Transport.start();
         Transport.bpm.value = 100;
         Transport.cancel();
@@ -138,7 +114,7 @@ export class SongPlayer {
         player.setInstrument(part.instrumentType);
 
         part.blocks.forEach(block => {
-            const noteData = this.playPartBlocks(block, player, song);
+            const noteData = this.playBlock(block, [], player, block.repeatingTimes);
             const partSoundInfo: PartSoundInfo = {
                 noteDatas: noteData,
                 player,
@@ -153,64 +129,35 @@ export class SongPlayer {
         Transport.start();
     }
 
-    private playPartBlocks(block: Block, player: Player, song: Song): NoteData[] {
-        console.log('Executing playPartBlocks for block:', block);
-        return this.playBlock(block, [], player, block.repeatingTimes, song.variableContext);
+
+
+    private executeBlockOperations(block: Block): void {
+        block.executeBlockOperations();
     }
 
-    private executeBlockOperations(block: Block, variableContext: VariableContext): void {
-        if (!variableContext) {
-            console.warn('Variable context is undefined.');
-            return;
-        }
+    private playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] {
 
-        console.log('Executing block operations. Current variables:', Array.from(variableContext.getAllVariables().entries()));
-        
-        // Asegurarse de que el bloque tenga el contexto de variables
-        block.setVariableContext(variableContext);
-        
-        // Ejecutar las operaciones del bloque
-        block.executeOperations();
-
-        // Ejecutar operaciones en bloques hijos
-        if (block.children && block.children.length > 0) {
-            for (const child of block.children) {
-                this.executeBlockOperations(child, variableContext);
-            }
-        }
-    }
-
-    private playBlock(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number, variableContext?: any): NoteData[] {
-        console.log(`Playing block with ${repeatingTimes} repetitions`);
         let resultNoteDatas: NoteData[] = [];
 
-        // Ejecutar las operaciones antes de cada repetición
         for (let i = 0; i < repeatingTimes; i++) {
-            if (variableContext) {
-                block.setVariableContext(variableContext);
-                block.executeOperations();
-            }
-
-            // Extraer y agregar las notas para esta repetición
-            const blockNoteDatas = this.extractNotesToPlay(block, noteDatas, player, variableContext);
+            this.executeBlockOperations(block);
+            const blockNoteDatas = this.extractNotesToPlay(block, noteDatas, player);
             resultNoteDatas = resultNoteDatas.concat(blockNoteDatas);
-
-            // Ejecutar los bloques hijos recursivamente
+            
             if (block.children && block.children.length > 0) {
                 for (const child of block.children) {
-                    const childNoteDatas = this.playBlock(child, resultNoteDatas, player, child.repeatingTimes, variableContext);
+                    const childNoteDatas = this.playBlock(child, [], player, child.repeatingTimes);
                     resultNoteDatas = resultNoteDatas.concat(childNoteDatas);
                 }
             }
         }
-
         return resultNoteDatas;
     }
 
-    private extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player, variableContext?: any): NoteData[] {
+    private extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player): NoteData[] {
         if (block.commands) {
             for (const command of block.commands) {
-                command.execute(player, variableContext);
+                command.execute(player);
             }
         }
 
@@ -267,10 +214,10 @@ export class SongPlayer {
         const loop = new Loop((time: any) => {
             this._metronome.next(this._beatCount % this._beatsPerBar);
             this._beatCount++;
-            
+
             let hasActiveParts = false;
             let allPartsFinished = true;
-            
+
             for (const info of partSoundInfo) {
                 // Si es un loop infinito y llegamos al final, reiniciamos
                 if (info.isInfiniteLoop && info.noteDataIndex >= info.noteDatas.length) {
@@ -307,11 +254,11 @@ export class SongPlayer {
                 // La última nota o silencio ha terminado
                 waitingForLastNote = false;
                 nextRepetitionPrepared = false;
-                
+
                 // Preparar la siguiente repetición después de que la nota o silencio haya terminado
                 if (this._currentRepetition < this._songRepetitions - 1) {
                     this._currentRepetition++;
-                    console.log(`Starting repetition ${this._currentRepetition + 1} of ${this._songRepetitions}`);
+
                     // Reiniciar todas las partes
                     for (const info of partSoundInfo) {
                         info.noteDataIndex = 0;
@@ -326,7 +273,7 @@ export class SongPlayer {
 
             // Si no hay partes activas o hemos completado todas las repeticiones, detenemos todo
             if (!hasActiveParts || (allPartsFinished && !waitingForLastNote && this._currentRepetition >= this._songRepetitions)) {
-                console.log("Playback finished");
+
                 loop.stop();
                 Transport.stop();
                 Transport.cancel();
@@ -346,7 +293,7 @@ export class SongPlayer {
 
     private findLastPlayedNote(partSoundInfo: PartSoundInfo[]): NoteData | undefined {
         let lastNote: NoteData | undefined;
-        
+
         for (const info of partSoundInfo) {
             if (info.noteDataIndex > 0 && info.noteDatas.length > 0) {
                 const lastNoteIndex = info.noteDataIndex - 1;
@@ -356,7 +303,7 @@ export class SongPlayer {
                 }
             }
         }
-        
+
         return lastNote;
     }
 
