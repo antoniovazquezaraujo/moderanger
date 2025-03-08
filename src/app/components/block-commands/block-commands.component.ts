@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, 
 import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
 import { OperationType } from 'src/app/model/operation';
-import { getPlayModeNames } from 'src/app/model/play.mode';
+import { getPlayModeNames, PlayMode, getPlayModeFromString } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
 import { VariableContext } from 'src/app/model/variable.context';
 import { Subscription } from 'rxjs';
@@ -302,6 +302,12 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 const value = command.value;
                 return value.startsWith('$') ? value.substring(1) : value;
             }
+            
+            // Para PlayMode, convertimos el valor numérico a string para mostrar en UI
+            if (command.type === CommandType.PLAYMODE && typeof command.value === 'number') {
+                return PlayMode[command.value as number];
+            }
+            
             return null;
         } catch (error) {
             console.error('Error getting selected value:', error);
@@ -445,5 +451,23 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             };
         });
         console.log('Initialized operations:', this.operations);
+    }
+
+    getPlayModeString(command: Command): string {
+        if (command.type === CommandType.PLAYMODE) {
+            const numValue = command.value as number;
+            // Convertir el valor numérico a nombre del enum
+            return PlayMode[numValue] || '';
+        }
+        return '';
+    }
+
+    setPlayModeFromString(modeString: string, command: Command): void {
+        if (command.type === CommandType.PLAYMODE) {
+            // Convertir el nombre a valor numérico usando la función existente
+            const modeValue = getPlayModeFromString(modeString);
+            command.setValue(modeValue);
+            this.cdr.detectChanges();
+        }
     }
 }

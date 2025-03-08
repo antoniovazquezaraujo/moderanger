@@ -34,7 +34,7 @@ export function getPlayModeFromString(mode:string): PlayMode{
     return PlayMode.CHORD;
 }
 export function getPlayModeNames():string[]{
-    return Object.values(PlayMode).filter(value => typeof value === 'string') as string[];
+    return Object.keys(PlayMode).filter(key => isNaN(Number(key)));
 }    
 
 export let isOdd = (t: number) => t % 2 === 1;
