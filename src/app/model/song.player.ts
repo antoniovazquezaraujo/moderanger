@@ -59,15 +59,30 @@ export class SongPlayer {
     }
 
     stop(): void {
-
+        // Detener la reproducción
         Transport.cancel();
         Transport.stop();
+        
+        // Reiniciar valores de las variables (sin eliminarlas)
+        VariableContext.resetAll();
+        
+        // Reiniciar el estado del reproductor
         this._isPlaying = false;
         this._currentPart = undefined;
         this._currentBlock = undefined;
         this._beatCount = 0;
         this._currentRepetition = 0;
         this._metronome.next(0);
+        
+        // Detener cualquier sonido en reproducción
+        if (this._player) {
+            this._player.stopAllNotes();
+        }
+        
+        // Limpiar cualquier intervalo o evento programado
+        // Tone.js Transport.cancel() ya debería hacer esto
+        
+        console.log('Song playback stopped and state reset');
     }
     playPart(part: Part, player: Player, song: Song): void {
 
@@ -333,14 +348,7 @@ export class SongPlayer {
 
             if (!hasActiveParts || (allPartsFinished && !waitingForLastNote && this._currentRepetition >= this._songRepetitions)) {
                 loop.stop();
-                Transport.stop();
-                Transport.cancel();
-                this._isPlaying = false;
-                this._currentPart = undefined;
-                this._currentBlock = undefined;
-                this._beatCount = 0;
-                this._currentRepetition = 0;
-                this._metronome.next(0);
+                this.stop();
             }
         });
 

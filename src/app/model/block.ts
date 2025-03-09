@@ -113,11 +113,24 @@ export class Block {
         clonedContent.variableName = this.blockContent.variableName;
         clonedBlock.blockContent = clonedContent;
 
-        clonedBlock.commands = this.commands.map(command => new Command({
-            type: command.type,
-            value: command.value,
-            isVariable: command.isVariable
-        }));
+        clonedBlock.commands = this.commands.map(command => {
+            const clonedCommand = new Command({
+                type: command.type,
+                isVariable: command.isVariable
+            });
+            
+            // Si es una variable, usar el método getVariableName() para obtener el nombre de la variable
+            if (command.isVariable) {
+                const variableName = command.getVariableName();
+                if (variableName) {
+                    clonedCommand.setVariable(variableName);
+                }
+            } else {
+                clonedCommand.setValue(command.value);
+            }
+            
+            return clonedCommand;
+        });
 
         clonedBlock.children = this.children.map(child => child.clone());
 

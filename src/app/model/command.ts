@@ -135,6 +135,17 @@ export class Command {
             case CommandType.PATTERN: player.decorationPattern = value; break;
         }
     }
+    
+    /**
+     * Devuelve el nombre de la variable si este comando utiliza una variable
+     * @returns El nombre de la variable sin el prefijo '$', o null si no usa una variable
+     */
+    getVariableName(): string | null {
+        if (this.isVariable && typeof this._value === 'string') {
+            return this._value.startsWith('$') ? this._value.substring(1) : this._value;
+        }
+        return null;
+    }
 }
 
 

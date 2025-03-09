@@ -298,9 +298,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     getSelectedValue(command: Command): string | null {
         try {
-            if (command.isVariable && typeof command.value === 'string') {
-                const value = command.value;
-                return value.startsWith('$') ? value.substring(1) : value;
+            if (command.isVariable) {
+                // Usar el nuevo método getVariableName() para obtener el nombre de la variable
+                return command.getVariableName();
             }
             
             // Para PlayMode, convertimos el valor numérico a string para mostrar en UI
