@@ -138,7 +138,7 @@
                 </ng-container>
 
                 <div class="command-controls">
-                    <p-button *ngIf="command.type !== commandTypes.SCALE && command.type !== commandTypes.PLAYMODE && command.type !== commandTypes.PATTERN" 
+                    <p-button
                         (click)="toggleVariableMode(command, $event)" 
                         icon="pi pi-dollar">
                     </p-button>

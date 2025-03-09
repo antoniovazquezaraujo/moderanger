@@ -51,21 +51,17 @@ export class VariableContext {
             // El valor actual lo obtenemos del contexto original
             const currentValue = VariableContext.context.get(name);
             
+            // Solo reiniciamos variables numéricas o de playmode
+            // Las variables de tipo escala y melodía se mantienen sin cambios
             if (typeof currentValue === 'number') {
                 VariableContext.setValue(name, 0); // Valores numéricos a 0
             } else if (typeof currentValue === 'string') {
-                // Las escalas se mantienen como string
-                if (['WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'].includes(currentValue)) {
-                    VariableContext.setValue(name, 'WHITE');
-                } 
-                // Los modos de reproducción pueden ser string o números
-                else if (['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'].includes(currentValue)) {
+                // Solo reiniciamos variables de playmode, no las de escala o melodía
+                if (['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'].includes(currentValue)) {
                     VariableContext.setValue(name, 'CHORD');
                 }
-                // Para cualquier otro string
-                else {
-                    VariableContext.setValue(name, ''); 
-                }
+                // No hacemos nada con variables de escala o melodía, 
+                // las dejamos con su valor actual
             }
         }
         
