@@ -147,7 +147,7 @@
                 </div>
             </div>
             <div class="add-command-wrapper">
-                <p-button class="add-command-button" (click)="addElement('command')" icon="pi pi-plus" label="Add Command"></p-button>
+                <p-button class="add-command-button" (click)="addElement('command')" icon="pi pi-cog" pTooltip="Add Command" tooltipPosition="top"></p-button>
             </div>
             <!-- Dynamic Operation Controls -->
             <div class="operation-controls">
@@ -158,21 +158,32 @@
 
     <!-- Second Row: Add Operation Button and Controls -->
     <div class="second-row">
+        <div *ngFor="let operation of operations; let i = index" class="operation-item">
+            <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">
+                <option *ngFor="let type of operationTypeNames" [value]="type">{{type}}</option>
+            </select>
+            <select class="command-type" [(ngModel)]="operation.variableName" (ngModelChange)="onVariableSelected($event)">
+                <option value="">Select variable</option>
+                <option *ngFor="let variable of availableVariables" [value]="variable.value">{{variable.label}}</option>
+            </select>
+            <ng-container *ngIf="operation.type === 'ASSIGN'">
+                <input type="number" class="command-value number-input" 
+                    [(ngModel)]="operation.value"
+                    min="-999"
+                    max="999"
+                    step="1">
+            </ng-container>
+            <div class="command-controls">
+                <p-button icon="pi pi-times" (click)="removeOperation(i)"></p-button>
+            </div>
+        </div>
         <div class="operation-controls">
             <p-button 
-                icon="pi pi-plus" 
-                label="Add Operation" 
+                icon="pi pi-percentage" 
+                pTooltip="Add Operation"
                 (click)="addElement('operation')" 
                 tooltipPosition="top">
             </p-button>
-        </div>
-        <div *ngFor="let operation of operations; let i = index" class="operation-item">
-            <p-dropdown [options]="operationDropdownOptions" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()" placeholder="Select operation type" appendTo="body"></p-dropdown>
-            <p-dropdown [options]="availableVariables" [(ngModel)]="operation.variableName" (ngModelChange)="onVariableSelected($event)" placeholder="Select variable" appendTo="body"></p-dropdown>
-            <ng-container *ngIf="operation.type === 'ASSIGN'">
-                <p-inputNumber [(ngModel)]="operation.value" mode="decimal" [showButtons]="true" buttonLayout="horizontal" [min]="-999" [max]="999"></p-inputNumber>
-            </ng-container>
-            <p-button icon="pi pi-times" (click)="removeOperation(i)"></p-button>
         </div>
     </div>
 </div>

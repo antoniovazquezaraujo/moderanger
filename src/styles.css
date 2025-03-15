@@ -41,22 +41,39 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
   .p-inputwrapper{
     padding:0px;
   }
-  .p-button{
-    height:24px;
-    width:24px!important;
-    padding: 0px!important; 
-    background-color: white!important;
-    background: white;
-    color: black!important;
-    border-color: black!important;
-
+  
+  /* Estilo para los botones con iconos */
+  .p-button {
+    height: 30px;
+    width: auto !important;
+    min-width: 30px !important;
+    padding: 0.25rem !important;
+    background-color: #007ad9 !important;
+    background: #007ad9 !important;
+    color: white !important;
+    border-color: #007ad9 !important;
+    margin: 2px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
-  .p-button.p-button-secondary, .p-buttonset.p-button-secondary > .p-button, .p-splitbutton.p-button-secondary > .p-button{
-    background-color: white!important;
-    background: white;
-    color: black!important;
-    height:24px;
-    padding: 0px!important; 
+  
+  /* Estilos para los iconos dentro de los botones */
+  .p-button .pi {
+    font-size: 1rem !important;
+    display: inline-block !important;
+    color: white !important;
+  }
+  
+  /* Estilos para botones secundarios */
+  .p-button.p-button-secondary, 
+  .p-buttonset.p-button-secondary > .p-button, 
+  .p-splitbutton.p-button-secondary > .p-button {
+    background-color: #6c757d !important;
+    background: #6c757d !important;
+    color: white !important;
+    height: 30px;
+    padding: 0.25rem !important;
   }
   
   .app-block-notes{
@@ -147,5 +164,279 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .p-tree .p-tree-container .p-treenode {
   padding: 0!important;
   margin: 0!important;
+}
+
+/* Estilo para botones con texto */
+.p-button[label] {
+  width: auto !important;
+  padding: 0.25rem 0.5rem !important;
+}
+
+.p-button .p-button-label {
+  margin-left: 0.25rem;
+  display: inline-block !important;
+  font-weight: normal;
+  font-size: 0.875rem;
+}
+
+/* Estilos específicos para los botones de comando y operación */
+.add-command-button .pi-cog {
+  font-size: 1.1rem !important;
+  color: white !important;
+}
+
+.operation-controls .pi-percentage {
+  font-size: 1.1rem !important;
+  color: white !important;
+}
+
+/* Distinguir los botones por color */
+.add-command-button {
+  background-color: #2196F3 !important; /* Azul para comandos */
+  border-color: #2196F3 !important;
+}
+
+.operation-controls .p-button {
+  background-color: #4CAF50 !important; /* Verde para operaciones */
+  border-color: #4CAF50 !important;
+}
+
+/* Estilos para los dropdowns con clase command-value */
+.command-value.p-dropdown,
+p-dropdown.command-value .p-dropdown {
+  height: 30px !important;
+  min-width: 120px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  background-color: white !important;
+  border: 1px solid #ced4da !important;
+}
+
+.command-value.p-dropdown .p-dropdown-label,
+p-dropdown.command-value .p-dropdown .p-dropdown-label {
+  padding: 0 0.5rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-value.p-dropdown .p-dropdown-trigger,
+p-dropdown.command-value .p-dropdown .p-dropdown-trigger {
+  width: 2rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+}
+
+.command-value.p-inputnumber,
+p-inputnumber.command-value .p-inputnumber {
+  height: 30px !important;
+  min-width: 80px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Estilos más específicos y agresivos para los dropdowns en operations */
+.second-row .operation-item p-dropdown .p-dropdown,
+.second-row .operation-item p-dropdown.command-value .p-dropdown {
+  width: 180px !important;
+  min-width: 180px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  background-color: white !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 4px !important;
+}
+
+.second-row .operation-item p-dropdown .p-dropdown .p-dropdown-label,
+.second-row .operation-item p-dropdown.command-value .p-dropdown .p-dropdown-label {
+  padding: 0 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+  width: calc(100% - 2.5rem) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  border: none !important;
+}
+
+.second-row .operation-item p-dropdown .p-dropdown .p-dropdown-trigger,
+.second-row .operation-item p-dropdown.command-value .p-dropdown .p-dropdown-trigger {
+  width: 2rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.second-row .operation-item p-inputnumber.command-value .p-inputnumber,
+.second-row .operation-item p-inputnumber .p-inputnumber {
+  height: 30px !important;
+  width: 80px !important;
+  min-width: 80px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 4px !important;
+}
+
+/* Override cualquier estilo previo que pueda estar causando conflictos */
+.p-dropdown {
+  height: auto !important;
+  padding: 0 !important;
+}
+
+/* Estilo para el contenedor de operaciones */
+.second-row {
+  display: flex !important;
+  flex-flow: row wrap !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
+  padding: 6px !important;
+}
+
+.second-row .operation-item {
+  display: flex !important;
+  align-items: center !important;
+  padding: 6px !important;
+  margin: 4px 0 !important;
+  background-color: #f8f9fa !important;
+  border-radius: 4px !important;
+  border: 1px solid #e9ecef !important;
+  gap: 4px !important;
+  flex: 0 0 auto !important; /* Evita que se expandan y ocupen toda la fila */
+}
+
+/* Mover el botón de agregar operación al inicio de la fila */
+.operation-controls {
+  order: 1; /* Coloca el control al final de los elementos flexibles */
+  margin-left: auto; /* Empuja el control hacia la derecha */
+}
+
+/* Estilos específicos para los nuevos styleClass */
+.command-dropdown {
+  width: 180px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  background-color: white !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+}
+
+.command-dropdown .p-dropdown-label {
+  padding: 0 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.command-dropdown .p-dropdown-trigger {
+  width: 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+}
+
+.command-inputnumber {
+  width: 80px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Estilos específicos para sobrescribir los estilos de PrimeNG */
+body .p-dropdown .p-dropdown-label {
+  padding: 0 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+body .p-dropdown .p-dropdown-trigger {
+  width: 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Estilos para los elementos select y input estándar */
+.operation-item select.command-type {
+  width: 120px;
+  height: 30px;
+  padding: 0 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  margin: 0 4px;
+  background-color: white;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.operation-item .number-input {
+  width: 80px;
+  height: 30px;
+  padding: 0 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  margin: 0 4px;
+  text-align: center;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+/* Estilos para el contenedor de botones en operation-item */
+.operation-item .command-controls {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: 0.25rem;
+}
+
+/* Anular estilos previos para operation-item */
+.second-row .operation-item {
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  margin: 4px 0;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  gap: 4px;
+}
+
+/* Mejorar la consistencia de los botones en las operaciones */
+.operation-item .command-controls .p-button,
+.operation-item .p-button {
+  height: 30px;
+  width: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px;
+  padding: 0;
+  background-color: #007ad9;
+  border-color: #007ad9;
+  color: white;
+}
+
+.operation-item .command-controls .p-button .pi,
+.operation-item .p-button .pi {
+  font-size: 0.875rem;
+  color: white;
 }
 

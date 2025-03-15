@@ -79,7 +79,15 @@
     position: relative;
 
     .command-type {
-        width: 100px;
+        width: 120px;
+        height: 30px;
+        padding: 0 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        margin: 0 4px;
+        background-color: white;
+        font-size: 14px;
+        font-family: inherit;
     }
 
     .command-value {
@@ -92,6 +100,42 @@
         gap: 0.25rem;
         margin-left: 0.25rem;
     }
+}
+
+.second-row {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.25rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.operation-item {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 0.25rem;
+    align-items: center;
+    position: relative;
+    padding: 0.25rem;
+    margin: 0.25rem 0;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    
+    .command-value {
+        min-width: 80px;
+        width: auto;
+    }
+    
+    .command-controls {
+        display: flex;
+        gap: 0.25rem;
+        margin-left: 0.25rem;
+    }
+}
+
+.operation-controls {
+    margin-left: auto;
 }
 
 .notes-input {
