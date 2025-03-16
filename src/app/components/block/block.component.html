@@ -21,12 +21,7 @@
     <ng-template let-node pTemplate="default">
     <div class="container">
       <label for="repeatingTimes"> Block {{node.id}} </label>
-      <p-inputNumber id="repeatingTimes" placeholder="Repeating times" [(ngModel)]="node.repeatingTimes" mode="decimal"
-        [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal"
-        [min]="0" [max]="999"
-        decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary"
-        incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" [size]="1">
-      </p-inputNumber>
+      <input type="number" id="repeatingTimes" class="number-input" placeholder="Repeating times" [(ngModel)]="node.repeatingTimes" min="0" max="999" step="1">
       <button pButton type="button" icon="pi pi-copy" (click)="duplicateBlock(node)"></button>
       <button pButton type="button" icon="pi pi-plus" (click)="addChild(node)"></button>
       <button pButton type="button" icon="pi pi-times" (click)="removeChild(node)"></button>

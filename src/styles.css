@@ -961,7 +961,6 @@ p-dropdown.command-value .p-dropdown,
   justify-content: center !important;
   background-color: transparent !important;
   border: none !important;
-  pointer-events: none !important;
 }
 
 /* Estilo para el icono de la flecha */
@@ -1031,160 +1030,51 @@ p-dropdown.command-value .p-dropdown,
   font-size: 0.75rem !important;
 }
 
-/* Estilo para input numérico simple */
+/* ====== INPUTS NUMÉRICOS SIMPLIFICADOS ====== */
+input[type="number"],
 .number-input {
-  width: 80px !important;
-  height: 30px !important;
-  border: 1px solid #ced4da !important;
-  border-radius: 4px !important;
-  padding: 0 0.5rem !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
-  text-align: center !important;
-  margin: 0 4px !important;
-}
-/* SOLUCIÓN PARA P-DROPDOWN */
-
-/* Estilo base para convertir p-dropdown en select */
-.command-type-style {
-  display: inline-block !important;
+    width: 80px !important;
+    height: 30px !important;
+    padding: 0 0.5rem !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    margin: 0 4px !important;
+    background-color: white !important;
+    font-size: 14px !important;
+    font-family: inherit !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
+    appearance: textfield !important; /* Oculta los controles de incremento/decremento por defecto */
 }
 
-/* Estilo del contenedor principal del dropdown */
-.command-type-style .p-dropdown {
-  width: 120px !important;
-  height: 30px !important;
-  border: 1px solid #ced4da !important;
-  border-radius: 4px !important;
-  background-color: white !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
-  margin: 0 4px !important;
-  padding: 0 !important;
-  position: relative !important;
-  display: inline-block !important;
-  vertical-align: middle !important;
-  box-sizing: border-box !important;
-  overflow: visible !important;
+/* Mostrar los controles solo al recibir el foco o al pasar el mouse */
+input[type="number"]:hover,
+input[type="number"]:focus,
+.number-input:hover,
+.number-input:focus {
+    appearance: auto !important; /* Muestra los controles nativos */
 }
 
-/* Estilo para dropdown más anchos como los de notas */
-.command-type-style.notes-value .p-dropdown {
-  width: 200px !important;
+/* Estilo específico para Chrome/Safari que controla las flechas */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button,
+.number-input::-webkit-inner-spin-button,
+.number-input::-webkit-outer-spin-button {
+    opacity: 0 !important; /* Oculta las flechas por defecto */
+    height: 28px !important; /* Altura ajustada al input */
 }
 
-/* Estilo para la etiqueta dentro del dropdown */
-.command-type-style .p-dropdown-label {
-  height: 28px !important;
-  line-height: 28px !important;
-  padding: 0 0.5rem !important;
-  margin: 0 !important;
-  display: block !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  width: calc(100% - 2rem) !important;
-  box-sizing: border-box !important;
-  border: none !important;
-  background-color: transparent !important;
-  color: #333 !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
-}
-
-/* Estilo para el trigger (flecha) del dropdown */
-.command-type-style .p-dropdown-trigger {
-  position: absolute !important;
-  width: 2rem !important;
-  height: 28px !important;
-  right: 0 !important;
-  top: 1px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background-color: transparent !important;
-  border: none !important;
-  pointer-events: none !important;
-}
-
-/* Estilo para el icono de la flecha */
-.command-type-style .p-dropdown-trigger-icon {
-  font-size: 0.875rem !important;
-  color: #333 !important;
-}
-
-/* Estilo para el icono de limpiar (X) */
-.command-type-style .p-dropdown-clear-icon {
-  position: absolute !important;
-  right: 2rem !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  font-size: 0.875rem !important;
-  color: #6c757d !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Estilos para p-inputnumber */
-.p-inputnumber {
-  width: 80px !important;
-  height: 30px !important;
-  display: inline-flex !important;
-  vertical-align: middle !important;
-  margin: 0 4px !important;
-}
-
-.p-inputnumber-input {
-  width: 100% !important;
-  height: 30px !important;
-  border: 1px solid #ced4da !important;
-  border-radius: 4px !important;
-  padding: 0 0.5rem !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
-  text-align: center !important;
-}
-
-.p-inputnumber-button-group {
-  display: flex !important;
-  flex-direction: row !important;
-  height: 30px !important;
-}
-
-.p-inputnumber-button {
-  width: 24px !important;
-  height: 15px !important;
-  background-color: #f0f0f0 !important;
-  border: 1px solid #ced4da !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-}
-
-.p-inputnumber-button-up {
-  border-radius: 0 4px 0 0 !important;
-}
-
-.p-inputnumber-button-down {
-  border-radius: 0 0 4px 0 !important;
-}
-
-.p-inputnumber-button-icon {
-  font-size: 0.75rem !important;
-}
-
-/* Estilo para input numérico simple */
-.number-input {
-  width: 80px !important;
-  height: 30px !important;
-  border: 1px solid #ced4da !important;
-  border-radius: 4px !important;
-  padding: 0 0.5rem !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
-  text-align: center !important;
-  margin: 0 4px !important;
+/* Mostrar las flechas al hacer hover o focus */
+input[type="number"]:hover::-webkit-inner-spin-button,
+input[type="number"]:focus::-webkit-inner-spin-button,
+input[type="number"]:hover::-webkit-outer-spin-button,
+input[type="number"]:focus::-webkit-outer-spin-button,
+.number-input:hover::-webkit-inner-spin-button,
+.number-input:focus::-webkit-inner-spin-button,
+.number-input:hover::-webkit-outer-spin-button,
+.number-input:focus::-webkit-outer-spin-button {
+    opacity: 1 !important; /* Muestra las flechas */
 }
 
 /* Estilos para botones */
@@ -1298,9 +1188,6 @@ p-dropdown.command-value .p-dropdown,
   color: #333 !important;
   font-size: 14px !important;
   font-family: inherit !important;
-  position: absolute !important;
-  left: 0 !important;
-  top: 0 !important;
 }
 
 .command-type-style .p-dropdown .p-dropdown-trigger {
@@ -1590,7 +1477,10 @@ input[type="number"],
     padding: 0 0.5rem !important;
     border: 1px solid #ced4da !important;
     border-radius: 4px !important;
+    margin: 0 !important;
+    background-color: white !important;
     font-size: 14px !important;
+    font-family: inherit !important;
     text-align: center !important;
     box-sizing: border-box !important;
 }
@@ -1648,4 +1538,194 @@ input[type="number"],
 .flex-align-center {
     display: flex !important;
     align-items: center !important;
+}
+
+/* ====== ESTILOS PARA INPUTS NUMÉRICOS DE REPETICIONES ====== */
+/* Estilos para los inputs numéricos de bloques, parts y canciones */
+#repeatingTimes, 
+#blockRepeatingTimes,
+#repetitions,
+p-inputNumber[id="repeatingTimes"],
+p-inputNumber[id="blockRepeatingTimes"],
+p-inputNumber[id="repetitions"],
+app-block p-inputnumber,
+app-song p-inputnumber,
+p-inputnumber[inputid="repetitions"],
+p-inputnumber#repetitions {
+    width: 80px !important;
+    height: 30px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin: 0 4px !important;
+}
+
+/* Ocultar completamente los botones de PrimeNG y usar solo el input nativo */
+p-inputnumber[id="repeatingTimes"] .p-inputnumber-buttons-stacked,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputnumber-buttons-stacked,
+p-inputnumber[id="repetitions"] .p-inputnumber-buttons-stacked,
+app-block p-inputnumber .p-inputnumber-buttons-stacked,
+app-song p-inputnumber .p-inputnumber-buttons-stacked,
+app-block p-inputnumber .p-inputnumber-button-group,
+app-song p-inputnumber .p-inputnumber-button-group,
+p-inputnumber[inputid="repetitions"] .p-inputnumber-button-group,
+p-inputnumber#repetitions .p-inputnumber-button-group,
+.p-inputnumber-buttons-stacked {
+    display: none !important;
+}
+
+/* Estilo para el input numérico dentro del componente p-inputnumber */
+p-inputnumber[id="repeatingTimes"] .p-inputtext,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext,
+p-inputnumber[id="repetitions"] .p-inputtext,
+app-block p-inputnumber .p-inputtext,
+app-song p-inputnumber .p-inputtext,
+p-inputnumber[inputid="repetitions"] .p-inputtext,
+p-inputnumber#repetitions .p-inputtext,
+p-inputnumber .p-inputtext {
+    width: 100% !important;
+    height: 30px !important;
+    padding: 0 0.5rem !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    margin: 0 !important;
+    background-color: white !important;
+    font-size: 14px !important;
+    font-family: inherit !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    appearance: textfield !important; /* Oculta los controles de incremento/decremento por defecto */
+}
+
+/* Mostrar los controles nativos solo al recibir el foco o al pasar el mouse */
+p-inputnumber[id="repeatingTimes"] .p-inputtext:hover,
+p-inputnumber[id="repeatingTimes"] .p-inputtext:focus,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext:hover,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext:focus,
+p-inputnumber[id="repetitions"] .p-inputtext:hover,
+p-inputnumber[id="repetitions"] .p-inputtext:focus,
+app-block p-inputnumber .p-inputtext:hover,
+app-block p-inputnumber .p-inputtext:focus,
+app-song p-inputnumber .p-inputtext:hover,
+app-song p-inputnumber .p-inputtext:focus,
+p-inputnumber[inputid="repetitions"] .p-inputtext:hover,
+p-inputnumber[inputid="repetitions"] .p-inputtext:focus,
+p-inputnumber#repetitions .p-inputtext:hover,
+p-inputnumber#repetitions .p-inputtext:focus,
+p-inputnumber .p-inputtext:hover,
+p-inputnumber .p-inputtext:focus {
+    appearance: auto !important; /* Muestra los controles nativos */
+}
+
+/* Estilo específico para Chrome/Safari que controla las flechas */
+p-inputnumber[id="repeatingTimes"] .p-inputtext::-webkit-inner-spin-button,
+p-inputnumber[id="repeatingTimes"] .p-inputtext::-webkit-outer-spin-button,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext::-webkit-inner-spin-button,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext::-webkit-outer-spin-button,
+p-inputnumber[id="repetitions"] .p-inputtext::-webkit-inner-spin-button,
+p-inputnumber[id="repetitions"] .p-inputtext::-webkit-outer-spin-button,
+app-block p-inputnumber .p-inputtext::-webkit-inner-spin-button,
+app-block p-inputnumber .p-inputtext::-webkit-outer-spin-button,
+app-song p-inputnumber .p-inputtext::-webkit-inner-spin-button,
+app-song p-inputnumber .p-inputtext::-webkit-outer-spin-button,
+p-inputnumber[inputid="repetitions"] .p-inputtext::-webkit-inner-spin-button,
+p-inputnumber[inputid="repetitions"] .p-inputtext::-webkit-outer-spin-button,
+p-inputnumber#repetitions .p-inputtext::-webkit-inner-spin-button,
+p-inputnumber#repetitions .p-inputtext::-webkit-outer-spin-button,
+p-inputnumber .p-inputtext::-webkit-inner-spin-button,
+p-inputnumber .p-inputtext::-webkit-outer-spin-button {
+    opacity: 0 !important; /* Oculta las flechas por defecto */
+    height: 28px !important; /* Altura ajustada al input */
+}
+
+/* Mostrar las flechas al hacer hover o focus */
+p-inputnumber[id="repeatingTimes"] .p-inputtext:hover::-webkit-inner-spin-button,
+p-inputnumber[id="repeatingTimes"] .p-inputtext:focus::-webkit-inner-spin-button,
+p-inputnumber[id="repeatingTimes"] .p-inputtext:hover::-webkit-outer-spin-button,
+p-inputnumber[id="repeatingTimes"] .p-inputtext:focus::-webkit-outer-spin-button,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext:hover::-webkit-inner-spin-button,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext:focus::-webkit-inner-spin-button,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext:hover::-webkit-outer-spin-button,
+p-inputnumber[id="blockRepeatingTimes"] .p-inputtext:focus::-webkit-outer-spin-button,
+p-inputnumber[id="repetitions"] .p-inputtext:hover::-webkit-inner-spin-button,
+p-inputnumber[id="repetitions"] .p-inputtext:focus::-webkit-inner-spin-button,
+p-inputnumber[id="repetitions"] .p-inputtext:hover::-webkit-outer-spin-button,
+p-inputnumber[id="repetitions"] .p-inputtext:focus::-webkit-outer-spin-button,
+app-block p-inputnumber .p-inputtext:hover::-webkit-inner-spin-button,
+app-block p-inputnumber .p-inputtext:focus::-webkit-inner-spin-button,
+app-block p-inputnumber .p-inputtext:hover::-webkit-outer-spin-button,
+app-block p-inputnumber .p-inputtext:focus::-webkit-outer-spin-button,
+app-song p-inputnumber .p-inputtext:hover::-webkit-inner-spin-button,
+app-song p-inputnumber .p-inputtext:focus::-webkit-inner-spin-button,
+app-song p-inputnumber .p-inputtext:hover::-webkit-outer-spin-button,
+app-song p-inputnumber .p-inputtext:focus::-webkit-outer-spin-button,
+p-inputnumber[inputid="repetitions"] .p-inputtext:hover::-webkit-inner-spin-button,
+p-inputnumber[inputid="repetitions"] .p-inputtext:focus::-webkit-inner-spin-button,
+p-inputnumber[inputid="repetitions"] .p-inputtext:hover::-webkit-outer-spin-button,
+p-inputnumber[inputid="repetitions"] .p-inputtext:focus::-webkit-outer-spin-button,
+p-inputnumber#repetitions .p-inputtext:hover::-webkit-inner-spin-button,
+p-inputnumber#repetitions .p-inputtext:focus::-webkit-inner-spin-button,
+p-inputnumber#repetitions .p-inputtext:hover::-webkit-outer-spin-button,
+p-inputnumber#repetitions .p-inputtext:focus::-webkit-outer-spin-button,
+p-inputnumber .p-inputtext:hover::-webkit-inner-spin-button,
+p-inputnumber .p-inputtext:focus::-webkit-inner-spin-button,
+p-inputnumber .p-inputtext:hover::-webkit-outer-spin-button,
+p-inputnumber .p-inputtext:focus::-webkit-outer-spin-button {
+    opacity: 1 !important; /* Muestra las flechas */
+}
+
+/* Estilos específicos para el componente p-inputNumber con un enfoque más agresivo */
+p-inputnumber {
+    width: 80px !important;
+    height: 30px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    margin: 0 4px !important;
+}
+
+p-inputnumber .p-inputnumber {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    background: none !important;
+    display: inline-block !important;
+    position: relative !important;
+}
+
+p-inputnumber .p-inputnumber-input {
+    width: 100% !important;
+    height: 30px !important;
+    padding: 0 0.5rem !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    margin: 0 !important;
+    background-color: white !important;
+    font-size: 14px !important;
+    font-family: inherit !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+}
+
+/* Estilos específicos para los contenedores de los inputs numéricos */
+.p-ml-2 p-inputnumber,
+.p-ml-2 p-inputnumber .p-inputnumber,
+.p-ml-2 p-inputnumber .p-inputnumber-input {
+    width: 80px !important;
+    height: 30px !important;
+}
+
+/* Estilos específicos para el HTML observado en los componentes */
+p-inputnumber[inputid="repetitions"],
+div.p-d-flex p-inputnumber,
+div.container p-inputnumber,
+div.part-header p-inputnumber {
+    width: 80px !important;
+    height: 30px !important;
+    display: inline-block !important;
+}
+
+/* Reset completo para los botones spinners */
+p-inputnumber .p-inputnumber-button-up,
+p-inputnumber .p-inputnumber-button-down,
+p-inputnumber .p-button.p-inputnumber-button {
+    display: none !important;
 }

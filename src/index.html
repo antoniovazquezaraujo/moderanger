@@ -9,6 +9,48 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css">
+  <link rel="stylesheet" href="repetitions-fix.css">
+  <style>
+    /* Estilos inline para máxima prioridad */
+    input[type="number"], 
+    .number-input, 
+    #repeatingTimes, 
+    #repetitions {
+      width: 80px !important;
+      height: 30px !important;
+      padding: 0 0.5rem !important;
+      border: 1px solid #ced4da !important;
+      border-radius: 4px !important;
+      margin: 0 4px !important;
+      background-color: white !important;
+      font-size: 14px !important;
+      font-family: inherit !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+      appearance: textfield !important;
+    }
+    
+    input[type="number"]:hover, 
+    input[type="number"]:focus,
+    .number-input:hover,
+    .number-input:focus,
+    #repeatingTimes:hover,
+    #repeatingTimes:focus,
+    #repetitions:hover,
+    #repetitions:focus {
+      appearance: auto !important;
+    }
+    
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 0 !important;
+    }
+    
+    input[type="number"]:hover::-webkit-inner-spin-button,
+    input[type="number"]:focus::-webkit-inner-spin-button {
+      opacity: 1 !important;
+    }
+  </style>
 </head>
 <body >
   <app-root></app-root>
