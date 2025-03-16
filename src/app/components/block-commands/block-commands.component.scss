@@ -1,163 +1,91 @@
-:host ::ng-deep {
-    .p-dropdown {
-        width: 200px !important;
-        flex: 0 0 200px !important;
-
-        .p-dropdown-label {
-            padding-right: 2.5rem !important;
-            text-align: left !important;
-            width: calc(100% - 2.5rem) !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-        }
-
-        .p-dropdown-trigger {
-            width: 2rem !important;
-            padding: 0 !important;
-        }
-
-        .p-dropdown-clear-icon {
-            right: 2rem !important;
-        }
-
-        .p-dropdown-items {
-            text-align: left !important;
-        }
-    }
-
-    .p-dropdown-panel {
-        min-width: 400px !important;
-        max-width: 600px !important;
-
-        .p-dropdown-items-wrapper {
-            width: 100% !important;
-        }
-
-        .p-dropdown-item {
-            width: 100% !important;
-            overflow: visible !important;
-        }
-    }
-
-    .p-inputnumber {
-        width: 80px !important;
-        flex: 0 0 80px !important;
-
-        .p-inputnumber-input {
-            width: 100% !important;
-            text-align: center !important;
-        }
-
-        .p-button {
-            width: 2rem !important;
-            padding: 0 !important;
-        }
-
-        .p-inputnumber-buttons-horizontal .p-button.p-inputnumber-button-up {
-            right: 0 !important;
-        }
-
-        .p-inputnumber-buttons-horizontal .p-button.p-inputnumber-button-down {
-            left: 0 !important;
-        }
-    }
+/* Estilos para p-inputnumber */
+:host ::ng-deep .p-inputnumber {
+  width: 80px !important;
+  height: 30px !important;
 }
 
-.commands-container {
-    display: flex;
-    flex-flow: row wrap;
-    gap: 0.25rem;
-    align-items: center;
+:host ::ng-deep .p-inputnumber-input {
+  width: 100% !important;
+  text-align: center !important;
+  height: 100% !important;
 }
 
-.command {
-    display: flex;
-    flex-flow: row nowrap;
-    gap: 0.25rem;
-    align-items: center;
-    position: relative;
+:host ::ng-deep .p-inputnumber .p-button {
+  width: 2rem !important;
+  padding: 0 !important;
+  height: 100% !important;
+}
 
-    .command-type {
-        width: 120px;
-        height: 30px;
-        padding: 0 0.5rem;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        margin: 0 4px;
-        background-color: white;
-        font-size: 14px;
-        font-family: inherit;
-    }
-
-    .command-value {
-        min-width: 80px;
-        width: auto;
-    }
-
-    .command-controls {
-        display: flex;
-        gap: 0.25rem;
-        margin-left: 0.25rem;
-    }
+/* Contenedores */
+.commands-container, .second-row {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
 }
 
 .second-row {
-    display: flex;
-    flex-flow: row wrap;
-    gap: 0.25rem;
-    align-items: center;
-    margin-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Elementos */
+.command, .operation-item {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 4px;
+  align-items: center;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0.25rem;
+  margin: 3px 0;
 }
 
 .operation-item {
-    display: flex;
-    flex-flow: row nowrap;
-    gap: 0.25rem;
-    align-items: center;
-    position: relative;
-    padding: 0.25rem;
-    margin: 0.25rem 0;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    border: 1px solid #e9ecef;
-    
-    .command-value {
-        min-width: 80px;
-        width: auto;
-    }
-    
-    .command-controls {
-        display: flex;
-        gap: 0.25rem;
-        margin-left: 0.25rem;
-    }
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+/* Command-type */
+.command-type {
+  width: 120px;
+  height: 30px;
+  padding: 0 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  margin: 0 4px;
+  background-color: white;
+  font-size: 14px;
+}
+
+/* Controles */
+.command-controls, .notes-controls {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: 0.25rem;
 }
 
 .operation-controls {
-    margin-left: auto;
+  margin-left: auto;
 }
 
+/* Notas */
 .notes-input {
-    display: flex;
-    gap: 0.25rem;
-    align-items: center;
-    margin-right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  margin-right: 0.5rem;
+}
 
-    input {
-        width: auto;
-        min-width: 200px;
-        padding: 0.25rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
+.notes-input input {
+  width: auto;
+  min-width: 200px;
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 
-    .notes-value {
-        width: 200px;
-    }
-
-    .notes-controls {
-        display: flex;
-        gap: 0.25rem;
-    }
-} 
+.notes-value {
+  width: 200px;
+}

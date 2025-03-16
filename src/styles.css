@@ -6,6 +6,7 @@
 html, body { height: 100%; }
 body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+/* Estilos básicos (no relacionados con p-dropdown) */
 .container{
     display:flex;
     flex-direction:row;
@@ -17,78 +18,79 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
     background-color: white!important;
     background: white;
     color: black!important;
-    
-  }
-  .p-component{
+}
+
+/* Componentes PrimeNG básicos */
+.p-component{
     padding: 0px; 
-  }
-  .p-inputtext{
+}
+.p-inputtext{
     height:24px;
     padding: 0px!important; 
-  }
-  
-  .p-element{
+}
+.p-element{
     padding:0px;
     margin:0px;
-  }
-  .p-accordion-header-link{
+}
+.p-accordion-header-link{
     background-color: white!important;
     background: white;
     color: black!important;
     height:14px;
-
-  }
-  .p-inputwrapper{
+}
+.p-inputwrapper{
     padding:0px;
-  }
-  
-  /* Estilo para los botones con iconos */
-  .p-button {
+}
+
+/* Estilo para los botones con iconos */
+.p-button {
     height: 30px;
-    width: auto !important;
+    width: 30px !important;
     min-width: 30px !important;
-    padding: 0.25rem !important;
+    padding: 0 !important;
     background-color: #007ad9 !important;
     background: #007ad9 !important;
     color: white !important;
     border-color: #007ad9 !important;
-    margin: 2px !important;
+    margin: 0 2px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-  }
-  
-  /* Estilos para los iconos dentro de los botones */
-  .p-button .pi {
+    border-radius: 4px !important;
+}
+
+/* Estilos para los iconos dentro de los botones */
+.p-button .pi {
     font-size: 1rem !important;
     display: inline-block !important;
     color: white !important;
-  }
-  
-  /* Estilos para botones secundarios */
-  .p-button.p-button-secondary, 
-  .p-buttonset.p-button-secondary > .p-button, 
-  .p-splitbutton.p-button-secondary > .p-button {
+}
+
+/* Estilos para botones secundarios */
+.p-button.p-button-secondary, 
+.p-buttonset.p-button-secondary > .p-button, 
+.p-splitbutton.p-button-secondary > .p-button {
     background-color: #6c757d !important;
     background: #6c757d !important;
     color: white !important;
     height: 30px;
     padding: 0.25rem !important;
-  }
-  
-  .app-block-notes{
+}
+
+.app-block-notes{
     height:24px;
-  }
-  .p-inputnumber{
+}
+.p-inputnumber{
     height:24px;
     padding: 0px;
+}
 
-  }
-   .p-dropdown{
+.p-dropdown{
     height:24px;
     padding: 0px;
     background-color: white!important;
     background: white!important;
+}
 
   }
  
@@ -300,7 +302,7 @@ p-inputnumber.command-value .p-inputnumber {
 .second-row {
   display: flex !important;
   flex-flow: row wrap !important;
-  gap: 0.5rem !important;
+  gap: 6px !important;
   align-items: center !important;
   padding: 6px !important;
 }
@@ -374,9 +376,15 @@ body .p-dropdown .p-dropdown-trigger {
 }
 
 /* Estilos para los elementos select y input estándar */
-.operation-item select.command-type {
+select.command-type,
+.command .command-type,
+.operation-item select.command-type,
+.operation-item input.command-value,
+.command input.command-value,
+.operation-item .number-input {
   width: 120px;
   height: 30px;
+  box-sizing: border-box;
   padding: 0 0.5rem;
   border: 1px solid #ced4da;
   border-radius: 4px;
@@ -384,18 +392,25 @@ body .p-dropdown .p-dropdown-trigger {
   background-color: white;
   font-size: 14px;
   font-family: inherit;
+  line-height: 30px;
+  vertical-align: middle;
 }
 
-.operation-item .number-input {
+/* Ajuste específico para los inputs numéricos */
+.operation-item .number-input,
+.command .number-input {
   width: 80px;
-  height: 30px;
-  padding: 0 0.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  margin: 0 4px;
   text-align: center;
-  font-size: 14px;
-  font-family: inherit;
+}
+
+/* Asegurar que los contenedores tengan la misma altura */
+.operation-item,
+.command {
+  height: 38px;
+  min-height: 38px;
+  align-items: center;
+  box-sizing: border-box;
+  margin: 3px 0; /* Consistencia en márgenes verticales */
 }
 
 /* Estilos para el contenedor de botones en operation-item */
@@ -440,3 +455,1197 @@ body .p-dropdown .p-dropdown-trigger {
   color: white;
 }
 
+/* Ajustar el tamaño y espaciado de los contenedores principales */
+.commands-container,
+.second-row {
+  display: flex !important;
+  flex-flow: row wrap !important;
+  gap: 6px !important; /* Espaciado consistente entre elementos */
+  align-items: center !important;
+  padding: 6px !important;
+}
+
+/* Asegurar que el botón de añadir quede alineado verticalmente */
+.add-command-wrapper,
+.operation-controls {
+  display: flex;
+  align-items: center;
+  height: 38px;
+}
+
+/* Estilos unificados para todos los dropdowns de PrimeNG */
+p-dropdown .p-dropdown,
+p-dropdown.command-value .p-dropdown,
+.command-value.p-dropdown {
+  width: 120px !important;
+  height: 30px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  background-color: white !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 4px !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Estilo para el label dentro del dropdown */
+p-dropdown .p-dropdown .p-dropdown-label,
+p-dropdown.command-value .p-dropdown .p-dropdown-label,
+.command-value.p-dropdown .p-dropdown-label {
+  padding: 0 0.5rem !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  width: calc(100% - 2rem) !important;
+  border: none !important;
+  background: transparent !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+
+/* Estilo para el trigger (flecha) del dropdown */
+p-dropdown .p-dropdown .p-dropdown-trigger,
+p-dropdown.command-value .p-dropdown .p-dropdown-trigger,
+.command-value.p-dropdown .p-dropdown-trigger {
+  width: 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  border: none !important;
+  background-color: transparent !important;
+  position: absolute !important;
+  right: 0 !important;
+}
+
+/* Asegurarse de que el ícono de limpiar esté bien posicionado */
+p-dropdown .p-dropdown .p-dropdown-clear-icon,
+p-dropdown.command-value .p-dropdown .p-dropdown-clear-icon,
+.command-value.p-dropdown .p-dropdown-clear-icon {
+  right: 2rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+}
+
+/* Ajuste para dropdowns específicos de variables */
+.notes-value.p-dropdown,
+.notes-value .p-dropdown {
+  width: 200px !important;
+  height: 30px !important;
+}
+
+/* Sobrescribir el estilo de height para todos los dropdowns */
+.p-dropdown {
+  height: 30px !important;
+}
+
+/* Ajustes específicos para los p-dropdown en comandos */
+.command p-dropdown .p-dropdown,
+.command p-dropdown.command-value .p-dropdown {
+  width: 120px !important;
+  min-width: 120px !important;
+  height: 30px !important;
+  max-height: 30px !important;
+  overflow: visible !important;
+}
+
+/* Ajustar paneles desplegables */
+.p-dropdown-panel {
+  z-index: 1000 !important; /* Asegurarse de que aparezca por encima de otros elementos */
+}
+
+.p-dropdown-panel .p-dropdown-items {
+  padding: 0.25rem 0 !important; /* Espaciado interior uniforme */
+}
+
+.p-dropdown-panel .p-dropdown-item {
+  padding: 0.5rem 0.75rem !important; /* Espaciado interior consistente */
+  font-size: 14px !important; /* Tamaño de fuente igual al de los selects */
+}
+
+/* Unificar apariencia de los contenedores */
+.command,
+.operation-item {
+  background-color: transparent !important; /* Quitar fondos diferentes */
+  border: none !important; /* Quitar bordes diferentes */
+  border-radius: 0 !important; /* Quitar bordes redondeados */
+  padding: 0.25rem !important; /* Padding uniforme */
+}
+
+/* Solo operation-item mantiene su estilo de fondo */
+.operation-item {
+  background-color: #f8f9fa !important;
+  border-radius: 4px !important;
+  border: 1px solid #e9ecef !important;
+}
+
+/* RESET COMPLETO Y UNIFICADO PARA P-DROPDOWN */
+p-dropdown {
+  margin: 0 4px !important;
+}
+
+/* Hacer que el contenedor se vea idéntico a un select nativo */
+p-dropdown .p-dropdown {
+  width: 120px !important;
+  min-width: 120px !important;
+  max-width: 120px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  position: relative !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+/* Estilo para el label (texto visible) */
+p-dropdown .p-dropdown .p-dropdown-label {
+  height: 28px !important; /* 30px - 2px de borde */
+  line-height: 28px !important;
+  padding: 0 0.5rem !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  width: calc(100% - 2rem) !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  text-align: left !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Estilo para el trigger (flecha desplegable) */
+p-dropdown .p-dropdown .p-dropdown-trigger {
+  width: 2rem !important;
+  height: 28px !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+
+/* Icono de flecha */
+p-dropdown .p-dropdown .p-dropdown-trigger-icon {
+  font-size: 0.875rem !important;
+  color: #333 !important;
+}
+
+/* Icono de limpiar (X) */
+p-dropdown .p-dropdown .p-dropdown-clear-icon,
+p-dropdown.command-value .p-dropdown .p-dropdown-clear-icon,
+.command-value.p-dropdown .p-dropdown-clear-icon {
+  right: 2rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+}
+
+/* Excepción para dropdown de notas */
+.notes-value.p-dropdown .p-dropdown,
+.notes-input p-dropdown .p-dropdown,
+.notes-input .p-dropdown {
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+}
+
+/* Panel desplegable */
+p-dropdown .p-dropdown-panel {
+  background-color: white !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 1000 !important;
+  min-width: 120px !important;
+  max-width: 300px !important;
+  height: auto !important;
+}
+
+/* Items del panel */
+p-dropdown .p-dropdown-panel .p-dropdown-items {
+  margin: 0 !important;
+  padding: 0.25rem 0 !important;
+  list-style: none !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+}
+
+/* Elementos de la lista */
+p-dropdown .p-dropdown-panel .p-dropdown-item {
+  padding: 0.5rem 0.75rem !important;
+  margin: 0 !important;
+  color: #333 !important;
+  background-color: white !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  border: none !important;
+}
+
+/* Elemento hover */
+p-dropdown .p-dropdown-panel .p-dropdown-item:hover {
+  background-color: #e9ecef !important;
+}
+
+/* Elemento seleccionado */
+p-dropdown .p-dropdown-panel .p-dropdown-item.p-highlight {
+  background-color: #007ad9 !important;
+  color: white !important;
+}
+
+/* Quitar estilos antiguos que puedan interferir */
+.command-value.p-dropdown,
+p-dropdown.command-value .p-dropdown,
+.second-row .operation-item p-dropdown .p-dropdown,
+.second-row .operation-item p-dropdown.command-value .p-dropdown {
+  /* Reset completo - todos los estilos vienen de arriba */
+  all: revert !important;
+}
+
+/* ===== NUEVO ESTILO PARA P-DROPDOWN ===== */
+/* Hacer que los p-dropdown se vean EXACTAMENTE como los select nativos */
+
+/* Contenedor de p-dropdown */
+p-dropdown {
+  display: inline-block !important;
+  margin: 0 4px !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+}
+
+/* El elemento principal del dropdown */
+p-dropdown .p-dropdown {
+  width: 120px !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  appearance: menulist !important; /* Hace que se vea más como un select nativo */
+  position: relative !important;
+  display: block !important;
+}
+
+/* Label dentro del dropdown */
+p-dropdown .p-dropdown-label {
+  width: 100% !important;
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 0 0.5rem !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  appearance: none !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+/* Trigger (flecha) del dropdown */
+p-dropdown .p-dropdown-trigger {
+  position: absolute !important;
+  width: 2rem !important;
+  height: 28px !important;
+  right: 0 !important;
+  top: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+
+/* Icono de la flecha del dropdown */
+p-dropdown .p-dropdown-trigger-icon {
+  font-size: 0.875rem !important;
+  color: #333 !important;
+}
+
+/* Excepción para dropdowns más anchos como el de notas */
+.notes-value.p-dropdown .p-dropdown,
+.notes-input p-dropdown .p-dropdown {
+  width: 200px !important;
+}
+
+/* El panel desplegable */
+.p-dropdown-panel {
+  z-index: 1000 !important;
+  background-color: white !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1) !important;
+}
+
+.p-dropdown-panel .p-dropdown-items {
+  padding: 0.25rem 0 !important;
+  max-height: 200px !important;
+}
+
+.p-dropdown-panel .p-dropdown-item {
+  padding: 0.5rem 0.75rem !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  cursor: pointer !important;
+}
+
+.p-dropdown-panel .p-dropdown-item:hover {
+  background-color: #f4f4f4 !important;
+}
+
+/* ELIMINAR ESTILOS CONFLICTIVOS */
+/* Estos estilos anteriores pueden estar causando conflictos, así que los revertimos */
+.command-value.p-dropdown,
+p-dropdown.command-value .p-dropdown,
+.second-row .operation-item p-dropdown .p-dropdown,
+.second-row .operation-item p-dropdown.command-value .p-dropdown,
+.command-dropdown {
+  all: unset !important;
+  display: inline-block !important;
+}
+
+/* SOLUCIÓN PARA LOS P-DROPDOWN */
+.command-type-style {
+  display: inline-block !important;
+}
+
+.command-type-style .p-dropdown {
+  width: 120px !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  margin: 0 4px !important;
+  box-sizing: border-box !important;
+  display: inline-block !important;
+  position: relative !important;
+  vertical-align: middle !important;
+}
+
+.command-type-style.notes-value .p-dropdown {
+  width: 200px !important;
+}
+
+.command-type-style .p-dropdown-label {
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 0 0.5rem !important;
+  margin: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  width: calc(100% - 2rem) !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  background-color: transparent !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+}
+
+/* Trigger (flecha) del dropdown */
+.command-type-style .p-dropdown-trigger {
+  position: absolute !important;
+  width: 2rem !important;
+  height: 28px !important;
+  right: 0 !important;
+  top: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+
+.command-type-style .p-dropdown-trigger-icon {
+  font-size: 0.875rem !important;
+  color: #333 !important;
+}
+/* SOLUCIÓN PARA P-DROPDOWN */
+
+/* Estilo base para convertir p-dropdown en select */
+.command-type-style {
+  display: inline-block !important;
+}
+
+/* Estilo del contenedor principal del dropdown */
+.command-type-style .p-dropdown {
+  width: 120px !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  margin: 0 4px !important;
+  padding: 0 !important;
+  position: relative !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+/* Estilo para dropdown más anchos como los de notas */
+.command-type-style.notes-value .p-dropdown {
+  width: 200px !important;
+}
+
+/* Estilo para la etiqueta dentro del dropdown */
+.command-type-style .p-dropdown-label {
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 0 0.5rem !important;
+  margin: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  width: calc(100% - 2rem) !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  background-color: transparent !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+}
+
+/* Estilo para el trigger (flecha) del dropdown */
+.command-type-style .p-dropdown-trigger {
+  position: absolute !important;
+  width: 2rem !important;
+  height: 28px !important;
+  right: 0 !important;
+  top: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+
+/* Estilo para el icono de la flecha */
+.command-type-style .p-dropdown-trigger-icon {
+  font-size: 0.875rem !important;
+  color: #333 !important;
+}
+
+/* Estilo para el icono de limpiar (X) */
+.command-type-style .p-dropdown-clear-icon {
+  position: absolute !important;
+  right: 2rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 0.875rem !important;
+  color: #6c757d !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Estilos para p-inputnumber */
+.p-inputnumber {
+  width: 80px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  margin: 0 4px !important;
+}
+
+.p-inputnumber-input {
+  width: 100% !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  padding: 0 0.5rem !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+}
+
+.p-inputnumber-button-group {
+  display: flex !important;
+  flex-direction: row !important;
+  height: 30px !important;
+}
+
+.p-inputnumber-button {
+  width: 24px !important;
+  height: 15px !important;
+  background-color: #f0f0f0 !important;
+  border: 1px solid #ced4da !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.p-inputnumber-button-up {
+  border-radius: 0 4px 0 0 !important;
+}
+
+.p-inputnumber-button-down {
+  border-radius: 0 0 4px 0 !important;
+}
+
+.p-inputnumber-button-icon {
+  font-size: 0.75rem !important;
+}
+
+/* Estilo para input numérico simple */
+.number-input {
+  width: 80px !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  padding: 0 0.5rem !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  margin: 0 4px !important;
+}
+/* SOLUCIÓN PARA P-DROPDOWN */
+
+/* Estilo base para convertir p-dropdown en select */
+.command-type-style {
+  display: inline-block !important;
+}
+
+/* Estilo del contenedor principal del dropdown */
+.command-type-style .p-dropdown {
+  width: 120px !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  margin: 0 4px !important;
+  padding: 0 !important;
+  position: relative !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+/* Estilo para dropdown más anchos como los de notas */
+.command-type-style.notes-value .p-dropdown {
+  width: 200px !important;
+}
+
+/* Estilo para la etiqueta dentro del dropdown */
+.command-type-style .p-dropdown-label {
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 0 0.5rem !important;
+  margin: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  width: calc(100% - 2rem) !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  background-color: transparent !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+}
+
+/* Estilo para el trigger (flecha) del dropdown */
+.command-type-style .p-dropdown-trigger {
+  position: absolute !important;
+  width: 2rem !important;
+  height: 28px !important;
+  right: 0 !important;
+  top: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: transparent !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+
+/* Estilo para el icono de la flecha */
+.command-type-style .p-dropdown-trigger-icon {
+  font-size: 0.875rem !important;
+  color: #333 !important;
+}
+
+/* Estilo para el icono de limpiar (X) */
+.command-type-style .p-dropdown-clear-icon {
+  position: absolute !important;
+  right: 2rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 0.875rem !important;
+  color: #6c757d !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Estilos para p-inputnumber */
+.p-inputnumber {
+  width: 80px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  margin: 0 4px !important;
+}
+
+.p-inputnumber-input {
+  width: 100% !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  padding: 0 0.5rem !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+}
+
+.p-inputnumber-button-group {
+  display: flex !important;
+  flex-direction: row !important;
+  height: 30px !important;
+}
+
+.p-inputnumber-button {
+  width: 24px !important;
+  height: 15px !important;
+  background-color: #f0f0f0 !important;
+  border: 1px solid #ced4da !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.p-inputnumber-button-up {
+  border-radius: 0 4px 0 0 !important;
+}
+
+.p-inputnumber-button-down {
+  border-radius: 0 0 4px 0 !important;
+}
+
+.p-inputnumber-button-icon {
+  font-size: 0.75rem !important;
+}
+
+/* Estilo para input numérico simple */
+.number-input {
+  width: 80px !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  padding: 0 0.5rem !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  margin: 0 4px !important;
+}
+
+/* Estilos para botones */
+.command-controls .p-button,
+.operation-controls .p-button,
+.notes-controls .p-button,
+.add-command-button,
+.operation-item .p-button {
+  min-width: 30px !important;
+  min-height: 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 2px !important;
+  background-color: #007ad9 !important;
+  border-color: #007ad9 !important;
+  color: white !important;
+}
+
+.command-controls .p-button-icon,
+.operation-controls .p-button-icon,
+.notes-controls .p-button-icon,
+.add-command-button .p-button-icon,
+.operation-item .p-button-icon {
+  font-size: 0.875rem !important;
+  color: white !important;
+}
+
+/* Ajustes para layout flexible */
+.commands-container,
+.second-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.command,
+.operation-item,
+.notes-input {
+  display: flex !important;
+  align-items: center !important;
+  background-color: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 4px !important;
+  padding: 4px !important;
+  margin-bottom: 4px !important;
+}
+
+/* Reset for select nativo */
+.command-type {
+  width: 120px !important;
+  height: 30px !important;
+  padding: 0 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 4px !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+}
+
+/* SOLUCIÓN DEFINITIVA PARA P-DROPDOWN - Corrige problemas de overflow */
+.command-type-style {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  margin: 0 4px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.command-type-style .p-dropdown {
+  width: 120px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  padding: 0 !important;
+  position: relative !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important; /* Importante: previene que el contenido sobresalga */
+}
+
+.command-type-style.notes-value .p-dropdown {
+  width: 200px !important;
+}
+
+.command-type-style .p-dropdown .p-dropdown-label {
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 0 0.5rem !important;
+  margin: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  width: calc(100% - 2rem) !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  background-color: transparent !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+}
+
+.command-type-style .p-dropdown .p-dropdown-trigger {
+  position: absolute !important;
+  width: 2rem !important;
+  height: 28px !important;
+  right: 0 !important;
+  top: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.command-type-style .p-dropdown .p-dropdown-trigger-icon {
+  font-size: 0.875rem !important;
+  color: #333 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.command-type-style .p-dropdown .p-dropdown-clear-icon {
+  position: absolute !important;
+  right: 2rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 0.875rem !important;
+  color: #6c757d !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Estilo para el panel desplegable */
+.p-dropdown-panel {
+  background-color: white !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1) !important;
+  z-index: 1000 !important;
+}
+
+.p-dropdown-panel .p-dropdown-items {
+  padding: 0.25rem 0 !important;
+  max-height: 200px !important;
+}
+
+.p-dropdown-panel .p-dropdown-item {
+  padding: 0.5rem 0.75rem !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  cursor: pointer !important;
+}
+
+.p-dropdown-panel .p-dropdown-item:hover {
+  background-color: #f4f4f4 !important;
+}
+
+/* Corregir input number para que coincida con los dropdowns */
+.p-inputnumber {
+  width: 80px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  vertical-align: middle !important;
+  margin: 0 4px !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.p-inputnumber .p-inputtext {
+  width: 100% !important;
+  height: 30px !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  padding: 0 0.5rem !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+/* Limpieza de estilos antiguos */
+p-dropdown:not(.command-type-style) .p-dropdown,
+.p-dropdown:not(.command-type-style),
+p-dropdown .p-dropdown:not(.command-type-style .p-dropdown) {
+  all: unset !important;
+  display: inline-block !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+}
+
+/* ====== RESET COMPLETO PARA P-DROPDOWN ====== */
+/* Esta regla reinicia completamente todos los estilos de los p-dropdown */
+p-dropdown, 
+p-dropdown *, 
+.p-dropdown, 
+.p-dropdown * {
+    all: initial !important;
+    box-sizing: border-box !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    line-height: normal !important;
+}
+
+/* ====== ESTILOS BASE PARA TODOS LOS P-DROPDOWN ====== */
+/* Contenedor principal */
+p-dropdown {
+    display: inline-block !important;
+    width: 120px !important;
+    height: 30px !important;
+    margin: 0 4px !important;
+    vertical-align: middle !important;
+    position: relative !important;
+}
+
+/* Notas - dropdown más ancho */
+p-dropdown.notes-value {
+    width: 200px !important;
+}
+
+/* El dropdown en sí */
+p-dropdown .p-dropdown {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    background-color: white !important;
+    overflow: hidden !important; /* Contener el contenido */
+    position: relative !important;
+}
+
+/* Etiqueta del dropdown (texto seleccionado) */
+p-dropdown .p-dropdown-label {
+    display: block !important;
+    width: calc(100% - 20px) !important; /* Espacio para el icono */
+    height: 28px !important; /* 30px - 2px de borde */
+    line-height: 28px !important;
+    padding: 0 8px !important;
+    margin: 0 !important;
+    color: #333333 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+}
+
+/* Contenedor del trigger (flecha) */
+p-dropdown .p-dropdown-trigger {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 20px !important;
+    height: 28px !important;
+    position: absolute !important;
+    right: 0 !important;
+    top: 0 !important;
+    background-color: transparent !important;
+}
+
+/* Icono de flecha */
+p-dropdown .p-dropdown-trigger-icon {
+    font-size: 12px !important;
+    color: #333333 !important;
+}
+
+/* Icono de limpiar (X) */
+p-dropdown .p-dropdown-clear-icon {
+    position: absolute !important;
+    right: 20px !important; /* Justo antes de la flecha */
+    top: 7px !important; /* Centrado verticalmente */
+    width: 14px !important;
+    height: 14px !important;
+    color: #6c757d !important;
+    font-size: 12px !important;
+    line-height: 14px !important;
+    text-align: center !important;
+}
+
+/* ====== PANEL DESPLEGABLE ====== */
+.p-dropdown-panel {
+    background-color: white !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15) !important;
+    margin-top: 2px !important;
+    z-index: 1000 !important;
+    width: auto !important;
+    min-width: 100% !important;
+}
+
+.p-dropdown-panel .p-dropdown-items-wrapper {
+    padding: 0 !important;
+}
+
+.p-dropdown-panel .p-dropdown-items {
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+}
+
+.p-dropdown-panel .p-dropdown-item {
+    padding: 8px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.p-dropdown-panel .p-dropdown-item:hover {
+    background-color: #f4f4f4 !important;
+}
+
+.p-dropdown-panel .p-dropdown-item.p-highlight {
+    background-color: #007ad9 !important;
+    color: white !important;
+}
+
+/* Clase específica para aplicar directamente */
+.command-type-style {
+    display: inline-block !important;
+    width: 120px !important;
+    height: 30px !important;
+    margin: 0 4px !important;
+    vertical-align: middle !important;
+    position: relative !important;
+}
+
+.command-type-style.notes-value {
+    width: 200px !important;
+}
+
+/* ====== RESTABLECER SELECTORES NATIVOS ====== */
+select.command-type,
+.command .command-type,
+.operation-item select.command-type {
+    width: 120px !important;
+    height: 30px !important;
+    padding: 0 0.5rem !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    margin: 0 4px !important;
+    background-color: white !important;
+    font-size: 14px !important;
+    font-family: inherit !important;
+    line-height: 30px !important;
+    vertical-align: middle !important;
+    appearance: auto !important;
+    box-sizing: border-box !important;
+}
+
+/* ====== INPUTS NUMÉRICOS ====== */
+input[type="number"],
+.number-input {
+    width: 80px !important;
+    height: 30px !important;
+    padding: 0 0.5rem !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    margin: 0 4px !important;
+    background-color: white !important;
+    font-size: 14px !important;
+    font-family: inherit !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
+}
+
+.p-inputnumber {
+    display: inline-block !important;
+    width: 80px !important;
+    height: 30px !important;
+    margin: 0 4px !important;
+    vertical-align: middle !important;
+    position: relative !important;
+}
+
+.p-inputnumber .p-inputtext {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 0.5rem !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+}
+
+/* ====== CONTENEDORES DE ITEMS ====== */
+.command, 
+.operation-item, 
+.notes-input {
+    display: flex !important;
+    flex-flow: row nowrap !important;
+    align-items: center !important;
+    background-color: #f8f9fa !important;
+    border: 1px solid #e9ecef !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    margin-bottom: 4px !important;
+    gap: 4px !important;
+}
+
+/* ====== BOTONES ====== */
+.p-button {
+    min-width: 30px !important;
+    min-height: 30px !important;
+    width: 30px !important;
+    height: 30px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 2px !important;
+    background-color: #007ad9 !important;
+    border: 1px solid #007ad9 !important;
+    border-radius: 4px !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s !important;
+}
+
+.p-button .pi {
+    font-size: 14px !important;
+    color: white !important;
+}
+
+/* ===== CLASES DE UTILIDAD ===== */
+.overflow-hidden {
+    overflow: hidden !important;
+}
+
+.text-ellipsis {
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+}
+
+.flex-align-center {
+    display: flex !important;
+    align-items: center !important;
+}
