@@ -182,25 +182,16 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 /* Estilos específicos para los botones de comando y operación */
-.add-command-button .pi-cog {
-  font-size: 1.1rem !important;
-  color: white !important;
-}
-
-.operation-controls .pi-percentage {
+.add-command-button .pi-cog,
+.add-command-button .pi-percentage {
   font-size: 1.1rem !important;
   color: white !important;
 }
 
 /* Distinguir los botones por color */
 .add-command-button {
-  background-color: #2196F3 !important; /* Azul para comandos */
+  background-color: #2196F3 !important; /* Azul para comandos y operaciones */
   border-color: #2196F3 !important;
-}
-
-.operation-controls .p-button {
-  background-color: #4CAF50 !important; /* Verde para operaciones */
-  border-color: #4CAF50 !important;
 }
 
 /* Estilos para los dropdowns con clase command-value */
@@ -640,7 +631,7 @@ p-dropdown .p-dropdown .p-dropdown-trigger {
   height: 28px !important;
   position: absolute !important;
   right: 0 !important;
-  top: 0 !important;
+  top: 1px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1079,7 +1070,6 @@ input[type="number"]:focus::-webkit-outer-spin-button,
 
 /* Estilos para botones */
 .command-controls .p-button,
-.operation-controls .p-button,
 .notes-controls .p-button,
 .add-command-button,
 .operation-item .p-button {
@@ -1098,7 +1088,6 @@ input[type="number"]:focus::-webkit-outer-spin-button,
 }
 
 .command-controls .p-button-icon,
-.operation-controls .p-button-icon,
 .notes-controls .p-button-icon,
 .add-command-button .p-button-icon,
 .operation-item .p-button-icon {
@@ -1246,298 +1235,137 @@ input[type="number"]:focus::-webkit-outer-spin-button,
   background-color: #f4f4f4 !important;
 }
 
-/* Corregir input number para que coincida con los dropdowns */
-.p-inputnumber {
-  width: 80px !important;
-  height: 30px !important;
-  display: inline-flex !important;
-  vertical-align: middle !important;
-  margin: 0 4px !important;
-  overflow: hidden !important;
-  position: relative !important;
-}
-
-.p-inputnumber .p-inputtext {
-  width: 100% !important;
-  height: 30px !important;
-  border: 1px solid #ced4da !important;
-  border-radius: 4px !important;
-  padding: 0 0.5rem !important;
-  font-size: 14px !important;
-  font-family: inherit !important;
-  text-align: center !important;
-  margin: 0 !important;
-}
-
-/* Limpieza de estilos antiguos */
-p-dropdown:not(.command-type-style) .p-dropdown,
-.p-dropdown:not(.command-type-style),
-p-dropdown .p-dropdown:not(.command-type-style .p-dropdown) {
-  all: unset !important;
-  display: inline-block !important;
-  position: relative !important;
-  box-sizing: border-box !important;
-  vertical-align: middle !important;
-}
-
-/* ====== RESET COMPLETO PARA P-DROPDOWN ====== */
-/* Esta regla reinicia completamente todos los estilos de los p-dropdown */
-p-dropdown, 
-p-dropdown *, 
-.p-dropdown, 
-.p-dropdown * {
-    all: initial !important;
-    box-sizing: border-box !important;
-    font-family: inherit !important;
-    font-size: 14px !important;
-    line-height: normal !important;
-}
-
-/* ====== ESTILOS BASE PARA TODOS LOS P-DROPDOWN ====== */
-/* Contenedor principal */
-p-dropdown {
-    display: inline-block !important;
-    width: 120px !important;
-    height: 30px !important;
-    margin: 0 4px !important;
-    vertical-align: middle !important;
-    position: relative !important;
-}
-
-/* Notas - dropdown más ancho */
-p-dropdown.notes-value {
-    width: 200px !important;
-}
-
-/* El dropdown en sí */
-p-dropdown .p-dropdown {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 4px !important;
-    background-color: white !important;
-    overflow: hidden !important; /* Contener el contenido */
-    position: relative !important;
-}
-
-/* Etiqueta del dropdown (texto seleccionado) */
-p-dropdown .p-dropdown-label {
-    display: block !important;
-    width: calc(100% - 20px) !important; /* Espacio para el icono */
-    height: 28px !important; /* 30px - 2px de borde */
-    line-height: 28px !important;
-    padding: 0 8px !important;
-    margin: 0 !important;
-    color: #333333 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-}
-
-/* Contenedor del trigger (flecha) */
-p-dropdown .p-dropdown-trigger {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 20px !important;
-    height: 28px !important;
-    position: absolute !important;
-    right: 0 !important;
-    top: 0 !important;
-    background-color: transparent !important;
-}
-
-/* Icono de flecha */
-p-dropdown .p-dropdown-trigger-icon {
-    font-size: 12px !important;
-    color: #333333 !important;
-}
-
-/* Icono de limpiar (X) */
-p-dropdown .p-dropdown-clear-icon {
-    position: absolute !important;
-    right: 20px !important; /* Justo antes de la flecha */
-    top: 7px !important; /* Centrado verticalmente */
-    width: 14px !important;
-    height: 14px !important;
-    color: #6c757d !important;
-    font-size: 12px !important;
-    line-height: 14px !important;
-    text-align: center !important;
-}
-
-/* ====== PANEL DESPLEGABLE ====== */
-.p-dropdown-panel {
-    background-color: white !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 4px !important;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15) !important;
-    margin-top: 2px !important;
-    z-index: 1000 !important;
-    width: auto !important;
-    min-width: 100% !important;
-}
-
-.p-dropdown-panel .p-dropdown-items-wrapper {
-    padding: 0 !important;
-}
-
-.p-dropdown-panel .p-dropdown-items {
-    padding: 0 !important;
-    margin: 0 !important;
-    list-style: none !important;
-    max-height: 200px !important;
-    overflow-y: auto !important;
-}
-
-.p-dropdown-panel .p-dropdown-item {
-    padding: 8px !important;
-    margin: 0 !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-
-.p-dropdown-panel .p-dropdown-item:hover {
-    background-color: #f4f4f4 !important;
-}
-
 .p-dropdown-panel .p-dropdown-item.p-highlight {
-    background-color: #007ad9 !important;
-    color: white !important;
+  background-color: #007ad9 !important;
+  color: white !important;
 }
 
 /* Clase específica para aplicar directamente */
 .command-type-style {
-    display: inline-block !important;
-    width: 120px !important;
-    height: 30px !important;
-    margin: 0 4px !important;
-    vertical-align: middle !important;
-    position: relative !important;
+  display: inline-block !important;
+  width: 120px !important;
+  height: 30px !important;
+  margin: 0 4px !important;
+  vertical-align: middle !important;
+  position: relative !important;
 }
 
 .command-type-style.notes-value {
-    width: 200px !important;
+  width: 200px !important;
 }
 
 /* ====== RESTABLECER SELECTORES NATIVOS ====== */
 select.command-type,
 .command .command-type,
 .operation-item select.command-type {
-    width: 120px !important;
-    height: 30px !important;
-    padding: 0 0.5rem !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 4px !important;
-    margin: 0 4px !important;
-    background-color: white !important;
-    font-size: 14px !important;
-    font-family: inherit !important;
-    line-height: 30px !important;
-    vertical-align: middle !important;
-    appearance: auto !important;
-    box-sizing: border-box !important;
+  width: 120px !important;
+  height: 30px !important;
+  padding: 0 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 4px !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  line-height: 30px !important;
+  vertical-align: middle !important;
+  appearance: auto !important;
+  box-sizing: border-box !important;
 }
 
 /* ====== INPUTS NUMÉRICOS ====== */
 input[type="number"],
 .number-input {
-    width: 80px !important;
-    height: 30px !important;
-    padding: 0 0.5rem !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 4px !important;
-    margin: 0 4px !important;
-    background-color: white !important;
-    font-size: 14px !important;
-    font-family: inherit !important;
-    text-align: center !important;
-    box-sizing: border-box !important;
-    vertical-align: middle !important;
+  width: 80px !important;
+  height: 30px !important;
+  padding: 0 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 4px !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
 }
 
 .p-inputnumber {
-    display: inline-block !important;
-    width: 80px !important;
-    height: 30px !important;
-    margin: 0 4px !important;
-    vertical-align: middle !important;
-    position: relative !important;
+  display: inline-block !important;
+  width: 80px !important;
+  height: 30px !important;
+  margin: 0 4px !important;
+  vertical-align: middle !important;
+  position: relative !important;
 }
 
 .p-inputnumber .p-inputtext {
-    width: 100% !important;
-    height: 100% !important;
-    padding: 0 0.5rem !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 4px !important;
-    margin: 0 !important;
-    background-color: white !important;
-    font-size: 14px !important;
-    font-family: inherit !important;
-    text-align: center !important;
-    box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
 }
 
 /* ====== CONTENEDORES DE ITEMS ====== */
 .command, 
 .operation-item, 
 .notes-input {
-    display: flex !important;
-    flex-flow: row nowrap !important;
-    align-items: center !important;
-    background-color: #f8f9fa !important;
-    border: 1px solid #e9ecef !important;
-    border-radius: 4px !important;
-    padding: 4px 8px !important;
-    margin-bottom: 4px !important;
-    gap: 4px !important;
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  background-color: #f8f9fa !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  margin-bottom: 4px !important;
+  gap: 4px !important;
 }
 
 /* ====== BOTONES ====== */
 .p-button {
-    min-width: 30px !important;
-    min-height: 30px !important;
-    width: 30px !important;
-    height: 30px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    margin: 0 2px !important;
-    background-color: #007ad9 !important;
-    border: 1px solid #007ad9 !important;
-    border-radius: 4px !important;
-    color: white !important;
-    cursor: pointer !important;
-    transition: background-color 0.2s !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 2px !important;
+  background-color: #007ad9 !important;
+  border: 1px solid #007ad9 !important;
+  border-radius: 4px !important;
+  color: white !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s !important;
 }
 
 .p-button .pi {
-    font-size: 14px !important;
-    color: white !important;
+  font-size: 14px !important;
+  color: white !important;
 }
 
 /* ===== CLASES DE UTILIDAD ===== */
 .overflow-hidden {
-    overflow: hidden !important;
+  overflow: hidden !important;
 }
 
 .text-ellipsis {
-    overflow: hidden !important;
-    white-space: nowrap !important;
-    text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
 }
 
 .flex-align-center {
-    display: flex !important;
-    align-items: center !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 /* ====== ESTILOS PARA INPUTS NUMÉRICOS DE REPETICIONES ====== */
@@ -1552,11 +1380,11 @@ app-block p-inputnumber,
 app-song p-inputnumber,
 p-inputnumber[inputid="repetitions"],
 p-inputnumber#repetitions {
-    width: 80px !important;
-    height: 30px !important;
-    display: inline-block !important;
-    vertical-align: middle !important;
-    margin: 0 4px !important;
+  width: 80px !important;
+  height: 30px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  margin: 0 4px !important;
 }
 
 /* Ocultar completamente los botones de PrimeNG y usar solo el input nativo */
@@ -1570,7 +1398,7 @@ app-song p-inputnumber .p-inputnumber-button-group,
 p-inputnumber[inputid="repetitions"] .p-inputnumber-button-group,
 p-inputnumber#repetitions .p-inputnumber-button-group,
 .p-inputnumber-buttons-stacked {
-    display: none !important;
+  display: none !important;
 }
 
 /* Estilo para el input numérico dentro del componente p-inputnumber */
@@ -1582,18 +1410,18 @@ app-song p-inputnumber .p-inputtext,
 p-inputnumber[inputid="repetitions"] .p-inputtext,
 p-inputnumber#repetitions .p-inputtext,
 p-inputnumber .p-inputtext {
-    width: 100% !important;
-    height: 30px !important;
-    padding: 0 0.5rem !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 4px !important;
-    margin: 0 !important;
-    background-color: white !important;
-    font-size: 14px !important;
-    font-family: inherit !important;
-    text-align: center !important;
-    box-sizing: border-box !important;
-    appearance: textfield !important; /* Oculta los controles de incremento/decremento por defecto */
+  width: 100% !important;
+  height: 30px !important;
+  padding: 0 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  appearance: textfield !important; /* Oculta los controles de incremento/decremento por defecto */
 }
 
 /* Mostrar los controles nativos solo al recibir el foco o al pasar el mouse */
@@ -1613,7 +1441,7 @@ p-inputnumber#repetitions .p-inputtext:hover,
 p-inputnumber#repetitions .p-inputtext:focus,
 p-inputnumber .p-inputtext:hover,
 p-inputnumber .p-inputtext:focus {
-    appearance: auto !important; /* Muestra los controles nativos */
+  appearance: auto !important; /* Muestra los controles nativos */
 }
 
 /* Estilo específico para Chrome/Safari que controla las flechas */
@@ -1633,8 +1461,8 @@ p-inputnumber#repetitions .p-inputtext::-webkit-inner-spin-button,
 p-inputnumber#repetitions .p-inputtext::-webkit-outer-spin-button,
 p-inputnumber .p-inputtext::-webkit-inner-spin-button,
 p-inputnumber .p-inputtext::-webkit-outer-spin-button {
-    opacity: 0 !important; /* Oculta las flechas por defecto */
-    height: 28px !important; /* Altura ajustada al input */
+  opacity: 0 !important; /* Oculta las flechas por defecto */
+  height: 28px !important; /* Altura ajustada al input */
 }
 
 /* Mostrar las flechas al hacer hover o focus */
@@ -1670,47 +1498,47 @@ p-inputnumber .p-inputtext:hover::-webkit-inner-spin-button,
 p-inputnumber .p-inputtext:focus::-webkit-inner-spin-button,
 p-inputnumber .p-inputtext:hover::-webkit-outer-spin-button,
 p-inputnumber .p-inputtext:focus::-webkit-outer-spin-button {
-    opacity: 1 !important; /* Muestra las flechas */
+  opacity: 1 !important; /* Muestra las flechas */
 }
 
 /* Estilos específicos para el componente p-inputNumber con un enfoque más agresivo */
 p-inputnumber {
-    width: 80px !important;
-    height: 30px !important;
-    display: inline-block !important;
-    vertical-align: middle !important;
-    margin: 0 4px !important;
+  width: 80px !important;
+  height: 30px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  margin: 0 4px !important;
 }
 
 p-inputnumber .p-inputnumber {
-    width: 100% !important;
-    height: 100% !important;
-    border: none !important;
-    background: none !important;
-    display: inline-block !important;
-    position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  background: none !important;
+  display: inline-block !important;
+  position: relative !important;
 }
 
 p-inputnumber .p-inputnumber-input {
-    width: 100% !important;
-    height: 30px !important;
-    padding: 0 0.5rem !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 4px !important;
-    margin: 0 !important;
-    background-color: white !important;
-    font-size: 14px !important;
-    font-family: inherit !important;
-    text-align: center !important;
-    box-sizing: border-box !important;
+  width: 100% !important;
+  height: 30px !important;
+  padding: 0 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  margin: 0 !important;
+  background-color: white !important;
+  font-size: 14px !important;
+  font-family: inherit !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
 }
 
 /* Estilos específicos para los contenedores de los inputs numéricos */
 .p-ml-2 p-inputnumber,
 .p-ml-2 p-inputnumber .p-inputnumber,
 .p-ml-2 p-inputnumber .p-inputnumber-input {
-    width: 80px !important;
-    height: 30px !important;
+  width: 80px !important;
+  height: 30px !important;
 }
 
 /* Estilos específicos para el HTML observado en los componentes */
@@ -1718,14 +1546,136 @@ p-inputnumber[inputid="repetitions"],
 div.p-d-flex p-inputnumber,
 div.container p-inputnumber,
 div.part-header p-inputnumber {
-    width: 80px !important;
-    height: 30px !important;
-    display: inline-block !important;
+  width: 80px !important;
+  height: 30px !important;
+  display: inline-block !important;
 }
 
 /* Reset completo para los botones spinners */
 p-inputnumber .p-inputnumber-button-up,
 p-inputnumber .p-inputnumber-button-down,
 p-inputnumber .p-button.p-inputnumber-button {
-    display: none !important;
+  display: none !important;
+}
+
+/* Estilos para los elementos de entrada en todos los componentes */
+input[type="text"],
+input[type="number"],
+select,
+.repetitions-input,
+.command-type,
+.command-value,
+.number-input {
+  height: 30px;
+  padding: 0 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+/* Estilos para botones en todos los componentes */
+:root .p-button {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0 2px;
+  background-color: #007ad9;
+  border-color: #007ad9;
+  color: white;
+}
+
+:root .p-button .p-button-icon {
+  font-size: 0.875rem;
+  color: white;
+}
+
+/* Estilos del encabezado del bloque */
+.block-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.block-header > * {
+  flex: 0 0 auto !important;
+}
+
+.block-header span, 
+.block-header div,
+.block-header p,
+.block-header input,
+.block-header select,
+.block-header button {
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* Regla global para el input de repeticiones con alta especificidad */
+html body .block-header .repetitions-container input#repeatingTimes,
+html body input#repeatingTimes.repetitions-input,
+#repeatingTimes.repetitions-input,
+input[type="number"]#repeatingTimes,
+.repetitions-input#repeatingTimes {
+  width: 45px !important;
+  max-width: 45px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  padding: 0 2px !important;
+}
+
+/* Regla para todos los inputs numéricos y de repetición */
+input[type="number"],
+.number-input,
+.command .number-input,
+.operation-item .number-input,
+.command-value.number-input,
+.command input.command-value[type="number"],
+.operation-item input.command-value[type="number"] {
+  width: 45px !important;
+  max-width: 45px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  padding: 0 2px !important;
+}
+
+/* Regla específica para el input de repeticiones del componente song */
+html body input#repetitions[type="number"],
+html body #repetitions.number-input,
+#repetitions.number-input,
+input[type="number"]#repetitions,
+.number-input#repetitions {
+  width: 45px !important;
+  max-width: 45px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  padding: 0 2px !important;
+}
+
+/* Estilo específico para el contenedor del repetitions de song */
+.p-d-flex .p-ml-3,
+.p-d-flex span + input#repetitions {
+  margin-right: 4px !important;
+}
+
+/* Aplicando estilos similares para todos los controles de repeticiones */
+html body input[type="number"][min="1"][max="100"],
+html body input[type="number"][id="repetitions"],
+html body input[type="number"].number-input[min],
+.p-d-flex .number-input,
+.p-mt-3 .number-input {
+  width: 45px !important;
+  max-width: 45px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  padding: 0 2px !important;
 }

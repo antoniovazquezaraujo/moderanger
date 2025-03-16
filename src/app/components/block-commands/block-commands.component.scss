@@ -66,26 +66,134 @@
   margin-left: 0.25rem;
 }
 
+/* Quitar margen automático para no alinear a la derecha */
 .operation-controls {
-  margin-left: auto;
+  display: flex;
+  gap: 0.25rem;
+  margin-left: 0.25rem;
+}
+
+/* Agregar estilos para el botón de agregar comando y operación */
+.add-command-wrapper, .add-operation-wrapper {
+  display: flex;
+  align-items: center;
+  height: 38px;
 }
 
 /* Notas */
-.notes-input {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-  margin-right: 0.5rem;
+.notes-value {
+  width: 200px;
 }
 
-.notes-input input {
+.block-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Filas de comandos y operaciones */
+.commands-row {
+  background-color: rgba(240, 240, 240, 0.5);
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.third-row {
+  background-color: rgba(220, 255, 220, 0.2);
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.commands-container, .operations-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.command, .operation-item {
+  display: inline-flex;
+  align-items: center;
+  background-color: white;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+  margin-right: 8px !important;
+}
+
+.command-type, .operation-type {
   width: auto;
-  min-width: 200px;
-  padding: 0.25rem;
+  min-width: 120px;
+  padding: 4px 8px;
   border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  margin-right: 8px;
+}
+
+.command-value, .number-input {
+  width: 45px !important;
+  height: 30px !important;
+  padding: 0 2px !important;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  margin: 0 4px;
+  text-align: center !important;
+}
+
+/* Estilo específico para los inputs numéricos */
+input[type="number"].command-value,
+input[type="number"].number-input {
+  width: 45px !important;
+  max-width: 45px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  padding: 0 2px !important;
+}
+
+.command-controls, .operation-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Estilos para los botones */
+:host ::ng-deep .p-button {
+  width: 30px !important;
+  height: 30px !important;
+  margin: 0 2px !important;
+  
+  .p-button-icon {
+    font-size: 0.875rem;
+    color: white;
+  }
+}
+
+/* Estilos para los select e inputs */
+.command-type {
+  width: 120px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid #ced4da;
   border-radius: 4px;
 }
 
-.notes-value {
-  width: 200px;
+.command-value {
+  width: 80px;
+  height: 30px;
+  padding: 0 8px;
+  text-align: center;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {  
+  .commands-container, .operations-container {
+    width: 100%;
+  }
 }

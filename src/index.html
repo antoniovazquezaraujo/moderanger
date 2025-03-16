@@ -16,9 +16,10 @@
     .number-input, 
     #repeatingTimes, 
     #repetitions {
-      width: 80px !important;
+      width: 45px !important;
+      max-width: 45px !important;
       height: 30px !important;
-      padding: 0 0.5rem !important;
+      padding: 0 2px !important;
       border: 1px solid #ced4da !important;
       border-radius: 4px !important;
       margin: 0 4px !important;
@@ -51,6 +52,67 @@
       opacity: 1 !important;
     }
   </style>
+  <script>
+    // Script para permitir que los inputs numéricos respondan a la rueda del ratón
+    document.addEventListener('DOMContentLoaded', function() {
+      // Función para manejar el evento de la rueda
+      function handleWheel(event) {
+        if (document.activeElement === this || this.matches(':hover')) {
+          // Prevenir el comportamiento predeterminado del scroll
+          event.preventDefault();
+          
+          // Obtener el valor actual, mínimo y máximo
+          let value = parseFloat(this.value) || 0;
+          const min = parseFloat(this.min);
+          const max = parseFloat(this.max);
+          const step = parseFloat(this.step) || 1;
+          
+          // Determinar la dirección del scroll (negativo es hacia arriba, positivo hacia abajo)
+          if (event.deltaY < 0) {
+            // Scroll hacia arriba - incrementar valor
+            value = Math.min(isNaN(max) ? value + step : max, value + step);
+          } else {
+            // Scroll hacia abajo - decrementar valor
+            value = Math.max(isNaN(min) ? value - step : min, value - step);
+          }
+          
+          // Actualizar el valor
+          this.value = value;
+          
+          // Disparar un evento de cambio para que Angular detecte el cambio
+          const changeEvent = new Event('input', { bubbles: true });
+          this.dispatchEvent(changeEvent);
+        }
+      }
+      
+      // Función para agregar los event listeners a los inputs existentes
+      function setupInputListeners() {
+        // Seleccionar todos los inputs numéricos
+        const numberInputs = document.querySelectorAll('input[type="number"], .number-input');
+        numberInputs.forEach(input => {
+          input.addEventListener('wheel', handleWheel);
+        });
+      }
+      
+      // Configurar los inputs existentes
+      setupInputListeners();
+      
+      // Usar MutationObserver para detectar nuevos inputs que se añadan dinámicamente
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+            setTimeout(setupInputListeners, 100); // Pequeño retraso para asegurarnos que el DOM está listo
+          }
+        });
+      });
+      
+      // Comenzar a observar cambios en el DOM
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    });
+  </script>
 </head>
 <body >
   <app-root></app-root>

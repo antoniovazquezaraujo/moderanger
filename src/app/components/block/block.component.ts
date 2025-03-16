@@ -7,7 +7,7 @@ import { VariableContext } from 'src/app/model/variable.context';
 @Component({
   selector: 'app-block',
   templateUrl: './block.component.html',
-  styleUrls: ['./block.component.css']
+  styleUrls: ['./block.component.scss']
 })
 export class BlockComponent implements OnInit {
   @Input() block: Block = new Block(); 
@@ -78,5 +78,23 @@ export class BlockComponent implements OnInit {
 
   dragEnd() {
     this.draggedBlock = undefined;
+  }
+
+  getMelodyVariables() {
+    return [
+      { label: 'Melody 1', value: 'melody1' },
+      { label: 'Melody 2', value: 'melody2' }
+    ];
+  }
+
+  toggleMelodyVariable(event: MouseEvent, blockNode?: Block) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const targetBlock = blockNode || this.block;
+    
+    if (targetBlock.blockContent) {
+      targetBlock.blockContent.isVariable = !targetBlock.blockContent.isVariable;
+    }
   }
 }

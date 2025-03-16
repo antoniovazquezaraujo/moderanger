@@ -11,6 +11,7 @@
 :host ::ng-deep {
     .p-treenode-content {
         cursor: default !important;
+        padding: 0 !important;
         
         &:not(.p-highlight):hover {
             background: transparent !important;
@@ -22,4 +23,87 @@
         border: none;
         background: transparent;
     }
+
+    .p-tree-container {
+        padding: 0 !important;
+    }
+}
+
+.block-content {
+  position: relative;
+  width: 100%;
+}
+
+.block-header {
+  display: table !important;
+  table-layout: fixed !important;
+  width: 100% !important;
+  white-space: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  height: 40px !important;
+  border-spacing: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.header-item {
+  display: table-cell !important;
+  vertical-align: middle !important;
+  padding: 0 5px 0 0 !important;
+  white-space: nowrap !important;
+}
+
+.block-label {
+  width: 80px !important;
+}
+
+.block-controls {
+  width: 110px !important;
+}
+
+.repetitions-container {
+  width: 55px !important;
+}
+
+.notes-container {
+  width: auto !important;
+}
+
+.block-header span,
+.block-header input,
+.block-header select,
+.block-header button {
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+.repetitions-input {
+  width: 45px !important;
+  height: 30px !important;
+  padding: 0 2px !important;
+  text-align: center !important;
+}
+
+.block-body {
+  margin-top: 10px;
+}
+
+@media screen and (max-width: 768px) {
+  .block-header {
+    display: table !important;
+    table-layout: fixed !important;
+    min-width: 500px !important;
+  }
+}
+
+.block-header * {
+  box-sizing: border-box !important;
+}
+
+input[type="number"]#repeatingTimes {
+  width: 45px !important;
+  max-width: 45px !important;
+  box-sizing: border-box !important;
+  padding: 0 2px !important;
 } 
