@@ -1,11 +1,11 @@
 <div class="block-container">
     <!-- Second Row: Comandos -->
     <div class="commands-row">
-        <div class="row-header">Commands:</div>
+        <div class="row-header"></div>
         <div class="commands-container">
             <div *ngFor="let command of block.commands" class="command">
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
-                    <optgroup label="Commands">
+                    <optgroup label="">
                         <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
                     </optgroup>
                 </select>
@@ -107,7 +107,7 @@
 
     <!-- Third Row: Operaciones -->
     <div class="third-row">
-        <div class="row-header">Operations:</div>
+        <div class="row-header"></div>
         <div class="operations-container">
             <div *ngFor="let operation of operations; let i = index" class="operation-item">
                 <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">

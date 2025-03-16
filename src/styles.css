@@ -63,7 +63,7 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .p-button .pi {
     font-size: 1rem !important;
     display: inline-block !important;
-    color: white !important;
+    color: black !important;
 }
 
 /* Estilos para botones secundarios */
@@ -185,7 +185,7 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .add-command-button .pi-cog,
 .add-command-button .pi-percentage {
   font-size: 1.1rem !important;
-  color: white !important;
+  color: black !important;
 }
 
 /* Distinguir los botones por color */
@@ -443,7 +443,7 @@ select.command-type,
 .operation-item .command-controls .p-button .pi,
 .operation-item .p-button .pi {
   font-size: 0.875rem;
-  color: white;
+  color: black;
 }
 
 /* Ajustar el tamaño y espaciado de los contenedores principales */
@@ -1092,7 +1092,13 @@ input[type="number"]:focus::-webkit-outer-spin-button,
 .add-command-button .p-button-icon,
 .operation-item .p-button-icon {
   font-size: 0.875rem !important;
-  color: white !important;
+  color: black !important;
+}
+
+.operation-item .command-controls .p-button .pi,
+.operation-item .p-button .pi {
+  font-size: 0.875rem;
+  color: black;
 }
 
 /* Ajustes para layout flexible */
@@ -1349,7 +1355,7 @@ input[type="number"],
 
 .p-button .pi {
   font-size: 14px !important;
-  color: white !important;
+  color: black !important;
 }
 
 /* ===== CLASES DE UTILIDAD ===== */
@@ -1588,12 +1594,12 @@ select,
   margin: 0 2px;
   background-color: #007ad9;
   border-color: #007ad9;
-  color: white;
+  color: black;
 }
 
 :root .p-button .p-button-icon {
   font-size: 0.875rem;
-  color: white;
+  color: black;
 }
 
 /* Estilos del encabezado del bloque */

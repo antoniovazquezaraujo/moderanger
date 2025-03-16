@@ -31,18 +31,16 @@
 
 /* Elementos */
 .command, .operation-item {
-  display: flex;
-  flex-flow: row nowrap;
-  gap: 4px;
+  display: inline-flex;
   align-items: center;
-  height: 38px;
-  box-sizing: border-box;
-  padding: 0.25rem;
-  margin: 3px 0;
+  background-color: transparent;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+  margin-right: 8px !important;
 }
 
 .operation-item {
-  background-color: #f8f9fa;
   border-radius: 4px;
   border: 1px solid #e9ecef;
 }
@@ -94,14 +92,14 @@
 
 /* Filas de comandos y operaciones */
 .commands-row {
-  background-color: rgba(240, 240, 240, 0.5);
+  background-color: transparent;
   padding: 8px;
   border-radius: 4px;
   border: 1px solid #ddd;
 }
 
 .third-row {
-  background-color: rgba(220, 255, 220, 0.2);
+  background-color: transparent;
   padding: 8px;
   border-radius: 4px;
   border: 1px solid #ddd;
@@ -112,16 +110,6 @@
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-}
-
-.command, .operation-item {
-  display: inline-flex;
-  align-items: center;
-  background-color: white;
-  padding: 5px 8px;
-  border-radius: 4px;
-  border: 1px solid #e8e8e8;
-  margin-right: 8px !important;
 }
 
 .command-type, .operation-type {
@@ -169,7 +157,7 @@ input[type="number"].number-input {
   
   .p-button-icon {
     font-size: 0.875rem;
-    color: white;
+    color: black;
   }
 }
 
