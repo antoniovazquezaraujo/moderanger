@@ -48,10 +48,10 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
     width: 30px !important;
     min-width: 30px !important;
     padding: 0 !important;
-    background-color: #007ad9 !important;
-    background: #007ad9 !important;
-    color: white !important;
-    border-color: #007ad9 !important;
+    background-color: transparent !important;
+    background: white;
+    color: #333333 !important;
+    border-color: #cccccc !important;
     margin: 0 2px !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -61,9 +61,9 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 /* Estilos para los iconos dentro de los botones */
 .p-button .pi {
-    font-size: 1rem !important;
+    font-size: 14px !important;
     display: inline-block !important;
-    color: black !important;
+    color: #555555 !important;
 }
 
 /* Estilos para botones secundarios */
@@ -92,7 +92,7 @@ body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
     background: white!important;
 }
 
-  }
+  
  
    .p-dropdown-items{
     height:200px;
@@ -303,9 +303,9 @@ p-inputnumber.command-value .p-inputnumber {
   align-items: center !important;
   padding: 6px !important;
   margin: 4px 0 !important;
-  background-color: #f8f9fa !important;
-  border-radius: 4px !important;
-  border: 1px solid #e9ecef !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  border: none !important;
   gap: 4px !important;
   flex: 0 0 auto !important; /* Evita que se expandan y ocupen toda la fila */
 }
@@ -417,9 +417,9 @@ select.command-type,
   align-items: center;
   padding: 6px;
   margin: 4px 0;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #e9ecef;
+  background-color: transparent;
+  border-radius: 0;
+  border: none;
   gap: 4px;
 }
 
@@ -435,9 +435,9 @@ select.command-type,
   justify-content: center;
   margin: 0 2px;
   padding: 0;
-  background-color: #007ad9;
-  border-color: #007ad9;
-  color: white;
+  background-color: transparent;
+  border-color: #cccccc;
+  color: #333333;
 }
 
 .operation-item .command-controls .p-button .pi,
@@ -573,9 +573,9 @@ p-dropdown.command-value .p-dropdown .p-dropdown-clear-icon,
 
 /* Solo operation-item mantiene su estilo de fondo */
 .operation-item {
-  background-color: #f8f9fa !important;
-  border-radius: 4px !important;
-  border: 1px solid #e9ecef !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  border: none !important;
 }
 
 /* RESET COMPLETO Y UNIFICADO PARA P-DROPDOWN */
@@ -1082,17 +1082,17 @@ input[type="number"]:focus::-webkit-outer-spin-button,
   justify-content: center !important;
   padding: 0 !important;
   margin: 0 2px !important;
-  background-color: #007ad9 !important;
-  border-color: #007ad9 !important;
-  color: white !important;
+  background-color: transparent !important;
+  border-color: #cccccc !important;
+  color: #333333 !important;
 }
 
 .command-controls .p-button-icon,
 .notes-controls .p-button-icon,
 .add-command-button .p-button-icon,
 .operation-item .p-button-icon {
-  font-size: 0.875rem !important;
-  color: black !important;
+  font-size: 14px !important;
+  color: #555555 !important;
 }
 
 .operation-item .command-controls .p-button .pi,
@@ -1115,12 +1115,14 @@ input[type="number"]:focus::-webkit-outer-spin-button,
 .operation-item,
 .notes-input {
   display: flex !important;
+  flex-flow: row nowrap !important;
   align-items: center !important;
-  background-color: #f8f9fa !important;
-  border: 1px solid #e9ecef !important;
-  border-radius: 4px !important;
-  padding: 4px !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 4px 8px !important;
   margin-bottom: 4px !important;
+  gap: 4px !important;
 }
 
 /* Reset for select nativo */
@@ -1326,9 +1328,9 @@ input[type="number"],
   display: flex !important;
   flex-flow: row nowrap !important;
   align-items: center !important;
-  background-color: #f8f9fa !important;
-  border: 1px solid #e9ecef !important;
-  border-radius: 4px !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
   padding: 4px 8px !important;
   margin-bottom: 4px !important;
   gap: 4px !important;
@@ -1345,17 +1347,17 @@ input[type="number"],
   justify-content: center !important;
   padding: 0 !important;
   margin: 0 2px !important;
-  background-color: #007ad9 !important;
-  border: 1px solid #007ad9 !important;
+  background-color: transparent !important;
+  border: 1px solid #cccccc !important;
   border-radius: 4px !important;
-  color: white !important;
+  color: #333333 !important;
   cursor: pointer !important;
   transition: background-color 0.2s !important;
 }
 
 .p-button .pi {
   font-size: 14px !important;
-  color: black !important;
+  color: #555555 !important;
 }
 
 /* ===== CLASES DE UTILIDAD ===== */
@@ -1592,14 +1594,14 @@ select,
   justify-content: center;
   padding: 0;
   margin: 0 2px;
-  background-color: #007ad9;
-  border-color: #007ad9;
-  color: black;
+  background-color: transparent;
+  border-color: #cccccc;
+  color: #333333;
 }
 
 :root .p-button .p-button-icon {
   font-size: 0.875rem;
-  color: black;
+  color: #555555;
 }
 
 /* Estilos del encabezado del bloque */
