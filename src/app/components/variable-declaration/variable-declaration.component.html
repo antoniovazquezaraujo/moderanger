@@ -18,17 +18,16 @@
                 <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
             </select>
 
-            <p-inputNumber *ngSwitchCase="'number'" 
-                [(ngModel)]="newVariable.value" 
+            <input *ngSwitchCase="'number'" 
+                type="number" 
+                class="number-input"
+                style="width:45px !important; max-width:45px !important;"
+                [(ngModel)]="newVariable.value"
                 name="value"
-                mode="decimal"
-                [showButtons]="true"
-                buttonLayout="horizontal"
                 [min]="-999"
                 [max]="999"
-                incrementButtonIcon="pi pi-plus"
-                decrementButtonIcon="pi pi-minus">
-            </p-inputNumber>
+                step="1"
+                required>
 
             <input *ngSwitchCase="'melody'" 
                 type="text" 
@@ -61,17 +60,15 @@
                     <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
                 </select>
 
-                <p-inputNumber *ngSwitchCase="'number'" 
+                <input *ngSwitchCase="'number'" 
+                    type="number" 
+                    class="number-input"
+                    style="width:45px !important; max-width:45px !important;"
                     [(ngModel)]="variable.value"
                     (ngModelChange)="updateVariable(i)"
-                    mode="decimal"
-                    [showButtons]="true"
-                    buttonLayout="horizontal"
                     [min]="-999"
                     [max]="999"
-                    incrementButtonIcon="pi pi-plus"
-                    decrementButtonIcon="pi pi-minus">
-                </p-inputNumber>
+                    step="1">
 
                 <input *ngSwitchCase="'melody'" 
                     type="text" 
