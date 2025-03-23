@@ -41,3 +41,29 @@
 :host ::ng-deep .p-inputnumber-button-icon {
     font-size: 0.8rem !important;
 }
+
+.song-title {
+    margin-bottom: 15px;
+    padding: 10px 0;
+}
+
+.song-name-input {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 8px;
+    width: 100%;
+    border: 1px solid transparent;
+    background-color: transparent;
+    transition: border-color 0.2s;
+}
+
+.song-name-input:focus {
+    outline: none;
+    border-color: #ddd;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.song-name-input::placeholder {
+    color: #999;
+    font-style: italic;
+}

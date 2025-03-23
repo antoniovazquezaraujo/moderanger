@@ -1,4 +1,8 @@
 <!doctype html>
+<div class="song-title">
+    <input type="text" [(ngModel)]="song.name" class="song-name-input" placeholder="Enter song name">
+</div>
+
 <app-parts 
     [parts] = "getParts() ||[]" 
     (onRemovePart)="removePart($event)">

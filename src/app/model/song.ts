@@ -8,6 +8,7 @@ export class Song {
     static getDefultInstrument() {
         return Song.instruments[0];
     }
+    name: string = "Untitled Song";
     parts: Part[] = [];
 
     constructor() {
@@ -15,6 +16,7 @@ export class Song {
     }
     clone():Song{
         const clonedSong = new Song();
+        clonedSong.name = this.name;
         clonedSong.parts = this.parts.map(part => part.clone());
         return clonedSong;
     }
@@ -32,6 +34,7 @@ export class Song {
 
     toJSON() {
         return {
+            name: this.name,
             parts: this.parts.map(part => part.blocks)
         };
     }

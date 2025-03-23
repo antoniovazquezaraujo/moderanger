@@ -14,8 +14,28 @@
 }
 
 .part-info {
-    width: 80px;
+    width: 120px;
     margin-right: 4px;
+}
+
+.part-name-input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: transparent;
+    font-weight: bold;
+    transition: border-color 0.2s;
+}
+
+.part-name-input:focus {
+    outline: none;
+    border-color: #ccc;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.part-name-input::placeholder {
+    color: #666;
 }
 
 .part-controls {

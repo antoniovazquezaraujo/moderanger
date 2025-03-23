@@ -1,7 +1,7 @@
 <div class="part">
     <div class="part-header">
         <div class="part-info">
-            <label>Part {{part.id}}</label>
+            <input type="text" [(ngModel)]="part.name" class="part-name-input" placeholder="Part {{part.id}}">
         </div>
         <div class="part-controls">
             <ng-container *ngFor="let block of part.blocks">
