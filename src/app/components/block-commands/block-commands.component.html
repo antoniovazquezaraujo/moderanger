@@ -139,7 +139,15 @@
                     </option>
                 </select>
                 <ng-container *ngIf="operation.type === 'ASSIGN'">
-                    <ng-container *ngIf="isVariableOfType(operation.variableName, 'melody'); else numericInput">
+                    <!-- Debug info -->
+                    <div style="display: none;">
+                        <!-- Debug para verificar el valor de isVariableOfType -->
+                        {{ logDebug('Variable ' + operation.variableName + ' type scale: ' + isVariableOfType(operation.variableName, 'scale')) }}
+                    </div>
+                    
+                    <!-- Resolver el tipo de variable -->
+                    <ng-container *ngIf="isVariableOfType(operation.variableName, 'melody')">
+                        <!-- Input para melodías -->
                         <input type="text" 
                             class="command-type"
                             [(ngModel)]="operation.value"
@@ -147,7 +155,18 @@
                             placeholder="Enter melody (e.g. 1 2 3)"
                             pattern="^[\s\d]+$">
                     </ng-container>
-                    <ng-template #numericInput>
+                    
+                    <ng-container *ngIf="isVariableOfType(operation.variableName, 'scale')">
+                        <!-- Selector para escalas -->
+                        <select class="command-type"
+                            [(ngModel)]="operation.value"
+                            (ngModelChange)="onOperationValueChange(operation, $event)">
+                            <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
+                        </select>
+                    </ng-container>
+                    
+                    <ng-container *ngIf="!isVariableOfType(operation.variableName, 'melody') && !isVariableOfType(operation.variableName, 'scale')">
+                        <!-- Input para números -->
                         <input type="number" 
                             class="command-value number-input" 
                             [(ngModel)]="operation.value"
@@ -155,7 +174,7 @@
                             min="-999"
                             max="999"
                             step="1">
-                    </ng-template>
+                    </ng-container>
                 </ng-container>
                 <div class="command-controls">
                     <p-button icon="pi pi-times" (click)="removeOperation(i)"></p-button>

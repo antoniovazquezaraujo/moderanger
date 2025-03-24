@@ -44,14 +44,21 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     constructor(private cdr: ChangeDetectorRef) {         
         this.playModeNames = getPlayModeNames();
         this.scaleNames = Scale.getScaleNames();
+        console.log('Scale names initialized in constructor:', this.scaleNames);
     }
 
     ngOnInit(): void {
         console.log('BlockCommandsComponent initialized with block:', this.block);
+        
+        // Asegurar que scaleNames esté inicializado correctamente
+        if (!this.scaleNames || this.scaleNames.length === 0) {
+            this.scaleNames = Scale.getScaleNames();
+            console.log('Scale names initialized in ngOnInit:', this.scaleNames);
+        }
+        
         this.commandTypeNames = Object.values(CommandType);
         this.operationTypeNames = Object.values(OperationType);
         
-       
         this.updateAvailableVariables();
         this.subscribeToVariableChanges();
         
@@ -179,6 +186,8 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             if (this.selectedOperationType === OperationType.ASSIGN && this.selectedVariable) {
                 if (this.isVariableOfType(this.selectedVariable, 'melody')) {
                     initialValue = '1 2 3'; // Valor por defecto para melodías
+                } else if (this.isVariableOfType(this.selectedVariable, 'scale')) {
+                    initialValue = this.scaleNames[0] || 'WHITE'; // Valor por defecto para escalas
                 } else if (this.isVariableOfType(this.selectedVariable, 'number')) {
                     initialValue = 0; // Valor por defecto para números
                 }
@@ -213,10 +222,16 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             const variableName = op.variableName || '';
             
             // Si estamos asignando a una variable de tipo melody, el valor debe ser una cadena
-            if (op.type === OperationType.ASSIGN && this.isVariableOfType(variableName, 'melody')) {
-                // Asegurarse de que el valor sea una cadena para melodías
-                const melodyValue = typeof op.value === 'string' ? op.value : String(op.value || '');
-                return new AssignOperation(variableName, melodyValue);
+            if (op.type === OperationType.ASSIGN) {
+                if (this.isVariableOfType(variableName, 'melody')) {
+                    // Asegurarse de que el valor sea una cadena para melodías
+                    const melodyValue = typeof op.value === 'string' ? op.value : String(op.value || '');
+                    return new AssignOperation(variableName, melodyValue);
+                } else if (this.isVariableOfType(variableName, 'scale')) {
+                    // Asegurarse de que el valor sea una cadena para escalas
+                    const scaleValue = typeof op.value === 'string' ? op.value : String(op.value || '');
+                    return new AssignOperation(variableName, scaleValue);
+                }
             }
             
             // Para el resto de los casos, seguir con la lógica original
@@ -447,6 +462,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                     if (typeof op.value !== 'string' || !/^[\s\d]+$/.test(op.value)) {
                         op.value = '1 2 3'; // Valor por defecto para melodías
                     }
+                } else if (this.isVariableOfType(value, 'scale')) {
+                    // Si es una escala, asegurarse de que el valor sea una de las escalas válidas
+                    if (typeof op.value !== 'string' || !this.scaleNames.includes(op.value)) {
+                        op.value = this.scaleNames[0] || 'WHITE'; // Valor por defecto para escalas
+                    }
                 } else if (this.isVariableOfType(value, 'number')) {
                     // Si es un número, asegurarse de que el valor sea numérico
                     if (typeof op.value !== 'number') {
@@ -517,9 +537,15 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             // Si es una operación ASSIGN para una variable de tipo melody, asegurar que el valor sea un string
             if (op.type === OperationType.ASSIGN && this.isVariableOfType(op.variableName, 'melody')) {
                 if (typeof op.value !== 'string') {
-                    op.value = '1 2 3';
+                    op.value = '1 2 3'; // Valor por defecto para melodías
                 }
             } 
+            // Si es una operación ASSIGN para una variable de tipo scale, asegurar que el valor sea un string válido de escala
+            else if (op.type === OperationType.ASSIGN && this.isVariableOfType(op.variableName, 'scale')) {
+                if (typeof op.value !== 'string' || !this.scaleNames.includes(op.value)) {
+                    op.value = this.scaleNames[0] || 'WHITE'; // Valor por defecto para escalas
+                }
+            }
             // Para operaciones INCREMENT/DECREMENT, asegurar que el valor sea un número
             else if ((op.type === OperationType.INCREMENT || op.type === OperationType.DECREMENT) && 
                      typeof op.value !== 'number') {
@@ -596,14 +622,37 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         
         const value = VariableContext.getValue(variableName);
         
+        // Verificar si el valor está definido
+        if (value === undefined) {
+            console.log(`Variable ${variableName} no tiene valor definido`);
+            return false;
+        }
+        
+        // Obtener todas las variables para depuración
+        const allVariables = Array.from(VariableContext.context.entries());
+        console.log('All variables:', allVariables);
+        
+        console.log(`Checking if ${variableName} (value: ${value}, type: ${typeof value}) is of type ${type}`);
+        
+        if (type === 'scale') {
+            console.log('ScaleNames:', this.scaleNames);
+            
+            // Verificar si es una escala válida comprobando si su valor está en la lista de nombres de escala
+            if (typeof value === 'string' && this.scaleNames.includes(value)) {
+                console.log(`✅ ${variableName} ES una variable de tipo scale`);
+                return true;
+            } else {
+                console.log(`❌ ${variableName} NO es una variable de tipo scale`);
+                return false;
+            }
+        }
+        
+        // Resto de los tipos
         if (type === 'number') {
             return typeof value === 'number';
         } else if (type === 'playmode') {
             const playModeNames = ['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'];
             return typeof value === 'string' && playModeNames.includes(value);
-        } else if (type === 'scale') {
-            const scaleNames = ['WHITE', 'BLACK', 'MAJOR', 'MINOR', 'CHROMATIC', 'PENTATONIC', 'BLUES', 'HARMONIC_MINOR'];
-            return typeof value === 'string' && scaleNames.includes(value);
         } else if (type === 'melody') {
             // Melody es una cadena que contiene solo dígitos y espacios
             return typeof value === 'string' && /^[\s\d]+$/.test(value);
@@ -633,5 +682,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         // Actualizar las operaciones del bloque
         this.updateBlockOperations();
         this.cdr.detectChanges();
+    }
+
+    logDebug(message: string): string {
+        console.log(message);
+        return '';
     }
 }
