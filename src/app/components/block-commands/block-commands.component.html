@@ -1,8 +1,7 @@
 <div class="block-container">
     <!-- Second Row: Comandos -->
-    <div class="commands-row">
-        <div class="row-header"></div>
-        <div class="commands-container">
+    <div class="block-row commands-row">
+        <div class="container-wrapper commands-container">
             <div *ngFor="let command of block.commands" class="command">
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
                     <optgroup label="">
@@ -99,16 +98,15 @@
                     <p-button (click)="removeCommand(command)" icon="pi pi-times"></p-button>
                 </div>
             </div>
-            <div class="add-command-wrapper">
-                <p-button class="add-command-button" (click)="addElement('command')" icon="pi pi-cog" pTooltip="Add Command" tooltipPosition="top"></p-button>
+            <div class="add-wrapper">
+                <p-button class="add-button" (click)="addElement('command')" icon="pi pi-cog" pTooltip="Add Command" tooltipPosition="top"></p-button>
             </div>
         </div>
     </div>
 
     <!-- Third Row: Operaciones -->
-    <div class="third-row">
-        <div class="row-header"></div>
-        <div class="operations-container">
+    <div class="block-row operations-row">
+        <div class="container-wrapper operations-container">
             <div *ngFor="let operation of operations; let i = index" class="operation-item">
                 <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">
                     <option *ngFor="let type of operationTypeNames" [value]="type">{{type}}</option>
@@ -128,9 +126,9 @@
                     <p-button icon="pi pi-times" (click)="removeOperation(i)"></p-button>
                 </div>
             </div>
-            <div class="add-operation-wrapper">
+            <div class="add-wrapper">
                 <p-button 
-                    class="add-command-button"
+                    class="add-button"
                     icon="pi pi-percentage" 
                     pTooltip="Add Operation"
                     (click)="addElement('operation')" 

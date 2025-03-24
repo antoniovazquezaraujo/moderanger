@@ -1,187 +1,141 @@
-/* Estilos para p-inputnumber */
-:host ::ng-deep .p-inputnumber {
-  width: 80px !important;
-  height: 30px !important;
-}
-
-:host ::ng-deep .p-inputnumber-input {
-  width: 100% !important;
-  text-align: center !important;
-  height: 100% !important;
-}
-
-:host ::ng-deep .p-inputnumber .p-button {
-  width: 2rem !important;
-  padding: 0 !important;
-  height: 100% !important;
-}
-
-/* Contenedores */
-.commands-container, .second-row {
-  display: flex;
-  flex-flow: row wrap;
-  gap: 6px;
-  align-items: center;
-  padding: 6px;
-}
-
-.second-row {
-  margin-top: 0.5rem;
-}
-
-/* Elementos */
-.command, .operation-item {
-  display: inline-flex;
-  align-items: center;
-  background-color: transparent;
-  padding: 5px 8px;
-  border-radius: 4px;
-  border: 1px solid #e8e8e8;
-  margin-right: 8px !important;
-}
-
-.operation-item {
-  border-radius: 4px;
-  border: 1px solid #e9ecef;
-}
-
-/* Command-type */
-.command-type {
-  width: 120px;
-  height: 30px;
-  padding: 0 0.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  margin: 0 4px;
-  background-color: white;
-  font-size: 14px;
-}
-
-/* Controles */
-.command-controls, .notes-controls {
-  display: flex;
-  gap: 0.25rem;
-  margin-left: 0.25rem;
-}
-
-/* Quitar margen automático para no alinear a la derecha */
-.operation-controls {
-  display: flex;
-  gap: 0.25rem;
-  margin-left: 0.25rem;
-}
-
-/* Agregar estilos para el botón de agregar comando y operación */
-.add-command-wrapper, .add-operation-wrapper {
-  display: flex;
-  align-items: center;
-  height: 38px;
-}
-
-/* Notas */
-.notes-value {
-  width: 200px;
-}
-
+/* Estilo principal */
 .block-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
   width: 100%;
 }
 
-/* Filas de comandos y operaciones */
-.commands-row {
-  background-color: transparent;
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
+/* Filas */
+.commands-row,
+.operations-row,
 .third-row {
   background-color: transparent;
-  padding: 8px;
   border-radius: 4px;
   border: 1px solid #ddd;
+  margin: 0 !important;
+  padding: 9px 8px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
-.commands-container, .operations-container {
+/* Contenedores */
+.commands-container,
+.operations-container,
+.container-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 2px;
   align-items: center;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  vertical-align: middle;
+  width: 100%;
 }
 
-.command-type, .operation-type {
-  width: auto;
-  min-width: 120px;
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: white;
-  margin-right: 8px;
-}
-
-.command-value, .number-input {
-  width: 45px !important;
-  height: 30px !important;
-  padding: 0 2px !important;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: white;
-  margin: 0 4px;
-  text-align: center !important;
-}
-
-/* Estilo específico para los inputs numéricos */
-input[type="number"].command-value,
-input[type="number"].number-input {
-  width: 45px !important;
-  max-width: 45px !important;
-  box-sizing: border-box !important;
-  text-align: center !important;
-  padding: 0 2px !important;
-}
-
-.command-controls, .operation-controls {
+/* Items */
+.command,
+.operation-item {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  background-color: transparent;
+  padding: 1px 4px !important;
+  border-radius: 3px;
+  border: 1px solid #e8e8e8;
+  margin: 1px 2px !important;
+  height: 24px !important;
+  max-height: 24px !important;
+  min-height: 24px !important;
+  box-sizing: border-box !important;
 }
 
-/* Estilos para los botones */
-:host ::ng-deep .p-button {
-  width: 30px !important;
-  height: 30px !important;
-  margin: 0 2px !important;
-  
-  .p-button-icon {
-    font-size: 0.875rem;
-    color: black;
-  }
-}
-
-/* Estilos para los select e inputs */
+/* Selects */
 .command-type {
-  width: 120px;
-  height: 30px;
-  padding: 0 8px;
+  height: 20px;
+  min-width: 100px;
+  padding: 0 4px;
   border: 1px solid #ced4da;
-  border-radius: 4px;
+  border-radius: 3px;
+  margin: 0 2px;
+  background-color: white;
+  font-size: 12px;
 }
 
-.command-value {
-  width: 80px;
-  height: 30px;
-  padding: 0 8px;
+/* Inputs */
+.command-value,
+.number-input {
+  width: 40px;
+  height: 20px;
+  padding: 0 2px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  background-color: white;
+  margin: 0 2px;
   text-align: center;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
+  font-size: 12px;
 }
 
-/* Responsive adjustments */
-@media screen and (max-width: 768px) {  
-  .commands-container, .operations-container {
-    width: 100%;
-  }
+/* Controles */
+.command-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 2px;
+}
+
+/* Wrappers */
+.add-wrapper,
+.add-command-wrapper,
+.add-operation-wrapper {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  margin: 1px;
+  padding: 0;
+}
+
+/* Botones */
+:host ::ng-deep .p-button {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+:host ::ng-deep .p-button .p-button-icon {
+  font-size: 0.7rem;
+}
+
+/* Esconder el row-header */
+.row-header {
+  display: none;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Para inputs más específicos */
+:host ::ng-deep .p-inputnumber {
+  width: 60px;
+  height: 20px;
+}
+
+:host ::ng-deep .p-inputnumber-input {
+  width: 100%;
+  text-align: center;
+  height: 100%;
+  font-size: 12px;
+}
+
+:host ::ng-deep .p-inputnumber .p-button {
+  width: 16px;
+  padding: 0;
+  height: 100%;
 }
