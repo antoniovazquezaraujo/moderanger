@@ -16,7 +16,11 @@
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
                                 <option value="">Select PlayMode variable</option>
-                                <option *ngFor="let variable of getFilteredVariables(command)" [value]="variable.value">{{variable.label}}</option>
+                                <option *ngFor="let variable of getFilteredVariables(command)" 
+                                        [value]="variable.value"
+                                        [selected]="getSelectedValue(command) === variable.value">
+                                    {{variable.label}}
+                                </option>
                             </select>
                         </ng-container>
                         <ng-template #playModeSelect>
@@ -42,7 +46,11 @@
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
                                 <option value="">Select Scale variable</option>
-                                <option *ngFor="let variable of getFilteredVariables(command)" [value]="variable.value">{{variable.label}}</option>
+                                <option *ngFor="let variable of getFilteredVariables(command)" 
+                                        [value]="variable.value"
+                                        [selected]="getSelectedValue(command) === variable.value">
+                                    {{variable.label}}
+                                </option>
                             </select>
                         </ng-container>
                         <ng-template #scaleSelect>
@@ -58,7 +66,11 @@
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
                                 <option value="">Select pattern variable</option>
-                                <option *ngFor="let variable of getFilteredVariables(command)" [value]="variable.value">{{variable.label}}</option>
+                                <option *ngFor="let variable of getFilteredVariables(command)" 
+                                        [value]="variable.value"
+                                        [selected]="getSelectedValue(command) === variable.value">
+                                    {{variable.label}}
+                                </option>
                             </select>
                         </ng-container>
                         <ng-template #patternInput>
@@ -75,7 +87,11 @@
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
                                 <option value="">Select number variable</option>
-                                <option *ngFor="let variable of getFilteredVariables(command)" [value]="variable.value">{{variable.label}}</option>
+                                <option *ngFor="let variable of getFilteredVariables(command)" 
+                                        [value]="variable.value"
+                                        [selected]="getSelectedValue(command) === variable.value">
+                                    {{variable.label}}
+                                </option>
                             </select>
                         </ng-container>
                         <ng-template #numberInput>
@@ -111,9 +127,16 @@
                 <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">
                     <option *ngFor="let type of operationTypeNames" [value]="type">{{type}}</option>
                 </select>
-                <select class="command-type" [(ngModel)]="operation.variableName" (ngModelChange)="onVariableSelected($event)">
+                <select class="command-type" 
+                    [(ngModel)]="operation.variableName" 
+                    (ngModelChange)="onVariableSelected($event)"
+                    [attr.data-operation-variable]="operation.variableName">
                     <option value="">Select variable</option>
-                    <option *ngFor="let variable of availableVariables" [value]="variable.value">{{variable.label}}</option>
+                    <option *ngFor="let variable of availableVariables" 
+                            [value]="variable.value" 
+                            [selected]="operation.variableName === variable.value">
+                        {{variable.label}}
+                    </option>
                 </select>
                 <ng-container *ngIf="operation.type === 'ASSIGN'">
                     <input type="number" class="command-value number-input" 

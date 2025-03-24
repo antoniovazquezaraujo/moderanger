@@ -83,30 +83,67 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             this.variablesSubscription.unsubscribe();
         }
         
-            this.variablesSubscription = VariableContext.onVariablesChange.subscribe(() => {
-                this.updateAvailableVariables();
-                if (this.block.blockContent.isVariable && this.block.blockContent.variableName) {
-                    const value = VariableContext.getValue(this.block.blockContent.variableName);
-                    if (typeof value === 'string') {
-                        this.block.blockContent.notes = value;
-                    }
+        this.variablesSubscription = VariableContext.onVariablesChange.subscribe(() => {
+            this.updateAvailableVariables();
+            
+            // Actualizar blockContent si usa variable
+            if (this.block.blockContent.isVariable && this.block.blockContent.variableName) {
+                const value = VariableContext.getValue(this.block.blockContent.variableName);
+                if (typeof value === 'string') {
+                    this.block.blockContent.notes = value;
                 }
-                this.cdr.detectChanges();
-            });
+            }
+            
+            // Actualizar todos los comandos que usan variables
+            if (this.block.commands) {
+                this.block.commands.forEach(command => {
+                    if (command.isVariable && command.getVariableName()) {
+                        // Esto fuerza al UI a actualizar el selector
+                        const currentVarName = command.getVariableName();
+                        if (currentVarName && VariableContext.context.has(currentVarName)) {
+                            // Reafirmar el valor actual para refrescar la UI
+                            command.setVariable(currentVarName);
+                        }
+                    }
+                });
+            }
+            
+            this.cdr.detectChanges();
+        });
     }
 
     private updateAvailableVariables(): void {
-            const variables = VariableContext.context;
-            this.availableVariables = Array.from(variables.entries())
-                .map(([name, value]) => ({
-                    label: `${name} (${value})`,
-                    value: name
-                }));
-
-            if (!this.selectedVariable && this.availableVariables.length > 0) {
-                this.selectedVariable = this.availableVariables[0].value;
+        const variables = VariableContext.context;
+        // Preservar las variables seleccionadas actualmente
+        const currentVariableSelections = new Map();
+        
+        // Guardar las variables seleccionadas de las operaciones
+        this.operations.forEach(op => {
+            if (op.variableName) {
+                currentVariableSelections.set(op.variableName, true);
             }
-            
+        });
+        
+        // Guardar las variables seleccionadas de los comandos
+        this.block.commands.forEach(cmd => {
+            if (cmd.isVariable && cmd.getVariableName()) {
+                currentVariableSelections.set(cmd.getVariableName(), true);
+            }
+        });
+        
+        // Actualizar la lista de variables disponibles
+        this.availableVariables = Array.from(variables.entries())
+            .map(([name, value]) => ({
+                label: `${name} (${value})`,
+                value: name
+            }));
+
+        // Si no hay variable seleccionada pero hay variables disponibles, seleccionar la primera
+        if (!this.selectedVariable && this.availableVariables.length > 0) {
+            this.selectedVariable = this.availableVariables[0].value;
+        }
+        
+        this.cdr.detectChanges();
     }
 
     removeCommand(command: Command): void {
@@ -299,8 +336,12 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     getSelectedValue(command: Command): string | null {
         try {
             if (command.isVariable) {
-                // Usar el nuevo método getVariableName() para obtener el nombre de la variable
-                return command.getVariableName();
+                // Obtener el nombre de la variable sin el prefijo $
+                const varName = command.getVariableName();
+                // Siempre devolver el nombre de la variable si existe
+                if (varName) {
+                    return varName;
+                }
             }
             
             // Para PlayMode, convertimos el valor numérico a string para mostrar en UI
@@ -308,10 +349,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 return PlayMode[command.value as number];
             }
             
-            return null;
+            return '';
         } catch (error) {
             console.error('Error getting selected value:', error);
-            return null;
+            return '';
         }
     }
 
@@ -441,16 +482,37 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     private initializeOperationsFromBlock(): void {
         console.log('Initializing operations from block:', this.block.operations);
+        if (!this.block.operations || this.block.operations.length === 0) {
+            // Si no hay operaciones, mantener el array vacío
+            this.operations = [];
+            return;
+        }
+        
+        // Crear un mapa de las operaciones actuales para preservar sus valores
+        const currentOperationsMap = new Map();
+        this.operations.forEach(op => {
+            const key = `${op.type}-${op.variableName}`;
+            currentOperationsMap.set(key, op);
+        });
+
         this.operations = this.block.operations.map(operation => {
+            const type = operation instanceof IncrementOperation ? OperationType.INCREMENT :
+                  operation instanceof DecrementOperation ? OperationType.DECREMENT :
+                  OperationType.ASSIGN;
+                  
+            // Intentar encontrar una operación actual que coincida para preservar sus valores
+            const key = `${type}-${operation.variableName}`;
+            const existingOp = currentOperationsMap.get(key);
+            
             return {
-                type: operation instanceof IncrementOperation ? OperationType.INCREMENT :
-                      operation instanceof DecrementOperation ? OperationType.DECREMENT :
-                      OperationType.ASSIGN,
+                type: type,
                 variableName: operation.variableName,
                 value: operation.value
             };
         });
+        
         console.log('Initialized operations:', this.operations);
+        this.cdr.detectChanges();
     }
 
     getPlayModeString(command: Command): string {
