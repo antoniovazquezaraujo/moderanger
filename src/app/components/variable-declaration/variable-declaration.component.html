@@ -26,8 +26,7 @@
                 name="value"
                 [min]="-999"
                 [max]="999"
-                step="1"
-                required>
+                step="1">
 
             <input *ngSwitchCase="'melody'" 
                 type="text" 
@@ -38,7 +37,7 @@
         </ng-container>
 
         <p-button type="submit" 
-            [disabled]="!varForm.form.valid"
+            [disabled]="!newVariable.name || !varForm.form.valid"
             icon="pi pi-plus">
         </p-button>
     </form>

@@ -35,7 +35,7 @@ export class VariableDeclarationComponent {
 
     addVariable(event: Event): void {
         event.preventDefault();
-        if ( this.newVariable.name) {
+        if (this.newVariable.name) {
             let value: any;
             if (this.newVariable.type === 'playmode') {
                 value = this.newVariable.value;
@@ -44,7 +44,7 @@ export class VariableDeclarationComponent {
             } else if (this.newVariable.type === 'scale') {
                 value = this.newVariable.value;
             } else {
-                value = Number(this.newVariable.value);
+                value = this.newVariable.value === '' ? 0 : Number(this.newVariable.value);
             }
 
             VariableContext.setValue(this.newVariable.name, value);
@@ -74,7 +74,7 @@ export class VariableDeclarationComponent {
             } else if (variable.type === 'scale') {
                 value = variable.value;
             } else {
-                value = Number(variable.value);
+                value = variable.value === '' ? 0 : Number(variable.value);
             }
 
             VariableContext.setValue(variable.name, value);
