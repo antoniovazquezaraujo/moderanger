@@ -139,11 +139,23 @@
                     </option>
                 </select>
                 <ng-container *ngIf="operation.type === 'ASSIGN'">
-                    <input type="number" class="command-value number-input" 
-                        [(ngModel)]="operation.value"
-                        min="-999"
-                        max="999"
-                        step="1">
+                    <ng-container *ngIf="isVariableOfType(operation.variableName, 'melody'); else numericInput">
+                        <input type="text" 
+                            class="command-type"
+                            [(ngModel)]="operation.value"
+                            (ngModelChange)="onOperationValueChange(operation, $event)"
+                            placeholder="Enter melody (e.g. 1 2 3)"
+                            pattern="^[\s\d]+$">
+                    </ng-container>
+                    <ng-template #numericInput>
+                        <input type="number" 
+                            class="command-value number-input" 
+                            [(ngModel)]="operation.value"
+                            (ngModelChange)="onOperationValueChange(operation, $event)"
+                            min="-999"
+                            max="999"
+                            step="1">
+                    </ng-template>
                 </ng-container>
                 <div class="command-controls">
                     <p-button icon="pi pi-times" (click)="removeOperation(i)"></p-button>

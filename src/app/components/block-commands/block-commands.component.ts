@@ -37,7 +37,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     selectedValue: string | null = null;
 
     // Initialize operations array
-    operations: { type: OperationType, variableName: string, value: number }[] = [];
+    operations: { type: OperationType, variableName: string, value: string | number }[] = [];
 
     operationDropdownOptions = this.operationTypeNames.map(type => ({ label: type, value: type }));
 
@@ -173,10 +173,21 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 this.selectedVariable = this.availableVariables[0].value;
             }
 
+            let initialValue: string | number = 1; // Valor por defecto para INCREMENT/DECREMENT
+            
+            // Para ASSIGN, inicializar con el valor adecuado según el tipo de variable
+            if (this.selectedOperationType === OperationType.ASSIGN && this.selectedVariable) {
+                if (this.isVariableOfType(this.selectedVariable, 'melody')) {
+                    initialValue = '1 2 3'; // Valor por defecto para melodías
+                } else if (this.isVariableOfType(this.selectedVariable, 'number')) {
+                    initialValue = 0; // Valor por defecto para números
+                }
+            }
+
             const newOperation = { 
                 type: this.selectedOperationType || OperationType.INCREMENT, 
                 variableName: this.selectedVariable || '', 
-                value: 1 // Cambiado de 0 a 1 para que el incremento/decremento sea más intuitivo
+                value: initialValue
             };
             
             if (!this.operations) {
@@ -201,18 +212,29 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         this.block.operations = this.operations.map(op => {
             const variableName = op.variableName || '';
             
+            // Si estamos asignando a una variable de tipo melody, el valor debe ser una cadena
+            if (op.type === OperationType.ASSIGN && this.isVariableOfType(variableName, 'melody')) {
+                // Asegurarse de que el valor sea una cadena para melodías
+                const melodyValue = typeof op.value === 'string' ? op.value : String(op.value || '');
+                return new AssignOperation(variableName, melodyValue);
+            }
+            
+            // Para el resto de los casos, seguir con la lógica original
             switch (op.type) {
                 case OperationType.INCREMENT:
-                    return new IncrementOperation(variableName, op.value || 1);
+                    // Asegurarse de que el valor sea numérico para incremento
+                    const incValue = typeof op.value === 'number' ? op.value : (parseInt(String(op.value)) || 1);
+                    return new IncrementOperation(variableName, incValue);
                 case OperationType.DECREMENT:
-                    return new DecrementOperation(variableName, op.value || 1);
+                    // Asegurarse de que el valor sea numérico para decremento
+                    const decValue = typeof op.value === 'number' ? op.value : (parseInt(String(op.value)) || 1);
+                    return new DecrementOperation(variableName, decValue);
                 case OperationType.ASSIGN:
                     return new AssignOperation(variableName, op.value || 0);
                 default:
                     throw new Error(`Unknown operation type: ${op.type}`);
             }
         });
-
     }
 
     removeOperation(index: number): void {
@@ -415,6 +437,25 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     onVariableSelected(value: string): void {
         console.log('Variable selected:', value);
         this.selectedVariable = value;
+        
+        // Para cada operación que usa esta variable, ajustar el valor según el tipo
+        this.operations.forEach(op => {
+            if (op.variableName === value && op.type === OperationType.ASSIGN) {
+                // Ajustar el valor según el tipo de variable
+                if (this.isVariableOfType(value, 'melody')) {
+                    // Si es una melodía, asegurarse de que el valor sea una cadena
+                    if (typeof op.value !== 'string' || !/^[\s\d]+$/.test(op.value)) {
+                        op.value = '1 2 3'; // Valor por defecto para melodías
+                    }
+                } else if (this.isVariableOfType(value, 'number')) {
+                    // Si es un número, asegurarse de que el valor sea numérico
+                    if (typeof op.value !== 'number') {
+                        op.value = 0;
+                    }
+                }
+            }
+        });
+        
         this.updateBlockOperations();
         this.cdr.detectChanges();
     }
@@ -469,6 +510,23 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     onOperationTypeChange(): void {
+        console.log('Operation type changed');
+        
+        // Ajustar valores por defecto según el tipo de operación
+        this.operations.forEach(op => {
+            // Si es una operación ASSIGN para una variable de tipo melody, asegurar que el valor sea un string
+            if (op.type === OperationType.ASSIGN && this.isVariableOfType(op.variableName, 'melody')) {
+                if (typeof op.value !== 'string') {
+                    op.value = '1 2 3';
+                }
+            } 
+            // Para operaciones INCREMENT/DECREMENT, asegurar que el valor sea un número
+            else if ((op.type === OperationType.INCREMENT || op.type === OperationType.DECREMENT) && 
+                     typeof op.value !== 'number') {
+                op.value = parseInt(String(op.value)) || 1;
+            }
+        });
+        
         this.updateBlockOperations();
         this.cdr.detectChanges();
     }
@@ -531,5 +589,49 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             command.setValue(modeValue);
             this.cdr.detectChanges();
         }
+    }
+
+    isVariableOfType(variableName: string, type: 'number' | 'playmode' | 'melody' | 'scale'): boolean {
+        if (!variableName) return false;
+        
+        const value = VariableContext.getValue(variableName);
+        
+        if (type === 'number') {
+            return typeof value === 'number';
+        } else if (type === 'playmode') {
+            const playModeNames = ['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'];
+            return typeof value === 'string' && playModeNames.includes(value);
+        } else if (type === 'scale') {
+            const scaleNames = ['WHITE', 'BLACK', 'MAJOR', 'MINOR', 'CHROMATIC', 'PENTATONIC', 'BLUES', 'HARMONIC_MINOR'];
+            return typeof value === 'string' && scaleNames.includes(value);
+        } else if (type === 'melody') {
+            // Melody es una cadena que contiene solo dígitos y espacios
+            return typeof value === 'string' && /^[\s\d]+$/.test(value);
+        }
+        
+        return false;
+    }
+
+    onOperationValueChange(operation: any, event: any): void {
+        console.log('Operation value changed:', operation, 'New value:', event);
+        
+        // Para los inputs de tipo number, extraer el valor numérico
+        if (event && event.target && typeof event.target.value !== 'undefined') {
+            if (this.isVariableOfType(operation.variableName, 'melody')) {
+                // Para melodías, asegurarse de que sea un string
+                operation.value = String(event.target.value);
+            } else {
+                // Para otros tipos, convertir a número si es posible
+                const numValue = parseFloat(event.target.value);
+                operation.value = isNaN(numValue) ? 0 : numValue;
+            }
+        } else {
+            // Si el evento no tiene target (por ejemplo, para [(ngModel)]), usarlo directamente
+            operation.value = event;
+        }
+        
+        // Actualizar las operaciones del bloque
+        this.updateBlockOperations();
+        this.cdr.detectChanges();
     }
 }

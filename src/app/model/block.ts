@@ -136,9 +136,15 @@ export class Block {
 
         clonedBlock.operations = this.operations.map(operation => {
             if (operation instanceof IncrementOperation) {
-                return new IncrementOperation(operation.variableName, operation.value);
+                // Garantizar que el valor sea numérico
+                const numValue = typeof operation.value === 'number' ? operation.value : 
+                    (parseInt(String(operation.value)) || 1);
+                return new IncrementOperation(operation.variableName, numValue);
             } else if (operation instanceof DecrementOperation) {
-                return new DecrementOperation(operation.variableName, operation.value);
+                // Garantizar que el valor sea numérico
+                const numValue = typeof operation.value === 'number' ? operation.value : 
+                    (parseInt(String(operation.value)) || 1);
+                return new DecrementOperation(operation.variableName, numValue);
             } else if (operation instanceof AssignOperation) {
                 return new AssignOperation(operation.variableName, operation.value);
             } else {

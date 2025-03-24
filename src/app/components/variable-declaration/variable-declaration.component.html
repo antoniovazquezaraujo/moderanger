@@ -28,12 +28,21 @@
                 [max]="999"
                 step="1">
 
-            <input *ngSwitchCase="'melody'" 
-                type="text" 
-                [(ngModel)]="newVariable.value" 
-                name="value"
-                placeholder="Enter notes (e.g. 1 2 3)"
-                required>
+            <ng-container *ngSwitchCase="'melody'">
+                <input 
+                    type="text" 
+                    [(ngModel)]="newVariable.value" 
+                    name="value"
+                    placeholder="Enter notes (e.g. 1 2 3)"
+                    pattern="^[\s\d]+$"
+                    [ngModelOptions]="{updateOn: 'blur'}"
+                    required>
+                <div *ngIf="varForm.form.get('value')?.invalid && 
+                        varForm.form.get('value')?.touched" 
+                        class="validation-error">
+                    Melody must contain only digits and spaces
+                </div>
+            </ng-container>
         </ng-container>
 
         <p-button type="submit" 
@@ -73,6 +82,7 @@
                     type="text" 
                     [(ngModel)]="variable.value" 
                     (blur)="updateVariable(i)"
+                    pattern="^[\s\d]+$"
                     placeholder="Enter notes (e.g. 1 2 3)">
             </ng-container>
 

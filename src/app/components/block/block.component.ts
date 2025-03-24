@@ -84,10 +84,19 @@ export class BlockComponent implements OnInit {
   getMelodyVariables() {
     return Array.from(VariableContext.context.entries())
       .filter(([_, value]) => {
-        // Filtrar variables de tipo string que no sean playmode o scale
+        // Solo aceptar variables de tipo string
         if (typeof value !== 'string') return false;
-        // Comprobar que contenga números (patrón de melody)
-        return /[0-9]/.test(value);
+        
+        // Excluir variables de playmode y scale
+        const playModeNames = ['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'];
+        if (playModeNames.some(mode => value === mode)) return false;
+        
+        // Verificar que no sea escala
+        const scaleNames = ['WHITE', 'BLACK', 'MAJOR', 'MINOR', 'CHROMATIC', 'PENTATONIC', 'BLUES', 'HARMONIC_MINOR'];
+        if (scaleNames.some(scale => value === scale)) return false;
+        
+        // Aceptar solo melodías (textos que incluyen números y espacios)
+        return /^[\s\d]+$/.test(value);
       })
       .map(([name, value]) => ({
         label: `${name} (${value})`,
@@ -128,7 +137,10 @@ export class BlockComponent implements OnInit {
 
     const value = VariableContext.getValue(variableName);
     if (typeof value === 'string') {
-      blockNode.blockContent.notes = value;
+      // Verificar que el valor sea una melodía válida (solo dígitos y espacios)
+      if (/^[\s\d]+$/.test(value)) {
+        blockNode.blockContent.notes = value;
+      }
     }
   }
 }

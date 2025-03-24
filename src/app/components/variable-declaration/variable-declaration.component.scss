@@ -78,4 +78,10 @@ input[type="text"], select {
             font-size: 12px;
         }
     }
+}
+
+.validation-error {
+    color: red;
+    font-size: 0.8rem;
+    margin-top: 2px;
 } 

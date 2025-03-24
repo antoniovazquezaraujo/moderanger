@@ -41,6 +41,10 @@ export class VariableDeclarationComponent {
                 value = this.newVariable.value;
             } else if (this.newVariable.type === 'melody') {
                 value = this.newVariable.value || '';
+                if (value && !(/^[\s\d]+$/.test(value))) {
+                    console.error('Invalid melody format. Must contain only numbers and spaces.');
+                    return;
+                }
             } else if (this.newVariable.type === 'scale') {
                 value = this.newVariable.value;
             } else {
@@ -71,6 +75,10 @@ export class VariableDeclarationComponent {
                 value = variable.value;
             } else if (variable.type === 'melody') {
                 value = variable.value || '';
+                if (value && !(/^[\s\d]+$/.test(value))) {
+                    console.error('Invalid melody format. Must contain only numbers and spaces.');
+                    return;
+                }
             } else if (variable.type === 'scale') {
                 value = variable.value;
             } else {
