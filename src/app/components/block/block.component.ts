@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Event } from '@angular/router';
 import { Block } from 'src/app/model/block';
+import { BlockContent } from 'src/app/model/block.content';
 import { Command } from 'src/app/model/command';
 import { VariableContext } from 'src/app/model/variable.context';
 
@@ -12,22 +13,22 @@ import { VariableContext } from 'src/app/model/variable.context';
 export class BlockComponent implements OnInit {
   @Input() block: Block = new Block(); 
     
-  @Output() blockChange: EventEmitter<Block>;
-  @Output() onDuplicateBlock: EventEmitter<any>;
-  @Output() onRemoveBlock: EventEmitter<any>;
-  @Output() onAddChild: EventEmitter<any>;
+  @Output() blockChange: EventEmitter<Block> = new EventEmitter();
+  @Output() onDuplicateBlock: EventEmitter<any> = new EventEmitter();
+  @Output() onRemoveBlock: EventEmitter<any> = new EventEmitter();
+  @Output() onAddChild: EventEmitter<any> = new EventEmitter();
 
-  @Input() onDragStart: EventEmitter<any>;
-  @Input() onDragEnd: EventEmitter<any>;
+  @Input() onDragStart: EventEmitter<any> = new EventEmitter();
+  @Input() onDragEnd: EventEmitter<any> = new EventEmitter();
   draggedBlock?: Block;
   
   constructor() {
-    this.onDuplicateBlock = new EventEmitter<any>();
-    this.onRemoveBlock = new EventEmitter<any>();
-    this.onAddChild = new EventEmitter<any>();
-    this.blockChange = new EventEmitter<Block>();
-    this.onDragStart = new EventEmitter<Block>();
-    this.onDragEnd = new EventEmitter<Block>();
+    if (!this.block.blockContent) {
+      this.block.blockContent = new BlockContent();
+      this.block.blockContent.notes = "";
+      this.block.blockContent.isVariable = false;
+      this.block.blockContent.variableName = "";
+    }
   }
  
   ngOnInit(): void {
@@ -81,10 +82,17 @@ export class BlockComponent implements OnInit {
   }
 
   getMelodyVariables() {
-    return [
-      { label: 'Melody 1', value: 'melody1' },
-      { label: 'Melody 2', value: 'melody2' }
-    ];
+    return Array.from(VariableContext.context.entries())
+      .filter(([_, value]) => {
+        // Filtrar variables de tipo string que no sean playmode o scale
+        if (typeof value !== 'string') return false;
+        // Comprobar que contenga números (patrón de melody)
+        return /[0-9]/.test(value);
+      })
+      .map(([name, value]) => ({
+        label: `${name} (${value})`,
+        value: name
+      }));
   }
 
   toggleMelodyVariable(event: MouseEvent, blockNode?: Block) {
@@ -95,6 +103,32 @@ export class BlockComponent implements OnInit {
     
     if (targetBlock.blockContent) {
       targetBlock.blockContent.isVariable = !targetBlock.blockContent.isVariable;
+      
+      // Si cambiamos a modo variable, seleccionar la primera variable disponible
+      if (targetBlock.blockContent.isVariable) {
+        const melodyVars = this.getMelodyVariables();
+        if (melodyVars.length > 0) {
+          targetBlock.blockContent.variableName = melodyVars[0].value;
+          const value = VariableContext.getValue(melodyVars[0].value);
+          if (typeof value === 'string') {
+            targetBlock.blockContent.notes = value;
+          }
+        }
+      }
+    }
+  }
+
+  handleMelodyVariableChange(variableName: string, blockNode: Block): void {
+    if (!blockNode.blockContent) return;
+    
+    if (!variableName) {
+      blockNode.blockContent.notes = '';
+      return;
+    }
+
+    const value = VariableContext.getValue(variableName);
+    if (typeof value === 'string') {
+      blockNode.blockContent.notes = value;
     }
   }
 }

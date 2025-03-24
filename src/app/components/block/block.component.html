@@ -21,7 +21,16 @@
     <ng-template let-node pTemplate="default">
     <div class="block-content">
       <!-- Bloque (información principal) - Todo en la misma línea -->
-      <div class="block-header"><span class="header-item block-label"><input type="text" [(ngModel)]="node.label" class="block-name-input" placeholder="Block {{node.id}}"></span><span class="header-item block-controls"><p-button (click)="addChild(node)" icon="pi pi-plus" pTooltip="Add Block" tooltipPosition="top"></p-button><p-button (click)="removeChild(node)" icon="pi pi-times" pTooltip="Remove Block" tooltipPosition="top"></p-button><p-button (click)="duplicateBlock(node)" icon="pi pi-copy" pTooltip="Duplicate Block" tooltipPosition="top"></p-button></span><span class="header-item repetitions-container"><span class="repetitions-label">Repeat</span><input type="number" id="repeatingTimes" class="repetitions-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="node.repeatingTimes" min="0" max="99" step="1"></span><span class="header-item notes-container"><span class="notes-label">Notes:</span><span class="notes-input"><ng-container *ngIf="node.blockContent?.isVariable; else notesInput"><select class="command-type" [(ngModel)]="node.blockContent.variableName"><option value="">Select melody variable</option><option *ngFor="let variable of getMelodyVariables()" [value]="variable.value">{{variable.label}}</option></select></ng-container><ng-template #notesInput><input type="text" [(ngModel)]="node.blockContent.notes" placeholder="Enter notes (e.g. 1 2 3)"></ng-template><span class="notes-controls"><p-button (click)="toggleMelodyVariable($event, node)" icon="pi pi-dollar"></p-button></span></span></span></div>
+      <div class="block-header"><span class="header-item block-label"><input type="text" [(ngModel)]="node.label" class="block-name-input" placeholder="Block {{node.id}}"></span><span class="header-item block-controls"><p-button (click)="addChild(node)" icon="pi pi-plus" pTooltip="Add Block" tooltipPosition="top"></p-button><p-button (click)="removeChild(node)" icon="pi pi-times" pTooltip="Remove Block" tooltipPosition="top"></p-button><p-button (click)="duplicateBlock(node)" icon="pi pi-copy" pTooltip="Duplicate Block" tooltipPosition="top"></p-button></span><span class="header-item repetitions-container"><span class="repetitions-label">Repeat</span><input type="number" id="repeatingTimes" class="repetitions-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="node.repeatingTimes" min="0" max="99" step="1"></span><span class="header-item notes-container"><span class="notes-label">Notes:</span><span class="notes-input"><ng-container *ngIf="node.blockContent?.isVariable; else notesInput"><select class="command-type" 
+      [(ngModel)]="node.blockContent.variableName"
+      (ngModelChange)="handleMelodyVariableChange($event, node)">
+      <option value="">Select melody variable</option>
+      <option *ngFor="let variable of getMelodyVariables()" 
+        [value]="variable.value"
+        [selected]="node.blockContent.variableName === variable.value">
+        {{variable.label}}
+      </option>
+    </select></ng-container><ng-template #notesInput><input type="text" [(ngModel)]="node.blockContent.notes" placeholder="Enter notes (e.g. 1 2 3)"></ng-template><span class="notes-controls"><p-button (click)="toggleMelodyVariable($event, node)" icon="pi pi-dollar"></p-button></span></span></span></div>
       
       <!-- Comandos y Operaciones -->
       <div class="block-body">
