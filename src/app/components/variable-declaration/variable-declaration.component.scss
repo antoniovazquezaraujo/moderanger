@@ -1,11 +1,17 @@
 .variables-container {
-    padding: 1rem;
+    padding: 10px 0;
 }
 
 .variable-form {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    
+    @media (max-width: 768px) {
+        gap: 5px;
+    }
 }
 
 .variable-input {
@@ -17,7 +23,12 @@
 
 input[type="text"], select {
     @extend .variable-input;
-    min-width: 150px;
+    min-width: 120px;
+    
+    @media (max-width: 768px) {
+        min-width: 80px;
+        font-size: 12px;
+    }
 }
 
 :host ::ng-deep .p-inputnumber {
@@ -30,10 +41,16 @@ input[type="text"], select {
 }
 
 .variables-list {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    max-height: 100px;
+    overflow-y: auto;
+    
+    @media (max-width: 768px) {
+        max-height: 80px;
+    }
 }
 
 .variable-item {
@@ -41,13 +58,24 @@ input[type="text"], select {
     gap: 0.5rem;
     align-items: center;
     margin-bottom: 0.5rem;
+    flex-wrap: wrap;
 
     .variable-name {
-        min-width: 150px;
+        min-width: 120px;
         font-weight: bold;
+        
+        @media (max-width: 768px) {
+            min-width: 80px;
+            font-size: 12px;
+        }
     }
 
     select {
         min-width: 100px;
+        
+        @media (max-width: 768px) {
+            min-width: 80px;
+            font-size: 12px;
+        }
     }
 } 

@@ -1,0 +1,22 @@
+:host {
+    display: block;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+h1 {
+    margin: 0;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.container {
+    height: calc(100vh - 52px); /* Altura total menos el h1 */
+    overflow: hidden;
+}

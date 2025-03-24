@@ -1,10 +1,19 @@
 <div class="song-editor">
-    <div class="editor-section">
+    <div class="editor-section content-section">
         <app-song [song]="song"></app-song>
-        <app-metronome></app-metronome>
     </div>
 
-    <div class="editor-section">
+    <div class="editor-section controls-section">
+        <div class="playback-controls">
+            <div class="p-d-flex p-ai-center">
+                <button pButton type="button" icon="pi pi-plus" (click)="addPart()" class="p-mr-2" pTooltip="Add Part" tooltipPosition="top"></button>
+                <span>Repeat:</span>
+                <input type="number" id="repetitions" class="number-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="repetitions" min="1" max="99" step="1">
+                <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
+                <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>
+            </div>
+        </div>
+        <app-metronome></app-metronome>
         <div class="variables-section">
             <app-variable-declaration></app-variable-declaration>
         </div>

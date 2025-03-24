@@ -6,13 +6,4 @@
 <app-parts 
     [parts] = "getParts() ||[]" 
     (onRemovePart)="removePart($event)">
-</app-parts> 
-
-<div class="p-d-flex p-ai-center p-mt-3">
-    <button pButton type="button" icon="pi pi-plus" (click)="addPart()" class="p-mr-2">
-    </button>
-    <span class="p-ml-3">Repeat:</span>
-    <input type="number" id="repetitions" class="number-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="repetitions" min="1" max="99" step="1">
-    <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
-    <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>
-</div>
+</app-parts>

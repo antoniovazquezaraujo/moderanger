@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input } from '@angular/core';
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
+import { Part } from 'src/app/model/part';
 
 @Component({
     selector: 'app-song-editor',
@@ -11,6 +12,7 @@ import { SongPlayer } from 'src/app/model/song.player';
 export class SongEditorComponent implements OnInit {
     @Input() song: Song = new Song();
     isPlaying: boolean = false;
+    repetitions: number = 1;
 
     constructor(
         private songPlayer: SongPlayer,
@@ -23,6 +25,20 @@ export class SongEditorComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.cdr.detectChanges();
+    }
+
+    playSong() {
+        this.songPlayer.songRepetitions = this.repetitions;
+        this.songPlayer.playSong(this.song);
+    }
+
+    stopSong() {
+        this.songPlayer.stop();
+    }
+    
+    addPart() {
+        this.song.parts.push(new Part());
         this.cdr.detectChanges();
     }
 }
