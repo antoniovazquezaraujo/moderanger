@@ -1805,3 +1805,21 @@ O sea, el pattern no representa la cantidad de GRADOS que nos desplazamos, si no
  Si embargo, ahora trabajamos con grados hasta el último momento, en que se convierten en notas. Eso ha estado bien, y abre la posibilidad de hacer más operaciones.
  Además se han agregado algunos tests. Eso también está bien.
  
+ 30-Marzo-2025.
+ El aspecto ha mejorado ostensiblemente. Ahora deberíamos estudiar el tema de las operaciones más a fondo.
+ De momento, solo tenemos incremento, decremento y asignación, y además las variables se pueden asignar solamente a elementos de las operaciones. Básicamente, solo operamos con las variables numéricas.
+ Tenemos varios tipos:
+    - Números
+    - Escalas
+    - Melodías
+    - PlayModes
+
+A los números habría que poder hacerles más cosas, como sumarle o restarle una cantidad concreta, o incluso multiplicarlos o dividirlos.
+A las escalas se las podría incrementar o decrementar, como si fuesen valores numéricos, posiciones en la lista de escalas
+A los playModes lo mismo
+A las melodías ya puede ser más complejo. Veamos:
+Una melodía es una lista de números, de momento, que pueden tener algunos símbolos más para indicar su duración.
+También pueden incluir silencios. Habría que crear una notación más avanzada, que permitiese editar las notas y su duración e intensidad de forma gráfica
+Pero además una melodía debería poder estar compuesta de variables también, es decir, cada nota, cada duración, cada intensidad debe poder ser una variable.
+
+ 
