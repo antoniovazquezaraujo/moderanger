@@ -22,6 +22,7 @@ import {InputTextareaModule} from 'primeng/inputtextarea';
 import {TooltipModule} from 'primeng/tooltip';
 import { MetronomeComponent } from './components/metronome/metronome.component';
 import { SongPlayer } from './model/song.player';
+import { MelodyEditorComponent } from './components/melody-editor/melody-editor.component';
 
 @NgModule({
     declarations: [
@@ -33,7 +34,8 @@ import { SongPlayer } from './model/song.player';
         PartComponent,
         SongComponent,
         VariableDeclarationComponent,
-        MetronomeComponent
+        MetronomeComponent,
+        MelodyEditorComponent
     ],
     imports: [
         FormsModule,

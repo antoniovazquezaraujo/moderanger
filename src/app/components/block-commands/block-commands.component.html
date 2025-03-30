@@ -74,10 +74,11 @@
                             </select>
                         </ng-container>
                         <ng-template #patternInput>
-                            <input type="text" 
-                                [(ngModel)]="command.value"
-                                placeholder="Enter pattern notes (e.g. 1 2 3)"
-                                class="command-type">
+                            <app-melody-editor 
+                                class="compact-melody-editor"
+                                [notes]="'' + command.value" 
+                                (notesChange)="command.value = $event">
+                            </app-melody-editor>
                         </ng-template>
                     </ng-container>
 
@@ -147,13 +148,12 @@
                     
                     <!-- Resolver el tipo de variable -->
                     <ng-container *ngIf="isVariableOfType(operation.variableName, 'melody')">
-                        <!-- Input para melodías -->
-                        <input type="text" 
-                            class="command-type"
-                            [(ngModel)]="operation.value"
-                            (ngModelChange)="onOperationValueChange(operation, $event)"
-                            placeholder="Enter melody (e.g. 1 2 3)"
-                            pattern="^[\s\d]+$">
+                        <!-- Editor de melodía directamente -->
+                        <app-melody-editor 
+                            class="inline-melody-editor"
+                            [notes]="'' + operation.value" 
+                            (notesChange)="onMelodyChange($event, operation)">
+                        </app-melody-editor>
                     </ng-container>
                     
                     <ng-container *ngIf="isVariableOfType(operation.variableName, 'scale')">

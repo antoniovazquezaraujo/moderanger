@@ -35,6 +35,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     showOperationControls: boolean = false;
     selectedVariable: string | null = null;
     selectedValue: string | null = null;
+    
+    // Editor de melodías
+    showMelodyEditorFor: string = '';
 
     // Initialize operations array
     operations: { type: OperationType, variableName: string, value: string | number }[] = [];
@@ -684,8 +687,42 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         this.cdr.detectChanges();
     }
 
-    logDebug(message: string): string {
-        console.log(message);
+    logDebug(value: string): string {
+        console.log(value);
         return '';
+    }
+
+    // Métodos para el editor de melodías
+    toggleMelodyEditor(operation: any): void {
+        if (this.showMelodyEditorFor === operation.variableName) {
+            this.closeMelodyEditor();
+        } else {
+            this.showMelodyEditorFor = operation.variableName;
+        }
+    }
+
+    closeMelodyEditor(): void {
+        this.showMelodyEditorFor = '';
+    }
+
+    onMelodyChange(newValue: string, operation: any): void {
+        operation.value = newValue;
+        this.onOperationValueChange(operation, newValue);
+    }
+
+    isBlockVariableMelody(): boolean {
+        if (!this.block.blockContent.variableName) return false;
+        
+        return this.isVariableOfType(this.block.blockContent.variableName, 'melody');
+    }
+
+    handleBlockMelodyChange(newValue: string): void {
+        if (this.block.blockContent.isVariable && this.block.blockContent.variableName) {
+            // Si estamos editando un bloque que usa una variable, actualizar la variable
+            VariableContext.setValue(this.block.blockContent.variableName, newValue);
+        }
+        
+        // Actualizar el bloque directamente
+        this.block.blockContent.notes = newValue;
     }
 }

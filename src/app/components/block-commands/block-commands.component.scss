@@ -9,13 +9,14 @@
 /* Filas */
 .commands-row,
 .operations-row,
-.third-row {
+.third-row,
+.melody-row {
   background-color: transparent;
   border-radius: 4px;
   border: 1px solid #ddd;
   margin: 0 !important;
   padding: 9px 8px !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   box-sizing: border-box !important;
   line-height: 1 !important;
   display: flex !important;
@@ -25,7 +26,8 @@
 /* Contenedores */
 .commands-container,
 .operations-container,
-.container-wrapper {
+.container-wrapper,
+.melody-container {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
@@ -47,10 +49,10 @@
   border-radius: 3px;
   border: 1px solid #e8e8e8;
   margin: 1px 2px !important;
-  height: 24px !important;
-  max-height: 24px !important;
+  height: auto !important;
   min-height: 24px !important;
   box-sizing: border-box !important;
+  position: relative;
 }
 
 /* Selects */
@@ -138,4 +140,155 @@
   width: 16px;
   padding: 0;
   height: 100%;
+}
+
+/* Estilos para el editor de melodías */
+.melody-row {
+  padding: 5px !important;
+}
+
+.melody-container {
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Ajustes para hacer más compacto el editor integrado - Estilos generales */
+:host ::ng-deep app-melody-editor {
+  .melody-editor {
+    min-height: auto;
+    border: none;
+    padding: 2px;
+    background-color: transparent;
+  }
+  
+  .editor-content {
+    padding: 2px;
+    border: none;
+    background-color: transparent;
+  }
+  
+  .notes-container {
+    padding: 2px 0;
+    gap: 2px;
+  }
+  
+  .note-item {
+    padding: 1px;
+  }
+  
+  .note-duration select {
+    width: 30px;
+    height: 18px;
+    font-size: 0.65rem;
+  }
+  
+  .note-visual {
+    width: 22px;
+    height: 22px;
+    
+    .note-circle {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .note-value {
+      font-size: 0.7rem;
+    }
+  }
+  
+  .group-bracket-start, 
+  .group-bracket-end {
+    font-size: 1.2rem;
+  }
+}
+
+/* Editor compacto para comandos PATTERN */
+.compact-melody-editor {
+  width: 120px;
+  min-height: 50px;
+  max-height: 120px;
+  overflow: auto;
+  display: block;
+  margin-top: 2px;
+  margin-left: 2px;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  background-color: #f9f9f9;
+  z-index: 10;
+  position: relative;
+  
+  :host ::ng-deep & {
+    .melody-editor {
+      min-height: auto;
+      max-height: 120px;
+      border: none;
+      padding: 0;
+      background-color: transparent;
+    }
+    
+    .editor-content {
+      padding: 0;
+      max-height: 120px;
+    }
+  }
+}
+
+/* Editor en línea para operaciones con melodías */
+.inline-melody-editor {
+  width: 180px;
+  min-height: 50px;
+  max-height: 80px;
+  overflow: auto;
+  display: block;
+  margin: 0 2px;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  background-color: #f9f9f9;
+  z-index: 10;
+  
+  :host ::ng-deep & {
+    .melody-editor {
+      border: none;
+      background-color: transparent;
+      padding: 2px;
+    }
+    
+    .editor-content {
+      border: none;
+      background-color: transparent;
+    }
+    
+    .note-item.selected {
+      background-color: rgba(0, 123, 255, 0.25);
+    }
+  }
+}
+
+/* Ajustes para la operación cuando contiene un editor de melodía */
+.operation-item:has(.inline-melody-editor) {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 60px !important;
+  flex-wrap: wrap;
+  padding-bottom: 4px !important;
+  
+  .inline-melody-editor {
+    flex-basis: 100%;
+    margin-top: 4px;
+  }
+}
+
+/* Ajustes para el comando cuando contiene un editor de melodía */
+.command:has(.compact-melody-editor) {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 24px !important;
+  flex-wrap: wrap;
+  padding-bottom: 4px !important;
+  
+  .compact-melody-editor {
+    flex-basis: 100%;
+    margin-top: 4px;
+  }
 }

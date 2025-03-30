@@ -1,0 +1,74 @@
+<div class="melody-editor" #editorContainer tabindex="0">
+  <div class="editor-content">
+    <div class="notes-container">
+      <!-- Mostrar una nota vacía si no hay notas -->
+      <ng-container *ngIf="editorNotes.length === 0">
+        <div class="note-item add-first-note" (click)="addNewNote()">
+          <div class="note-visual">
+            <span class="note-value note-add">+</span>
+          </div>
+          <div class="note-duration">
+            <span class="note-placeholder">Add</span>
+          </div>
+        </div>
+      </ng-container>
+      
+      <!-- Iterar sobre todas las notas -->
+      <ng-container *ngFor="let note of editorNotes; let i = index">
+        <!-- CAMBIO: Usamos un div relativo para posicionamiento -->
+        <div class="note-container">
+          <!-- Corchete inicio grupo - ELEMENTO INDEPENDIENTE -->
+          <button *ngIf="note.groupStart" 
+                  type="button"
+                  class="group-bracket group-start" 
+                  [class.selected-bracket]="selectedBracketIndex === i && selectedBracketType === 'start'"
+                  tabindex="0"
+                  [attr.data-index]="i"
+                  [attr.data-bracket-type]="'start'"
+                  title="Shift+flechas: mover bracket"
+                  (click)="selectGroupStart(i); $event.stopPropagation();">
+            {{note.groupDuration || '4n'}}:(
+          </button>
+          
+          <!-- Nota individual -->
+          <div class="note-item" 
+               [class.selected]="note.isSelected && selectedBracketIndex !== i"
+               [class.inside-group]="note.groupLevel && note.groupLevel > 0"
+               [style.marginLeft.px]="note.groupLevel ? note.groupLevel * 10 : 0"
+               (click)="selectNote(i)">
+            
+            <div class="note-visual" (click)="toggleNoteSilence(i); $event.stopPropagation();">
+              <span *ngIf="note.value !== null" class="note-value">{{note.value}}</span>
+              <span *ngIf="note.value === null" class="note-rest">X</span>
+            </div>
+            
+            <div class="note-duration" (wheel)="handleDurationWheel($event, i)">
+              <span class="duration-value">{{note.duration}}</span>
+            </div>
+          </div>
+          
+          <!-- Corchete fin grupo - ELEMENTO INDEPENDIENTE -->
+          <button *ngIf="note.groupEnd"
+                  type="button" 
+                  class="group-bracket group-end"
+                  [class.selected-bracket]="selectedBracketIndex === i && selectedBracketType === 'end'"
+                  tabindex="0"
+                  [attr.data-index]="i"
+                  [attr.data-bracket-type]="'end'"
+                  [style.marginLeft.px]="note.groupLevel ? note.groupLevel * 10 : 0"
+                  title="Shift+flechas: mover bracket"
+                  (click)="selectGroupEnd(i); $event.stopPropagation();">
+            )
+          </button>
+        </div>
+      </ng-container>
+      
+      <!-- Botón para agregar nueva nota al final -->
+      <div class="note-item add-note" (click)="addNewNote()">
+        <div class="note-visual">
+          <span class="note-value note-add">+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

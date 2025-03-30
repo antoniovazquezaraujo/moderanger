@@ -143,4 +143,15 @@ export class BlockComponent implements OnInit {
       }
     }
   }
+
+  // Método para actualizar las notas del bloque
+  updateBlockNotes(notes: string, blockNode: Block): void {
+    if (!blockNode.blockContent) {
+      blockNode.blockContent = new BlockContent();
+      blockNode.blockContent.isVariable = false;
+      blockNode.blockContent.variableName = '';
+    }
+    
+    blockNode.blockContent.notes = notes;
+  }
 }

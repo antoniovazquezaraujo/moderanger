@@ -131,4 +131,65 @@ input[type="number"]#repeatingTimes {
   max-width: 45px !important;
   box-sizing: border-box !important;
   padding: 0 2px !important;
+}
+
+/* Estilos para el editor de melodía */
+.melody-editor-wrapper {
+  border-radius: 4px;
+  margin-bottom: 6px;
+  background-color: transparent;
+  padding: 4px;
+  border: 1px solid #eaeaea;
+}
+
+.melody-header {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  
+  .melody-variable-select {
+    flex: 1;
+    height: 28px;
+    padding: 0 6px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    background-color: white;
+    font-size: 12px;
+    margin-right: 6px;
+  }
+  
+  .melody-controls {
+    display: flex;
+    align-items: center;
+    margin-left: 6px;
+  }
+}
+
+.block-melody-editor {
+  flex: 1;
+  display: block;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  overflow: auto;
+  background-color: #f9f9f9;
+  min-height: 60px;
+  
+  :host ::ng-deep & {
+    .melody-editor {
+      border: none;
+      background-color: transparent;
+      padding: 2px;
+    }
+    
+    .editor-content {
+      padding: 2px;
+      border: none;
+      background-color: transparent;
+    }
+    
+    .note-item.selected {
+      background-color: rgba(0, 123, 255, 0.25);
+      box-shadow: 0 0 0 2px #007bff;
+    }
+  }
 } 
