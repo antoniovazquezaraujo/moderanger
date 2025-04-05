@@ -152,6 +152,10 @@ export class BlockComponent implements OnInit {
       blockNode.blockContent.variableName = '';
     }
     
+    // Guardar las notas ya en formato compatible con el reproductor
     blockNode.blockContent.notes = notes;
+    
+    // Notificar cambios
+    this.blockChange.emit(this.block);
   }
 }

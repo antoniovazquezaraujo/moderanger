@@ -22,7 +22,7 @@ import {InputTextareaModule} from 'primeng/inputtextarea';
 import {TooltipModule} from 'primeng/tooltip';
 import { MetronomeComponent } from './components/metronome/metronome.component';
 import { SongPlayer } from './model/song.player';
-import { MelodyEditorComponent } from './components/melody-editor/melody-editor.component';
+import { MelodyEditorModule } from './components/melody-editor/melody-editor.module';
 
 @NgModule({
     declarations: [
@@ -34,8 +34,7 @@ import { MelodyEditorComponent } from './components/melody-editor/melody-editor.
         PartComponent,
         SongComponent,
         VariableDeclarationComponent,
-        MetronomeComponent,
-        MelodyEditorComponent
+        MetronomeComponent
     ],
     imports: [
         FormsModule,
@@ -49,7 +48,8 @@ import { MelodyEditorComponent } from './components/melody-editor/melody-editor.
         InputNumberModule,
         AccordionModule,
         InputTextareaModule,
-        TooltipModule
+        TooltipModule,
+        MelodyEditorModule
     ],
     providers: [TreeDragDropService, SongPlayer],
     bootstrap: [AppComponent]

@@ -1,392 +1,265 @@
+// Variables
+$primary-color: #0077cc;
+$secondary-color: #666;
+$light-bg: #f9f9f9;
+$white: #fff;
+$border-color: #ccc;
+$hover-color: #e6f2ff;
+$selected-color: rgba(0, 119, 204, 0.2);
+$group-start-color: #cc0000;
+$group-end-color: #0000cc;
+$transition-time: 0.2s;
+$z-index-base: 10;
+$z-index-selected: 100;
+
+// Animaciones
+@keyframes pulse {
+  0% { box-shadow: 0 0 5px rgba(0, 119, 204, 0.3); }
+  50% { box-shadow: 0 0 12px rgba(0, 119, 204, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(0, 119, 204, 0.3); }
+}
+
+// Contenedor principal
 .melody-editor {
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: auto;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  padding: 5px;
-  background-color: #f9f9f9;
-  font-family: 'Arial', sans-serif;
+  border: 1px solid $border-color;
+  border-radius: 5px;
+  padding: 15px;
+  background-color: $light-bg;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 60px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none;
   
   &:focus {
-    outline: 1px solid #007bff;
-    outline-offset: -1px;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px $selected-color;
   }
 }
 
-.editor-header {
-  margin-bottom: 15px;
-  
-  .instructions {
-    font-size: 0.85rem;
-    color: #666;
-    
-    p {
-      margin: 5px 0;
-    }
-  }
-}
-
+// Contenido del editor
 .editor-content {
   flex: 1;
   overflow-x: auto;
-  overflow-y: auto;
+  overflow-y: hidden;
   padding: 5px;
-  background-color: #fff;
+  background-color: $white;
   border-radius: 3px;
   border: 1px solid #e0e0e0;
+  white-space: nowrap;
 }
 
+// Contenedor de notas
 .notes-container {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 0;
-  min-height: 40px; /* Asegurar una altura mínima */
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  padding: 10px 0;
+  min-height: 40px;
 }
 
-.note-item {
+// Contenedor de nota individual
+.note-container {
+  position: relative;
   display: flex;
+  align-items: center;
+  margin: 0 30px;
+  padding: 5px 0;
+}
+
+// Elemento de nota
+.note-item {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 0 2px;
+  padding: 8px 4px;
+  min-width: 60px;
+  min-height: 40px;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  padding: 2px;
-  border-radius: 3px;
-  transition: all 0.2s ease;
+  background-color: $white;
+  cursor: pointer;
+  transition: all $transition-time ease;
+  
+  &:hover {
+    border-color: $primary-color;
+    background-color: #f0f8ff;
+  }
   
   &.selected {
-    background-color: rgba(0, 123, 255, 0.25);
-    box-shadow: 0 0 0 2px #007bff;
-    z-index: 2;
+    border-color: $primary-color;
+    background-color: $hover-color;
+    box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.3);
+    transform: scale(1.05);
+    z-index: $z-index-base + 1;
   }
   
   &.inside-group {
-    margin-top: 12px;
+    border-color: #7799bb;
+    background-color: #f5f8fa;
+    margin-left: 10px;
   }
   
   &.add-note, &.add-first-note {
     opacity: 0.7;
-    cursor: pointer;
-    transition: opacity 0.2s;
+    background-color: #f0f8ff;
+    border-style: dashed;
     
     &:hover {
       opacity: 1;
+      background-color: $hover-color;
     }
   }
 }
 
+// Visualización de la nota
+.note-visual {
+  margin-bottom: 4px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  
+  .note-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    
+    &.note-add {
+      color: $primary-color;
+      font-size: 18px;
+    }
+  }
+  
+  .note-rest {
+    font-size: 16px;
+    font-weight: bold;
+    color: #999;
+  }
+}
+
+// Duración de la nota
 .note-duration {
-  font-size: 0.7rem;
-  margin-top: 4px;
-  cursor: ns-resize; /* Indicar que se puede cambiar con scroll vertical */
-  background-color: rgba(240, 240, 240, 0.8);
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  padding: 1px 3px;
-  min-width: 25px;
-  text-align: center;
-  transition: background-color 0.2s;
+  font-size: 12px;
+  color: $secondary-color;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background-color: #f0f0f0;
+  cursor: ns-resize;
   
   &:hover {
-    background-color: rgba(230, 230, 230, 1);
+    background-color: #e6e6e6;
   }
   
   .duration-value {
+    font-family: monospace;
     font-weight: bold;
     color: #444;
   }
   
   .note-placeholder {
-    font-size: 0.7rem;
-    color: #666;
+    font-size: 12px;
+    color: $secondary-color;
   }
 }
 
-.note-visual {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 28px;
-  height: 28px;
-  
-  .note-value {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #000;
-    cursor: pointer;
-    padding: 2px 4px;
-    transition: all 0.2s ease;
-    
-    &.note-add {
-      color: #007bff;
-      font-size: 1.2rem;
-      opacity: 0.6;
-      
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
-  
-  .note-rest {
-    font-weight: bold;
-    font-size: 1rem;
-    color: #666;
-    cursor: pointer;
-  }
-}
-
-/* Estilo para grupos de notas */
-.group-start, .group-bracket-end {
-  display: flex;
-  align-items: center;
-}
-
-.group-duration {
-  font-size: 0.7rem;
-  margin-right: 2px;
-  cursor: ns-resize;
-  background-color: rgba(240, 240, 240, 0.8);
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  padding: 1px 3px;
-  min-width: 25px;
-  text-align: center;
-  
-  &:hover {
-    background-color: rgba(230, 230, 230, 1);
-  }
-  
-  .duration-value {
-    font-weight: bold;
-    color: #444;
-  }
-}
-
-.group-bracket-start, .group-bracket-end {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #555;
-  line-height: 1;
-  cursor: pointer;
-  transition: color 0.2s, transform 0.2s, background-color 0.2s, border-color 0.2s;
-  user-select: none;
-  padding: 4px 8px; /* Aumentado el tamaño del área clickeable */
-  border: 2px solid transparent;
-  border-radius: 4px;
-  position: relative;
-  z-index: 100; /* Z-index mucho más alto para asegurar que está por encima */
-  display: inline-block; /* Asegurar que sea un bloque para capturar eventos */
-  
-  &:hover {
-    color: #0066cc;
-    background-color: rgba(0, 102, 204, 0.2);
-    transform: scale(1.05);
-  }
-  
-  &.selected, &:focus {
-    color: #0066cc;
-    border-color: #0066cc;
-    background-color: rgba(0, 102, 204, 0.3);
-    outline: none;
-    transform: scale(1.15);
-    box-shadow: 0 0 10px rgba(0, 102, 204, 0.7);
-    font-weight: 800;
-    z-index: 200;
-  }
-  
-  /* Pista sobre las teclas mejorada */
-  &::after {
-    content: 'Shift+←→';
-    position: absolute;
-    top: -18px;
-    left: 50%;
-    transform: translateX(-50%) scale(0);
-    font-size: 0.6rem;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 2px 4px;
-    border-radius: 3px;
-    opacity: 0;
-    transition: opacity 0.2s, transform 0.2s;
-    pointer-events: none;
-    white-space: nowrap;
-    z-index: 205;
-  }
-  
-  &.selected::after, &:focus::after, &:hover::after {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-  }
-}
-
-/* Aumentar la separación entre elementos para mejorar la interacción */
-.group-start {
-  margin-right: 4px;
-}
-
-.group-bracket-end {
-  margin-left: 4px;
-}
-
-/* Estilos para grupos seleccionados */
-.group-start:has(.group-bracket-start.selected), 
-.group-bracket-end.selected {
-  z-index: 200;
-}
-
-/* Estilos para mostrar el estado activo */
-.group-bracket-start:active,
-.group-bracket-end:active {
-  transform: scale(0.95);
-}
-
-/* Estilos adicionales para mejorar la visualización */
-.group-bracket-start.selected,
-.group-bracket-end.selected {
-  position: relative;
-}
-
-.note-item.selected + .group-bracket-end,
-.group-start:has(.group-bracket-start:active) {
-  color: #007bff;
-}
-
-/* Estilos específicos para los corchetes independientes */
-.standalone-bracket {
-  position: relative;
-  cursor: pointer;
-  min-width: 20px;
-  min-height: 30px;
-  text-align: center;
-  border: 3px solid transparent;
-  border-radius: 6px;
-  background-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
-  
-  /* Asegurar que los eventos de clic funcionen correctamente */
-  pointer-events: auto;
-  
-  &:hover, &:focus {
-    background-color: rgba(0, 102, 204, 0.2);
-    border-color: rgba(0, 102, 204, 0.5);
-    color: #0066cc;
-    box-shadow: 0 0 8px rgba(0, 102, 204, 0.3);
-    transform: scale(1.1);
-  }
-  
-  &.selected {
-    background-color: rgba(0, 102, 204, 0.3);
-    border-color: #0066cc;
-    color: #0066cc;
-    box-shadow: 0 0 12px rgba(0, 102, 204, 0.6);
-    transform: scale(1.2);
-    font-weight: 800;
-    z-index: 500 !important;
-  }
-}
-
-/* Marcar visualmente los corchetes seleccionados con un indicador adicional */
-.standalone-bracket.selected::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 8px;
-  height: 8px;
-  background-color: #0066cc;
-  border-radius: 50%;
-  box-shadow: 0 0 5px rgba(0, 102, 204, 0.7);
-}
-
-.note-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* Estilos mejorados para los corchetes con estilo botón */
+// Estilos para los corchetes de grupo
 .group-bracket {
-  position: relative;
-  font-size: 16px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 8px;
+  font-family: monospace;
+  font-size: 14px;
   font-weight: bold;
-  padding: 2px 5px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s, color 0.2s;
-  z-index: 10;
   border-radius: 4px;
+  cursor: pointer;
+  z-index: $z-index-base;
+  transition: all $transition-time ease;
+  min-width: 30px;
+  min-height: 30px;
+  user-select: none;
   
   &:hover {
-    background-color: rgba(0, 100, 255, 0.1);
-    box-shadow: 0 0 4px rgba(0, 100, 255, 0.3);
-    color: #0055ff;
-  }
-  
-  &.selected-bracket {
-    background-color: rgba(0, 100, 255, 0.2);
     transform: scale(1.1);
-    color: #0055ff;
-    font-weight: bold;
-    box-shadow: 0 0 6px rgba(0, 100, 255, 0.4);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  &.selected-bracket {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    z-index: $z-index-selected;
+    animation: pulse 1.5s infinite;
   }
 }
 
+// Bracket de inicio
 .group-start {
-  color: #007700;
-  margin-right: 2px;
+  left: -25px;
+  background-color: rgba(255, 200, 200, 0.4);
+  border: 2px solid $group-start-color;
+  color: $group-start-color;
+  
+  &:hover {
+    background-color: rgba(255, 200, 200, 0.7);
+  }
   
   &.selected-bracket {
-    color: #00aa00;
+    background-color: rgba(255, 150, 150, 0.7);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
   }
 }
 
+// Bracket de fin
 .group-end {
-  color: #770000;
-  margin-left: 2px;
+  right: -25px;
+  background-color: rgba(200, 200, 255, 0.4);
+  border: 2px solid $group-end-color;
+  color: $group-end-color;
+  
+  &:hover {
+    background-color: rgba(200, 200, 255, 0.7);
+  }
   
   &.selected-bracket {
-    color: #aa0000;
+    background-color: rgba(150, 150, 255, 0.7);
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.7);
   }
 }
 
-/* Resolver conflicto con otros estilos */
-button.group-bracket {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  outline: none !important;
-}
-
-/* Estilo específico para la duración del grupo */
-.group-duration {
-  z-index: 999;
-  background-color: #fff;
-  border: 1px solid #ddd;
+// Tooltip para brackets
+.group-bracket::after {
+  content: 'Shift+←→';
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
   padding: 2px 4px;
   border-radius: 3px;
-  font-size: 12px;
-  margin: 0 2px;
+  opacity: 0;
+  transition: opacity $transition-time, transform $transition-time;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: $z-index-selected + 5;
 }
 
-/* Estilos para el destacado extra de elementos seleccionados */
-.extra-highlight {
-  transform: scale(1.3) !important;
-  opacity: 1 !important;
-  z-index: 10000 !important;
-  box-shadow: 0 0 20px rgba(255, 255, 0, 0.8) !important;
-  animation: pulse 1s infinite alternate !important;
+.group-bracket:hover::after,
+.group-bracket:focus::after,
+.group-bracket.selected-bracket::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
 }
-
-@keyframes pulse {
-  from {
-    box-shadow: 0 0 15px rgba(255, 255, 0, 0.6);
-  }
-  to {
-    box-shadow: 0 0 25px rgba(255, 255, 0, 0.9);
-  }
-} 
