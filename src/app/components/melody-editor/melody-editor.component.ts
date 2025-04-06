@@ -73,7 +73,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
       
-      this.cdr.detectChanges();
+        this.cdr.detectChanges();
     });
   }
 
@@ -86,7 +86,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     if (['Insert', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', ' '].includes(event.key)) {
       event.preventDefault();
     }
-
+    
     switch (event.key) {
       case 'Insert':
         this.insertNote();
@@ -108,14 +108,14 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
           case 'ArrowUp':
             if (event.shiftKey) {
               this.increaseDuration();
-            } else {
+    } else {
               this.increaseNote();
             }
             break;
           case 'ArrowDown':
             if (event.shiftKey) {
               this.decreaseDuration();
-            } else {
+    } else {
               this.decreaseNote();
             }
             break;
@@ -139,7 +139,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     if (event.shiftKey) {
       // Cambiar duración con Shift + rueda
       const currentIndex = this.durations.indexOf(note.duration);
-      const delta = event.deltaY > 0 ? 1 : -1;
+    const delta = event.deltaY > 0 ? 1 : -1;
       const newIndex = currentIndex + delta;
       
       if (newIndex >= 0 && newIndex < this.durations.length) {
@@ -148,7 +148,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
         this.focusedElement = { ...note, duration: newDuration };
         this.emitNotesChange();
       }
-    } else {
+      } else {
       // Cambiar valor de la nota con rueda
       const delta = event.deltaY > 0 ? -1 : 1;
       this.updateNoteValue(note, (note.value ?? 0) + delta);
@@ -232,7 +232,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
       if (currentIndex > 0) {
         // Si no es el primer elemento, enfocar el anterior
         this.focusedElement = this.elements[currentIndex - 1];
-      } else {
+    } else {
         // Si es el primer elemento, enfocar el nuevo primer elemento
         this.focusedElement = this.elements[0];
       }
@@ -266,7 +266,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleGroup(id: string): void {
     if (this.expandedGroups.has(id)) {
       this.expandedGroups.delete(id);
-    } else {
+        } else {
       this.expandedGroups.add(id);
     }
   }

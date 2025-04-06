@@ -1687,3 +1687,16 @@ html body input[type="number"].number-input[min],
   text-align: center !important;
   padding: 0 2px !important;
 }
+
+/* Override PrimeNG dropdown styles */
+.p-dropdown-panel {
+  background: white !important;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  background: white !important;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+  background: #f5f5f5 !important;
+}

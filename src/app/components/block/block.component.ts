@@ -4,6 +4,10 @@ import { Block } from 'src/app/model/block';
 import { BlockContent } from 'src/app/model/block.content';
 import { Command } from 'src/app/model/command';
 import { VariableContext } from 'src/app/model/variable.context';
+import { BlockCommandsComponent } from '../block-commands/block-commands.component';
+import { MelodyEditorService } from '../../services/melody-editor.service';
+import { parseBlockNotes } from '../../model/ohm.parser';
+import { NoteData } from '../../model/note';
 
 @Component({
   selector: 'app-block',
@@ -101,12 +105,14 @@ export class BlockComponent implements OnInit {
       .map(([name, value]) => {
         // Asegurarnos de que el valor sea una cadena
         const stringValue = value.toString();
-        // Separar las notas
-        const notes = stringValue.split(' ').filter(note => note.trim() !== '');
+        // Separar las notas por comas o espacios
+        const notes = stringValue.includes(',') 
+          ? stringValue.split(',').map(note => note.trim())
+          : stringValue.split(' ').filter(note => note.trim() !== '');
         return {
           name: name,
           value: name,
-          notes: notes
+          notes: stringValue // Pass the original string to let parseNotes handle it
         };
       });
   }
@@ -134,20 +140,21 @@ export class BlockComponent implements OnInit {
     }
   }
 
-  handleMelodyVariableChange(variableName: string, blockNode: Block): void {
+  handleMelodyVariableChange(event: any, blockNode: Block): void {
     if (!blockNode.blockContent) return;
     
-    if (!variableName) {
+    const selectedOption = event.value;
+    if (!selectedOption) {
       blockNode.blockContent.notes = '';
       blockNode.blockContent.variableName = '';
       return;
     }
 
     // Actualizar el nombre de la variable
-    blockNode.blockContent.variableName = variableName;
+    blockNode.blockContent.variableName = selectedOption;
 
     // Obtener y actualizar las notas
-    const value = VariableContext.getValue(variableName);
+    const value = VariableContext.getValue(selectedOption);
     if (typeof value === 'string') {
       // Verificar que el valor sea una melodía válida (solo dígitos y espacios)
       if (/^[\s\d]+$/.test(value)) {
@@ -171,5 +178,20 @@ export class BlockComponent implements OnInit {
     
     // Notificar cambios
     this.blockChange.emit(this.block);
+  }
+
+  parseNotes(notesString: string): NoteData[] {
+    try {
+      // If the string contains commas, convert comma-separated to space-separated
+      if (notesString.includes(',')) {
+        const formattedNotes = notesString.split(',').map(note => note.trim()).join(' ');
+        return parseBlockNotes(formattedNotes);
+      }
+      // Otherwise, try parsing it as is
+      return parseBlockNotes(notesString);
+    } catch (e) {
+      console.error('Error parsing notes:', e);
+      return [];
+    }
   }
 }
