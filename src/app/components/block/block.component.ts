@@ -89,14 +89,14 @@ export class BlockComponent implements OnInit {
         
         // Excluir variables de playmode y scale
         const playModeNames = ['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'];
-        if (playModeNames.some(mode => value === mode)) return false;
+        if (playModeNames.includes(value)) return false;
         
-        // Verificar que no sea escala
+        // Excluir variables de tipo scale
         const scaleNames = ['WHITE', 'BLACK', 'MAJOR', 'MINOR', 'CHROMATIC', 'PENTATONIC', 'BLUES', 'HARMONIC_MINOR'];
-        if (scaleNames.some(scale => value === scale)) return false;
+        if (scaleNames.includes(value)) return false;
         
-        // Aceptar solo melodías (textos que incluyen números y espacios)
-        return /^[\s\d]+$/.test(value);
+        // Si no es playmode ni scale, es una melodía
+        return true;
       })
       .map(([name, value]) => ({
         label: `${name} (${value})`,

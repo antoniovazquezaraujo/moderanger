@@ -13,8 +13,7 @@ interface VariableDeclaration {
 @Component({
     selector: 'app-variable-declaration',
     templateUrl: './variable-declaration.component.html',
-    styleUrls: ['./variable-declaration.component.scss'],
-    providers: [MelodyEditorService]
+    styleUrls: ['./variable-declaration.component.scss']
 })
 export class VariableDeclarationComponent {
     @Output() variableAdded = new EventEmitter<void>();
@@ -31,7 +30,7 @@ export class VariableDeclarationComponent {
     playModeNames: string[] = getPlayModeNames();
     scaleNames: string[] = Scale.getScaleNames();
 
-    constructor(private melodyEditorService: MelodyEditorService) {
+    constructor() {
         this.updateVariablesList();
     }
 
@@ -56,14 +55,6 @@ export class VariableDeclarationComponent {
         }
     }
 
-    removeVariable(index: number): void {
-        const variable = this.variables[index];
-        if (VariableContext && variable) {
-            VariableContext.removeValue(variable.name);
-            this.variableRemoved.emit();
-        }
-    }
-
     updateVariable(index: number): void {
         const variable = this.variables[index];
         if (VariableContext && variable) {
@@ -80,6 +71,14 @@ export class VariableDeclarationComponent {
 
             VariableContext.setValue(variable.name, value);
             this.variableUpdated.emit();
+        }
+    }
+
+    removeVariable(index: number): void {
+        const variable = this.variables[index];
+        if (VariableContext && variable) {
+            VariableContext.removeValue(variable.name);
+            this.variableRemoved.emit();
         }
     }
 

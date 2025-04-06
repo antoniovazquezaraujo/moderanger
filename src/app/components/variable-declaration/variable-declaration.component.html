@@ -10,15 +10,18 @@
         </select>
 
         <ng-container [ngSwitch]="newVariable.type">
-            <select *ngSwitchCase="'playmode'" [(ngModel)]="newVariable.value" name="value" required>
+            <select *ngSwitchCase="'playmode'" 
+                [(ngModel)]="newVariable.value" 
+                name="value" 
+                required>
                 <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
             </select>
 
             <ng-container *ngSwitchCase="'melody'">
-                <app-melody-editor 
+                <app-melody-editor-wrapper 
                     [notes]="toString(newVariable.value)" 
                     (notesChange)="newVariable.value = $event">
-                </app-melody-editor>
+                </app-melody-editor-wrapper>
             </ng-container>
 
             <ng-container *ngSwitchCase="'scale'">
@@ -72,16 +75,14 @@
                     step="1">
 
                 <ng-container *ngSwitchCase="'melody'">
-                    <app-melody-editor 
+                    <app-melody-editor-wrapper 
                         [notes]="toString(variable.value)" 
                         (notesChange)="variable.value = $event; updateVariable(i)">
-                    </app-melody-editor>
+                    </app-melody-editor-wrapper>
                 </ng-container>
             </ng-container>
 
-            <p-button (click)="removeVariable(i)" 
-                icon="pi pi-times">
-            </p-button>
+            <p-button (click)="removeVariable(i)" icon="pi pi-trash" pTooltip="Remove Variable" tooltipPosition="top"></p-button>
         </div>
     </div>
 </div> 
