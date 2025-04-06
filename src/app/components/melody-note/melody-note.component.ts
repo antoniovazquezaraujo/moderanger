@@ -20,13 +20,13 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0 5px;
-            padding: 5px;
+            margin: 0 2px;
+            padding: 2px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 2px;
             cursor: pointer;
             background-color: white;
-            min-width: 40px;
+            min-width: 24px;
             
             &:hover {
                 background-color: #f0f0f0;
@@ -42,6 +42,7 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             font-size: 1.2em;
             font-weight: bold;
             cursor: ns-resize;
+            padding: 0 2px;
             
             .silence {
                 color: #666;
@@ -52,6 +53,7 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             font-size: 0.8em;
             color: #666;
             cursor: ns-resize;
+            padding: 0 2px;
         }
     `]
 })

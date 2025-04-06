@@ -1,18 +1,6 @@
 <div class="melody-editor" tabindex="0" #editorContainer>
   <div class="editor-content">
     <div class="notes-container">
-      <!-- Mostrar una nota vacía si no hay notas -->
-      <ng-container *ngIf="elements.length === 0">
-        <div class="note-item add-first-note" (click)="addNewNote()">
-          <div class="note-visual">
-            <span class="note-value note-add">+</span>
-          </div>
-          <div class="note-duration">
-            <span class="note-placeholder">Add</span>
-          </div>
-        </div>
-      </ng-container>
-
       <!-- Iterar sobre todos los elementos -->
       <ng-container *ngFor="let element of elements">
         <!-- Nota simple -->
@@ -43,9 +31,9 @@
       </ng-container>
       
       <!-- Botón para agregar nueva nota al final -->
-      <div class="note-item add-note" (click)="addNewNote()">
+      <div class="note-item" (click)="addNewNote()" tabindex="0" (keydown.enter)="addNewNote()">
         <div class="note-visual">
-          <span class="note-value note-add">+</span>
+          <span class="note-value">+</span>
         </div>
       </div>
     </div>
