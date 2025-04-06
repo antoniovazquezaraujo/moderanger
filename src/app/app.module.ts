@@ -24,6 +24,7 @@ import { MetronomeComponent } from './components/metronome/metronome.component';
 import { SongPlayer } from './model/song.player';
 import { MelodyEditorModule } from './components/melody-editor/melody-editor.module';
 import { MelodyEditorWrapperComponent } from './components/melody-editor-wrapper/melody-editor-wrapper.component';
+import { MelodyOptionComponent } from './components/melody-option/melody-option.component';
 
 @NgModule({
     declarations: [
@@ -36,7 +37,8 @@ import { MelodyEditorWrapperComponent } from './components/melody-editor-wrapper
         SongComponent,
         VariableDeclarationComponent,
         MetronomeComponent,
-        MelodyEditorWrapperComponent
+        MelodyEditorWrapperComponent,
+        MelodyOptionComponent
     ],
     imports: [
         FormsModule,

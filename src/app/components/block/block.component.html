@@ -29,15 +29,39 @@
         <div class="melody-editor-wrapper">
           <div class="melody-header">
             <ng-container *ngIf="node.blockContent?.isVariable; else notesEditor">
-              <select class="melody-variable-select" 
+              <p-dropdown 
+                [options]="getMelodyVariables()" 
                 [(ngModel)]="node.blockContent.variableName"
-                (ngModelChange)="handleMelodyVariableChange($event, node)">
-                <option [ngValue]="null">Select melody variable</option>
-                <option *ngFor="let variable of getMelodyVariables()" 
-                  [ngValue]="variable.value">
-                  {{variable.label}}
-                </option>
-              </select>
+                (onChange)="handleMelodyVariableChange($event.value.name, node)"
+                [optionLabel]="'name'"
+                [placeholder]="'Select melody variable'"
+                [style]="{'width': '100%'}"
+                [panelStyle]="{'min-width': '300px'}"
+                [appendTo]="'body'"
+                [showClear]="true">
+                <ng-template let-item pTemplate="item">
+                  <div class="melody-option">
+                    <span class="variable-name">{{item.name}}</span>
+                    <div class="notes-container">
+                      <div *ngFor="let note of item.notes" class="note-item">
+                        <span class="note-value">{{note}}</span>
+                        <span class="note-duration">1</span>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+                <ng-template let-item pTemplate="selectedItem">
+                  <div class="melody-option">
+                    <span class="variable-name">{{item?.name || 'Select melody variable'}}</span>
+                    <div class="notes-container" *ngIf="item?.notes">
+                      <div *ngFor="let note of item.notes" class="note-item">
+                        <span class="note-value">{{note}}</span>
+                        <span class="note-duration">1</span>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </p-dropdown>
             </ng-container>
             <ng-template #notesEditor>
               <app-melody-editor 

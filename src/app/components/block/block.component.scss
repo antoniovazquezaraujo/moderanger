@@ -190,4 +190,49 @@ input[type="number"]#repeatingTimes {
       box-shadow: 0 0 0 2px #007bff;
     }
   }
+}
+
+.melody-variable-select {
+  width: 100%;
+  option {
+    padding: 0;
+    height: auto;
+  }
+}
+
+.melody-option {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  
+  .variable-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  
+  .notes-container {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+  }
+  
+  .note-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid #ddd;
+    background-color: white;
+    
+    .note-value {
+      font-size: 12px;
+    }
+    
+    .note-duration {
+      font-size: 8px;
+      color: #666;
+    }
+  }
 } 

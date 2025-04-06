@@ -98,10 +98,17 @@ export class BlockComponent implements OnInit {
         // Si no es playmode ni scale, es una melodía
         return true;
       })
-      .map(([name, value]) => ({
-        label: `${name} (${value})`,
-        value: name
-      }));
+      .map(([name, value]) => {
+        // Asegurarnos de que el valor sea una cadena
+        const stringValue = value.toString();
+        // Separar las notas
+        const notes = stringValue.split(' ').filter(note => note.trim() !== '');
+        return {
+          name: name,
+          value: name,
+          notes: notes
+        };
+      });
   }
 
   toggleMelodyVariable(event: MouseEvent, blockNode?: Block) {
@@ -132,14 +139,21 @@ export class BlockComponent implements OnInit {
     
     if (!variableName) {
       blockNode.blockContent.notes = '';
+      blockNode.blockContent.variableName = '';
       return;
     }
 
+    // Actualizar el nombre de la variable
+    blockNode.blockContent.variableName = variableName;
+
+    // Obtener y actualizar las notas
     const value = VariableContext.getValue(variableName);
     if (typeof value === 'string') {
       // Verificar que el valor sea una melodía válida (solo dígitos y espacios)
       if (/^[\s\d]+$/.test(value)) {
         blockNode.blockContent.notes = value;
+        // Notificar el cambio para que se actualice la reproducción
+        this.blockChange.emit(this.block);
       }
     }
   }
