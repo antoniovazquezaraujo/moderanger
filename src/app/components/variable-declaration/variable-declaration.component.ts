@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { VariableContext } from 'src/app/model/variable.context';
 import { getPlayModeNames } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
+import { MelodyEditorService } from 'src/app/services/melody-editor.service';
 
 interface VariableDeclaration {
     name: string;
@@ -12,7 +13,8 @@ interface VariableDeclaration {
 @Component({
     selector: 'app-variable-declaration',
     templateUrl: './variable-declaration.component.html',
-    styleUrls: ['./variable-declaration.component.scss']
+    styleUrls: ['./variable-declaration.component.scss'],
+    providers: [MelodyEditorService]
 })
 export class VariableDeclarationComponent {
     @Output() variableAdded = new EventEmitter<void>();
@@ -29,7 +31,7 @@ export class VariableDeclarationComponent {
     playModeNames: string[] = getPlayModeNames();
     scaleNames: string[] = Scale.getScaleNames();
 
-    constructor() {
+    constructor(private melodyEditorService: MelodyEditorService) {
         this.updateVariablesList();
     }
 
@@ -40,11 +42,7 @@ export class VariableDeclarationComponent {
             if (this.newVariable.type === 'playmode') {
                 value = this.newVariable.value;
             } else if (this.newVariable.type === 'melody') {
-                value = this.newVariable.value || '';
-                if (value && !(/^[\s\d]+$/.test(value))) {
-                    console.error('Invalid melody format. Must contain only numbers and spaces.');
-                    return;
-                }
+                value = String(this.newVariable.value || '');
             } else if (this.newVariable.type === 'scale') {
                 value = this.newVariable.value;
             } else {
@@ -62,7 +60,6 @@ export class VariableDeclarationComponent {
         const variable = this.variables[index];
         if (VariableContext && variable) {
             VariableContext.removeValue(variable.name);
-            this.updateVariablesList();
             this.variableRemoved.emit();
         }
     }
@@ -74,11 +71,7 @@ export class VariableDeclarationComponent {
             if (variable.type === 'playmode') {
                 value = variable.value;
             } else if (variable.type === 'melody') {
-                value = variable.value || '';
-                if (value && !(/^[\s\d]+$/.test(value))) {
-                    console.error('Invalid melody format. Must contain only numbers and spaces.');
-                    return;
-                }
+                value = String(variable.value || '');
             } else if (variable.type === 'scale') {
                 value = variable.value;
             } else {
@@ -106,5 +99,9 @@ export class VariableDeclarationComponent {
                 return { name, value, type: 'number' as const };
             });
         }
+    }
+
+    toString(value: any): string {
+        return String(value || '');
     }
 } 

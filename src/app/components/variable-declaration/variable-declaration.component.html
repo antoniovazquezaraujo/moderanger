@@ -14,9 +14,18 @@
                 <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
             </select>
 
-            <select *ngSwitchCase="'scale'" [(ngModel)]="newVariable.value" name="value" required>
-                <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
-            </select>
+            <ng-container *ngSwitchCase="'melody'">
+                <app-melody-editor 
+                    [notes]="toString(newVariable.value)" 
+                    (notesChange)="newVariable.value = $event">
+                </app-melody-editor>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="'scale'">
+                <select [(ngModel)]="newVariable.value" name="value" required>
+                    <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
+                </select>
+            </ng-container>
 
             <input *ngSwitchCase="'number'" 
                 type="number" 
@@ -27,22 +36,6 @@
                 [min]="-999"
                 [max]="999"
                 step="1">
-
-            <ng-container *ngSwitchCase="'melody'">
-                <input 
-                    type="text" 
-                    [(ngModel)]="newVariable.value" 
-                    name="value"
-                    placeholder="Enter notes (e.g. 1 2 3)"
-                    pattern="^[\s\d]+$"
-                    [ngModelOptions]="{updateOn: 'blur'}"
-                    required>
-                <div *ngIf="varForm.form.get('value')?.invalid && 
-                        varForm.form.get('value')?.touched" 
-                        class="validation-error">
-                    Melody must contain only digits and spaces
-                </div>
-            </ng-container>
         </ng-container>
 
         <p-button type="submit" 
@@ -78,12 +71,12 @@
                     [max]="999"
                     step="1">
 
-                <input *ngSwitchCase="'melody'" 
-                    type="text" 
-                    [(ngModel)]="variable.value" 
-                    (blur)="updateVariable(i)"
-                    pattern="^[\s\d]+$"
-                    placeholder="Enter notes (e.g. 1 2 3)">
+                <ng-container *ngSwitchCase="'melody'">
+                    <app-melody-editor 
+                        [notes]="toString(variable.value)" 
+                        (notesChange)="variable.value = $event; updateVariable(i)">
+                    </app-melody-editor>
+                </ng-container>
             </ng-container>
 
             <p-button (click)="removeVariable(i)" 
