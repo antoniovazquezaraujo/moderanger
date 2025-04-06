@@ -188,34 +188,42 @@ input[type="number"]#repeatingTimes {
 }
 
 /* Estilos para el editor de melodía */
-.melody-editor-wrapper {
-  border-radius: 4px;
-  margin-bottom: 6px;
-  background-color: transparent;
-  padding: 4px;
-  border: 1px solid #eaeaea;
-}
-
-.melody-header {
+.melody-editor-container {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 4px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  min-height: 60px;
+  padding: 4px;
   
-  .melody-variable-select {
-    flex: 1;
-    height: 28px;
-    padding: 0 6px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    background-color: white;
-    font-size: 12px;
-    margin-right: 6px;
+  :host ::ng-deep & {
+    .p-dropdown {
+      width: 100%;
+      border: none;
+      background-color: transparent;
+      
+      .p-dropdown-label {
+        padding: 8px;
+      }
+    }
   }
   
-  .melody-controls {
-    display: flex;
-    align-items: center;
-    margin-left: 6px;
+  .variable-icon {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    font-size: 0.8em;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+    z-index: 1;
+    display: inline !important;
+
+    &:hover {
+      color: #000;
+    }
   }
 }
 
@@ -318,6 +326,66 @@ input[type="number"]#repeatingTimes {
       font-size: 10px;
       color: #6c757d;
       line-height: 1;
+    }
+  }
+}
+
+.variable-icon {
+  display: none;
+  font-size: 0.8em;
+  vertical-align: super;
+  margin-left: 2px;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #000;
+  }
+}
+
+.note-value:hover .variable-icon,
+.note-duration:hover .variable-icon,
+.operation-type:hover .variable-icon,
+.operation-value:hover .variable-icon,
+.block-name:hover .variable-icon {
+  display: inline;
+}
+
+button.variable-button {
+  display: none;
+}
+
+.note-value,
+.note-duration,
+.operation-type,
+.operation-value,
+.block-name {
+  position: relative;
+  display: inline-block;
+  padding-right: 15px;
+}
+
+.hidden-button {
+  display: none !important;
+}
+
+.melody-variable-container {
+  position: relative;
+  width: 100%;
+  
+  .variable-icon {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    font-size: 0.8em;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+    z-index: 1;
+
+    &:hover {
+      color: #000;
     }
   }
 } 

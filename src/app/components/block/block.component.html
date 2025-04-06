@@ -28,57 +28,64 @@
         <!-- Editor de melodías siempre visible -->
         <div class="melody-editor-wrapper">
           <div class="melody-header">
-            <div [class.hidden]="!node.blockContent?.isVariable">
-              <p-dropdown 
-                [options]="getMelodyVariables()" 
-                [(ngModel)]="node.blockContent.variableName"
-                (onChange)="handleMelodyVariableChange($event, node)"
-                [optionLabel]="'name'"
-                [placeholder]="'Select melody variable'"
-                [style]="{'width': '100%'}"
-                [panelStyle]="{'min-width': '400px'}"
-                [appendTo]="'body'"
-                [showClear]="true"
-                [dataKey]="'name'"
-                [filter]="false"
-                [autoDisplayFirst]="false"
-                [editable]="false">
-                <ng-template let-item pTemplate="item">
-                  <div class="melody-option">
-                    <div class="melody-content">
-                      <span class="variable-name">{{item.name}}</span>
-                      <div class="notes-container">
-                        <div *ngFor="let note of parseNotes(item.notes)" class="note-item">
-                          <span class="note-value">{{note.note ?? 'x'}}</span>
-                          <span class="note-duration">{{note.duration}}</span>
+            <div class="melody-editor-container">
+              <div [class.hidden]="node.blockContent?.isVariable">
+                <app-melody-editor 
+                  class="block-melody-editor"
+                  [notes]="node.blockContent?.notes || ''" 
+                  (notesChange)="updateBlockNotes($event, node)">
+                </app-melody-editor>
+              </div>
+              <div [class.hidden]="!node.blockContent?.isVariable">
+                <p-dropdown 
+                  [options]="getMelodyVariables()" 
+                  [(ngModel)]="node.blockContent.variableName"
+                  (onChange)="handleMelodyVariableChange($event, node)"
+                  [optionLabel]="'name'"
+                  [placeholder]="'Select melody variable'"
+                  [style]="{'width': '100%'}"
+                  [panelStyle]="{'min-width': '400px'}"
+                  [appendTo]="'body'"
+                  [showClear]="true"
+                  [dataKey]="'name'"
+                  [filter]="false"
+                  [autoDisplayFirst]="false"
+                  [editable]="false">
+                  <ng-template let-item pTemplate="item">
+                    <div class="melody-option">
+                      <div class="melody-content">
+                        <span class="variable-name">{{item.name}}</span>
+                        <div class="notes-container">
+                          <div *ngFor="let note of parseNotes(item.notes); let i = index" class="note-item">
+                            <span class="note-value">
+                              {{ note.note !== undefined ? note.note : 's' }}
+                            </span>
+                            <span class="note-duration">
+                              {{ note.duration }}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </ng-template>
-                <ng-template let-item pTemplate="selectedItem">
-                  <div class="melody-option">
-                    <div class="melody-content">
-                      <span class="variable-name">{{item?.name || 'Select melody variable'}}</span>
+                  </ng-template>
+                  <ng-template let-item pTemplate="selectedItem">
+                    <div class="melody-option">
+                      <div class="melody-content">
+                        <span class="variable-name">{{item?.name || 'Select melody variable'}}</span>
+                      </div>
                     </div>
-                  </div>
-                </ng-template>
-              </p-dropdown>
-            </div>
-            <div [class.hidden]="node.blockContent?.isVariable">
-              <app-melody-editor 
-                class="block-melody-editor"
-                [notes]="node.blockContent?.notes || ''" 
-                (notesChange)="updateBlockNotes($event, node)">
-              </app-melody-editor>
-            </div>
-            <div class="melody-controls">
-              <p-button (click)="toggleMelodyVariable($event, node)" icon="pi pi-dollar" pTooltip="Toggle Variable Mode" tooltipPosition="top"></p-button>
+                  </ng-template>
+                </p-dropdown>
+              </div>
+              <sup class="variable-icon" (click)="toggleMelodyVariable($event, node)">$</sup>
             </div>
           </div>
         </div>
         
-        <app-block-commands [block]="node" (removeCommand)="onRemoveCommand($event)"></app-block-commands>
+        <app-block-commands 
+          [block]="node" 
+          (removeCommand)="handleRemoveCommand($event)">
+        </app-block-commands>
       </div>
     </div>
   </ng-template>

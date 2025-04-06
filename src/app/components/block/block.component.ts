@@ -15,9 +15,19 @@ import { NoteData } from '../../model/note';
   styleUrls: ['./block.component.scss']
 })
 export class BlockComponent implements OnInit {
-  @Input() block: Block = new Block(); 
-    
-  @Output() blockChange: EventEmitter<Block> = new EventEmitter();
+  private _block!: Block;
+  
+  @Input() 
+  set block(value: Block) {
+    this._block = value;
+    this.initializeBlockContent();
+  }
+  get block(): Block {
+    return this._block;
+  }
+
+  @Output() blockChange = new EventEmitter<Block>();
+  @Output() delete = new EventEmitter<void>();
   @Output() onDuplicateBlock: EventEmitter<any> = new EventEmitter();
   @Output() onRemoveBlock: EventEmitter<any> = new EventEmitter();
   @Output() onAddChild: EventEmitter<any> = new EventEmitter();
@@ -26,16 +36,25 @@ export class BlockComponent implements OnInit {
   @Input() onDragEnd: EventEmitter<any> = new EventEmitter();
   draggedBlock?: Block;
   
-  constructor() {
-    if (!this.block.blockContent) {
-      this.block.blockContent = new BlockContent();
-      this.block.blockContent.notes = "";
-      this.block.blockContent.isVariable = false;
-      this.block.blockContent.variableName = "";
-    }
-  }
- 
+  isEditingName = false;
+  isEditingNote = false;
+  isEditingDuration = false;
+  isEditingOperationType = false;
+  isEditingOperationValue = false;
+
+  constructor() {}
+
   ngOnInit(): void {
+    this.initializeBlockContent();
+  }
+
+  private initializeBlockContent(): void {
+    if (this._block && !this._block.blockContent) {
+      this._block.blockContent = new BlockContent();
+      this._block.blockContent.notes = "";
+      this._block.blockContent.isVariable = false;
+      this._block.blockContent.variableName = "";
+    }
   }
 
   duplicateBlock(block: Block) {
@@ -43,7 +62,7 @@ export class BlockComponent implements OnInit {
   }
 
   removeChild(block: any) {
-    this.removeChildFrom(this.block, block);
+    this.removeChildFrom(this._block, block);
   }
 
   removeChildFrom(parent: Block, childToRemove: Block) {
@@ -55,21 +74,21 @@ export class BlockComponent implements OnInit {
     }  
   }
 
-  onRemoveCommand(command: any) {
-    this.block.commands = this.block.commands.filter(t => t !== command);
+  onRemoveCommand(command: Command) {
+    this._block.commands = this._block.commands.filter((cmd: Command) => cmd !== command);
   }
 
   onAddCommand(block: Block) {
     block.commands.push(new Command());
-  } 
+  }
 
   addChild(block: Block) {
     this.onAddChild.emit(block);
-    this.blockChange.emit(this.block);
+    this.blockChange.emit(this._block);
   }
 
   hasChildren() {
-    return !!this.block!.children && this.block!.children.length > 0;
+    return !!this._block!.children && this._block!.children.length > 0;
   }
   
   dragStart(block: Block) {
@@ -121,7 +140,7 @@ export class BlockComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     
-    const targetBlock = blockNode || this.block;
+    const targetBlock = blockNode || this._block;
     
     if (targetBlock.blockContent) {
       targetBlock.blockContent.isVariable = !targetBlock.blockContent.isVariable;
@@ -160,7 +179,7 @@ export class BlockComponent implements OnInit {
       if (/^[\s\d]+$/.test(value)) {
         blockNode.blockContent.notes = value;
         // Notificar el cambio para que se actualice la reproducción
-        this.blockChange.emit(this.block);
+        this.blockChange.emit(this._block);
       }
     }
   }
@@ -177,7 +196,7 @@ export class BlockComponent implements OnInit {
     blockNode.blockContent.notes = notes;
     
     // Notificar cambios
-    this.blockChange.emit(this.block);
+    this.blockChange.emit(this._block);
   }
 
   parseNotes(notesString: string): NoteData[] {
@@ -192,6 +211,27 @@ export class BlockComponent implements OnInit {
     } catch (e) {
       console.error('Error parsing notes:', e);
       return [];
+    }
+  }
+
+  editNote(index: number) {
+    this.isEditingNote = true;
+    // Implementar lógica de edición
+  }
+
+  editDuration(index: number) {
+    this.isEditingDuration = true;
+    // Implementar lógica de edición
+  }
+
+  toggleVariable(type: string, event: MouseEvent) {
+    event.stopPropagation();
+    // Implementar lógica de toggle variable
+  }
+
+  handleRemoveCommand(event: any) {
+    if (event instanceof Command) {
+      this.onRemoveCommand(event);
     }
   }
 }
