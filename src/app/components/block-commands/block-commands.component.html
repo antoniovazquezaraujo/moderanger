@@ -3,6 +3,9 @@
     <div class="block-row commands-row">
         <div class="container-wrapper commands-container">
             <div *ngFor="let command of block.commands" class="command">
+                <sup class="variable-icon" (click)="toggleVariableMode(command, $event)">$</sup>
+                <sup class="remove-icon" (click)="removeCommand(command)">×</sup>
+                
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
                     <optgroup label="">
                         <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
@@ -105,15 +108,6 @@
                         </ng-template>
                     </ng-container>
                 </ng-container>
-
-                <div class="command-controls">
-                    <p-button
-                        (click)="toggleVariableMode(command, $event)" 
-                        icon="pi pi-dollar">
-                    </p-button>
-
-                    <p-button (click)="removeCommand(command)" icon="pi pi-times"></p-button>
-                </div>
             </div>
             <div class="add-wrapper">
                 <p-button class="add-button" (click)="addElement('command')" icon="pi pi-cog" pTooltip="Add Command" tooltipPosition="top"></p-button>

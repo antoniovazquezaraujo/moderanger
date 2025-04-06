@@ -30,9 +30,9 @@
 .melody-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 8px;
   align-items: center;
-  padding: 0 !important;
+  padding: 8px !important;
   margin: 0 !important;
   min-height: 0 !important;
   vertical-align: middle;
@@ -291,4 +291,82 @@
     flex-basis: 100%;
     margin-top: 4px;
   }
+}
+
+.command {
+  display: inline-flex;
+  align-items: center;
+  background-color: white;
+  padding: 8px !important;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  margin: 4px !important;
+  height: auto !important;
+  min-height: 32px !important;
+  box-sizing: border-box !important;
+  position: relative;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    border-color: #999;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+
+    .variable-icon,
+    .remove-icon {
+      display: inline;
+    }
+  }
+
+  .variable-icon,
+  .remove-icon {
+    position: absolute;
+    top: -8px;
+    font-size: 0.8em;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+    display: none;
+    background-color: white;
+    padding: 0 2px;
+    border-radius: 2px;
+    border: 1px solid #ddd;
+    z-index: 1;
+
+    &:hover {
+      color: #000;
+      border-color: #999;
+    }
+  }
+
+  .variable-icon {
+    right: 20px;
+  }
+
+  .remove-icon {
+    right: 4px;
+  }
+}
+
+/* Ajustes para los componentes internos del comando */
+.command-type,
+.command-value,
+.number-input {
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  background-color: white;
+  font-size: 12px;
+  height: 24px;
+  padding: 0 4px;
+  margin: 0;
+}
+
+.command-type {
+  min-width: 100px;
+}
+
+.command-value,
+.number-input {
+  width: 40px;
+  text-align: center;
 }
