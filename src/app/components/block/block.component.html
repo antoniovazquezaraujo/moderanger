@@ -32,10 +32,9 @@
               <select class="melody-variable-select" 
                 [(ngModel)]="node.blockContent.variableName"
                 (ngModelChange)="handleMelodyVariableChange($event, node)">
-                <option value="">Select melody variable</option>
+                <option [ngValue]="null">Select melody variable</option>
                 <option *ngFor="let variable of getMelodyVariables()" 
-                  [value]="variable.value"
-                  [selected]="node.blockContent.variableName === variable.value">
+                  [ngValue]="variable.value">
                   {{variable.label}}
                 </option>
               </select>
