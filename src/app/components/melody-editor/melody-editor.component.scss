@@ -27,6 +27,7 @@ $z-index-selected: 100;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   min-height: 60px;
   outline: none;
+  background-color: $white;
   
   &:focus {
     border-color: $primary-color;

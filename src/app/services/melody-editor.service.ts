@@ -8,7 +8,7 @@ import { NoteData } from '../model/note';
 })
 export class MelodyEditorService {
     private elementsSubject = new BehaviorSubject<MusicElement[]>([]);
-    elements$: Observable<MusicElement[]> = this.elementsSubject.asObservable();
+    elements$ = this.elementsSubject.asObservable();
     
     constructor() {}
     
@@ -53,15 +53,16 @@ export class MelodyEditorService {
     }
     
     updateNote(id: string, changes: Partial<SingleNote>): void {
-        const currentElements = this.elementsSubject.value;
-        const newElements = currentElements.map(e => {
-            if (e.id === id) {
-                if (e.type === 'note' || e.type === 'rest') {
-                    return { ...e, ...changes } as SingleNote;
-                }
-            }
-            return e;
-        });
+        const elements = this.elementsSubject.value;
+        const index = elements.findIndex(e => e.id === id);
+        if (index === -1) return;
+
+        const e = elements[index];
+        if (e.type !== 'note') return;
+
+        const updatedNote = { ...e, ...changes } as SingleNote;
+        const newElements = [...elements];
+        newElements[index] = updatedNote;
         this.elementsSubject.next(newElements);
     }
     

@@ -168,10 +168,8 @@ input[type="number"]#repeatingTimes {
 .block-melody-editor {
   flex: 1;
   display: block;
-  border: 1px solid #eee;
-  border-radius: 3px;
-  overflow: auto;
-  background-color: #f9f9f9;
+  border: none;
+  background-color: white;
   min-height: 60px;
   
   :host ::ng-deep & {

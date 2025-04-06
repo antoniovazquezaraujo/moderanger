@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { NoteData } from '../../model/note';
 import { parseBlockNotes } from '../../model/ohm.parser';
 import { VariableContext } from '../../model/variable.context';
@@ -29,7 +29,7 @@ interface EditorNote {
   templateUrl: './melody-editor.component.html',
   styleUrls: ['./melody-editor.component.scss']
 })
-export class MelodyEditorComponent implements OnInit, AfterViewInit {
+export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() notes: string = '';
   @Output() notesChange = new EventEmitter<string>();
   @ViewChild('editorContainer') editorContainer!: ElementRef;
@@ -42,7 +42,8 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit {
   
   constructor(
     private melodyEditorService: MelodyEditorService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
@@ -55,57 +56,76 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.melodyEditorService.elements$.subscribe(elements => {
       this.elements = elements;
-      // Mantener el foco en el elemento actual después de actualizar
+      
+      // Si no hay elemento enfocado y hay elementos, enfocar el último
+      if (!this.focusedElement && elements.length > 0) {
+        this.focusedElement = elements[elements.length - 1];
+        this.melodyEditorService.selectNote(this.focusedElement.id);
+      }
+      
+      // Si hay elemento enfocado, asegurarse de que sigue existiendo
       if (this.focusedElement) {
         const updatedElement = elements.find(e => e.id === this.focusedElement?.id);
-        if (updatedElement) {
-          this.focusedElement = updatedElement;
+        if (!updatedElement) {
+          // Si el elemento enfocado ya no existe, enfocar el último
+          this.focusedElement = elements[elements.length - 1];
+          this.melodyEditorService.selectNote(this.focusedElement.id);
         }
       }
+      
       this.cdr.detectChanges();
     });
   }
 
   @HostListener('keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
-    if (!this.focusedElement) return;
+    // Solo procesar el evento si no es una repetición de tecla
+    if (event.repeat) return;
+
+    // Solo prevenir el comportamiento por defecto para las teclas que manejamos
+    if (['Insert', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Delete', ' '].includes(event.key)) {
+      event.preventDefault();
+    }
 
     switch (event.key) {
-      case 'ArrowLeft':
-        this.moveFocus(-1);
-        event.preventDefault();
-        break;
-      case 'ArrowRight':
-        this.moveFocus(1);
-        event.preventDefault();
-        break;
-      case 'ArrowUp':
-        if (event.shiftKey) {
-          this.increaseDuration();
-        } else {
-          this.increaseNote();
-        }
-        event.preventDefault();
-        break;
-      case 'ArrowDown':
-        if (event.shiftKey) {
-          this.decreaseDuration();
-        } else {
-          this.decreaseNote();
-        }
-        event.preventDefault();
-        break;
       case 'Insert':
         this.insertNote();
-        event.preventDefault();
         break;
+      case 'ArrowLeft':
+      case 'ArrowRight':
+      case 'ArrowUp':
+      case 'ArrowDown':
       case 'Delete':
-        this.deleteNote();
-        event.preventDefault();
-        break;
       case ' ':
-        this.toggleSilence();
-        event.preventDefault();
+        if (!this.focusedElement) return;
+        switch (event.key) {
+          case 'ArrowLeft':
+            this.moveFocus(-1);
+            break;
+          case 'ArrowRight':
+            this.moveFocus(1);
+            break;
+          case 'ArrowUp':
+            if (event.shiftKey) {
+              this.increaseDuration();
+            } else {
+              this.increaseNote();
+            }
+            break;
+          case 'ArrowDown':
+            if (event.shiftKey) {
+              this.decreaseDuration();
+            } else {
+              this.decreaseNote();
+            }
+            break;
+          case 'Delete':
+            this.deleteNote();
+            break;
+          case ' ':
+            this.toggleSilence();
+            break;
+        }
         break;
     }
   }
@@ -123,14 +143,15 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit {
       const newIndex = currentIndex + delta;
       
       if (newIndex >= 0 && newIndex < this.durations.length) {
-        this.melodyEditorService.updateNote(note.id, { duration: this.durations[newIndex] });
+        const newDuration = this.durations[newIndex];
+        this.melodyEditorService.updateNote(note.id, { duration: newDuration });
+        this.focusedElement = { ...note, duration: newDuration };
         this.emitNotesChange();
       }
     } else {
       // Cambiar valor de la nota con rueda
       const delta = event.deltaY > 0 ? -1 : 1;
-      this.melodyEditorService.updateNote(note.id, { value: (note.value ?? 0) + delta });
-      this.emitNotesChange();
+      this.updateNoteValue(note, (note.value ?? 0) + delta);
     }
   }
 
@@ -146,18 +167,22 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private updateNoteValue(note: SingleNote, newValue: number | null): void {
+    this.melodyEditorService.updateNote(note.id, { value: newValue });
+    this.focusedElement = { ...note, value: newValue };
+    this.emitNotesChange();
+  }
+
   private increaseNote(): void {
     if (!this.focusedElement || this.focusedElement.type !== 'note') return;
     const note = this.focusedElement as SingleNote;
-    this.melodyEditorService.updateNote(note.id, { value: (note.value ?? 0) + 1 });
-    this.emitNotesChange();
+    this.updateNoteValue(note, (note.value ?? 0) + 1);
   }
 
   private decreaseNote(): void {
     if (!this.focusedElement || this.focusedElement.type !== 'note') return;
     const note = this.focusedElement as SingleNote;
-    this.melodyEditorService.updateNote(note.id, { value: (note.value ?? 0) - 1 });
-    this.emitNotesChange();
+    this.updateNoteValue(note, (note.value ?? 0) - 1);
   }
 
   private increaseDuration(): void {
@@ -165,7 +190,9 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit {
     const currentDuration = this.focusedElement.duration;
     const currentIndex = this.durations.indexOf(currentDuration);
     if (currentIndex > 0) {
-      this.melodyEditorService.updateNote(this.focusedElement.id, { duration: this.durations[currentIndex - 1] });
+      const newDuration = this.durations[currentIndex - 1];
+      this.melodyEditorService.updateNote(this.focusedElement.id, { duration: newDuration });
+      this.focusedElement = { ...this.focusedElement, duration: newDuration };
       this.emitNotesChange();
     }
   }
@@ -175,14 +202,19 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit {
     const currentDuration = this.focusedElement.duration;
     const currentIndex = this.durations.indexOf(currentDuration);
     if (currentIndex < this.durations.length - 1) {
-      this.melodyEditorService.updateNote(this.focusedElement.id, { duration: this.durations[currentIndex + 1] });
+      const newDuration = this.durations[currentIndex + 1];
+      this.melodyEditorService.updateNote(this.focusedElement.id, { duration: newDuration });
+      this.focusedElement = { ...this.focusedElement, duration: newDuration };
       this.emitNotesChange();
     }
   }
 
-  private insertNote(): void {
-    if (!this.focusedElement) return;
-    this.melodyEditorService.addNoteAfter(this.focusedElement.id);
+  insertNote(): void {
+    if (this.elements.length === 0) {
+      this.melodyEditorService.addNote();
+    } else if (this.focusedElement) {
+      this.melodyEditorService.addNoteAfter(this.focusedElement.id);
+    }
     this.emitNotesChange();
   }
 
@@ -216,8 +248,9 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit {
   toggleSilence(id?: string): void {
     const elementId = id || this.focusedElement?.id;
     if (!elementId) return;
-    this.melodyEditorService.updateNote(elementId, { value: null });
-    this.emitNotesChange();
+    const element = this.elements.find(e => e.id === elementId);
+    if (!element || element.type !== 'note') return;
+    this.updateNoteValue(element as SingleNote, null);
   }
 
   onNoteClick(element: MusicElement): void {
@@ -259,14 +292,23 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit {
   changeNoteValue(id: string, delta: number): void {
     const element = this.elements.find(e => e.id === id);
     if (!element || element.type !== 'note') return;
-    
-    const note = element as SingleNote;
-    this.melodyEditorService.updateNote(note.id, { value: (note.value ?? 0) + delta });
-    this.emitNotesChange();
+    this.updateNoteValue(element as SingleNote, (element.value ?? 0) + delta);
   }
 
   private emitNotesChange(): void {
     const noteData = this.melodyEditorService.toNoteData();
     this.notesChange.emit(NoteData.toStringArray(noteData));
+  }
+
+  ngOnDestroy() {
+    // Limpiar cualquier suscripción si es necesario
+  }
+
+  onEditorClick(event: MouseEvent) {
+    // Asegurarse de que el editor gane el foco
+    const editorElement = this.elementRef.nativeElement.querySelector('.melody-editor');
+    if (editorElement) {
+      editorElement.focus();
+    }
   }
 }
