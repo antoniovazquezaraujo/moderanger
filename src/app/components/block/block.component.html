@@ -43,15 +43,15 @@
                   <div class="dropdown-variable-icon" (click)="toggleMelodyVariable($event, node)">$</div>
                   <p-dropdown 
                     [options]="melodyVariables"
-                    [(ngModel)]="node.blockContent.variableName"
-                    (onChange)="handleMelodyVariableChange($event, node)"
+                    [ngModel]="getSelectedVariableObject(node)"
+                    (ngModelChange)="setSelectedVariableObject($event, node)"
                     [optionLabel]="'name'"
-                    [optionValue]="'value'"
                     [placeholder]="'Select melody variable'"
+                    [style]="{'width': '100% !important', 'max-width': 'none !important'}"
                     [panelStyle]="{'min-width': '300px'}"
                     [appendTo]="'body'"
                     [showClear]="true"
-                    [dataKey]="'value'"
+                    [dataKey]="'name'"
                     [filter]="false"
                     [autoDisplayFirst]="false"
                     [editable]="false">

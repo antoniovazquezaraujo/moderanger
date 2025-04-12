@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
 import { Event } from '@angular/router';
 import { Block } from 'src/app/model/block';
 import { BlockContent } from 'src/app/model/block.content';
@@ -8,15 +8,17 @@ import { BlockCommandsComponent } from '../block-commands/block-commands.compone
 import { MelodyEditorService } from '../../services/melody-editor.service';
 import { parseBlockNotes } from '../../model/ohm.parser';
 import { NoteData } from '../../model/note';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-block',
   templateUrl: './block.component.html',
   styleUrls: ['./block.component.scss']
 })
-export class BlockComponent implements OnInit {
+export class BlockComponent implements OnInit, OnDestroy {
   private _block!: Block;
   melodyVariables: any[] = []; // Property to store options
+  private variableListSubscription: Subscription | null = null;
   
   @Input() 
   set block(value: Block) {
@@ -49,7 +51,23 @@ export class BlockComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeBlockContent();
-    this.loadMelodyVariables(); // Load variables on init
+    this.loadMelodyVariables(); // Initial load
+    this.variableListSubscription = VariableContext.onVariablesChange.subscribe(() => {
+      console.log('[BlockComponent] VariableContext changed, reloading melody variables for dropdown.');
+      this.loadMelodyVariables();
+      if (this._block?.blockContent?.isVariable && this._block.blockContent.variableName) {
+          const currentVarExists = this.melodyVariables.some(v => v.value === this._block.blockContent.variableName);
+          if (!currentVarExists) {
+              console.log(` - Currently selected variable '${this._block.blockContent.variableName}' no longer exists. Clearing selection.`);
+              this._block.blockContent.variableName = '';
+              this._block.blockContent.notes = '';
+          }
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.variableListSubscription?.unsubscribe();
   }
 
   private initializeBlockContent(): void {
@@ -108,28 +126,21 @@ export class BlockComponent implements OnInit {
     this.draggedBlock = undefined;
   }
 
-  // Renamed function to load and store variables
   loadMelodyVariables() {
     this.melodyVariables = Array.from(VariableContext.context.entries())
       .filter(([_, value]) => {
-        // Solo aceptar variables de tipo string
         if (typeof value !== 'string') return false;
         
-        // Excluir variables de playmode y scale
         const playModeNames = ['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'];
         if (playModeNames.includes(value)) return false;
         
-        // Excluir variables de tipo scale
         const scaleNames = ['WHITE', 'BLACK', 'MAJOR', 'MINOR', 'CHROMATIC', 'PENTATONIC', 'BLUES', 'HARMONIC_MINOR'];
         if (scaleNames.includes(value)) return false;
         
-        // Si no es playmode ni scale, es una melodía
         return true;
       })
       .map(([name, value]) => {
-        // Asegurarnos de que el valor sea una cadena
         const stringValue = value.toString();
-        // Separar las notas por comas o espacios
         const notes = stringValue.includes(',') 
           ? stringValue.split(',').map(note => note.trim())
           : stringValue.split(' ').filter(note => note.trim() !== '');
@@ -152,29 +163,22 @@ export class BlockComponent implements OnInit {
     
     if (targetBlock.blockContent) {
       targetBlock.blockContent.isVariable = !targetBlock.blockContent.isVariable;
-      this.loadMelodyVariables(); // Reload variables when toggling mode
+      this.loadMelodyVariables();
       
       if (targetBlock.blockContent.isVariable) {
-        // Use the loaded variables
         if (this.melodyVariables.length > 0) {
           targetBlock.blockContent.variableName = this.melodyVariables[0].value;
           const value = VariableContext.getValue(this.melodyVariables[0].value);
           if (typeof value === 'string') {
-            // Update notes immediately when switching to variable mode
             targetBlock.blockContent.notes = value; 
-            this.blockChange.emit(this._block); // Notify change
+            this.blockChange.emit(this._block);
           }
         } else {
-             // No variables available, switch back? Or stay in variable mode with empty selection?
-             // Let's keep it in variable mode but clear name/notes
              targetBlock.blockContent.variableName = '';
              targetBlock.blockContent.notes = '';
              this.blockChange.emit(this._block);
         }
       } else {
-           // Optional: When switching back to non-variable, maybe clear variableName?
-           // targetBlock.blockContent.variableName = '';
-           // Notes are already managed by the melody editor itself
       }
     }
   }
@@ -196,13 +200,11 @@ export class BlockComponent implements OnInit {
 
     console.log(' - blockNode.blockContent.variableName (ngModel value AFTER handler logic - should be same as before): ', blockNode.blockContent.variableName);
 
-    // Fix the regex validation
     const value = VariableContext.getValue(selectedOptionValue);
     console.log(` - VariableContext.getValue('${selectedOptionValue}') returned: `, value);
     if (typeof value === 'string') {
-       // Allow letters, numbers, spaces, brackets, parens, colons, dots, hyphens, underscores, slashes, asterisks
-      const validNotesRegex = /^[\w\s\d\.\-_\*\/\[\]\(\):,]*$/; 
-      if (validNotesRegex.test(value) || value === '') { // Use updated regex
+       const validNotesRegex = /^[\w\s\d\.\-_\*\/\[\]\(\):,]*$/; 
+      if (validNotesRegex.test(value) || value === '') {
         console.log(` - Updating block notes to: "${value}"`);
         blockNode.blockContent.notes = value;
         this.blockChange.emit(this._block);
@@ -214,7 +216,6 @@ export class BlockComponent implements OnInit {
     }
   }
 
-  // Método para actualizar las notas del bloque
   updateBlockNotes(notes: string, blockNode: Block): void {
     if (!blockNode.blockContent) {
       blockNode.blockContent = new BlockContent();
@@ -222,21 +223,17 @@ export class BlockComponent implements OnInit {
       blockNode.blockContent.variableName = '';
     }
     
-    // Guardar las notas ya en formato compatible con el reproductor
     blockNode.blockContent.notes = notes;
     
-    // Notificar cambios
     this.blockChange.emit(this._block);
   }
 
   parseNotes(notesString: string): NoteData[] {
     try {
-      // If the string contains commas, convert comma-separated to space-separated
       if (notesString.includes(',')) {
         const formattedNotes = notesString.split(',').map(note => note.trim()).join(' ');
         return parseBlockNotes(formattedNotes);
       }
-      // Otherwise, try parsing it as is
       return parseBlockNotes(notesString);
     } catch (e) {
       console.error('Error parsing notes:', e);
@@ -263,5 +260,59 @@ export class BlockComponent implements OnInit {
     if (event instanceof Command) {
       this.onRemoveCommand(event);
     }
+  }
+
+  getSelectedVariableObject(blockNode: Block): any | null {
+    if (!blockNode?.blockContent?.variableName || this.melodyVariables.length === 0) {
+      return null;
+    }
+    // Find the object in the current list that matches the stored name
+    const foundVar = this.melodyVariables.find(v => v.value === blockNode.blockContent.variableName);
+    // console.log(`[Block ${blockNode.id}] getSelectedVariableObject for name \'${blockNode.blockContent.variableName}\': Found?`, foundVar);
+    return foundVar || null;
+  }
+
+  setSelectedVariableObject(selectedObject: any, blockNode: Block): void {
+    console.log(`[Block ${blockNode.id}] setSelectedVariableObject received:`, selectedObject);
+    if (!blockNode.blockContent) return;
+
+    if (selectedObject) {
+      const newVariableName = selectedObject.value; // Or selectedObject.name
+      console.log(` - New variable name: \'${newVariableName}\'`);
+      // Update the variableName that the rest of the app uses
+      blockNode.blockContent.variableName = newVariableName;
+
+      // --- Update notes immediately (Logic from handleMelodyVariableChange) ---
+      const value = VariableContext.getValue(newVariableName);
+      console.log(` - VariableContext.getValue(\'${newVariableName}\') returned: `, value);
+      if (typeof value === 'string') {
+        const validNotesRegex = /^[\w\s\d\.\-_\*/\[\]\(\):,]*$/;
+        if (validNotesRegex.test(value) || value === '') {
+          console.log(` - Updating block notes to: "${value}"`);
+          blockNode.blockContent.notes = value;
+          this.blockChange.emit(this._block); // Notify SongPlayer
+        } else {
+          console.warn(` - Value for variable \'${newVariableName}\' doesn\'t look like valid notes: "${value}"`);
+          // Optionally clear notes if invalid?
+          // blockNode.blockContent.notes = ''; 
+        }
+      } else {
+        console.warn(` - Value for variable \'${newVariableName}\' is not a string: `, value);
+        // Clear notes if variable value isn't a string
+        blockNode.blockContent.notes = ''; 
+        this.blockChange.emit(this._block);
+      }
+      // ---------------------------------------------------------------------
+
+    } else {
+      // Handle clear event ([showClear] = true)
+      console.log(' - Clearing variable selection.');
+      blockNode.blockContent.variableName = '';
+      blockNode.blockContent.notes = '';
+      this.blockChange.emit(this._block);
+    }
+    
+    // We might need to trigger change detection manually if the view doesn't update
+    // this.cdr.detectChanges(); // Inject ChangeDetectorRef if needed
   }
 }
