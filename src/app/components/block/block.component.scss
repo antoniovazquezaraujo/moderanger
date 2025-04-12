@@ -227,6 +227,20 @@ input[type="number"]#repeatingTimes {
   }
 }
 
+.melody-title {
+  position: relative;
+  top: 10px;
+  margin-bottom: -10px;
+  z-index: 1;
+  background-color: white;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  display: inline-block;
+  margin-left: 15px;
+}
+
 .block-melody-editor {
   flex: 1;
   display: block;

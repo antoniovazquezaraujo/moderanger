@@ -6,6 +6,27 @@
   width: 100%;
 }
 
+/* Títulos de sección */
+.title-container {
+  position: relative;
+  display: block;
+  margin-top: 8px;
+}
+
+.section-title {
+  position: relative;
+  top: 10px;
+  margin-bottom: -10px;
+  z-index: 1;
+  background-color: white;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  display: inline-block;
+  margin-left: 15px;
+}
+
 /* Filas */
 .commands-row,
 .operations-row,

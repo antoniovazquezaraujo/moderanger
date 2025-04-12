@@ -1,5 +1,6 @@
 <div class="block-container">
     <!-- Second Row: Comandos -->
+    <div class="title-container"><div class="section-title">Commands</div></div>
     <div class="block-row commands-row">
         <div class="container-wrapper commands-container">
             <div *ngFor="let command of block.commands" class="command">
@@ -110,12 +111,13 @@
                 </ng-container>
             </div>
             <div class="add-wrapper">
-                <p-button class="add-button" (click)="addElement('command')" icon="pi pi-cog" pTooltip="Add Command" tooltipPosition="top"></p-button>
+                <p-button class="add-button" (click)="addElement('command')" icon="pi pi-plus" pTooltip="Add Command" tooltipPosition="top"></p-button>
             </div>
         </div>
     </div>
 
     <!-- Third Row: Operaciones -->
+    <div class="title-container"><div class="section-title">Actions</div></div>
     <div class="block-row operations-row">
         <div class="container-wrapper operations-container">
             <div *ngFor="let operation of operations; let i = index" class="operation-item">
@@ -177,7 +179,7 @@
             <div class="add-wrapper">
                 <p-button 
                     class="add-button"
-                    icon="pi pi-percentage" 
+                    icon="pi pi-plus" 
                     pTooltip="Add Operation"
                     (click)="addElement('operation')" 
                     tooltipPosition="top">
