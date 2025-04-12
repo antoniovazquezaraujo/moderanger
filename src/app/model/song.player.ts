@@ -112,47 +112,38 @@ export class SongPlayer {
     }
 
     playSong(song: Song): void {
-        // Assume Tone.start() was called externally if needed
-        Transport.bpm.value = 100; // Use hardcoded 100 bpm
-        Transport.cancel(); // Cancel any previously scheduled events
-        Transport.stop();   // Stop transport before rescheduling
-        Transport.position = 0; // Reset position
+        this.stop(); 
+        Transport.bpm.value = 100; 
+        Transport.position = 0;
 
         if (!song || !song.parts || song.parts.length === 0) {
-             console.log("[SongPlayer] No parts to play.");
              return;
          }
          
-        // Reset internal state for the new playback
         this._isPlaying = false; 
         this._beatCount = 0;
         this._currentRepetition = 0; 
 
-        // --- Update Block Notes from Variables BEFORE Processing --- 
-        console.log("[SongPlayer] Updating block notes from variables before playback...");
         song.parts.forEach(part => {
             const processBlock = (block: Block) => {
                 if (block.blockContent?.isVariable && block.blockContent.variableName) {
                     const variableValue = VariableContext.getValue(block.blockContent.variableName);
                     if (typeof variableValue === 'string') {
                         if (block.blockContent.notes !== variableValue) {
-                           console.log(` - Updating Block ${block.id} notes from variable '${block.blockContent.variableName}'. Old: "${block.blockContent.notes}", New: "${variableValue}"`);
                            block.blockContent.notes = variableValue;
                         } 
                     } else {
-                        console.warn(` - Variable '${block.blockContent.variableName}' for Block ${block.id} is not a string (value: ${variableValue}), clearing notes.`);
                         block.blockContent.notes = ''; 
                     }
                 }
-                // Recursively process children
                 if (block.children && block.children.length > 0) {
                     block.children.forEach(processBlock);
                 }
             };
-            part.blocks.forEach(processBlock);
+            if (part.blocks) { 
+               part.blocks.forEach(processBlock);
+            }
         });
-        console.log("[SongPlayer] Finished updating block notes from variables.");
-        // -------------------------------------------------------
 
         let channel = 0;
         const partStates = song.parts.map(part => {
@@ -221,11 +212,9 @@ export class SongPlayer {
         }
 
         if (partSoundInfo.length > 0) {
-            console.log(`[SongPlayer] Starting playback loop (playNoteDatas) with ${partSoundInfo.length} part(s) having notes.`);
             this.playNoteDatas(partSoundInfo);
             Transport.start('+0.1'); 
         } else {
-            console.log("[SongPlayer] No notes found in any part after processing. Playback not started.");
             this._isPlaying = false; 
         }
     }
@@ -233,19 +222,15 @@ export class SongPlayer {
     private extractJustBlockNotes(block: Block, player: Player): NoteData[] {
         let notesToParse = '';
         if (block.blockContent) {
-            // Use the notes property that was potentially updated at the start of playSong
             notesToParse = block.blockContent.notes || ''; 
         } else {
-            console.warn(`[SongPlayer] extractJustBlockNotes: Block ${block.id} has no blockContent`);
         }
 
-        console.log(`[SongPlayer] extractJustBlockNotes for Block ${block.id}: Parsing notes: "${notesToParse}"`);
         let rootNoteDatas: NoteData[] = [];
         if (notesToParse.trim()) {
             try {
                  rootNoteDatas = parseBlockNotes(notesToParse);
             } catch (e) {
-                console.error(`[SongPlayer] extractJustBlockNotes: Error parsing notes for block ${block.id}: "${notesToParse}"`, e);
                 rootNoteDatas = [];
             }
         }
@@ -267,7 +252,6 @@ export class SongPlayer {
             } else if (noteData.type === 'rest' || noteData.type === 'silence') {
                 noteDatas.push({ type: 'rest', duration });
             }
-            // Handle explicit chord/arpeggio types if needed from parser
              else if (noteData.type === 'chord' && noteData.noteDatas) {
                  noteDatas.push(noteData);
              } else if (noteData.type === 'arpeggio' && noteData.noteDatas) {
@@ -324,7 +308,7 @@ export class SongPlayer {
         let nextRepetitionPrepared = false;
         const interval = Time('16n').toSeconds(); // Use loop resolution
 
-        const loop = new Loop((time: number) => { // Explicitly type time as number
+        const loop = new Loop((time: number) => {
             // Metronome
             this._metronome.next(this._beatCount % this._beatsPerBar);
             this._beatCount++;
@@ -342,8 +326,6 @@ export class SongPlayer {
 
             // Repetition logic (simplified, might need adjustment based on duration)
             if (allPartsFinished && !nextRepetitionPrepared && this._currentRepetition < this._songRepetitions - 1) {
-                 console.log(`[SongPlayer] Loop: End of repetition ${this._currentRepetition + 1}. Preparing next.`);
-                // Reset parts for next repetition
                 this._currentRepetition++;
                 for (const info of partSoundInfo) {
                     info.noteDataIndex = 0;
@@ -365,13 +347,14 @@ export class SongPlayer {
             }
 
             if (!hasActiveParts) {
-                 console.log("[SongPlayer] Loop: No active parts, stopping loop.");
-                loop.stop();
-                // Call internal stop to reset state? Or just let transport run out?
-                // Let's call stop() for consistency.
-                this.stop();
+                 loop.stop();
+                 Transport.stop(); 
+                 this._isPlaying = false; 
+                 this._metronome.next(0); 
             }
-        }, '16n').start(0); // Start loop immediately
+        }, '16n');
+
+        loop.start(0); 
     }
 
     private findLastPlayedNote(partSoundInfo: PartSoundInfo[]): NoteData | undefined {
@@ -398,8 +381,7 @@ export class SongPlayer {
             try {
                  noteDurationSeconds = Time(noteData.duration).toSeconds();
              } catch (e) {
-                  console.error(`[SongPlayer] playTurn: Error converting duration '${noteData.duration}' to seconds`, e);
-                  noteDurationSeconds = 0;
+                 noteDurationSeconds = 0;
              }
 
             if (noteData.type === 'arpeggio' && noteData.noteDatas && noteData.noteDatas.length > 0) {
@@ -429,8 +411,7 @@ export class SongPlayer {
         // Note index check happens in playTurn before calling this
         const noteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
         if (!noteData) {
-             console.error(`[SongPlayer] playNoteData: noteData is null/undefined at index ${partSoundInfo.noteDataIndex}`);
-             return;
+            return;
         }
 
         const duration: string | number = noteData.duration; 
@@ -441,7 +422,6 @@ export class SongPlayer {
                 .filter(nd => nd.note !== undefined)
                 .map(nd => Frequency(nd.note!, "midi").toFrequency());
             if (freqs.length > 0) {
-                console.log(`[SongPlayer] playNoteData @${time.toFixed(4)}: Playing CHORD (${freqs.length} notes), dur: ${duration}`);
                 player.triggerAttackRelease(freqs, duration, time);
             }
             // Don't advance index here, handled in playTurn
@@ -454,10 +434,8 @@ export class SongPlayer {
                 let singleNoteDuration = 0;
                  try { singleNoteDuration = Time(noteData.duration).toSeconds() / noteData.noteDatas.length; } catch(e) {}
                 const singleNoteToneDuration = `${singleNoteDuration}s`;
-                 console.log(`[SongPlayer] playNoteData @${time.toFixed(4)}: Playing ARP note ${partSoundInfo.arpeggioIndex + 1}/${noteData.noteDatas.length}, freq: ${freq.toFixed(2)}, dur: ${singleNoteToneDuration}`);
                 player.triggerAttackRelease(freq, singleNoteToneDuration, time);
             } else {
-                 console.warn(`[SongPlayer] playNoteData: Invalid note in arpeggio at index ${partSoundInfo.arpeggioIndex}:`, note);
             }
 
             partSoundInfo.arpeggioIndex++;
@@ -468,13 +446,11 @@ export class SongPlayer {
 
         } else if (noteData.type === 'note' && noteData.note !== undefined) {
              const freq = Frequency(noteData.note, "midi").toFrequency();
-              console.log(`[SongPlayer] playNoteData @${time.toFixed(4)}: Playing NOTE ${noteData.note}, freq: ${freq.toFixed(2)}, dur: ${duration}`);
             player.triggerAttackRelease(freq, duration, time);
              // Don't advance index here, handled in playTurn
 
         } else if (noteData.type === 'rest' || noteData.type === 'silence') {
-             console.log(`[SongPlayer] playNoteData @${time.toFixed(4)}: Processing REST, dur: ${duration}`);
-            // No sound for rests
+             // No sound for rests
              // Don't advance index here, handled in playTurn
         }
     }

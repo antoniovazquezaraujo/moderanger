@@ -19,8 +19,8 @@
 
             <ng-container *ngSwitchCase="'melody'">
                 <app-melody-editor-wrapper 
-                    [notes]="toString(newVariable.value)" 
-                    (notesChange)="newVariable.value = $event">
+                    [(ngModel)]="newVariable.value" 
+                    name="value">
                 </app-melody-editor-wrapper>
             </ng-container>
 
@@ -76,13 +76,13 @@
 
                 <ng-container *ngSwitchCase="'melody'">
                     <app-melody-editor-wrapper 
-                        [notes]="toString(variable.value)" 
-                        (notesChange)="variable.value = $event; updateVariable(i)">
+                        [(ngModel)]="variable.value" 
+                        (ngModelChange)="updateVariableContext($event, variable.name)">
                     </app-melody-editor-wrapper>
                 </ng-container>
             </ng-container>
 
-            <p-button (click)="removeVariable(i)" icon="pi pi-trash" pTooltip="Remove Variable" tooltipPosition="top"></p-button>
+            <p-button (click)="removeVariable(i)" icon="pi pi-times" pTooltip="Remove Variable" tooltipPosition="top"></p-button>
         </div>
     </div>
 </div> 

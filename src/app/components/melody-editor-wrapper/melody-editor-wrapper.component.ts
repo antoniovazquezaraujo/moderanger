@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, forwardRef, ChangeDetectorRef } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MelodyEditorService } from '../../services/melody-editor.service';
 
 @Component({
@@ -9,15 +10,44 @@ import { MelodyEditorService } from '../../services/melody-editor.service';
             (notesChange)="onNotesChange($event)">
         </app-melody-editor>
     `,
-    providers: [MelodyEditorService]
+    providers: [
+        MelodyEditorService,
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MelodyEditorWrapperComponent),
+            multi: true
+        }
+    ]
 })
-export class MelodyEditorWrapperComponent {
+export class MelodyEditorWrapperComponent implements ControlValueAccessor {
     @Input() notes: string = '';
-    @Output() notesChange = new EventEmitter<string>();
 
-    constructor() {}
+    private onChange = (_: any) => {};
+    private onTouched = () => {};
 
-    onNotesChange(notes: string): void {
-        this.notesChange.emit(notes);
+    constructor(private cdr: ChangeDetectorRef) {}
+
+    writeValue(value: any): void {
+        const newValue = value || '';
+        if (newValue !== this.notes) {
+            this.notes = newValue;
+            this.cdr.detectChanges();
+        }
+    }
+
+    registerOnChange(fn: any): void {
+        this.onChange = fn;
+    }
+
+    registerOnTouched(fn: any): void {
+        this.onTouched = fn;
+    }
+
+    onNotesChange(newNotesValue: string): void {
+        if (newNotesValue !== this.notes) {
+            this.notes = newNotesValue;
+            this.onChange(this.notes);
+        }
+        this.onTouched();
     }
 } 

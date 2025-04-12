@@ -38,7 +38,6 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
        this.contextSubscription = VariableContext.onVariablesChange.subscribe(() => {
-           console.log('[VariableDeclarationComponent] VariableContext changed, updating local list.');
            this.updateVariablesList();
        });
        this.updateVariablesList();
@@ -70,21 +69,26 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
 
     updateVariable(index: number): void {
         const variable = this.variables[index];
+        if (variable.type === 'melody') {
+            return;
+        }
+        
         if (VariableContext && variable) {
             let value: any;
             if (variable.type === 'playmode') {
                 value = variable.value;
-            } else if (variable.type === 'melody') {
-                value = String(variable.value || '');
             } else if (variable.type === 'scale') {
                 value = variable.value;
             } else {
                 value = variable.value === '' ? 0 : Number(variable.value);
             }
-
             VariableContext.setValue(variable.name, value);
             this.variableUpdated.emit();
         }
+    }
+
+    updateVariableContext(newMelodyValue: string, variableName: string): void {
+        VariableContext.setValue(variableName, newMelodyValue || '');
     }
 
     removeVariable(index: number): void {
@@ -111,9 +115,5 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
                 return { name, value, type: 'number' as const };
             });
         }
-    }
-
-    toString(value: any): string {
-        return String(value || '');
     }
 } 

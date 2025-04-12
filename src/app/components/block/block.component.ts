@@ -53,12 +53,12 @@ export class BlockComponent implements OnInit, OnDestroy {
     this.initializeBlockContent();
     this.loadMelodyVariables(); // Initial load
     this.variableListSubscription = VariableContext.onVariablesChange.subscribe(() => {
-      console.log('[BlockComponent] VariableContext changed, reloading melody variables for dropdown.');
+      // console.log('[BlockComponent] VariableContext changed, reloading melody variables for dropdown.');
       this.loadMelodyVariables();
       if (this._block?.blockContent?.isVariable && this._block.blockContent.variableName) {
           const currentVarExists = this.melodyVariables.some(v => v.value === this._block.blockContent.variableName);
           if (!currentVarExists) {
-              console.log(` - Currently selected variable '${this._block.blockContent.variableName}' no longer exists. Clearing selection.`);
+              // console.log(` - Currently selected variable '${this._block.blockContent.variableName}' no longer exists...`);
               this._block.blockContent.variableName = '';
               this._block.blockContent.notes = '';
           }
@@ -150,7 +150,7 @@ export class BlockComponent implements OnInit, OnDestroy {
           notes: typeof value === 'string' ? value : ''
         };
       });
-    console.log('[BlockComponent] Melody variables loaded:', JSON.stringify(this.melodyVariables)); 
+    // console.log('[BlockComponent] Melody variables loaded:', JSON.stringify(this.melodyVariables)); 
   }
 
   toggleMelodyVariable(event: any, blockNode?: Block) {
@@ -273,31 +273,31 @@ export class BlockComponent implements OnInit, OnDestroy {
   }
 
   setSelectedVariableObject(selectedObject: any, blockNode: Block): void {
-    console.log(`[Block ${blockNode.id}] setSelectedVariableObject received:`, selectedObject);
+    // console.log(`[Block ${blockNode.id}] setSelectedVariableObject received:`, selectedObject);
     if (!blockNode.blockContent) return;
 
     if (selectedObject) {
       const newVariableName = selectedObject.value; // Or selectedObject.name
-      console.log(` - New variable name: \'${newVariableName}\'`);
+      // console.log(` - New variable name: \'${newVariableName}\'`);
       // Update the variableName that the rest of the app uses
       blockNode.blockContent.variableName = newVariableName;
 
       // --- Update notes immediately (Logic from handleMelodyVariableChange) ---
       const value = VariableContext.getValue(newVariableName);
-      console.log(` - VariableContext.getValue(\'${newVariableName}\') returned: `, value);
+      // console.log(` - VariableContext.getValue(\'${newVariableName}\') returned: `, value);
       if (typeof value === 'string') {
         const validNotesRegex = /^[\w\s\d\.\-_\*/\[\]\(\):,]*$/;
         if (validNotesRegex.test(value) || value === '') {
-          console.log(` - Updating block notes to: "${value}"`);
+          // console.log(` - Updating block notes to: \"${value}\"`);
           blockNode.blockContent.notes = value;
           this.blockChange.emit(this._block); // Notify SongPlayer
         } else {
-          console.warn(` - Value for variable \'${newVariableName}\' doesn\'t look like valid notes: "${value}"`);
+          // console.warn(` - Value for variable \'${newVariableName}\' doesn\'t look like valid notes...`);
           // Optionally clear notes if invalid?
           // blockNode.blockContent.notes = ''; 
         }
       } else {
-        console.warn(` - Value for variable \'${newVariableName}\' is not a string: `, value);
+        // console.warn(` - Value for variable \'${newVariableName}\' is not a string...`);
         // Clear notes if variable value isn't a string
         blockNode.blockContent.notes = ''; 
         this.blockChange.emit(this._block);
@@ -306,7 +306,7 @@ export class BlockComponent implements OnInit, OnDestroy {
 
     } else {
       // Handle clear event ([showClear] = true)
-      console.log(' - Clearing variable selection.');
+      // console.log(\' - Clearing variable selection.\');
       blockNode.blockContent.variableName = '';
       blockNode.blockContent.notes = '';
       this.blockChange.emit(this._block);

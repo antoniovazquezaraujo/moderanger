@@ -134,8 +134,8 @@ export const ModeRangerSemantics = {
   },
 
   _terminal(this: { sourceString: string }): NoteData | null {
-    return this.sourceString === 's' 
-      ? new NoteData({ type: 'silence', duration: '4t' }) 
+    return this.sourceString === 's'
+      ? new NoteData({ type: 'rest', duration: '4t', note: undefined })
       : null;
   }
 }; 

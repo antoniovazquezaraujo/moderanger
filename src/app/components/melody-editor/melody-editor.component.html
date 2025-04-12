@@ -6,7 +6,7 @@
       
       <div class="notes-container">
         <!-- Iterar sobre todos los elementos -->
-        <ng-container *ngFor="let element of elements">
+        <ng-container *ngFor="let element of elements; let i = index">
           <!-- Nota simple -->
           <app-melody-note
             *ngIf="element.type === 'note' || element.type === 'rest'"

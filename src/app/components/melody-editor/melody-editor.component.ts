@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { NoteData } from '../../model/note';
 import { parseBlockNotes } from '../../model/ohm.parser';
 import { VariableContext } from '../../model/variable.context';
@@ -29,7 +29,7 @@ interface EditorNote {
   templateUrl: './melody-editor.component.html',
   styleUrls: ['./melody-editor.component.scss']
 })
-export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   @Input() notes: string = '';
   @Input() showVariableIcon: boolean = true;
   @Output() notesChange = new EventEmitter<string>();
@@ -49,13 +49,48 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    if (this.notes) {
-      const noteData = parseBlockNotes(this.notes);
-      this.melodyEditorService.loadFromNoteData(noteData);
+    // Initial load logic remains here, but ngOnChanges will handle subsequent updates
+    // this.loadNotesFromString(this.notes);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['notes']) {
+      const newNotes = changes['notes'].currentValue;
+      // console.log(`[MelodyEditor] ngOnChanges detected notes change: Prev=`, changes['notes'].previousValue, ` New=`, newNotes);
+      this.loadNotesFromString(newNotes);
     }
   }
 
+  private loadNotesFromString(notesString: string): void {
+    // console.log(`[MelodyEditor] loadNotesFromString called with:`, notesString);
+    try {
+      if (notesString) {
+        const noteData = parseBlockNotes(notesString);
+        // console.log(`[MelodyEditor] Parsed NoteData:`, noteData);
+        this.melodyEditorService.loadFromNoteData(noteData);
+      } else {
+        // console.log(`[MelodyEditor] Empty notes string received, clearing editor.`);
+        this.melodyEditorService.loadFromNoteData([]); 
+      }
+    } catch (e) {
+      console.error('[MelodyEditor] Error parsing notes in loadNotesFromString:', notesString, e);
+    }
+    setTimeout(() => { 
+      if (this.elements.length > 0) {
+        this.focusedElement = this.elements[this.elements.length - 1];
+        if (this.focusedElement) { // Check if focusedElement is not null
+          this.melodyEditorService.selectNote(this.focusedElement.id);
+        }
+      } else {
+        this.focusedElement = null;
+      }
+      this.cdr.detectChanges();
+    }, 0); 
+  }
+
   ngAfterViewInit(): void {
+    this.loadNotesFromString(this.notes);
+
     this.melodyEditorService.elements$.subscribe(elements => {
       this.elements = elements;
       
@@ -75,7 +110,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
       
-        this.cdr.detectChanges();
+      this.cdr.detectChanges();
     });
   }
 
@@ -110,14 +145,14 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
           case 'ArrowUp':
             if (event.shiftKey) {
               this.increaseDuration();
-    } else {
+            } else {
               this.increaseNote();
             }
             break;
           case 'ArrowDown':
             if (event.shiftKey) {
               this.decreaseDuration();
-    } else {
+            } else {
               this.decreaseNote();
             }
             break;
@@ -141,7 +176,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     if (event.shiftKey) {
       // Cambiar duración con Shift + rueda
       const currentIndex = this.durations.indexOf(note.duration);
-    const delta = event.deltaY > 0 ? 1 : -1;
+      const delta = event.deltaY > 0 ? 1 : -1;
       const newIndex = currentIndex + delta;
       
       if (newIndex >= 0 && newIndex < this.durations.length) {
@@ -150,7 +185,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
         this.focusedElement = { ...note, duration: newDuration };
         this.emitNotesChange();
       }
-      } else {
+    } else {
       // Cambiar valor de la nota con rueda
       const delta = event.deltaY > 0 ? -1 : 1;
       this.updateNoteValue(note, (note.value ?? 0) + delta);
@@ -170,8 +205,16 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private updateNoteValue(note: SingleNote, newValue: number | null): void {
-    this.melodyEditorService.updateNote(note.id, { value: newValue });
-    this.focusedElement = { ...note, value: newValue };
+    let updatePayload: Partial<SingleNote>;
+    if (newValue === null) {
+        // console.log(`[MelodyEditor] Setting note ${note.id} to silence (type: rest).`);
+        updatePayload = { value: null, type: 'rest' }; 
+    } else {
+        // console.log(`[MelodyEditor] Setting note ${note.id} to value ${newValue} (type: note).`);
+        updatePayload = { value: newValue, type: 'note' };
+    }
+    this.melodyEditorService.updateNote(note.id, updatePayload);
+    this.focusedElement = { ...note, ...updatePayload }; 
     this.emitNotesChange();
   }
 
@@ -234,7 +277,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
       if (currentIndex > 0) {
         // Si no es el primer elemento, enfocar el anterior
         this.focusedElement = this.elements[currentIndex - 1];
-    } else {
+      } else {
         // Si es el primer elemento, enfocar el nuevo primer elemento
         this.focusedElement = this.elements[0];
       }
@@ -251,8 +294,14 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     const elementId = id || this.focusedElement?.id;
     if (!elementId) return;
     const element = this.elements.find(e => e.id === elementId);
-    if (!element || element.type !== 'note') return;
-    this.updateNoteValue(element as SingleNote, null);
+    if (element && element.type === 'note' && element.value !== null) {
+        // console.log(`[MelodyEditor] Toggling note ${element.id} TO silence.`);
+        this.updateNoteValue(element as SingleNote, null);
+    } else if (element && element.type === 'note' && element.value === null) {
+         // console.log(`[MelodyEditor] Note ${element.id} is already silence. Toggle ignored.`);
+    } else {
+        // console.warn('[MelodyEditor] toggleSilence called on non-note or missing element:', elementId);
+    }
   }
 
   onNoteClick(element: MusicElement): void {
@@ -268,7 +317,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleGroup(id: string): void {
     if (this.expandedGroups.has(id)) {
       this.expandedGroups.delete(id);
-        } else {
+    } else {
       this.expandedGroups.add(id);
     }
   }
@@ -299,7 +348,10 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private emitNotesChange(): void {
     const noteData = this.melodyEditorService.toNoteData();
-    this.notesChange.emit(NoteData.toStringArray(noteData));
+    // console.log('[MelodyEditor] Emitting notes change. NoteData from service:', JSON.stringify(noteData));
+    const stringArray = NoteData.toStringArray(noteData);
+    // console.log('[MelodyEditor] Emitting string array:', stringArray);
+    this.notesChange.emit(stringArray);
   }
 
   ngOnDestroy() {
