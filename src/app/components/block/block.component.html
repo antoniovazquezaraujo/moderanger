@@ -42,16 +42,16 @@
                 <div class="dropdown-wrapper">
                   <div class="dropdown-variable-icon" (click)="toggleMelodyVariable($event, node)">$</div>
                   <p-dropdown 
-                    [options]="getMelodyVariables()" 
+                    [options]="melodyVariables"
                     [(ngModel)]="node.blockContent.variableName"
                     (onChange)="handleMelodyVariableChange($event, node)"
                     [optionLabel]="'name'"
+                    [optionValue]="'value'"
                     [placeholder]="'Select melody variable'"
-                    [style]="{'width': '250px'}"
                     [panelStyle]="{'min-width': '300px'}"
                     [appendTo]="'body'"
                     [showClear]="true"
-                    [dataKey]="'name'"
+                    [dataKey]="'value'"
                     [filter]="false"
                     [autoDisplayFirst]="false"
                     [editable]="false">
@@ -73,8 +73,8 @@
                       </div>
                     </ng-template>
                     <ng-template let-item pTemplate="selectedItem">
-                      <div class="melody-option">
-                        <div class="melody-content">
+                      <div class="melody-option" style="height: 100%;">
+                        <div class="melody-content" style="display: flex; align-items: center; height: 100%;">
                           <span class="variable-name">{{item?.name || 'Select melody variable'}}</span>
                         </div>
                       </div>

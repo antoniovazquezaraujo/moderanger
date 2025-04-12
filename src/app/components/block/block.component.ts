@@ -16,11 +16,14 @@ import { NoteData } from '../../model/note';
 })
 export class BlockComponent implements OnInit {
   private _block!: Block;
+  melodyVariables: any[] = []; // Property to store options
   
   @Input() 
   set block(value: Block) {
     this._block = value;
     this.initializeBlockContent();
+    // Potentially update variables if block changes significantly?
+    // For now, let's fetch in ngOnInit and when toggling
   }
   get block(): Block {
     return this._block;
@@ -46,6 +49,7 @@ export class BlockComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeBlockContent();
+    this.loadMelodyVariables(); // Load variables on init
   }
 
   private initializeBlockContent(): void {
@@ -104,8 +108,9 @@ export class BlockComponent implements OnInit {
     this.draggedBlock = undefined;
   }
 
-  getMelodyVariables() {
-    return Array.from(VariableContext.context.entries())
+  // Renamed function to load and store variables
+  loadMelodyVariables() {
+    this.melodyVariables = Array.from(VariableContext.context.entries())
       .filter(([_, value]) => {
         // Solo aceptar variables de tipo string
         if (typeof value !== 'string') return false;
@@ -131,9 +136,10 @@ export class BlockComponent implements OnInit {
         return {
           name: name,
           value: name,
-          notes: stringValue // Pass the original string to let parseNotes handle it
+          notes: typeof value === 'string' ? value : ''
         };
       });
+    console.log('[BlockComponent] Melody variables loaded:', JSON.stringify(this.melodyVariables)); 
   }
 
   toggleMelodyVariable(event: any, blockNode?: Block) {
@@ -146,17 +152,29 @@ export class BlockComponent implements OnInit {
     
     if (targetBlock.blockContent) {
       targetBlock.blockContent.isVariable = !targetBlock.blockContent.isVariable;
+      this.loadMelodyVariables(); // Reload variables when toggling mode
       
-      // Si cambiamos a modo variable, seleccionar la primera variable disponible
       if (targetBlock.blockContent.isVariable) {
-        const melodyVars = this.getMelodyVariables();
-        if (melodyVars.length > 0) {
-          targetBlock.blockContent.variableName = melodyVars[0].value;
-          const value = VariableContext.getValue(melodyVars[0].value);
+        // Use the loaded variables
+        if (this.melodyVariables.length > 0) {
+          targetBlock.blockContent.variableName = this.melodyVariables[0].value;
+          const value = VariableContext.getValue(this.melodyVariables[0].value);
           if (typeof value === 'string') {
-            targetBlock.blockContent.notes = value;
+            // Update notes immediately when switching to variable mode
+            targetBlock.blockContent.notes = value; 
+            this.blockChange.emit(this._block); // Notify change
           }
+        } else {
+             // No variables available, switch back? Or stay in variable mode with empty selection?
+             // Let's keep it in variable mode but clear name/notes
+             targetBlock.blockContent.variableName = '';
+             targetBlock.blockContent.notes = '';
+             this.blockChange.emit(this._block);
         }
+      } else {
+           // Optional: When switching back to non-variable, maybe clear variableName?
+           // targetBlock.blockContent.variableName = '';
+           // Notes are already managed by the melody editor itself
       }
     }
   }
@@ -164,25 +182,35 @@ export class BlockComponent implements OnInit {
   handleMelodyVariableChange(event: any, blockNode: Block): void {
     if (!blockNode.blockContent) return;
     
-    const selectedOption = event.value;
-    if (!selectedOption) {
+    const selectedOptionValue = event.value;
+    console.log('[BlockComponent] handleMelodyVariableChange triggered.');
+    console.log(' - event.value (Selected Option Value): ', selectedOptionValue);
+    console.log(' - blockNode.blockContent.variableName (ngModel value BEFORE handler logic): ', blockNode.blockContent.variableName);
+
+    if (!selectedOptionValue) {
+      console.log(' - Clearing variable selection.');
       blockNode.blockContent.notes = '';
       blockNode.blockContent.variableName = '';
       return;
     }
 
-    // Actualizar el nombre de la variable
-    blockNode.blockContent.variableName = selectedOption;
+    console.log(' - blockNode.blockContent.variableName (ngModel value AFTER handler logic - should be same as before): ', blockNode.blockContent.variableName);
 
-    // Obtener y actualizar las notas
-    const value = VariableContext.getValue(selectedOption);
+    // Fix the regex validation
+    const value = VariableContext.getValue(selectedOptionValue);
+    console.log(` - VariableContext.getValue('${selectedOptionValue}') returned: `, value);
     if (typeof value === 'string') {
-      // Verificar que el valor sea una melodía válida (solo dígitos y espacios)
-      if (/^[\s\d]+$/.test(value)) {
+       // Allow letters, numbers, spaces, brackets, parens, colons, dots, hyphens, underscores, slashes, asterisks
+      const validNotesRegex = /^[\w\s\d\.\-_\*\/\[\]\(\):,]*$/; 
+      if (validNotesRegex.test(value) || value === '') { // Use updated regex
+        console.log(` - Updating block notes to: "${value}"`);
         blockNode.blockContent.notes = value;
-        // Notificar el cambio para que se actualice la reproducción
         this.blockChange.emit(this._block);
+      } else {
+         console.warn(` - Value for variable '${selectedOptionValue}' doesn't look like valid notes: "${value}"`);
       }
+    } else {
+       console.warn(` - Value for variable '${selectedOptionValue}' is not a string: `, value);
     }
   }
 
