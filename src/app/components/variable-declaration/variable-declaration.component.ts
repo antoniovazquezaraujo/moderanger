@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { VariableContext } from 'src/app/model/variable.context';
 import { getPlayModeNames } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
 import { MelodyEditorService } from 'src/app/services/melody-editor.service';
+import { Subscription } from 'rxjs';
 
 interface VariableDeclaration {
     name: string;
@@ -15,7 +16,7 @@ interface VariableDeclaration {
     templateUrl: './variable-declaration.component.html',
     styleUrls: ['./variable-declaration.component.scss']
 })
-export class VariableDeclarationComponent {
+export class VariableDeclarationComponent implements OnInit, OnDestroy {
     @Output() variableAdded = new EventEmitter<void>();
     @Output() variableRemoved = new EventEmitter<void>();
     @Output() variableUpdated = new EventEmitter<void>();
@@ -30,8 +31,21 @@ export class VariableDeclarationComponent {
     playModeNames: string[] = getPlayModeNames();
     scaleNames: string[] = Scale.getScaleNames();
 
+    private contextSubscription: Subscription | null = null;
+
     constructor() {
-        this.updateVariablesList();
+    }
+
+    ngOnInit(): void {
+       this.contextSubscription = VariableContext.onVariablesChange.subscribe(() => {
+           console.log('[VariableDeclarationComponent] VariableContext changed, updating local list.');
+           this.updateVariablesList();
+       });
+       this.updateVariablesList();
+    }
+
+    ngOnDestroy(): void {
+        this.contextSubscription?.unsubscribe();
     }
 
     addVariable(event: Event): void {
@@ -50,7 +64,6 @@ export class VariableDeclarationComponent {
 
             VariableContext.setValue(this.newVariable.name, value);
             this.newVariable = { name: '', value: '', type: 'number' };
-            this.updateVariablesList();
             this.variableAdded.emit();
         }
     }
