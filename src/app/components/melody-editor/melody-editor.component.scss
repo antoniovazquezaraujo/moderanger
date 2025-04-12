@@ -55,6 +55,24 @@ $z-index-selected: 100;
   white-space: nowrap;
 }
 
+// Contenedor wrapper para las notas
+.notes-container-wrapper {
+  position: relative;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px;
+  transition: border-color 0.3s ease;
+  
+  &:hover {
+    border-color: #ddd;
+    
+    .variable-toggle-icon {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
 // Contenedor de notas
 .notes-container {
   display: flex;
@@ -62,6 +80,36 @@ $z-index-selected: 100;
   align-items: flex-start;
   padding: 10px 0;
   min-height: 40px;
+  position: relative;
+}
+
+// Icono para alternar variable
+.variable-toggle-icon {
+  position: absolute;
+  right: 8px;
+  top: -8px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  cursor: pointer;
+  z-index: 10;
+  border: 1px solid #ddd;
+  transition: all 0.2s ease;
+  opacity: 0;
+  visibility: hidden;
+  
+  &:hover {
+    background-color: #f0f0f0;
+    color: #333;
+    transform: scale(1.1);
+  }
 }
 
 // Contenedor de nota individual

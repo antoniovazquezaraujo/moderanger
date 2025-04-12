@@ -227,6 +227,25 @@ input[type="number"]#repeatingTimes {
   }
 }
 
+.melody-variable-icon {
+  position: absolute !important;
+  right: 8px !important;
+  top: 8px !important;
+  display: inline-block !important;
+  font-size: 0.8em !important;
+  cursor: pointer !important;
+  color: #666 !important;
+  z-index: 10 !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  padding: 2px 5px !important;
+  border-radius: 3px !important;
+  
+  &:hover {
+    color: #000 !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+  }
+}
+
 .melody-title {
   position: relative;
   top: 10px;
@@ -400,6 +419,62 @@ button.variable-button {
 
     &:hover {
       color: #000;
+    }
+  }
+}
+
+.melody-dropdown-container {
+  position: relative;
+  width: 100%;
+  display: inline-block;
+  
+  &:hover {
+    .dropdown-variable-icon {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .dropdown-wrapper {
+      border-color: #ddd;
+    }
+  }
+  
+  .dropdown-wrapper {
+    display: inline-block;
+    width: auto;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px;
+    transition: border-color 0.3s ease;
+    max-width: 300px;
+    position: relative;
+  }
+  
+  .dropdown-variable-icon {
+    position: absolute;
+    right: 8px;
+    top: -8px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    z-index: 10;
+    border: 1px solid #ddd;
+    transition: all 0.2s ease;
+    opacity: 0;
+    visibility: hidden;
+    
+    &:hover {
+      background-color: #f0f0f0;
+      color: #333;
+      transform: scale(1.1);
     }
   }
 } 

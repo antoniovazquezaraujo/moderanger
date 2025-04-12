@@ -136,9 +136,11 @@ export class BlockComponent implements OnInit {
       });
   }
 
-  toggleMelodyVariable(event: MouseEvent, blockNode?: Block) {
-    event.preventDefault();
-    event.stopPropagation();
+  toggleMelodyVariable(event: any, blockNode?: Block) {
+    if (event instanceof MouseEvent) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     
     const targetBlock = blockNode || this._block;
     

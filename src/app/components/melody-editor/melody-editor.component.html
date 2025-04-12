@@ -1,39 +1,44 @@
 <div class="melody-editor" tabindex="0" (click)="onEditorClick($event)">
   <div class="editor-content">
-    <div class="notes-container">
-      <!-- Iterar sobre todos los elementos -->
-      <ng-container *ngFor="let element of elements">
-        <!-- Nota simple -->
-        <app-melody-note
-          *ngIf="element.type === 'note' || element.type === 'rest'"
-          [note]="element"
-          [isSelected]="element.id === focusedElement?.id"
-          (click)="onNoteClick(element)"
-          (toggleSilence)="toggleSilence(element.id)"
-          (changeDuration)="changeDuration(element.id, $event)"
-          (changeValue)="changeNoteValue(element.id, $event)">
-        </app-melody-note>
-        
-        <!-- Grupo de notas -->
-        <app-melody-group
-          *ngIf="element.type === 'arpeggio' || element.type === 'chord'"
-          [note]="element"
-          [isSelected]="element.id === focusedElement?.id"
-          [isExpanded]="isGroupExpanded(element.id)"
-          [selectedNoteId]="focusedElement?.id"
-          [expandedGroups]="expandedGroups"
-          (click)="onNoteClick(element)"
-          (toggleExpand)="toggleGroup($event)"
-          (changeDuration)="changeDuration(element.id, $event)"
-          (toggleSilence)="toggleSilence($event)"
-          (changeChildDuration)="changeDuration($event.id, $event.delta)">
-        </app-melody-group>
-      </ng-container>
+    <div class="notes-container-wrapper">
+      <!-- Icono $ para variable (visible en hover) -->
+      <div class="variable-toggle-icon" *ngIf="showVariableIcon" (click)="onToggleVariable($event)">$</div>
       
-      <!-- Botón para agregar nueva nota al final -->
-      <div class="note-item" (click)="addNewNote()" tabindex="0" (keydown.enter)="addNewNote()">
-        <div class="note-visual">
-          <span class="note-value">+</span>
+      <div class="notes-container">
+        <!-- Iterar sobre todos los elementos -->
+        <ng-container *ngFor="let element of elements">
+          <!-- Nota simple -->
+          <app-melody-note
+            *ngIf="element.type === 'note' || element.type === 'rest'"
+            [note]="element"
+            [isSelected]="element.id === focusedElement?.id"
+            (click)="onNoteClick(element)"
+            (toggleSilence)="toggleSilence(element.id)"
+            (changeDuration)="changeDuration(element.id, $event)"
+            (changeValue)="changeNoteValue(element.id, $event)">
+          </app-melody-note>
+          
+          <!-- Grupo de notas -->
+          <app-melody-group
+            *ngIf="element.type === 'arpeggio' || element.type === 'chord'"
+            [note]="element"
+            [isSelected]="element.id === focusedElement?.id"
+            [isExpanded]="isGroupExpanded(element.id)"
+            [selectedNoteId]="focusedElement?.id"
+            [expandedGroups]="expandedGroups"
+            (click)="onNoteClick(element)"
+            (toggleExpand)="toggleGroup($event)"
+            (changeDuration)="changeDuration(element.id, $event)"
+            (toggleSilence)="toggleSilence($event)"
+            (changeChildDuration)="changeDuration($event.id, $event.delta)">
+          </app-melody-group>
+        </ng-container>
+        
+        <!-- Botón para agregar nueva nota al final -->
+        <div class="note-item" (click)="addNewNote()" tabindex="0" (keydown.enter)="addNewNote()">
+          <div class="note-visual">
+            <span class="note-value">+</span>
+          </div>
         </div>
       </div>
     </div>

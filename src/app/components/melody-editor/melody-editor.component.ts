@@ -31,7 +31,9 @@ interface EditorNote {
 })
 export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() notes: string = '';
+  @Input() showVariableIcon: boolean = true;
   @Output() notesChange = new EventEmitter<string>();
+  @Output() toggleVariable = new EventEmitter<void>();
   @ViewChild('editorContainer') editorContainer!: ElementRef;
   
   focusedElement: MusicElement | null = null;
@@ -310,5 +312,12 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     if (editorElement) {
       editorElement.focus();
     }
+  }
+
+  // Método para manejar el clic en el icono de variable
+  onToggleVariable(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggleVariable.emit();
   }
 }
