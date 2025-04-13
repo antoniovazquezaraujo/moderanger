@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-song',
@@ -12,11 +13,21 @@ export class SongComponent implements OnInit {
 
     @Input() song: Song = new Song();
     repetitions: number = 1;
+    public metronome$: Observable<number>;
+    
+    // Add sidebar visibility control
+    variablesSidebarVisible: boolean = false;
 
     constructor(private songPlayer: SongPlayer) {
+        this.metronome$ = this.songPlayer.metronome$;
     }
 
     ngOnInit(): void {
+    }
+
+    // Add method to toggle sidebar
+    toggleVariablesSidebar(): void {
+      this.variablesSidebarVisible = !this.variablesSidebarVisible;
     }
 
     addPart() {

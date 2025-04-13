@@ -42,20 +42,42 @@
     font-size: 0.8rem !important;
 }
 
+.song-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+/* Container for title and playback controls */
+.song-title-and-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .song-title {
-    margin-bottom: 20px;
-    padding: 5px 0;
-    border-bottom: 1px solid #eee;
+    flex-shrink: 0;
 }
 
 .song-name-input {
-    font-size: 1.5rem;
-    font-weight: bold;
-    padding: 8px;
-    width: 100%;
-    border: 1px solid transparent;
-    background-color: transparent;
-    transition: border-color 0.2s;
+    width: 150px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.playback-controls {
+    display: flex;
+    align-items: center;
+}
+
+.playback-controls .inline-metronome {
+    display: inline-flex;
+    vertical-align: middle;
 }
 
 .song-name-input:focus {
@@ -80,4 +102,40 @@
 .add-part-button button {
     background-color: #f5f5f5;
     border: 1px solid #ddd;
+}
+
+/* Style for the variables toggle button container */
+.variables-control {
+    flex-shrink: 0;
+}
+
+/* Style for the text button */
+:host ::ng-deep .variables-control .p-button.p-button-text {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 1.2rem;
+    padding: 0 !important;
+    background-color: transparent !important;
+    color: #333 !important;
+    border: none !important;
+}
+
+:host ::ng-deep .variables-control .p-button.p-button-text:hover {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Styles for sidebar (optional, adjust as needed) */
+:host ::ng-deep .variables-sidebar {
+    width: 400px;
+}
+
+:host ::ng-deep .variables-sidebar .p-sidebar-content {
+    height: calc(100% - 3rem);
+    padding: 1rem;
+}
+
+:host ::ng-deep .variables-sidebar h3 {
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
 }

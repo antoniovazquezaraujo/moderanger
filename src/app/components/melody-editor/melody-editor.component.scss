@@ -49,10 +49,9 @@ $z-index-selected: 100;
 // Contenido del editor
 .editor-content {
   flex: 1;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
   padding: 5px;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 // Contenedor wrapper para las notas
@@ -76,7 +75,7 @@ $z-index-selected: 100;
 // Contenedor de notas
 .notes-container {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: flex-start;
   padding: 10px 0;
   min-height: 40px;

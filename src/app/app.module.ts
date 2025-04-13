@@ -25,6 +25,8 @@ import { SongPlayer } from './model/song.player';
 import { MelodyEditorModule } from './components/melody-editor/melody-editor.module';
 import { MelodyEditorWrapperComponent } from './components/melody-editor-wrapper/melody-editor-wrapper.component';
 import { MelodyOptionComponent } from './components/melody-option/melody-option.component';
+import { SplitterModule } from 'primeng/splitter';
+import { SidebarModule } from 'primeng/sidebar';
 
 @NgModule({
     declarations: [
@@ -53,7 +55,9 @@ import { MelodyOptionComponent } from './components/melody-option/melody-option.
         AccordionModule,
         InputTextareaModule,
         TooltipModule,
-        MelodyEditorModule
+        MelodyEditorModule,
+        SplitterModule,
+        SidebarModule
     ],
     providers: [TreeDragDropService, SongPlayer],
     bootstrap: [AppComponent]

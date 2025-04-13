@@ -1,5 +1,5 @@
 <div class="variables-container">
-    <form (submit)="addVariable($event)" class="variable-form" #varForm="ngForm">
+    <form class="variable-form">
         <input type="text" [(ngModel)]="newVariable.name" name="name" placeholder="Variable name" required>
         
         <select [(ngModel)]="newVariable.type" name="type" required>
@@ -41,8 +41,9 @@
                 step="1">
         </ng-container>
 
-        <p-button type="submit" 
-            [disabled]="!newVariable.name || !varForm.form.valid"
+        <p-button type="button" 
+            (click)="addVariable()" 
+            [disabled]="!newVariable.name" 
             icon="pi pi-plus">
         </p-button>
     </form>

@@ -40,15 +40,14 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
        this.contextSubscription = VariableContext.onVariablesChange.subscribe(() => {
            this.updateVariablesList();
        });
-       this.updateVariablesList();
+        this.updateVariablesList();
     }
 
     ngOnDestroy(): void {
         this.contextSubscription?.unsubscribe();
     }
 
-    addVariable(event: Event): void {
-        event.preventDefault();
+    addVariable(): void {
         if (this.newVariable.name) {
             let value: any;
             if (this.newVariable.type === 'playmode') {

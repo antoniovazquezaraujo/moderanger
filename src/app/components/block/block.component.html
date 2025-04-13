@@ -17,7 +17,8 @@
   droppableScope="self"  
   emptyMessage="Empty" 
   (onDragStart)="dragStart(block)" 
-  (onDragEnd)="dragEnd()">
+  (onDragEnd)="dragEnd()"
+  [style]="{'height': 'auto', 'overflow-y': 'auto'}">
     <ng-template let-node pTemplate="default">
     <div class="block-content">
       <!-- Bloque (información principal) - Todo en la misma línea -->

@@ -3,21 +3,40 @@
 @import "../node_modules/primeng/resources/themes/saga-green/theme.css";
 @import "~primeng/resources/primeng.min.css";
 
-html, body { height: 100%; }
-body { margin: 5; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html, body { 
+  height: 100%; 
+  margin: 0; /* Remove default body margin */
+  box-sizing: border-box; /* Add box-sizing */
+}
+*, *::before, *::after { /* Apply to all elements for consistency */
+  box-sizing: inherit;
+}
+
+body {
+  display: flex; /* Make body a flex container */
+  flex-direction: column; /* Stack children vertically */
+  font-family: Roboto, "Helvetica Neue", sans-serif; 
+  height: 100%; /* Use full height */
+}
+
+h1 { /* Add some style for the header */
+  padding: 10px 15px;
+  margin: 0; /* No outer margin */
+  flex-shrink: 0; /* Prevent header from shrinking */
+  background-color: #f0f0f0; /* Example background */
+}
 
 /* Estilos básicos (no relacionados con p-dropdown) */
 .container{
-    display:flex;
-    flex-direction:row;
-    flex-wrap:wrap;
-    justify-content:flex-start;
-    align-items:flex-start;
-    align-content:flex-start;
-    padding: 0px 0px 5px 5px; 
-    background-color: white!important;
-    background: white;
-    color: black!important;
+  display: flex; /* Keep flex */
+  flex-direction: column; /* Change to column */
+  flex-grow: 1; /* Make container fill remaining vertical space */
+  overflow: hidden; /* Add overflow hidden to ensure it limits children */
+  padding: 5px; /* Add padding here if needed */
+  background-color: white!important;
+  background: white;
+  color: black!important;
+  box-sizing: border-box; /* Ensure container also uses border-box */
 }
 
 /* Componentes PrimeNG básicos */
