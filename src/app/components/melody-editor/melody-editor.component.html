@@ -5,37 +5,11 @@
       <div class="variable-toggle-icon" *ngIf="showVariableIcon" (click)="onToggleVariable($event)">$</div>
       
       <div class="notes-container">
-        <!-- Iterar sobre todos los elementos -->
-        <ng-container *ngFor="let element of elements; let i = index; trackBy: trackByElementId">
-          <!-- Nota simple -->
-          <app-melody-note
-            *ngIf="element.type === 'note' || element.type === 'rest'"
-            [note]="element"
-            [isSelected]="element.id === selectedId"
-            (click)="onNoteClick(element)"
-            (toggleSilence)="toggleSilence(element.id)"
-            (changeDuration)="changeDuration(element.id, $event)"
-            (changeValue)="changeNoteValue(element.id, $event)">
-          </app-melody-note>
-          
-          <!-- Grupo de notas -->
-          <app-melody-group
-            *ngIf="element.type === 'arpeggio' || element.type === 'chord'"
-            [note]="element"
-            [isSelected]="element.id === selectedId"
-            [isExpanded]="isGroupExpanded(element.id)"
-            [selectedNoteId]="selectedId ?? undefined"
-            [expandedGroups]="expandedGroups"
-            (click)="onNoteClick(element)"
-            (toggleExpand)="toggleGroup($event)"
-            (changeDuration)="changeDuration(element.id, $event)"
-            (toggleSilence)="toggleSilence($event)"
-            (changeChildDuration)="changeDuration($event.id, $event.delta)">
-          </app-melody-group>
-        </ng-container>
+        <!-- Usar ng-template para renderizar elementos (permite recursión) -->
+        <ng-container *ngTemplateOutlet="elementTemplate; context: {$implicit: visualElements}"></ng-container>
         
         <!-- Botón para agregar nueva nota al final -->
-        <div class="note-item" (click)="addNewNote()" tabindex="0" (keydown.enter)="addNewNote()">
+        <div class="note-item add-note" (click)="addNewNote()" tabindex="0" (keydown.enter)="addNewNote()">
           <div class="note-visual">
             <span class="note-value">+</span>
           </div>
@@ -44,3 +18,51 @@
     </div>
   </div>
 </div>
+
+<!-- Template Recursivo para Elementos -->
+<ng-template #elementTemplate let-elementList>
+  <ng-container *ngFor="let element of elementList; trackBy: trackByElementId">
+    <!-- Nota simple -->
+    <app-melody-note
+      *ngIf="element.type === 'note' || element.type === 'rest'"
+      [note]="element.originalElement"
+      [isSelected]="element.id === selectedId"
+      (click)="selectElement(element.id)"
+      (wheel)="onWheel($event, element)"
+      (toggleSilence)="toggleSilence(element.originalElement.id)"
+      (changeDuration)="changeDuration(element.originalElement.id, $event)"
+      (changeValue)="changeNoteValue(element.originalElement.id, $event)">
+    </app-melody-note>
+    
+    <!-- Grupo compuesto (Arpegio/Acorde) -->
+    <app-melody-group
+      *ngIf="element.type === 'arpeggio' || element.type === 'chord'"
+      [note]="element.originalElement"
+      [isSelected]="element.id === selectedId"
+      [isExpanded]="isGroupExpanded(element.originalElement.id)"
+      [selectedNoteId]="selectedId ?? undefined"
+      [expandedGroups]="expandedGroups"
+      (click)="selectElement(element.id)"
+      (wheel)="onWheel($event, element)"      
+      (toggleExpand)="toggleGroup($event)"
+      (changeDuration)="changeDuration(element.originalElement.id, $event)"
+      (toggleSilence)="toggleSilence($event)"
+      (changeChildDuration)="changeDuration($event.id, $event.delta)">
+    </app-melody-group>
+
+    <!-- Grupo genérico (...) -->
+    <ng-container *ngIf="element.type === 'group-start' || element.type === 'group-end'">
+      <span class="group-marker" 
+            [class.group-start-marker]="element.type === 'group-start'"
+            [class.group-end-marker]="element.type === 'group-end'"
+            [class.active-marker]="element.id === selectedId"
+            (click)="selectElement(element.id)"
+            (wheel)="onWheel($event, element)">
+        <!-- Quitar contenedor extra -->
+        <span *ngIf="element.type === 'group-start'" class="group-duration">{{element.duration}}:</span>
+        <span class="group-bracket">{{ element.type === 'group-start' ? '(' : ')' }}</span>
+      </span>
+    </ng-container>
+
+  </ng-container>
+</ng-template>

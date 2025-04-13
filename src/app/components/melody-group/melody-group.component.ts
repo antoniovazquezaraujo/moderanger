@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { NoteGroup, MusicElement, NoteDuration } from '../../model/melody';
+import { CompositeNote, MusicElement, NoteDuration } from '../../model/melody';
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 
 @Component({
@@ -14,30 +14,14 @@ import { MelodyNoteComponent } from '../melody-note/melody-note.component';
                 </button>
             </div>
             <div class="group-content" *ngIf="isExpanded">
-                <ng-container *ngFor="let child of note.notes">
-                    <app-melody-note
-                        *ngIf="child.type === 'note' || child.type === 'rest'"
-                        [note]="child"
-                        [isSelected]="child.id === selectedNoteId"
-                        (select)="onSelectChild(child.id)"
-                        (toggleSilence)="onToggleSilence(child.id)"
-                        (changeDuration)="onChangeChildDuration(child.id, $event)">
-                    </app-melody-note>
-                    
-                    <app-melody-group
-                        *ngIf="child.type === 'arpeggio' || child.type === 'chord'"
-                        [note]="child"
-                        [isSelected]="child.id === selectedNoteId"
-                        [isExpanded]="isChildExpanded(child.id)"
-                        [selectedNoteId]="selectedNoteId"
-                        [expandedGroups]="expandedGroups"
-                        (select)="onSelectChild($event)"
-                        (toggleExpand)="onToggleChildExpand(child.id)"
-                        (changeDuration)="onChangeChildDuration(child.id, $event)"
-                        (toggleSilence)="onToggleSilence($event)"
-                        (changeChildDuration)="onChangeChildDuration($event.id, $event.delta)">
-                    </app-melody-group>
-                </ng-container>
+                <app-melody-note
+                    *ngFor="let child of note.notes"
+                    [note]="child"
+                    [isSelected]="child.id === selectedNoteId"
+                    (select)="onSelectChild(child.id)"
+                    (toggleSilence)="onToggleSilence(child.id)"
+                    (changeDuration)="onChangeChildDuration(child.id, $event)">
+                </app-melody-note>
             </div>
         </div>
     `,
@@ -93,7 +77,7 @@ import { MelodyNoteComponent } from '../melody-note/melody-note.component';
     `]
 })
 export class MelodyGroupComponent {
-    @Input() note!: NoteGroup;
+    @Input() note!: CompositeNote;
     @Input() isSelected = false;
     @Input() isExpanded = false;
     @Input() selectedNoteId?: string;

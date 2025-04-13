@@ -2,29 +2,35 @@ import { NoteData } from './note';
 
 // Tipos básicos
 export type NoteDuration = '1n' | '2n' | '4n' | '8n' | '16n' | '4t' | '8t';
-export type NoteType = 'note' | 'rest' | 'arpeggio' | 'chord';
+export type NoteType = 'note' | 'rest' | 'arpeggio' | 'chord' | 'group';
 
 // Modelo base de nota
-export interface BaseNote {
+export interface BaseElement {
     id: string;              // Identificador único para cada nota
     type: NoteType;
     duration: NoteDuration;
 }
 
 // Nota simple
-export interface SingleNote extends BaseNote {
+export interface SingleNote extends BaseElement {
     type: 'note' | 'rest';
     value: number | null;    // null para silencios
 }
 
-// Grupo de notas (para reemplazar el sistema actual de brackets)
-export interface NoteGroup extends BaseNote {
+// Grupo compuesto (Arpegio o Acorde)
+export interface CompositeNote extends BaseElement {
     type: 'arpeggio' | 'chord';
-    notes: MusicElement[];
+    notes: SingleNote[]; // Solo notas simples dentro?
+}
+
+// NUEVO: Grupo genérico (paréntesis con duración)
+export interface GenericGroup extends BaseElement {
+    type: 'group';
+    children: MusicElement[]; // Puede contener notas o subgrupos
 }
 
 // Tipo unión para cualquier elemento musical
-export type MusicElement = SingleNote | NoteGroup;
+export type MusicElement = SingleNote | CompositeNote | GenericGroup;
 
 // Datos de presentación separados
 export interface EditorState {
@@ -52,12 +58,22 @@ export class NoteFactory {
         };
     }
     
-    static createNoteGroup(type: 'arpeggio' | 'chord', notes: MusicElement[], duration: NoteDuration = '4n'): NoteGroup {
+    static createCompositeNote(type: 'arpeggio' | 'chord', notes: SingleNote[], duration: NoteDuration = '4n'): CompositeNote {
         return {
             id: NoteIdGenerator.generateId(),
             type,
             duration,
             notes
+        };
+    }
+
+    // NUEVO: Factory para grupos genéricos
+    static createGenericGroup(children: MusicElement[], duration: NoteDuration): GenericGroup {
+        return {
+            id: NoteIdGenerator.generateId(),
+            type: 'group',
+            duration, // La duración es obligatoria para el grupo
+            children
         };
     }
 }
@@ -71,8 +87,15 @@ export class NoteConverter {
                 duration: element.duration,
                 note: element.value ?? undefined
             });
-        } else {
-            const group = element as NoteGroup;
+        } else if (element.type === 'group') { // Manejar GenericGroup
+            const group = element as GenericGroup;
+            return new NoteData({
+                type: 'group',
+                duration: group.duration,
+                children: group.children.map(child => this.toNoteData(child))
+            });
+        } else { // Manejar CompositeNote (arpegio/acorde)
+            const group = element as CompositeNote;
             return new NoteData({
                 type: group.type,
                 duration: group.duration,
@@ -87,10 +110,15 @@ export class NoteConverter {
                 noteData.note ?? null,
                 noteData.duration as NoteDuration
             );
-        } else {
-            return NoteFactory.createNoteGroup(
+        } else if (noteData.type === 'group') { // Manejar nuestro tipo 'group'
+            return NoteFactory.createGenericGroup(
+                noteData.children?.map(child => this.fromNoteData(child)) ?? [],
+                noteData.duration as NoteDuration
+            );
+        } else { // Asumir CompositeNote (arpegio/acorde)
+            return NoteFactory.createCompositeNote(
                 noteData.type as 'arpeggio' | 'chord',
-                noteData.noteDatas?.map(note => this.fromNoteData(note)) ?? [],
+                noteData.noteDatas?.map(note => this.fromNoteData(note) as SingleNote) ?? [], // Asumir SingleNote dentro?
                 noteData.duration as NoteDuration
             );
         }

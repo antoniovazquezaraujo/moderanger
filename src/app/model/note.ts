@@ -1,10 +1,25 @@
-export class NoteData {
-    type: 'note' | 'rest' | 'arpeggio' | 'chord' | 'silence' = 'note';
-    duration: string = '4t';
-    note?: number;
+export interface NoteData {
+    id?: string;
+    type?: 'note' | 'rest' | 'arpeggio' | 'chord' | 'silence' | 'group';
+    duration?: string;
+    note?: number | undefined;
+    children?: NoteData[];
     noteDatas?: NoteData[]; // Para Arpeggios y Acordes
-    constructor(data?: Partial<NoteData>) {
+}
+
+export class NoteData implements NoteData {
+    id?: string;
+    type?: 'note' | 'rest' | 'arpeggio' | 'chord' | 'silence' | 'group';
+    duration?: string;
+    note?: number | undefined;
+    children?: NoteData[];
+    noteDatas?: NoteData[]; // Para Arpeggios y Acordes
+
+    constructor(data: Partial<NoteData>) {
         Object.assign(this, data);
+        if (!this.duration && this.type !== 'group') { // Los grupos sí tienen duración propia
+            this.duration = '4t';
+        }
     }
     
     toString(): string {

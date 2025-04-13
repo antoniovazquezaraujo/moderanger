@@ -234,7 +234,7 @@ export class SongPlayer {
         
         const noteDatas: NoteData[] = [];
         for (const noteData of rootNoteDatas) {
-            const duration = noteData.duration;
+            const duration = noteData.duration ?? '4t';
             if (noteData.type === 'note' && noteData.note !== undefined) {
                 player.selectedNote = noteData.note;
                 const noteNoteDatas = player.getSelectedNotes(player.scale, player.tonality);
@@ -293,7 +293,10 @@ export class SongPlayer {
     }
 
     private notesToNoteDatas(notes: number[], duration: string): NoteData[] {
-        return notes.map(note => ({ type: 'note', duration, note }));
+        return notes.map(note => {
+            const noteDuration = duration || '4t';
+            return new NoteData({ type: 'note', duration: noteDuration, note: note });
+        });
     }
 
     private playNoteDatas(partSoundInfo: PartSoundInfo[]): void {
@@ -410,7 +413,7 @@ export class SongPlayer {
             return;
         }
 
-        const duration: string | number = noteData.duration; 
+        const duration = noteData.duration ?? '4t';
         const player = partSoundInfo.player;
 
         if (noteData.type === 'chord' && noteData.noteDatas) {
@@ -423,7 +426,7 @@ export class SongPlayer {
             // Don't advance index here, handled in playTurn
 
         } else if (noteData.type === 'arpeggio' && noteData.noteDatas && noteData.noteDatas.length > 0) {
-            const groupDurationSeconds = Time(noteData.duration).toSeconds();
+            const groupDurationSeconds = Time(duration).toSeconds();
             const singleNoteDurationSeconds = groupDurationSeconds / noteData.noteDatas.length;
             const singleNoteToneDuration = `${singleNoteDurationSeconds}s`;
 

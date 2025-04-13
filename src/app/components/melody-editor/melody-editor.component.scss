@@ -210,7 +210,7 @@ $z-index-selected: 100;
 
 // Estilos para los corchetes de grupo
 .group-bracket {
-  position: absolute;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -301,4 +301,62 @@ $z-index-selected: 100;
 .group-bracket.selected-bracket::after {
   opacity: 1;
   transform: translateX(-50%) scale(1);
+}
+
+// NUEVO: Estilos para los marcadores de grupo
+.group-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  padding: 2px 4px;
+  margin: 0 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  box-sizing: border-box;
+
+  &.active-marker { 
+    border-color: $primary-color;
+    background-color: rgba(0, 119, 204, 0.1);
+    box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.3);
+  }
+
+  &:hover:not(.active-marker) {
+    border-color: $border-color;
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.group-start-marker {
+  // padding-left: 4px;
+}
+
+.group-end-marker {
+  // Estilos específicos si son necesarios para el fin
+}
+
+.group-duration {
+  font-size: 0.8em;
+  color: $secondary-color;
+  font-weight: bold;
+  order: 1;
+  margin-right: 3px;
+}
+
+.group-bracket {
+  font-size: 1.5em;
+  color: $secondary-color;
+  font-weight: bold;
+  order: 2;
+}
+
+.group-bracket-start {
+  // margin-right: 0;
+}
+
+.group-bracket-end {
+  // margin-left: 0;
+  // No necesita order si es el único hijo en .group-end-marker
 }

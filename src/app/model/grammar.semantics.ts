@@ -67,17 +67,13 @@ export const ModeRangerSemantics = {
 
   NoteGroup(duration: Node, _open: Node, _sp1: Node, notes: Node, _sp2: Node, _close: Node) {
     const groupDuration = duration.sourceString.slice(0, -1);
-    const evaluatedNotes = notes['eval']();
-    const notesArray = Array.isArray(evaluatedNotes) ? evaluatedNotes : [evaluatedNotes];
+    const childrenNotes = notes['eval']();
     
-    return notesArray.map(note => {
-      if (note instanceof NoteData) {
-        return new NoteData({
-          ...note,
-          duration: note.duration === '4t' ? groupDuration : note.duration
-        });
-      }
-      return note;
+    return new NoteData({
+        type: 'group',
+        duration: groupDuration,
+        children: Array.isArray(childrenNotes) ? childrenNotes : [childrenNotes],
+        note: undefined
     });
   },
 
