@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { SongPlayer } from '../../model/song.player';
 import { Subscription } from 'rxjs';
 
@@ -6,8 +6,10 @@ import { Subscription } from 'rxjs';
     selector: 'app-metronome',
     template: `
         <div class="metronome">
-            <div class="beat" *ngFor="let beat of beats" 
-                 [class.active]="beat === currentBeat">
+            <div class="beat" 
+                 *ngFor="let beat of beats; let i = index" 
+                 [class.active]="beat === currentBeat"
+                 [class.downbeat]="beat % 8 === 0">
                 ●
             </div>
         </div>
@@ -46,6 +48,13 @@ import { Subscription } from 'rxjs';
             transform: scale(1.2);
         }
         
+        /* Style for downbeats (e.g., every 8th beat) */
+        .beat.downbeat {
+          color: #000; /* Change to black for more contrast */
+          /* Optional: Slightly larger? */
+          /* transform: scale(1.1); */ 
+        }
+        
         /* Styles when used with .inline-metronome class */
         /* We can put specific inline styles here if needed, 
            but adjusting the base .metronome might be enough */
@@ -56,11 +65,12 @@ export class MetronomeComponent implements OnInit, OnDestroy {
     currentBeat: number = -1;
     private subscription?: Subscription;
 
-    constructor(private songPlayer: SongPlayer) {}
+    constructor(private songPlayer: SongPlayer, private cdr: ChangeDetectorRef) {}
 
     ngOnInit() {
         this.subscription = this.songPlayer.metronome$.subscribe((beat: number) => {
             this.currentBeat = beat % this.beats.length;
+            this.cdr.detectChanges();
         });
     }
 
