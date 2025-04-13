@@ -34,7 +34,6 @@
             <div class="melody-editor-container">
               <!-- Use wrapper for direct editing -->
               <div *ngIf="!node.blockContent?.isVariable" class="p-field p-col-12">
-                <label for="melody-{{node.id}}">Melody:</label>
                 <app-melody-editor-wrapper 
                   id="melody-{{node.id}}" 
                   [(ngModel)]="node.blockContent.notes"

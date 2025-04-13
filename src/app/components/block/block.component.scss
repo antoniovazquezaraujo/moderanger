@@ -195,16 +195,29 @@ input[type="number"]#repeatingTimes {
   border-top: 1px solid #ddd;
   background-color: white;
   min-height: 60px;
-  padding: 4px;
+  padding: 2px;
+  outline: none;
+
+  &:focus,
+  &:focus-within {
+    outline: none;
+  }
   
   :host ::ng-deep & {
     .p-dropdown {
       width: 100%;
       border: none;
       background-color: transparent;
+      outline: none;
       
       .p-dropdown-label {
         padding: 8px;
+      }
+
+      &:not(.p-disabled).p-focus {
+        border-color: transparent;
+        box-shadow: none;
+        outline: none;
       }
     }
   }
@@ -270,11 +283,11 @@ input[type="number"]#repeatingTimes {
     .melody-editor {
       border: none;
       background-color: transparent;
-      padding: 2px;
+      padding: 0;
     }
     
     .editor-content {
-      padding: 2px;
+      padding: 0;
       border: none;
       background-color: transparent;
     }

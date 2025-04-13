@@ -1,7 +1,9 @@
 <div class="block-container">
     <!-- Second Row: Comandos -->
-    <div class="title-container"><div class="section-title">Commands</div></div>
-    <div class="block-row commands-row">
+    <div class="commands-row">
+        <div class="title-container">
+            <span class="section-title">Commands</span>
+        </div>
         <div class="container-wrapper commands-container">
             <div *ngFor="let command of block.commands" class="command">
                 <sup class="variable-icon" (click)="toggleVariableMode(command, $event)">$</sup>
@@ -117,8 +119,10 @@
     </div>
 
     <!-- Third Row: Operaciones -->
-    <div class="title-container"><div class="section-title">Actions</div></div>
-    <div class="block-row operations-row">
+    <div class="operations-row">
+        <div class="title-container">
+            <span class="section-title">Operations</span>
+        </div>
         <div class="container-wrapper operations-container">
             <div *ngFor="let operation of operations; let i = index" class="operation-item">
                 <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">
