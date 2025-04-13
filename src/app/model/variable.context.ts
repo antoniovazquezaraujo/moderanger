@@ -36,32 +36,26 @@ export class VariableContext {
      * según su tipo.
      */
     static resetAll(): void {
-        // En lugar de eliminar las variables, restauramos sus valores iniciales
         const variableBackup = new Map<string, VariableValue>();
         
-        // Primero hacemos una copia de todas las variables y sus nombres
-        // para mantener un registro de cuáles existen
         const variables = Array.from(VariableContext.context.entries());
         for (const [name, _] of variables) {
             variableBackup.set(name, null as any);
         }
         
-        // Luego para cada variable, determinamos un valor inicial apropiado
         for (const [name, _] of variableBackup.entries()) {
-            // El valor actual lo obtenemos del contexto original
             const currentValue = VariableContext.context.get(name);
             
-            // Solo reiniciamos variables numéricas o de playmode
-            // Las variables de tipo escala y melodía se mantienen sin cambios
-            if (typeof currentValue === 'number') {
-                VariableContext.setValue(name, 0); // Valores numéricos a 0
-            } else if (typeof currentValue === 'string') {
-                // Solo reiniciamos variables de playmode, no las de escala o melodía
+            // Comentar o eliminar el reinicio para variables numéricas
+            // if (typeof currentValue === 'number') {
+            //     VariableContext.setValue(name, 0);
+            // }
+            
+            if (typeof currentValue === 'string') {
+                // Solo reiniciamos variables de playmode
                 if (['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'].includes(currentValue)) {
                     VariableContext.setValue(name, 'CHORD');
                 }
-                // No hacemos nada con variables de escala o melodía, 
-                // las dejamos con su valor actual
             }
         }
         

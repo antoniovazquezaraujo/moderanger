@@ -79,7 +79,8 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
             } else if (variable.type === 'scale') {
                 value = variable.value;
             } else {
-                value = variable.value === '' ? 0 : Number(variable.value);
+                const numValue = Number(variable.value);
+                value = isNaN(numValue) ? 0 : numValue;
             }
             VariableContext.setValue(variable.name, value);
             this.variableUpdated.emit();
