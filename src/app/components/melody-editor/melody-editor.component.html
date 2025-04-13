@@ -6,12 +6,12 @@
       
       <div class="notes-container">
         <!-- Iterar sobre todos los elementos -->
-        <ng-container *ngFor="let element of elements; let i = index">
+        <ng-container *ngFor="let element of elements; let i = index; trackBy: trackByElementId">
           <!-- Nota simple -->
           <app-melody-note
             *ngIf="element.type === 'note' || element.type === 'rest'"
             [note]="element"
-            [isSelected]="element.id === focusedElement?.id"
+            [isSelected]="element.id === selectedId"
             (click)="onNoteClick(element)"
             (toggleSilence)="toggleSilence(element.id)"
             (changeDuration)="changeDuration(element.id, $event)"
@@ -22,9 +22,9 @@
           <app-melody-group
             *ngIf="element.type === 'arpeggio' || element.type === 'chord'"
             [note]="element"
-            [isSelected]="element.id === focusedElement?.id"
+            [isSelected]="element.id === selectedId"
             [isExpanded]="isGroupExpanded(element.id)"
-            [selectedNoteId]="focusedElement?.id"
+            [selectedNoteId]="selectedId ?? undefined"
             [expandedGroups]="expandedGroups"
             (click)="onNoteClick(element)"
             (toggleExpand)="toggleGroup($event)"

@@ -30,14 +30,15 @@
           <div class="melody-title">Melody</div>
           <div class="melody-header">
             <div class="melody-editor-container">
+              <!-- Use wrapper for direct editing -->
               <div [class.hidden]="node.blockContent?.isVariable">
-                <app-melody-editor 
-                  class="block-melody-editor"
-                  [notes]="node.blockContent?.notes || ''" 
-                  (notesChange)="updateBlockNotes($event, node)"
+                <app-melody-editor-wrapper 
+                  class="block-melody-editor-wrapper" 
+                  [(ngModel)]="node.blockContent.notes" 
                   (toggleVariable)="toggleMelodyVariable($event, node)">
-                </app-melody-editor>
+                </app-melody-editor-wrapper>
               </div>
+              <!-- Dropdown for variable selection -->
               <div [class.hidden]="!node.blockContent?.isVariable" class="melody-dropdown-container">
                 <div class="dropdown-wrapper">
                   <div class="dropdown-variable-icon" (click)="toggleMelodyVariable($event, node)">$</div>

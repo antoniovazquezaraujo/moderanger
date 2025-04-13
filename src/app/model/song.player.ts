@@ -16,7 +16,6 @@ type PartSoundInfo = {
     noteDatas: NoteData[];
     player: Player;
     noteDataIndex: number;
-    arpeggioIndex: number;
     pendingTurnsToPlay: number;
 }
 
@@ -102,7 +101,6 @@ export class SongPlayer {
                 noteDatas: noteData,
                 player,
                 noteDataIndex: 0,
-                arpeggioIndex: 0,
                 pendingTurnsToPlay: 0,
             };
             this.playNoteDatas([partSoundInfo]);
@@ -205,7 +203,6 @@ export class SongPlayer {
                     noteDatas: state.extractedNotes,
                     player: state.player,
                     noteDataIndex: 0,
-                    arpeggioIndex: 0,
                     pendingTurnsToPlay: 0
                 });
             }
@@ -329,7 +326,6 @@ export class SongPlayer {
                 this._currentRepetition++;
                 for (const info of partSoundInfo) {
                     info.noteDataIndex = 0;
-                    info.arpeggioIndex = 0;
                     info.pendingTurnsToPlay = 0;
                 }
                 nextRepetitionPrepared = true; // Prepare for next round in the next loop iteration
@@ -427,22 +423,19 @@ export class SongPlayer {
             // Don't advance index here, handled in playTurn
 
         } else if (noteData.type === 'arpeggio' && noteData.noteDatas && noteData.noteDatas.length > 0) {
-            const note = noteData.noteDatas[partSoundInfo.arpeggioIndex];
-            if (note && note.note !== undefined && !isNaN(note.note)) {
-                const freq = Frequency(note.note, "midi").toFrequency();
-                // Arpeggio notes need their own shorter duration calculated based on parent duration
-                let singleNoteDuration = 0;
-                 try { singleNoteDuration = Time(noteData.duration).toSeconds() / noteData.noteDatas.length; } catch(e) {}
-                const singleNoteToneDuration = `${singleNoteDuration}s`;
-                player.triggerAttackRelease(freq, singleNoteToneDuration, time);
-            } else {
-            }
+            const groupDurationSeconds = Time(noteData.duration).toSeconds();
+            const singleNoteDurationSeconds = groupDurationSeconds / noteData.noteDatas.length;
+            const singleNoteToneDuration = `${singleNoteDurationSeconds}s`;
 
-            partSoundInfo.arpeggioIndex++;
-            if (partSoundInfo.arpeggioIndex >= noteData.noteDatas.length) {
-                partSoundInfo.arpeggioIndex = 0;
-                // Arpeggio cycle finished, index advancement handled in playTurn
-            }
+            noteData.noteDatas.forEach((note, index) => {
+                if (note && note.note !== undefined && !isNaN(note.note)) {
+                    const freq = Frequency(note.note, "midi").toFrequency();
+                    // Calculate the start time for this note within the arpeggio group
+                    const noteStartTime = time + (index * singleNoteDurationSeconds);
+                    player.triggerAttackRelease(freq, singleNoteToneDuration, noteStartTime);
+                } // If it's a rest within the arpeggio, do nothing, just advance time
+            });
+            // Index advancement for the entire arpeggio group is handled in playTurn
 
         } else if (noteData.type === 'note' && noteData.note !== undefined) {
              const freq = Frequency(noteData.note, "midi").toFrequency();
