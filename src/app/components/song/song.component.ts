@@ -1,8 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
-import { SongPlayer } from 'src/app/model/song.player';
-import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-song',
@@ -12,44 +10,19 @@ import { Observable } from 'rxjs';
 export class SongComponent implements OnInit {
 
     @Input() song: Song = new Song();
-    repetitions: number = 1;
-    public metronome$: Observable<number>;
+    @Output() removePartEvent = new EventEmitter<Part>();
     
-    // Add sidebar visibility control
-    variablesSidebarVisible: boolean = false;
-
-    constructor(private songPlayer: SongPlayer) {
-        this.metronome$ = this.songPlayer.metronome$;
+    constructor() {
     }
 
     ngOnInit(): void {
     }
 
-    // Add method to toggle sidebar
-    toggleVariablesSidebar(): void {
-      this.variablesSidebarVisible = !this.variablesSidebarVisible;
-    }
-
-    addPart() {
-        this.song.parts.push(new Part());
+    handleRemovePart(part: Part): void {
+        this.removePartEvent.emit(part);
     }
 
     getParts() {
         return this.song.parts;
-    }
-
-    removePart(part: Part) {
-        if (this.song.parts && this.song.parts.length > 0) {
-            this.song.parts = this.song.parts.filter(t => t != part);
-        }
-    }
-
-    playSong() {
-        this.songPlayer.songRepetitions = this.repetitions;
-        this.songPlayer.playSong(this.song);
-    }
-
-    stopSong() {
-        this.songPlayer.stop();
     }
 }

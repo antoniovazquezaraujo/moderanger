@@ -1,9 +1,40 @@
 <div class="song-editor">
-    <!-- Main content area for the song -->
-    <div class="content-section">
-        <app-song [song]="song"></app-song>
+    <!-- Header moved here from SongComponent -->
+    <div class="song-header">
+        <div class="song-title-and-controls">
+            <div class="song-title">
+                <!-- Bind to song.name (Input property) -->
+                <input type="text" [(ngModel)]="song.name" class="song-name-input" placeholder="Enter song name">
+            </div>
+            <div class="playback-controls">
+                <div class="p-d-flex p-ai-center p-flex-nowrap">
+                    <!-- Use methods from this component (SongEditorComponent) -->
+                    <button pButton type="button" icon="pi pi-plus" (click)="addPart()" class="p-mr-2" pTooltip="Add Part" tooltipPosition="top"></button>
+                    <span>Repeat:</span>
+                    <!-- Bind to repetitions property of this component -->
+                    <input type="number" id="repetitions" class="number-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="repetitions" min="1" max="99" step="1">
+                    <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
+                    <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>
+                    <!-- Use metronome$ property of this component -->
+                    <app-metronome class="inline-metronome p-ml-2"></app-metronome> 
+                </div>
+            </div>
+        </div>
+        <div class="variables-control">
+            <!-- Use toggleVariablesSidebar method from this component -->
+            <p-button (click)="toggleVariablesSidebar()" label="$" styleClass="p-button-text" pTooltip="Show/Hide Variables" tooltipPosition="top"></p-button>
+        </div>
     </div>
 
-    <!-- Removed toolbar and sidebar from here -->
+    <!-- Content section now only contains app-song (which will contain app-parts) -->
+    <div class="content-section">
+        <!-- Pass song down, handle remove event -->
+        <app-song [song]="song" (removePartEvent)="removePartFromSong($event)"></app-song>
+    </div>
 
+    <!-- Sidebar remains here, controlled by this component -->
+    <p-sidebar [(visible)]="variablesSidebarVisible" position="right" styleClass="variables-sidebar">
+        <h3>Variables</h3>
+        <app-variable-declaration></app-variable-declaration>
+    </p-sidebar>
 </div>   
