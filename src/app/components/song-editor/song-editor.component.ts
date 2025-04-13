@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input } 
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
 import { Part } from 'src/app/model/part';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-song-editor',
@@ -13,12 +14,15 @@ export class SongEditorComponent implements OnInit {
     @Input() song: Song = new Song();
     isPlaying: boolean = false;
     repetitions: number = 1;
+    public metronome$: Observable<number>;
 
     constructor(
         private songPlayer: SongPlayer,
         private cdr: ChangeDetectorRef
     ) {
-        this.songPlayer.metronome$.subscribe(() => {
+        this.metronome$ = this.songPlayer.metronome$;
+        
+        this.metronome$.subscribe(() => {
             this.isPlaying = this.songPlayer.isPlaying;
             this.cdr.detectChanges();
         });

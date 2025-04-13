@@ -13,29 +13,42 @@ import { Subscription } from 'rxjs';
         </div>
     `,
     styles: [`
+        /* Default styles (for potential standalone use) */
+        :host {
+            display: inline-block; /* Changed to inline-block */
+            vertical-align: middle; /* Align host vertically */
+            line-height: 1; /* Prevent extra space */
+        }
         .metronome {
-            display: flex;
-            gap: 4px;
-            padding: 10px;
-            background: white;
-            border-radius: 4px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
+            display: inline-flex; /* Changed to inline-flex for inline layout */
+            gap: 2px; /* Reduced gap */
+            padding: 0 5px; /* Minimal padding, adjust as needed */
+            /* background: white; /* Remove background */
+            /* border-radius: 4px; /* Remove border-radius */
+            /* margin: 10px 0; /* Remove default margin */
+            /* border: 1px solid #ddd; /* Remove border */
+            height: 30px; /* Match button height */
+            align-items: center; /* Center dots vertically */
         }
         .beat {
-            width: 12px;
-            height: 12px;
+            width: 8px; /* Smaller dots */
+            height: 8px; /* Smaller dots */
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ccc;
             transition: all 0.1s ease;
-            font-size: 10px;
+            font-size: 8px; /* Smaller font size */
+            line-height: 8px; /* Match height */
         }
         .beat.active {
             color: #333;
             transform: scale(1.2);
         }
+        
+        /* Styles when used with .inline-metronome class */
+        /* We can put specific inline styles here if needed, 
+           but adjusting the base .metronome might be enough */
     `]
 })
 export class MetronomeComponent implements OnInit, OnDestroy {
@@ -47,7 +60,7 @@ export class MetronomeComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.subscription = this.songPlayer.metronome$.subscribe((beat: number) => {
-            this.currentBeat = beat;
+            this.currentBeat = beat % this.beats.length;
         });
     }
 
