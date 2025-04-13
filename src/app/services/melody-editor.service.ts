@@ -288,8 +288,8 @@ export class MelodyEditorService {
         }
     }
 
-    // <<< NUEVA FUNCIÓN AUXILIAR >>>
-    private findElementAndParent(elementId: string, elements: MusicElement[] = this.elementsSubject.value, parent: MusicElement | null = null): { element: MusicElement | null, parent: MusicElement | null } {
+    // <<< HACER PÚBLICO >>>
+    public findElementAndParent(elementId: string, elements: MusicElement[] = this.elementsSubject.value, parent: MusicElement | null = null): { element: MusicElement | null, parent: MusicElement | null } {
         for (const element of elements) {
             if (element.id === elementId) {
                 return { element, parent };

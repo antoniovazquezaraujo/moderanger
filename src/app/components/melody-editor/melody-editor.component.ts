@@ -334,29 +334,44 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       this.selectElement(`${newGroupId}_start`);
   }
   
-  // Asegurar que increase/decreaseDuration operen sobre el elemento original
+  // Asegurar que increase/decreaseDuration operen sobre el elemento original (raíz o anidado)
   private increaseDuration(elementId?: string): void {
       const targetId = elementId ?? this.focusedElement?.id;
       if (!targetId) return;
-      // Encontrar el elemento en la lista del SERVICIO (elements) para obtener la duración actual
-      const element = this.elements.find(e => e.id === targetId);
-      if (!element) return;
+      // Usar el servicio para encontrar el elemento real (raíz o anidado)
+      const { element } = this.melodyEditorService.findElementAndParent(targetId);
+      
+      if (!element) {
+          console.warn(`increaseDuration: Element with ID ${targetId} not found.`);
+          return;
+      }
+
+      // Proceder con la lógica original usando el elemento encontrado
       const currentIndex = this.durations.indexOf(element.duration);
       if (currentIndex > 0) {
-          this.melodyEditorService.updateNote(targetId, { duration: this.durations[currentIndex - 1] });
-          this.emitNotesChange();
+          const newDuration = this.durations[currentIndex - 1];
+          this.melodyEditorService.updateNote(targetId, { duration: newDuration });
+          // No es necesario emitNotesChange() aquí, la suscripción al servicio se encarga
       }
   }
 
   private decreaseDuration(elementId?: string): void {
       const targetId = elementId ?? this.focusedElement?.id;
       if (!targetId) return;
-      const element = this.elements.find(e => e.id === targetId);
-      if (!element) return;
+      // Usar el servicio para encontrar el elemento real (raíz o anidado)
+      const { element } = this.melodyEditorService.findElementAndParent(targetId);
+      
+      if (!element) {
+          console.warn(`decreaseDuration: Element with ID ${targetId} not found.`);
+          return;
+      }
+      
+      // Proceder con la lógica original usando el elemento encontrado
       const currentIndex = this.durations.indexOf(element.duration);
       if (currentIndex < this.durations.length - 1) {
-          this.melodyEditorService.updateNote(targetId, { duration: this.durations[currentIndex + 1] });
-          this.emitNotesChange();
+           const newDuration = this.durations[currentIndex + 1];
+          this.melodyEditorService.updateNote(targetId, { duration: newDuration });
+           // No es necesario emitNotesChange() aquí, la suscripción al servicio se encarga
       }
   }
   
