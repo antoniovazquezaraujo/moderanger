@@ -9,16 +9,17 @@
     <button pButton type="button" icon="pi pi-times" (click)="removeChild(block)"></button>
     <app-block-commands [block]="block" (removeCommand)="onRemoveCommand($event)"></app-block-commands> -->
 
-<p-tree 
-  [value]="block.children ||[]" 
-  [draggableNodes]="true" 
-  [droppableNodes]="true" 
-  draggableScope="self" 
-  droppableScope="self"  
-  emptyMessage="Empty" 
-  (onDragStart)="dragStart(block)" 
-  (onDragEnd)="dragEnd()"
-  [style]="{'height': 'auto', 'overflow-y': 'auto'}">
+<!-- Conditionally render the p-tree only if there are children -->
+<ng-container *ngIf="block.children && block.children.length > 0">
+  <p-tree 
+    [value]="block.children ||[]" 
+    [draggableNodes]="true" 
+    [droppableNodes]="true" 
+    draggableScope="self" 
+    droppableScope="self"  
+    (onDragStart)="dragStart(block)" 
+    (onDragEnd)="dragEnd()"
+    [style]="{'height': 'auto', 'overflow-y': 'auto'}">
     <ng-template let-node pTemplate="default">
     <div class="block-content">
       <!-- Bloque (información principal) - Todo en la misma línea -->
@@ -97,4 +98,6 @@
     </div>
   </ng-template>
 </p-tree>
+</ng-container> <!-- Close the conditional container -->
+
 <!-- </div> -->
