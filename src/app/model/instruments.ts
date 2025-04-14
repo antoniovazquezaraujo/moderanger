@@ -5,9 +5,7 @@ export enum InstrumentType {
     PIANO = 'Piano'
 }
 
-export const instrumentTypes = [
-    { label: 'Piano', value: InstrumentType.PIANO }
-];
+
 
 export class InstrumentFactory {
     private static pianoInstance?: PianoInstrument;

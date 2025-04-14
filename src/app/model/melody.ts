@@ -26,11 +26,6 @@ export interface NoteGroup extends BaseNote {
 // Tipo unión para cualquier elemento musical
 export type MusicElement = SingleNote | NoteGroup;
 
-// Datos de presentación separados
-export interface EditorState {
-    selectedNoteId?: string;
-    expandedGroups: Set<string>;
-}
 
 // Clase utilitaria para generar IDs únicos
 export class NoteIdGenerator {

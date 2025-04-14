@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { MusicElement, SingleNote, NoteGroup, NoteDuration, NoteFactory, NoteConverter } from '../model/melody';
+import { BehaviorSubject } from 'rxjs';
+import { MusicElement, SingleNote, NoteFactory, NoteConverter } from '../model/melody';
 import { NoteData } from '../model/note';
 
 @Injectable({
     providedIn: 'root'
 })
 export class MelodyEditorService {
-    private elementsSubject = new BehaviorSubject<MusicElement[]>([]);
+    private readonly elementsSubject = new BehaviorSubject<MusicElement[]>([]);
     elements$ = this.elementsSubject.asObservable();
     
     // New subject for selected element ID
-    private selectedElementIdSubject = new BehaviorSubject<string | null>(null);
+    private readonly selectedElementIdSubject = new BehaviorSubject<string | null>(null);
     selectedElementId$ = this.selectedElementIdSubject.asObservable();
 
     constructor() {}

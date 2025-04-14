@@ -1,9 +1,8 @@
 import { Component, OnInit, Input, Output, EventEmitter, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { NoteData } from '../../model/note';
 import { parseBlockNotes } from '../../model/ohm.parser';
-import { VariableContext } from '../../model/variable.context';
 import { MelodyEditorService } from '../../services/melody-editor.service';
-import { MusicElement, NoteDuration, SingleNote, NoteGroup } from '../../model/melody';
+import { MusicElement, NoteDuration, SingleNote } from '../../model/melody';
 import { Subscription } from 'rxjs';
 
 /**
