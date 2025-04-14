@@ -1,4 +1,11 @@
 <h1>ModeRanger</h1>
-<div class="container">
+
+<!-- Mostrar mensaje de carga o nada hasta que esté listo -->
+<div *ngIf="!isAudioReady">
+  Loading audio samples...
+</div>
+
+<!-- Mostrar el editor solo cuando el audio esté listo -->
+<div class="container" *ngIf="isAudioReady">
     <app-song-editor [song]="currentSong"></app-song-editor>
 </div>

@@ -136,9 +136,11 @@ export class PartComponent implements OnInit {
     }
 
     playPart() {
-        const player = new Player(0, this.part.instrumentType || InstrumentType.PIANO);
-        const dummySong = new Song();
-        this.songPlayer.playPart(this.part, player, dummySong);
+        // Comentar temporalmente - necesita refactor usando AudioEngineService
+        // const player = new Player(0, this.part.instrumentType || InstrumentType.PIANO);
+        // const dummySong = new Song();
+        // this.songPlayer.playPart(this.part, player, dummySong);
+        console.warn("playPart functionality in PartComponent needs refactoring.");
     }
 
     stopPart() {
