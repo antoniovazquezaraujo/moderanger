@@ -246,7 +246,6 @@ export class SongPlayer {
     }
     
     private _loopTick(time: number, partSoundInfo: PartSoundInfo[]): void {
-        // console.log(`[SongPlayer] _loopTick @ time: ${time}, beatCount: ${this._beatCount}`);
         this._metronome.next(this._beatCount);
         let turnPlayed = false;
         const sixteenthNoteDuration = this.audioEngine.timeToSeconds('16n');
@@ -289,21 +288,17 @@ export class SongPlayer {
 
     private _playTurn(partSoundInfo: PartSoundInfo, interval: number, time: number): boolean {
          const { instrumentId, noteDataIndex, pendingTurnsToPlay } = partSoundInfo;
-         // console.log(`[SongPlayer]   _playTurn for ${instrumentId} - Index: ${noteDataIndex}, Pending: ${pendingTurnsToPlay}`);
          
          if (noteDataIndex >= partSoundInfo.noteDatas.length && pendingTurnsToPlay === 0) {
-            // console.log(`[SongPlayer]     Part ${instrumentId} finished.`);
             return false;
          }
 
          if (pendingTurnsToPlay > 0) {
              partSoundInfo.pendingTurnsToPlay--;
-             // console.log(`[SongPlayer]     Part ${instrumentId} skipping turn, pending: ${partSoundInfo.pendingTurnsToPlay}`);
              return true; 
          } else {
             if (noteDataIndex < partSoundInfo.noteDatas.length) {
                  const noteData = partSoundInfo.noteDatas[noteDataIndex];
-                 // console.log(`[SongPlayer]     Part ${instrumentId} playing note index ${noteDataIndex}.`);
                  this._playNoteData(partSoundInfo, time);
 
                  let calculatedPendingTurns = 0;
@@ -317,10 +312,8 @@ export class SongPlayer {
                  }
                  partSoundInfo.pendingTurnsToPlay = calculatedPendingTurns;
                  partSoundInfo.noteDataIndex++;
-                 // console.log(`[SongPlayer]     Part ${instrumentId} finished playing index ${noteDataIndex-1}. New index: ${partSoundInfo.noteDataIndex}, New pending: ${partSoundInfo.pendingTurnsToPlay}`);
                  return true; 
              } else {
-                 // console.log(`[SongPlayer]     Part ${instrumentId} has no more notes to play right now.`);
                  return false;
              }
          }
@@ -330,7 +323,6 @@ export class SongPlayer {
         if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length) return;
         const noteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
         const instrumentId = partSoundInfo.instrumentId;
-        // console.log(`[SongPlayer]       _playNoteData: Instrument ${instrumentId}, Time: ${time}, NoteData: ${JSON.stringify(noteData)}`);
 
         try {
             switch (noteData.type) {

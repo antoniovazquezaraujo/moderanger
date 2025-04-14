@@ -110,32 +110,29 @@ export class AudioEngineService {
       // 1. Check if an instrument of this type already exists
       const existingInstrumentInfo = this.instrumentInstancesByType.get(type);
       if (existingInstrumentInfo) {
-          // console.log(`[AudioEngineService] Reusing existing instrument ${existingInstrumentInfo.id} for type ${type}`);
           // Ensure it hasn't been disposed unexpectedly
           if (this.instruments.has(existingInstrumentInfo.id)) {
-             return existingInstrumentInfo.id;
+              return existingInstrumentInfo.id;
           } else {
-             console.warn(`[AudioEngineService] Found instance info for ${type} but instance ${existingInstrumentInfo.id} was missing from main map. Forcing recreation.`);
-             this.instrumentInstancesByType.delete(type); // Remove stale entry
+              console.warn(`[AudioEngineService] Found instance info for ${type} but instance ${existingInstrumentInfo.id} was missing from main map. Forcing recreation.`);
+              this.instrumentInstancesByType.delete(type); // Remove stale entry
           }
       }
 
       // 2. If not existing or stale, create a new one
       const instrumentId = `instrument-${this.nextInstrumentId++}`;
-      // console.log(`[AudioEngineService] Creating new instrument ${instrumentId} of type ${type}`);
       try {
-         const musicalInstrumentWrapper = await InstrumentFactory.getInstrument(type);
-         const toneInstrument = musicalInstrumentWrapper.instrument;
+          const musicalInstrumentWrapper = await InstrumentFactory.getInstrument(type);
+          const toneInstrument = musicalInstrumentWrapper.instrument;
 
-         if (toneInstrument instanceof Tone.Sampler || toneInstrument instanceof Tone.PolySynth) {
-             // console.log(`[AudioEngineService] Storing new instrument ${instrumentId} in maps.`);
-             this.instruments.set(instrumentId, toneInstrument);
-             this.instrumentInstancesByType.set(type, { id: instrumentId, instance: toneInstrument });
-             return instrumentId;
-         } else {
+          if (toneInstrument instanceof Tone.Sampler || toneInstrument instanceof Tone.PolySynth) {
+              this.instruments.set(instrumentId, toneInstrument);
+              this.instrumentInstancesByType.set(type, { id: instrumentId, instance: toneInstrument });
+              return instrumentId;
+          } else {
               console.error("[AudioEngineService] Wrapper did not contain a valid Sampler or PolySynth");
               throw new Error("Failed to get valid Tone.js instrument from wrapper");
-         }
+          }
       } catch (error) {
           console.error(`[AudioEngineService] Error creating instrument ${type}:`, error);
           throw error;
@@ -145,7 +142,6 @@ export class AudioEngineService {
   disposeInstrument(instrumentId: InstrumentId): void {
     const instrument = this.instruments.get(instrumentId);
     if (instrument) {
-        // console.log(`[AudioEngineService] Disposing instrument ${instrumentId}`);
         let instrumentType: InstrumentType | null = null;
         for (const [type, info] of this.instrumentInstancesByType.entries()) {
             if (info.id === instrumentId) {
@@ -155,8 +151,7 @@ export class AudioEngineService {
         }
 
         if (instrumentType) {
-             // console.log(`[AudioEngineService] Removing instrument type ${instrumentType} from reuse map.`);
-             this.instrumentInstancesByType.delete(instrumentType);
+            this.instrumentInstancesByType.delete(instrumentType);
         }
 
         if (typeof instrument.dispose === 'function') {
@@ -185,32 +180,10 @@ export class AudioEngineService {
         throw new Error(`Instrument ${instrumentId} not found`);
     }
 
-    // --- Remove Simplified Logging ---
-    // console.log(`[AudioEngine] > triggerAttackRelease called for ID: ${instrumentId}, Note/Freq: ${JSON.stringify(noteOrFreq)}, Duration: ${duration}, Time: ${time ?? 'now'}`);
-    // if (instrument instanceof Tone.Sampler) {
-    //     console.log(`[AudioEngine]   Sampler loaded state: ${instrument.loaded}`);
-    //     try {
-    //         const samplerBuffers = (instrument as any).buffers;
-    //         if (samplerBuffers && typeof samplerBuffers.has === 'function') {
-    //             let midiNoteToCheck: number | null = null;
-    //              if (typeof noteOrFreq === 'number' && Number.isInteger(noteOrFreq) && noteOrFreq >= 0 && noteOrFreq <= 127) {
-    //                 midiNoteToCheck = noteOrFreq;
-    //              }
-    //              if (midiNoteToCheck !== null) {
-    //                  console.log(`[AudioEngine]   Buffer check for MIDI note ${midiNoteToCheck}: ${samplerBuffers.has(midiNoteToCheck)}`);
-    //              }
-    //         } else {
-    //              console.log(`[AudioEngine]   Sampler buffers property not found or inaccessible.`);
-    //         }
-    //     } catch (e) {
-    //         console.log(`[AudioEngine]   Error accessing sampler buffers: ${e}`);
-    //     }
-    // }
-    // --- End Remove Simplified Logging ---
+    // --- Removed Simplified Logging --- 
 
     try {
         instrument.triggerAttackRelease(noteOrFreq, duration, time);
-        // console.log(`[AudioEngine] < triggerAttackRelease successful for ID: ${instrumentId}`); // Remove success log
     } catch (error) {
         console.error(`[AudioEngine] Error during instrument.triggerAttackRelease for ${instrumentId}`, error);
         throw error;
