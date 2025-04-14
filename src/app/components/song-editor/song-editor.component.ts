@@ -12,7 +12,7 @@ import { takeUntil } from 'rxjs/operators';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SongEditorComponent implements OnInit, OnDestroy {
-    @Input() song: Song = new Song();
+    @Input() song!: Song;
     
     repetitions: number = 1;
     public metronome$: Observable<number>;
