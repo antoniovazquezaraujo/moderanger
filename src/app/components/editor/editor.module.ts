@@ -1,0 +1,67 @@
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+// Componentes relacionados con la edición
+import { BlockComponent } from '../block/block.component';
+import { BlockCommandsComponent } from '../block-commands/block-commands.component';
+import { SongEditorComponent } from '../song-editor/song-editor.component';
+import { PartsComponent } from '../parts/parts.component';
+import { PartComponent } from '../part/part.component';
+import { SongComponent } from '../song/song.component';
+import { VariableDeclarationComponent } from '../variable-declaration/variable-declaration.component';
+import { MetronomeComponent } from '../metronome/metronome.component';
+import { MelodyEditorWrapperComponent } from '../melody-editor-wrapper/melody-editor-wrapper.component';
+import { MelodyOptionComponent } from '../melody-option/melody-option.component';
+
+// Módulos de PrimeNG (y otros) necesarios para estos componentes
+import { TreeModule } from 'primeng/tree';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { KnobModule } from 'primeng/knob';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { AccordionModule } from 'primeng/accordion';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { TooltipModule } from 'primeng/tooltip';
+import { SplitterModule } from 'primeng/splitter';
+import { SidebarModule } from 'primeng/sidebar';
+import { MelodyEditorModule } from '../melody-editor/melody-editor.module'; // Importar módulo existente
+
+@NgModule({
+  declarations: [
+    BlockComponent,
+    BlockCommandsComponent,
+    SongEditorComponent,
+    PartsComponent,
+    PartComponent,
+    SongComponent,
+    VariableDeclarationComponent,
+    MetronomeComponent,
+    MelodyEditorWrapperComponent,
+    MelodyOptionComponent
+  ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    // Módulos PrimeNG
+    TreeModule,
+    ButtonModule,
+    InputTextModule,
+    KnobModule,
+    DropdownModule,
+    InputNumberModule,
+    AccordionModule,
+    InputTextareaModule,
+    TooltipModule,
+    SplitterModule,
+    SidebarModule,
+    // Otros módulos necesarios
+    MelodyEditorModule 
+  ],
+  exports: [
+    // Exportar el componente principal que se usa fuera (en AppComponent)
+    SongEditorComponent 
+  ]
+})
+export class EditorModule { } 
