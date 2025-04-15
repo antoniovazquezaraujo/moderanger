@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
 import { SingleNote, NoteDuration } from '../../model/melody';
 
 @Component({
@@ -65,6 +65,8 @@ export class MelodyNoteComponent {
     @Output() toggleSilence = new EventEmitter<void>();
     @Output() changeDuration = new EventEmitter<number>();
     @Output() changeValue = new EventEmitter<number>();
+    
+    constructor(public elementRef: ElementRef) {}
     
     onClick(): void {
         this.select.emit();

@@ -216,16 +216,16 @@ export class SongPlayer {
     }
 
     private _initializePlayback(song: Song): boolean {
-        this.stop();
+        this.stop(); 
         if (!song || !song.parts || song.parts.length === 0) {
             this._isPlaying = false; 
             return false; 
-        }
+         }
         this.audioEngine.setTransportBpm(100);
         this.audioEngine.setTransportPosition(0);
         this._isPlaying = true; 
         this._beatCount = 0;
-        this._currentRepetition = 0;
+        this._currentRepetition = 0; 
         if (!this.currentStopListenerId) {
              this.currentStopListenerId = this.audioEngine.onTransportStop(this._handleTransportStop);
         }
@@ -239,7 +239,7 @@ export class SongPlayer {
                       const value = VariableContext.getValue(block.blockContent.variableName);
                       if (typeof value === 'string') {
                           block.blockContent.notes = value;
-                      } else {
+                    } else {
                           console.warn(`Variable ${block.blockContent.variableName} not found or not a string for block ${block.id}`);
                       }
                  }
@@ -258,7 +258,7 @@ export class SongPlayer {
                 for (let i = 0; i < block.repeatingTimes; i++) {
                     executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
                     block.children?.forEach(childBlock => {
-                        addBlockAndChildren(childBlock, childLevel + 1, block);
+                            addBlockAndChildren(childBlock, childLevel + 1, block);
                     });
                 }
             };
@@ -284,7 +284,7 @@ export class SongPlayer {
                 if (unit) {
                     const { block } = unit;
                     block.commands?.forEach((command: Command) => command.execute(state.player));
-                    block.executeBlockOperations(); 
+                    block.executeBlockOperations();
                     const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player);
                     state.extractedNotes = state.extractedNotes.concat(blockNotes);
                     state.currentUnitIndex++;
@@ -293,7 +293,7 @@ export class SongPlayer {
                     }
                 } else {
                       state.isFinished = true;
-                 }
+                }
             }
         }
         const partSoundInfo: PartSoundInfo[] = [];

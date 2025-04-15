@@ -1,9 +1,11 @@
-import { Component, OnInit, Input, Output, EventEmitter, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges, QueryList, ViewChildren } from '@angular/core';
 import { NoteData } from '../../model/note';
 import { parseBlockNotes } from '../../model/ohm.parser';
 import { MelodyEditorService } from '../../services/melody-editor.service';
-import { MusicElement, NoteDuration, SingleNote } from '../../model/melody';
+import { MusicElement, NoteDuration, SingleNote, NoteGroup } from '../../model/melody';
 import { Subscription } from 'rxjs';
+import { MelodyNoteComponent } from '../melody-note/melody-note.component';
+import { MelodyGroupComponent } from '../melody-group/melody-group.component';
 
 /**
  * Interfaz para notas en el editor de melodías
@@ -35,6 +37,8 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   @Output() notesChange = new EventEmitter<string>();
   @Output() toggleVariable = new EventEmitter<void>();
   @ViewChild('editorContainer') editorContainer!: ElementRef;
+  @ViewChildren(MelodyNoteComponent) noteComponents!: QueryList<MelodyNoteComponent>;
+  @ViewChildren(MelodyGroupComponent) groupComponents!: QueryList<MelodyGroupComponent>;
   
   focusedElement: MusicElement | null = null;
   elements: MusicElement[] = [];
@@ -52,17 +56,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   ) {}
 
   ngOnInit(): void {
-    // Subscribe to selected ID changes FROM THE SERVICE
-    this.selectedIdSub = this.melodyEditorService.selectedElementId$.subscribe(id => {
-      this.selectedId = id;
-      // THIS is now the single source of truth for setting focusedElement based on selection
-      if (id) {
-        this.focusedElement = this.elements.find(e => e.id === id) || null;
-      } else {
-        this.focusedElement = null; // Deselected
-      }
-      this.cdr.detectChanges(); // Update view based on selection change
-    });
+    // Subscription moved to ngAfterViewInit to ensure ViewChildren are available
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -110,22 +104,67 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   }
 
   ngAfterViewInit(): void {
-    // Initial load needs to happen before tracking last emitted string
+    // Initial load
     this.loadNotesFromString(this.notes);
 
-    // Subscribe AFTER initial load
+    // Subscribe AFTER initial load AND view init
     this.elementsSub = this.melodyEditorService.elements$.subscribe(elements => {
       const previouslySelectedId = this.selectedId;
       this.elements = elements; // Update the component's element list
-      
+
+      // Re-evaluate focusedElement based on the NEW elements list and the CURRENT selectedId
       if (previouslySelectedId && !elements.some(e => e.id === previouslySelectedId)) {
-        this.melodyEditorService.selectNote(null);
+          // Previously selected element is gone, selection state handled by selectedId$ sub
       } else if (previouslySelectedId) {
-        this.focusedElement = this.elements.find(e => e.id === previouslySelectedId) || null;
+          this.focusedElement = this.elements.find(e => e.id === previouslySelectedId) || null;
+      } else {
+          this.focusedElement = null;
+      }
+      // We need to detect changes so the *ngFor updates *before* the selectedId$ sub tries to find the element
+      this.cdr.detectChanges();
+    });
+
+    // Subscribe to selection changes
+    this.selectedIdSub = this.melodyEditorService.selectedElementId$.subscribe(id => {
+      this.selectedId = id;
+      if (id) {
+        this.focusedElement = this.elements.find(e => e.id === id) || null;
+      } else {
+        this.focusedElement = null; // Deselected
       }
       
-      this.cdr.detectChanges(); // Update view with new elements list
+      // Detect changes to update the template bindings ([isSelected])
+      this.cdr.detectChanges(); 
+      
+      // After view updates, scroll the selected element into view
+      if (id) {
+          this.scrollToElement(id);
+      }
     });
+    
+    // Set initial focus to the editor container if needed
+    this.editorContainer?.nativeElement.focus();
+  }
+
+  private scrollToElement(elementId: string): void {
+    // Use setTimeout to allow DOM to update after change detection
+    setTimeout(() => {
+        const allComponents = [...this.noteComponents.toArray(), ...this.groupComponents.toArray()];
+        const targetComponent = allComponents.find(comp => comp.note?.id === elementId);
+
+        if (targetComponent) {
+            targetComponent.elementRef.nativeElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest'
+            });
+        }
+         // Also ensure the main editor retains browser focus for keyboard events
+        const editorElement = this.editorContainer?.nativeElement;
+        if (editorElement && document.activeElement !== editorElement) {
+             // editorElement.focus(); // Re-focus container if needed, might steal focus unexpectedly
+        }
+    }, 0);
   }
 
   @HostListener('keydown', ['$event'])
@@ -213,10 +252,10 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   onEditorClick(event: MouseEvent) {
     const clickedInsideNote = (event.target as HTMLElement).closest('app-melody-note, app-melody-group');
     if (!clickedInsideNote) {
-      // If clicked on background, deselect all
       this.melodyEditorService.selectNote(null);
     }
-    const editorElement = this.elementRef.nativeElement.querySelector('.melody-editor');
+    // Always ensure editor container has focus on click within editor
+    const editorElement = this.editorContainer?.nativeElement; 
     if (editorElement) {
       editorElement.focus();
     }
@@ -291,15 +330,38 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   }
 
   insertNote(): void {
-    if (this.elements.length === 0) {
-      this.melodyEditorService.addNote(); // Service adds and selects
-    } else if (this.focusedElement) {
-      this.melodyEditorService.addNoteAfter(this.focusedElement.id); // Service adds and selects
+    const baseNoteValue = 1; // Default value
+    const baseDuration: NoteDuration = '4n';
+
+    let newNoteId: string | null = null;
+
+    if (this.focusedElement) {
+      newNoteId = this.melodyEditorService.addNoteAfter(this.focusedElement.id, {
+        value: baseNoteValue,
+        duration: baseDuration,
+        type: 'note' // Explicitly type as note
+      });
     } else {
-      // If no focus, add at the end? Or beginning?
-      this.melodyEditorService.addNote(); 
+      newNoteId = this.melodyEditorService.addNote({
+        value: baseNoteValue,
+        duration: baseDuration,
+        type: 'note' // Explicitly type as note
+      });
     }
-    this.emitNotesChange();
+
+    // Service now handles selection via selectNote(newNoteId)
+    // The selectedId$ subscription will handle focusing the container and scrolling
+    /*
+    if (newNoteId) {
+      this.melodyEditorService.selectNote(newNoteId);
+      setTimeout(() => {
+        const editorElement = this.editorContainer?.nativeElement;
+        if (editorElement) {
+          editorElement.focus();
+        }
+      }, 0);
+    }
+    */
   }
 
   private deleteNote(): void {

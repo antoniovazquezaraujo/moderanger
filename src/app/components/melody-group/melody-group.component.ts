@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
 import { NoteGroup, MusicElement, NoteDuration } from '../../model/melody';
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 
@@ -104,6 +104,8 @@ export class MelodyGroupComponent {
     @Output() changeDuration = new EventEmitter<number>();
     @Output() toggleSilence = new EventEmitter<string>();
     @Output() changeChildDuration = new EventEmitter<{ id: string; delta: number }>();
+    
+    constructor(public elementRef: ElementRef) {}
     
     onClick(): void {
         this.select.emit(this.note.id);
