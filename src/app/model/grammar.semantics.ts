@@ -58,9 +58,10 @@ export const ModeRangerSemantics = {
 
   Note(duration: Node, num: Node) {
     const note = num['eval']();
-    const noteDuration = duration.numChildren > 0 ? duration.sourceString.slice(0, -1) : '4t';
+    const noteDuration = duration.numChildren > 0 ? duration.sourceString.slice(0, -1) : undefined;
     return new NoteData({
-      ...note,
+      type: note.type,
+      note: note.note,
       duration: noteDuration
     });
   },

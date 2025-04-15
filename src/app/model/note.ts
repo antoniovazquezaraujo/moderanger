@@ -17,17 +17,40 @@ export class NoteData implements NoteData {
 
     constructor(data: Partial<NoteData>) {
         Object.assign(this, data);
-        if (!this.duration && this.type !== 'group') { // Los grupos sí tienen duración propia
-            this.duration = '4t';
-        }
     }
     
     toString(): string {
-        if (this.type === 'note' || this.type === 'rest') {
-            return `${this.duration}:${this.note ?? 's'}`;
-        } else {
-            const notes = this.noteDatas?.map(note => note.toString()).join(' ') ?? '';
-            return `${this.duration}:(${notes})`;
+        let durationPrefix = '';
+        // Añadir prefijo de duración SOLO si existe
+        if (this.duration) {
+            durationPrefix = `${this.duration}:`;
+        }
+        
+        switch (this.type) {
+            case 'note':
+            case 'rest':
+            case 'silence':
+                // Usar el prefijo (puede ser vacío si no había duración)
+                return `${durationPrefix}${this.note ?? 's'}`;
+            
+            case 'arpeggio': 
+                const arpeggioNotes = this.noteDatas?.map(note => note.toString()).join(' ') ?? '';
+                // Usar el prefijo (el grupo siempre debería tener duración?)
+                return `${durationPrefix}[${arpeggioNotes}]`; 
+            
+            case 'chord': 
+                 const chordNotes = this.noteDatas?.map(note => note.toString()).join(' ') ?? '';
+                 // Usar el prefijo
+                 return `${durationPrefix}{${chordNotes}}`; 
+            
+            case 'group': 
+                const groupNotes = this.children?.map(note => note.toString()).join(' ') ?? '';
+                // Usar el prefijo
+                return `${durationPrefix}(${groupNotes})`; 
+            
+            default:
+                console.warn(`NoteData.toString: Unknown type ${this.type}`);
+                return ''; 
         }
     }
 

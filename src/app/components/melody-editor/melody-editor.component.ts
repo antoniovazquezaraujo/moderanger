@@ -188,10 +188,10 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   selectElement(id: string | null): void {
       if (this.selectedId !== id) {
           this.selectedId = id;
-          console.log('Selected visual element ID:', id);
+          console.log('[MelodyEditor] Selecting visual element ID:', id);
           const visualEl = this.visualElements.find(ve => ve.id === id);
           this.focusedElement = visualEl ? visualEl.originalElement : null;
-          console.log('Focused original element:', this.focusedElement);
+          console.log('[MelodyEditor] Focused original element:', this.focusedElement ? JSON.parse(JSON.stringify(this.focusedElement)) : null);
           this.cdr.detectChanges();
       }
   }
@@ -338,41 +338,88 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   private increaseDuration(elementId?: string): void {
       const targetId = elementId ?? this.focusedElement?.id;
       if (!targetId) return;
-      // Usar el servicio para encontrar el elemento real (raíz o anidado)
-      const { element } = this.melodyEditorService.findElementAndParent(targetId);
-      
-      if (!element) {
-          console.warn(`increaseDuration: Element with ID ${targetId} not found.`);
-          return;
+      // Find the element within the complete, potentially nested 'elements' structure
+      const findElementRecursive = (id: string, els: MusicElement[]): MusicElement | null => {
+          for (const el of els) {
+              if (el.id === id) return el;
+              if (el.type === 'group' && el.children) {
+                  const found = findElementRecursive(id, el.children);
+                  if (found) return found;
+              } else if ((el.type === 'arpeggio' || el.type === 'chord') && el.notes) {
+                  // Arpeggios/Chords might have MusicElements too if we adapt the model later
+                  // For now, assume they don't contain nestable elements with durations
+                  // const found = findElementRecursive(id, el.notes);
+                  // if (found) return found;
+              }
+          }
+          return null;
+      };
+      const currentElement = findElementRecursive(targetId, this.elements);
+      if (!currentElement) return;
+
+      const currentDuration = currentElement.duration;
+      let newDuration: NoteDuration | undefined;
+
+      if (currentDuration === undefined) {
+          // If current is undefined, cycle to the last duration ('8t')
+          newDuration = this.durations[this.durations.length - 1];
+      } else {
+          const currentIndex = this.durations.indexOf(currentDuration);
+          if (currentIndex === 0) {
+              // If current is the first ('1n'), cycle to undefined
+              newDuration = undefined;
+          } else if (currentIndex > 0) {
+              // Otherwise, go to the previous duration
+              newDuration = this.durations[currentIndex - 1];
+          } else {
+             // Duration existed but wasn't in our list? Fallback to undefined.
+             newDuration = undefined;
+          }
       }
 
-      // Proceder con la lógica original usando el elemento encontrado
-      const currentIndex = this.durations.indexOf(element.duration);
-      if (currentIndex > 0) {
-          const newDuration = this.durations[currentIndex - 1];
-          this.melodyEditorService.updateNote(targetId, { duration: newDuration });
-          // No es necesario emitNotesChange() aquí, la suscripción al servicio se encarga
-      }
+      this.melodyEditorService.updateNote(targetId, { duration: newDuration });
+      this.emitNotesChange(); // Emit after update
   }
 
   private decreaseDuration(elementId?: string): void {
       const targetId = elementId ?? this.focusedElement?.id;
       if (!targetId) return;
-      // Usar el servicio para encontrar el elemento real (raíz o anidado)
-      const { element } = this.melodyEditorService.findElementAndParent(targetId);
-      
-      if (!element) {
-          console.warn(`decreaseDuration: Element with ID ${targetId} not found.`);
-          return;
+      // Find the element within the complete, potentially nested 'elements' structure
+      const findElementRecursive = (id: string, els: MusicElement[]): MusicElement | null => {
+           for (const el of els) {
+               if (el.id === id) return el;
+               if (el.type === 'group' && el.children) {
+                   const found = findElementRecursive(id, el.children);
+                   if (found) return found;
+               } // Add checks for arpeggio/chord if needed
+           }
+           return null;
+      };
+      const currentElement = findElementRecursive(targetId, this.elements);
+      if (!currentElement) return;
+
+      const currentDuration = currentElement.duration;
+      let newDuration: NoteDuration | undefined;
+
+      if (currentDuration === undefined) {
+          // If current is undefined, cycle to the first duration ('1n')
+          newDuration = this.durations[0];
+      } else {
+          const currentIndex = this.durations.indexOf(currentDuration);
+          if (currentIndex === this.durations.length - 1) {
+              // If current is the last ('8t'), cycle to undefined
+              newDuration = undefined;
+          } else if (currentIndex >= 0 && currentIndex < this.durations.length - 1) {
+              // Otherwise, go to the next duration
+              newDuration = this.durations[currentIndex + 1];
+          } else {
+              // Duration existed but wasn't in list? Fallback to undefined.
+              newDuration = undefined;
+          }
       }
-      
-      // Proceder con la lógica original usando el elemento encontrado
-      const currentIndex = this.durations.indexOf(element.duration);
-      if (currentIndex < this.durations.length - 1) {
-           const newDuration = this.durations[currentIndex + 1];
-          this.melodyEditorService.updateNote(targetId, { duration: newDuration });
-           // No es necesario emitNotesChange() aquí, la suscripción al servicio se encarga
-      }
+
+      this.melodyEditorService.updateNote(targetId, { duration: newDuration });
+      this.emitNotesChange(); // Emit after update
   }
   
   // deleteNote y toggleSilence probablemente necesiten ajustarse para usar el ID del elemento original también
@@ -503,12 +550,24 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     const element = this.elements.find(e => e.id === id);
     if (!element) return;
     this.melodyEditorService.selectNote(id);
-    const currentIndex = this.durations.indexOf(element.duration);
-    const newIndex = currentIndex + delta;
-    if (newIndex >= 0 && newIndex < this.durations.length) {
-      this.melodyEditorService.updateNote(id, { duration: this.durations[newIndex] });
-      this.emitNotesChange();
+    // Handle undefined duration before calling indexOf
+    if (element.duration === undefined) {
+      // If undefined, delta > 0 (up) goes to last, delta < 0 (down) goes to first
+      const newDuration = delta > 0 ? this.durations[this.durations.length - 1] : this.durations[0];
+      this.melodyEditorService.updateNote(id, { duration: newDuration });
+    } else {
+      const currentIndex = this.durations.indexOf(element.duration);
+      if (currentIndex === -1) return; // Duration not in list, do nothing?
+      const newIndex = currentIndex + delta;
+      if (newIndex === -1) { // Trying to go before the first duration
+        this.melodyEditorService.updateNote(id, { duration: undefined });
+      } else if (newIndex === this.durations.length) { // Trying to go after the last duration
+        this.melodyEditorService.updateNote(id, { duration: undefined });
+      } else if (newIndex >= 0 && newIndex < this.durations.length) {
+        this.melodyEditorService.updateNote(id, { duration: this.durations[newIndex] });
+      }
     }
+    this.emitNotesChange();
   }
 
   changeNoteValue(id: string, delta: number): void {
@@ -544,13 +603,24 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     const element = visualElement.originalElement; // Trabajar con el elemento original
 
     if (event.shiftKey) { // Cambiar duración
-      const currentIndex = this.durations.indexOf(element.duration);
-      const delta = event.deltaY > 0 ? 1 : -1;
-      const newIndex = currentIndex + delta;
-      if (newIndex >= 0 && newIndex < this.durations.length) {
+      const delta = event.deltaY > 0 ? 1 : -1; // Positive delta (scroll down) = decrease duration
+      // Handle undefined duration before calling indexOf
+      if (element.duration === undefined) {
+        const newDuration = delta > 0 ? this.durations[0] : this.durations[this.durations.length - 1];
+        this.melodyEditorService.updateNote(element.id, { duration: newDuration });
+      } else {
+        const currentIndex = this.durations.indexOf(element.duration); 
+        if (currentIndex === -1) return; // Not found
+        const newIndex = currentIndex + delta;
+        if (newIndex === -1) { // Trying to go before the first duration
+          this.melodyEditorService.updateNote(element.id, { duration: undefined });
+        } else if (newIndex === this.durations.length) { // Trying to go after the last duration
+          this.melodyEditorService.updateNote(element.id, { duration: undefined });
+        } else if (newIndex >= 0 && newIndex < this.durations.length) {
           this.melodyEditorService.updateNote(element.id, { duration: this.durations[newIndex] });
-          this.emitNotesChange(); // Emitir cambios
+        }
       }
+      this.emitNotesChange(); // Emitir cambios
     } else { // Cambiar valor (si es nota/silencio)
       if (element.type === 'note' || element.type === 'rest') {
         const delta = event.deltaY > 0 ? -1 : 1;
@@ -561,27 +631,32 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
 
   // <<< RESTAURAR insertNote >>>
   insertNote(): void {
-    let referenceElementId: string | undefined = undefined;
-    let insertMode: 'after' | 'start' = 'after';
+    const baseNoteValue = 1; 
+    const baseDuration: NoteDuration = '4n'; // Asegúrate que NoteDuration esté importado si usas el tipo
+    const noteData = { value: baseNoteValue, duration: baseDuration, type: 'note' as 'note' };
+    let newNoteId: string | null = null;
 
-    if (this.selectedId) {
-        const visualEl = this.visualElements.find(ve => ve.id === this.selectedId);
-        if (visualEl) {
-            referenceElementId = visualEl.originalElement.id;
-            // Si el elemento seleccionado es un marcador de inicio, insertar al principio del grupo?
-            // Si es un marcador de fin, insertar después del grupo?
-            // Lógica más compleja requerida aquí si queremos insertar DENTRO de grupos.
-            // Por ahora, insertaremos DESPUÉS del elemento original referenciado.
+    if (this.focusedElement) {
+        // <<< LÓGICA MODIFICADA >>>
+        if (this.focusedElement.type === 'group') {
+            // Si el foco está en un GenericGroup, añadir DENTRO
+            console.log(`Insert note inside group ${this.focusedElement.id}`);
+            newNoteId = this.melodyEditorService.addNoteToGroup(this.focusedElement.id, noteData);
+        } else {
+            // Si el foco está en una nota u otro elemento, añadir DESPUÉS
+            console.log(`Insert note after element ${this.focusedElement.id}`);
+            newNoteId = this.melodyEditorService.addNoteAfter(this.focusedElement.id, noteData);
         }
-    }
-
-    if (referenceElementId) {
-        this.melodyEditorService.addNoteAfter(referenceElementId);
     } else {
-        this.melodyEditorService.addNote(); // Añadir al final si no hay selección
+        // Si no hay foco, añadir al final de la lista raíz
+        console.log('Insert note at the end');
+        newNoteId = this.melodyEditorService.addNote(noteData);
     }
-    // El servicio debería seleccionar la nueva nota, y la suscripción actualizará la vista.
-    // ¿Necesitamos emitir? Probablemente no si el servicio maneja la selección.
+    
+    // La selección de la nueva nota (newNoteId) la maneja el servicio
+    // La actualización de la vista la maneja la suscripción a elements$
+    console.log('New note ID:', newNoteId);
+    // Ya no necesitamos emitir cambios aquí si el servicio actualiza el observable
     // this.emitNotesChange(); 
   }
 }

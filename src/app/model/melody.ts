@@ -8,7 +8,9 @@ export type NoteType = 'note' | 'rest' | 'arpeggio' | 'chord' | 'group';
 export interface BaseElement {
     id: string;              // Identificador único para cada nota
     type: NoteType;
-    duration: NoteDuration;
+    time?: number; // Time in seconds relative to the start of the transport
+    ticks?: number; // Time in ticks relative to the start of the transport
+    duration?: NoteDuration; // Make duration optional
 }
 
 // Nota simple
@@ -20,7 +22,7 @@ export interface SingleNote extends BaseElement {
 // Grupo compuesto (Arpegio o Acorde)
 export interface CompositeNote extends BaseElement {
     type: 'arpeggio' | 'chord';
-    notes: SingleNote[]; // Solo notas simples dentro?
+    notes: SingleNote[]; // ENFORCE: Solo notas simples dentro
 }
 
 // NUEVO: Grupo genérico (paréntesis con duración)

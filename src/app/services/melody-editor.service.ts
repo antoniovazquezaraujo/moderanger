@@ -28,25 +28,54 @@ export class MelodyEditorService {
         });
     }
     
-    addNote(): void {
-        const newNote = NoteFactory.createSingleNote(1, '4n');
+    addNote(noteData?: Partial<SingleNote>): string | null {
+        const newNote = NoteFactory.createSingleNote(
+            noteData?.value ?? 1,
+            noteData?.duration ?? '4n'
+        );
         const currentElements = this.elementsSubject.value;
         this.elementsSubject.next([...currentElements, newNote]);
-        // Optionally select the new note
-        // this.selectNote(newNote.id);
+        this.selectNote(newNote.id);
+        return newNote.id;
     }
     
-    addNoteAfter(id: string): void {
+    addNoteAfter(id: string, noteData?: Partial<SingleNote>): string | null {
         const currentElements = this.elementsSubject.value;
         const index = currentElements.findIndex(e => e.id === id);
-        if (index === -1) return;
+        if (index === -1) return null;
 
-        const newNote = NoteFactory.createSingleNote(1, '4n');
+        const newNote = NoteFactory.createSingleNote(
+            noteData?.value ?? 1,
+            noteData?.duration ?? '4n'
+        );
         const newElements = [...currentElements];
         newElements.splice(index + 1, 0, newNote);
         this.elementsSubject.next(newElements);
-        // Optionally select the new note
         this.selectNote(newNote.id);
+        return newNote.id;
+    }
+    
+    addNoteToGroup(groupId: string, noteData?: Partial<SingleNote>): string | null {
+        const { element: group } = this.findElementAndParent(groupId);
+
+        if (!group || group.type !== 'group') {
+            console.warn(`addNoteToGroup: Element ${groupId} not found or is not a GenericGroup.`);
+            return null;
+        }
+
+        const newNote = NoteFactory.createSingleNote(
+            noteData?.value ?? 1, 
+            noteData?.duration ?? '4n' 
+        );
+
+        const currentChildren = (group as GenericGroup).children || [];
+        const newChildren = [...currentChildren, newNote];
+
+        this.updateNote(groupId, { children: newChildren });
+
+        this.selectNote(newNote.id);
+
+        return newNote.id;
     }
     
     removeNote(id: string): void {
@@ -82,8 +111,9 @@ export class MelodyEditorService {
     }
 
     // <<< FUNCIÓN AUXILIAR RECURSIVA PARA ACTUALIZAR >>>
-    private findAndUpdateRecursively(elements: MusicElement[], id: string, changes: Partial<MusicElement>): MusicElement[] {
-        return elements.map((element): MusicElement => {
+    private findAndUpdateRecursively(elements: MusicElement[], id: string, changes: Partial<MusicElement>): { modified: boolean, newElements: MusicElement[] } {
+        let listChanged = false; // Flag to track if the list itself was changed
+        const mappedElements = elements.map((element): MusicElement => {
             if (element.id === id) {
                 // Elemento encontrado, aplicar cambios de forma segura según el tipo
                 let updatedElement: MusicElement;
@@ -91,84 +121,78 @@ export class MelodyEditorService {
                 switch (element.type) {
                     case 'note':
                     case 'rest':
-                        // Apply changes relevant to SingleNote, using type guard
                         const valueChange = this.isPartialSingleNote(changes) ? { value: changes.value } : {};
-                        const durationChange = changes.duration !== undefined ? { duration: changes.duration } : {};
-                        
-                        updatedElement = {
-                            ...element,
-                            ...valueChange, // Apply value only if type guard passes
-                            ...durationChange,
-                        } as SingleNote;
+                        const durationChange = changes.hasOwnProperty('duration') ? { duration: changes.duration } : {};
+                        updatedElement = { ...element, ...valueChange, ...durationChange } as SingleNote;
                         break;
                     case 'group':
-                        // Apply changes relevant to GenericGroup
-                        // Explicitly handle potential children update from 'changes'
                         const updatedChildrenFromChanges = (changes as Partial<GenericGroup>).children;
-                        updatedElement = {
-                            ...element,
-                             // Apply duration if present in changes
-                             ...(changes.duration !== undefined && { duration: changes.duration }),
-                             // Apply children if present in changes (overrides existing)
-                             ...(updatedChildrenFromChanges !== undefined && { children: updatedChildrenFromChanges }),
-                            // Note: Recursion below handles updates *within* children,
-                            // this handles replacing the children array wholesale.
-                        } as GenericGroup;
+                        updatedElement = { ...element, ...(changes.hasOwnProperty('duration') && { duration: changes.duration }), ...(updatedChildrenFromChanges !== undefined && { children: updatedChildrenFromChanges }) } as GenericGroup;
                         break;
                     case 'arpeggio':
                     case 'chord':
-                         // Apply changes relevant to CompositeNote
-                        updatedElement = {
-                            ...element,
-                            // Only apply compatible changes
-                            ...(changes.duration !== undefined && { duration: changes.duration }),
-                           // Note: 'notes' are handled recursively below for CompositeNote if needed, not merged here
-                           // Ignore other incompatible changes like 'value' or 'children'
-                        } as CompositeNote;
+                        updatedElement = { ...element, ...(changes.hasOwnProperty('duration') && { duration: changes.duration }) } as CompositeNote;
                         break;
                     default:
-                        // Fallback shouldn't be reached with exhaustive check, but necessary for TS
-                        // In a real scenario, might throw an error or handle unknown types
-                        updatedElement = element; 
+                        updatedElement = element;
                 }
-                 // IMPORTANT: Return the correctly typed updated element
-                 return updatedElement; 
+                
+                // Check if the update actually changed the element before returning
+                if (JSON.stringify(element) !== JSON.stringify(updatedElement)) {
+                    listChanged = true; // Mark list as changed because this element was modified
+                    console.log('[MelodyEditorService] findAndUpdateRecursively: Target found & modified. Returning updated:', JSON.parse(JSON.stringify(updatedElement)));
+                    return updatedElement;
+                } else {
+                    // Element found, but changes resulted in the same object (e.g., setting same duration)
+                    return element; // Return original if no effective change
+                }
             }
 
-            // --- RECURSION SOLO PARA GenericGroup --- 
+            // --- RECURSION PARA CONTENEDORES --- 
+            let currentChildren: MusicElement[] | undefined;
+            let updateProp: 'children' | 'notes' | null = null;
+
             if (element.type === 'group' && (element as GenericGroup).children) {
-                const currentChildren = (element as GenericGroup).children;
-                // Pass only relevant changes down? Or pass all? For now, pass all.
-                const updatedChildren = this.findAndUpdateRecursively(currentChildren, id, changes);
-                if (updatedChildren !== currentChildren) {
-                    // Devolver explícitamente un GenericGroup
-                    return { 
-                        id: element.id,
-                        type: 'group',
-                        duration: element.duration, // Mantener duración original o usar changes.duration?
-                        children: updatedChildren 
-                    } as GenericGroup;
+                currentChildren = (element as GenericGroup).children;
+                updateProp = 'children';
+            } else if ((element.type === 'arpeggio' || element.type === 'chord') && (element as CompositeNote).notes) {
+                currentChildren = (element as CompositeNote).notes; // Use notes for CompositeNote
+                updateProp = 'notes';
+            }
+
+            if (currentChildren && updateProp) {
+                const result = this.findAndUpdateRecursively(currentChildren, id, changes);
+                if (result.modified) { // Check if the recursive call modified its list
+                    listChanged = true; // Mark this list as changed because a child list was modified
+                    console.log(`[MelodyEditorService] findAndUpdateRecursively: Child of ${element.id} (${element.type}) was modified. Updating parent.`);
+                    if (updateProp === 'children') {
+                        return { ...element, children: result.newElements } as GenericGroup;
+                    } else { // updateProp === 'notes'
+                        return { ...element, notes: result.newElements as SingleNote[] } as CompositeNote; // Ensure cast for notes
+                    }
                 }
             }
-            // --- NO RECURSIÓN para CompositeNote (arpegios/acordes) ---
             
-            // Si no es el elemento y no hubo cambios en hijos (o no es grupo), devolver original
+            // Si no es el elemento y no hubo cambios en hijos (o no es contenedor), devolver original
             return element;
         });
+        // Return the potentially modified array and whether it was changed
+        return { modified: listChanged, newElements: mappedElements };
     }
 
-    updateNote(id: string, changes: Partial<MusicElement>): void { // Cambiar tipo de changes
+    updateNote(id: string, changes: Partial<MusicElement>): void {
         const currentElements = this.elementsSubject.value;
-        // Llamar a la función recursiva sobre una copia (inmutabilidad)
-        const newElements = this.findAndUpdateRecursively([...currentElements], id, changes);
+        // --- RESTORED ORIGINAL CODE --- 
+        const result = this.findAndUpdateRecursively([...currentElements], id, changes);
 
-        // Comparación profunda (mediante JSON) para detectar cambios anidados
-        if (JSON.stringify(newElements) !== JSON.stringify(currentElements)) {
-            console.log(`Updating element ${id} with`, changes, newElements);
-            this.elementsSubject.next(newElements);
+        // Use the 'modified' flag returned by the recursive function
+        if (result.modified) {
+            console.log(`[MelodyEditorService] updateNote: Update detected for element ${id} or its children. Emitting new elements. Changes:`, changes);
+            this.elementsSubject.next(result.newElements);
         } else {
-            console.log(`Element ${id} not found or no effective changes needed.`);
+            console.log(`[MelodyEditorService] updateNote: Element ${id} not found or no effective changes needed.`);
         }
+        // --- END RESTORED ORIGINAL CODE --- 
     }
     
     loadFromNoteData(noteData: NoteData[]): void {

@@ -216,46 +216,125 @@ export class SongPlayer {
         }
     }
 
-    private extractJustBlockNotes(block: Block, player: Player): NoteData[] {
-        let notesToParse = '';
-        if (block.blockContent) {
-            notesToParse = block.blockContent.notes || ''; 
-        } else {
+    private propagateGroupDurations(noteData: NoteData, parentDuration?: string): void {
+        let effectiveDurationForChildren: string | undefined = parentDuration;
+        if ((noteData.type === 'chord' || noteData.type === 'arpeggio' || noteData.type === 'group') && noteData.duration) {
+            effectiveDurationForChildren = noteData.duration;
         }
 
-        let rootNoteDatas: NoteData[] = [];
-        if (notesToParse.trim()) {
-            try {
-                 rootNoteDatas = parseBlockNotes(notesToParse);
-            } catch (e) {
-                rootNoteDatas = [];
-            }
+        if ((noteData.type === 'note' || noteData.type === 'rest' || noteData.type === 'silence') && !noteData.duration && parentDuration) {
+            noteData.duration = parentDuration;
         }
-        
-        const noteDatas: NoteData[] = [];
-        for (const noteData of rootNoteDatas) {
-            const duration = noteData.duration ?? '4t';
-            if (noteData.type === 'note' && noteData.note !== undefined) {
-                player.selectedNote = noteData.note;
-                const noteNoteDatas = player.getSelectedNotes(player.scale, player.tonality);
-                const notes = this.noteDatasToNotes(noteNoteDatas);
-                if (player.playMode === PlayMode.CHORD) {
-                    noteDatas.push({ type: 'chord', duration, noteDatas: noteNoteDatas });
-                } else {
-                    const arpeggio = arpeggiate(notes, player.playMode);
-                    const arpeggioNoteDatas = this.notesToNoteDatas(arpeggio, duration);
-                    noteDatas.push({ type: 'arpeggio', duration, noteDatas: arpeggioNoteDatas });
-                }
-            } else if (noteData.type === 'rest' || noteData.type === 'silence') {
-                noteDatas.push({ type: 'rest', duration });
+
+        if (noteData.type === 'chord' || noteData.type === 'arpeggio') {
+            if (noteData.noteDatas) {
+                noteData.noteDatas.forEach(child => {
+                    this.propagateGroupDurations(child, effectiveDurationForChildren);
+                });
             }
-             else if (noteData.type === 'chord' && noteData.noteDatas) {
-                 noteDatas.push(noteData);
-             } else if (noteData.type === 'arpeggio' && noteData.noteDatas) {
-                 noteDatas.push(noteData);
+        } else if (noteData.type === 'group') { 
+             if (noteData.children) {
+                 noteData.children.forEach(child => {
+                    this.propagateGroupDurations(child, effectiveDurationForChildren);
+                 });
              }
         }
-        return noteDatas;
+    }
+
+    private processIndividualNoteData(noteData: NoteData, player: Player, contextNote?: number): NoteData[] {
+        console.log(`[processIndividual] Input: ${JSON.stringify(noteData)}, ContextNote: ${contextNote}`);
+        const results: NoteData[] = [];
+        const duration: string = noteData.duration ?? '4n'; 
+
+        switch (noteData.type) {
+            case 'note':
+                const noteToProcess = noteData.note ?? contextNote;
+                if (noteToProcess !== undefined) {
+                    player.selectedNote = noteToProcess;
+                    console.log(`[processIndividual] Processing NOTE ${noteToProcess}, Player State: scale=${player.scale}, tonality=${player.tonality}, playMode=${player.playMode}`);
+                    const derivedNoteDatas = player.getSelectedNotes(player.scale, player.tonality);
+                    console.log(`[processIndividual] Derived NotesData from getSelectedNotes: ${JSON.stringify(derivedNoteDatas)}`);
+                    const derivedNotes = this.noteDatasToNotes(derivedNoteDatas);
+
+                    if (player.playMode === PlayMode.CHORD) {
+                        if (derivedNoteDatas.length > 0) {
+                            derivedNoteDatas.forEach(nd => nd.duration = duration);
+                            const chordData = { type: 'chord' as 'chord', duration, noteDatas: derivedNoteDatas };
+                            console.log(`[processIndividual] Generated CHORD: ${JSON.stringify(chordData)}`);
+                            results.push(chordData);
+                        }
+                    } else {
+                        const arpeggioNotes = arpeggiate(derivedNotes, player.playMode);
+                        const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
+                        if (arpeggioNoteDatas.length > 0) {
+                             const arpeggioData = { type: 'arpeggio' as 'arpeggio', duration, noteDatas: arpeggioNoteDatas };
+                             console.log(`[processIndividual] Generated ARPEGGIO: ${JSON.stringify(arpeggioData)}`);
+                            results.push(arpeggioData);
+                        }
+                    }
+                } else {
+                    const restData = { type: 'rest' as 'rest', duration };
+                    console.log(`[processIndividual] Generated REST (from note without value): ${JSON.stringify(restData)}`);
+                    results.push(restData);
+                }
+                break;
+            case 'rest':
+            case 'silence':
+                const restData = { type: 'rest' as 'rest', duration };
+                console.log(`[processIndividual] Generated REST: ${JSON.stringify(restData)}`);
+                results.push(restData);
+                break;
+            case 'chord':
+            case 'arpeggio':
+                 console.log(`[processIndividual] Entering GROUP ${noteData.type}, recursing...`);
+                 if (noteData.noteDatas) {
+                     noteData.noteDatas.forEach(child => {
+                        results.push(...this.processIndividualNoteData(child, player, child.note));
+                     });
+                 }
+                 console.log(`[processIndividual] Finished recursing GROUP ${noteData.type}`);
+                break;
+            case 'group':
+                 console.log(`[processIndividual] Entering GENERIC GROUP, recursing...`);
+                 if (noteData.children) {
+                     noteData.children.forEach(child => {
+                        results.push(...this.processIndividualNoteData(child, player, child.note));
+                     });
+                 }
+                 console.log(`[processIndividual] Finished recursing GENERIC GROUP`);
+                break;
+            default:
+                 console.warn(`Unhandled NoteData type in processIndividualNoteData: ${noteData.type}`);
+                break;
+        }
+        console.log(`[processIndividual] Returning results for input ${JSON.stringify(noteData)}: ${JSON.stringify(results)}`);
+        return results;
+    }
+
+    private extractJustBlockNotes(block: Block, player: Player): NoteData[] {
+        let notesToParse = '';
+        if (block.blockContent) { notesToParse = block.blockContent.notes || ''; }
+        console.log(`[extractJustBlockNotes] Parsing notes: "${notesToParse}"`);
+        let rootNoteDatas: NoteData[] = [];
+        if (notesToParse.trim()) {
+            try { 
+                rootNoteDatas = parseBlockNotes(notesToParse); 
+                console.log(`[extractJustBlockNotes] Parsed rootNoteDatas: ${JSON.stringify(rootNoteDatas)}`);
+            }
+            catch (e) { console.error(`Error parsing block notes: ${notesToParse}`, e); rootNoteDatas = []; }
+        }
+        
+        console.log(`[extractJustBlockNotes] Propagating durations...`);
+        rootNoteDatas.forEach(rootNote => this.propagateGroupDurations(rootNote));
+        console.log(`[extractJustBlockNotes] rootNoteDatas after propagation: ${JSON.stringify(rootNoteDatas)}`);
+        
+        console.log(`[extractJustBlockNotes] Processing individual notes...`);
+        const finalPlayableNoteDatas: NoteData[] = [];
+        for (const rootNoteData of rootNoteDatas) {
+            finalPlayableNoteDatas.push(...this.processIndividualNoteData(rootNoteData, player));
+        }
+        console.log(`[extractJustBlockNotes] Final playable NoteDatas: ${JSON.stringify(finalPlayableNoteDatas)}`);
+        return finalPlayableNoteDatas;
     }
 
     private executeBlockOperations(block: Block): void {
@@ -287,16 +366,11 @@ export class SongPlayer {
     }
 
     private noteDatasToNotes(noteDatas: NoteData[]): number[] {
-        return noteDatas
-            .filter(noteData => noteData.type === 'note' && noteData.note !== undefined)
-            .map(noteData => noteData.note!);
+        return noteDatas.map(nd => nd.note).filter(n => n !== undefined && n !== null) as number[];
     }
 
     private notesToNoteDatas(notes: number[], duration: string): NoteData[] {
-        return notes.map(note => {
-            const noteDuration = duration || '4t';
-            return new NoteData({ type: 'note', duration: noteDuration, note: note });
-        });
+        return notes.map(n => ({ type: 'note', duration, note: n }));
     }
 
     private playNoteDatas(partSoundInfo: PartSoundInfo[]): void {
@@ -407,11 +481,12 @@ export class SongPlayer {
     }
 
     private playNoteData(partSoundInfo: PartSoundInfo, time: number): void {
-        // Note index check happens in playTurn before calling this
         const noteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
         if (!noteData) {
+            console.log(`[playNoteData] No noteData found at index ${partSoundInfo.noteDataIndex}. Skipping.`);
             return;
         }
+        console.log(`[playNoteData] Time: ${time.toFixed(3)}, Processing: ${JSON.stringify(noteData)}`);
 
         const duration = noteData.duration ?? '4t';
         const player = partSoundInfo.player;
@@ -421,33 +496,39 @@ export class SongPlayer {
                 .filter(nd => nd.note !== undefined)
                 .map(nd => Frequency(nd.note!, "midi").toFrequency());
             if (freqs.length > 0) {
+                console.log(`[playNoteData] TRIGGER CHORD: freqs=${freqs}, duration=${duration}, time=${time.toFixed(3)}`);
                 player.triggerAttackRelease(freqs, duration, time);
+            } else {
+                 console.log(`[playNoteData] Skipping CHORD (no valid notes): ${JSON.stringify(noteData.noteDatas)}`);
             }
-            // Don't advance index here, handled in playTurn
 
         } else if (noteData.type === 'arpeggio' && noteData.noteDatas && noteData.noteDatas.length > 0) {
             const groupDurationSeconds = Time(duration).toSeconds();
             const singleNoteDurationSeconds = groupDurationSeconds / noteData.noteDatas.length;
             const singleNoteToneDuration = `${singleNoteDurationSeconds}s`;
+            console.log(`[playNoteData] ARPEGGIO groupDur=${groupDurationSeconds.toFixed(3)}s, noteDur=${singleNoteDurationSeconds.toFixed(3)}s`);
 
             noteData.noteDatas.forEach((note, index) => {
                 if (note && note.note !== undefined && !isNaN(note.note)) {
                     const freq = Frequency(note.note, "midi").toFrequency();
-                    // Calculate the start time for this note within the arpeggio group
                     const noteStartTime = time + (index * singleNoteDurationSeconds);
+                    console.log(`[playNoteData]   TRIGGER ARPEGGIO NOTE: freq=${freq}, duration=${singleNoteToneDuration}, startTime=${noteStartTime.toFixed(3)}`);
                     player.triggerAttackRelease(freq, singleNoteToneDuration, noteStartTime);
-                } // If it's a rest within the arpeggio, do nothing, just advance time
+                } else {
+                     console.log(`[playNoteData]   Skipping ARPEGGIO note (rest or invalid): ${JSON.stringify(note)}`);
+                }
             });
-            // Index advancement for the entire arpeggio group is handled in playTurn
 
         } else if (noteData.type === 'note' && noteData.note !== undefined) {
              const freq = Frequency(noteData.note, "midi").toFrequency();
+             console.log(`[playNoteData] TRIGGER NOTE: freq=${freq}, duration=${duration}, time=${time.toFixed(3)}`);
             player.triggerAttackRelease(freq, duration, time);
-             // Don't advance index here, handled in playTurn
 
         } else if (noteData.type === 'rest' || noteData.type === 'silence') {
+             console.log(`[playNoteData] REST duration=${duration}`);
              // No sound for rests
-             // Don't advance index here, handled in playTurn
+        } else {
+            console.warn(`[playNoteData] Unhandled NoteData type or missing data: ${JSON.stringify(noteData)}`);
         }
     }
 }
