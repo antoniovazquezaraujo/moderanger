@@ -1,11 +1,11 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command } from 'src/app/model/command';
 import { Part } from 'src/app/model/part';
 import { VariableContext } from 'src/app/model/variable.context';
 import { SongPlayer } from 'src/app/model/song.player';
-import { InstrumentType } from 'src/app/model/instruments';
+import { InstrumentType } from 'src/app/services/audio-engine.service';
 import { Song } from 'src/app/model/song';
 import { Player } from 'src/app/model/player';
 

@@ -1,13 +1,8 @@
 import { Block } from "./block";
 import { Part } from "./part";
 import { VariableContext, VariableValue } from "./variable.context";
-import { Piano } from "./piano";
 
 export class Song {
-    static instruments = [new Piano()];
-    static getDefultInstrument() {
-        return Song.instruments[0];
-    }
     name: string = "Untitled Song";
     parts: Part[] = [];
 

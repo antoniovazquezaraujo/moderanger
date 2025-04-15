@@ -5,16 +5,13 @@ import { NoteData } from "./note";
 import { Part } from "./part";
 import { Block } from "./block";
 import { PlayMode, arpeggiate } from "./play.mode";
-import { parseBlockNotes } from "./ohm.parser";
 import { Subject } from 'rxjs';
-import { InstrumentType } from "./instruments";
+import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
+import { NoteGenerationService } from '../services/note-generation.service';
 import { VariableContext } from './variable.context';
 import { BaseOperation, IncrementOperation, DecrementOperation, AssignOperation } from './operation';
-import { AudioEngineService } from '../services/audio-engine.service';
 import { Command } from './command';
 import * as Tone from 'tone';
-import { Scale, ScaleTypes, Tonality } from "./scale";
-import { InstrumentFactory } from "./instruments";
 
 type InstrumentId = string;
 type LoopId = string;
@@ -62,10 +59,11 @@ export class SongPlayer {
     
     private currentLoopId: LoopId | null = null;
     private currentStopListenerId: ListenerId | null = null;
-    
-    private activeInstrumentIds: InstrumentId[] = [];
 
-    constructor(private audioEngine: AudioEngineService) { }
+    constructor(
+        private audioEngine: AudioEngineService,
+        private noteGenerationService: NoteGenerationService 
+    ) { }
 
     get isPlaying(): boolean {
         return this._isPlaying;
@@ -117,7 +115,6 @@ export class SongPlayer {
         }
         this._substituteVariablesInSong(song);
         const partStates = await this._buildPartExecutionStates(song);
-        this.activeInstrumentIds = partStates.map(state => state.instrumentId);
         const partSoundInfo = this._extractNotesFromStates(partStates);
         await this._schedulePlayback(partSoundInfo); 
     }
@@ -192,7 +189,7 @@ export class SongPlayer {
                     const { block } = unit;
                     block.commands?.forEach((command: Command) => command.execute(state.player));
                     block.executeBlockOperations(); 
-                    const blockNotes = this.extractJustBlockNotes(block, state.player);
+                    const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player);
                     state.extractedNotes = state.extractedNotes.concat(blockNotes);
                     state.currentUnitIndex++;
                     if (state.currentUnitIndex >= state.executionUnits.length) {
@@ -216,14 +213,15 @@ export class SongPlayer {
                 });
             }
         }
+        console.log(`[SongPlayer] _extractNotesFromStates result (partSoundInfo):`, JSON.stringify(partSoundInfo, null, 2)); 
         return partSoundInfo;
     }
 
     private async _schedulePlayback(partSoundInfo: PartSoundInfo[]): Promise<void> {
+        console.log(`[SongPlayer] _schedulePlayback called with partSoundInfo length: ${partSoundInfo.length}`);
         if (partSoundInfo.length === 0) {
+            console.log(`[SongPlayer] No sound info to schedule, stopping playback logic.`);
             this._isPlaying = false;
-            this.activeInstrumentIds.forEach(id => this.audioEngine.disposeInstrument(id));
-            this.activeInstrumentIds = [];
             return;
         }
 
@@ -246,6 +244,7 @@ export class SongPlayer {
     }
     
     private _loopTick(time: number, partSoundInfo: PartSoundInfo[]): void {
+        console.log(`[SongPlayer] _loopTick executing @ time ${time}`); 
         this._metronome.next(this._beatCount);
         let turnPlayed = false;
         const sixteenthNoteDuration = this.audioEngine.timeToSeconds('16n');
@@ -365,84 +364,6 @@ export class SongPlayer {
              console.error(`[SongPlayer] Error during _playNoteData switch execution:`, error);
         }
     }
-
-    private extractJustBlockNotes(block: Block, player: Player): NoteData[] {
-         let notesToParse = '';
-         if (block.blockContent) {
-             notesToParse = block.blockContent.notes || '';
-         }
-         let rootNoteDatas: NoteData[] = [];
-         if (notesToParse.trim()) {
-             try {
-                  rootNoteDatas = parseBlockNotes(notesToParse);
-             } catch (e) {
-                 console.error("Error parsing block notes:", notesToParse, e);
-                 rootNoteDatas = [];
-             }
-         }
-         
-         const finalNoteDatas: NoteData[] = [];
-         const scale = Scale.getScaleByName(ScaleTypes[player.scale]);
-
-         for (const rootNoteData of rootNoteDatas) {
-             const duration = rootNoteData.duration;
-             if (rootNoteData.type === 'note' && rootNoteData.note !== undefined) {
-                let generatedNotes: NoteData[] = [];
-
-                try {
-                    const selectedGrades = scale.getSelectedGrades(rootNoteData.note, player.density, player.gap);
-                    
-                    const gradesToProcess = selectedGrades;
-
-                    let midiNotes = gradesToProcess.map(grade => grade.tonoteData());
-
-                    midiNotes.forEach(nd => { if (nd.note !== undefined) nd.note += player.tonality });
-
-                    midiNotes.forEach(nd => { if (nd.note !== undefined) nd.note += (player.octave * 12) });
-
-                    const invertedNotes: NoteData[] = [];
-                    midiNotes.forEach((nd, index) => {
-                        const noteCopy: NoteData = { ...nd };
-                        if (index < player.inversion && noteCopy.note !== undefined) {
-                           noteCopy.note += 12;
-                        }
-                        invertedNotes.push(noteCopy);
-                    });
-                    
-                    generatedNotes = invertedNotes;
-
-                } catch(genError) {
-                    console.error(`Error generating notes for root ${rootNoteData.note}:`, genError);
-                    generatedNotes = [];
-                }
-
-                generatedNotes.forEach(nd => nd.duration = duration);
-
-                 if (player.playMode === PlayMode.CHORD) {
-                     if(generatedNotes.length > 0) {
-                        finalNoteDatas.push({ type: 'chord', duration, noteDatas: generatedNotes });
-                     } else {
-                         console.warn(`No notes generated for CHORD for root ${rootNoteData.note}, adding rest.`);
-                         finalNoteDatas.push({ type: 'rest', duration });
-                     }
-                 } else {
-                     const midiNoteNumbers = this.noteDatasToNotes(generatedNotes);
-                     if (midiNoteNumbers.length > 0) {
-                        const arpeggioMidiNotes = arpeggiate(midiNoteNumbers, player.playMode); 
-                        const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioMidiNotes, duration);
-                        finalNoteDatas.push({ type: 'arpeggio', duration, noteDatas: arpeggioNoteDatas });
-                     } else {
-                         console.warn(`No notes generated for ARPEGGIO for root ${rootNoteData.note}, adding rest.`);
-                         finalNoteDatas.push({ type: 'rest', duration });
-                     }
-                 }
-             } else if (rootNoteData.type === 'rest' || rootNoteData.type === 'silence') {
-                 finalNoteDatas.push({ type: 'rest', duration });
-             } 
-         }
-         
-         return finalNoteDatas;
-     }
 
     private extractBlockNotes(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] {
         console.warn("[SongPlayer] extractBlockNotes might be redundant.");

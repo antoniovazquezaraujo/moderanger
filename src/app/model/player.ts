@@ -4,7 +4,7 @@ import { PlayMode } from "./play.mode";
 import { Scale, ScaleTypes, Tonality } from "./scale";
 import { Block } from "./block";
 import { Command } from "./command";
-import { InstrumentType } from "./instruments";
+import { InstrumentType } from "../services/audio-engine.service";
 import { PlayState } from "./play.state";
 import { BehaviorSubject, Subject } from "rxjs";
 import { AudioEngineService } from "../services/audio-engine.service";

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { InstrumentFactory } from './model/instruments';
+import { AudioEngineService, InstrumentType } from './services/audio-engine.service';
 import { Song } from './model/song';
 
 @Component({
@@ -12,14 +12,14 @@ export class AppComponent implements OnInit {
   public currentSong = new Song();
   public isAudioReady = false;
  
-  constructor() {
+  constructor(private audioEngine: AudioEngineService) {
     // Mantener constructor ligero
   }
 
   async ngOnInit(): Promise<void> {
     console.log("[AppComponent] ngOnInit - Preloading audio...");
     try {
-      await InstrumentFactory.preloadPiano();
+      await this.audioEngine.preloadInstrument(InstrumentType.PIANO);
       console.log("[AppComponent] Audio preloaded successfully.");
       this.isAudioReady = true;
     } catch (error) {
