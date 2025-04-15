@@ -105,9 +105,18 @@ export class SongPlayer {
         this._metronome.next(0);
     }
 
-    playPart(part: Part, player: Player, song: Song): void {
-        console.warn("playPart is likely outdated and needs to be rewritten using AudioEngineService.");
-    }
+    private _handleTransportStop = () => {
+         if (this._isPlaying) {
+             this._isPlaying = false;
+             this._currentPart = undefined;
+             this._currentBlock = undefined;
+             this._beatCount = 0; 
+             this._currentRepetition = 0;
+             this._metronome.next(0);
+             this.currentLoopId = null;
+             this.currentStopListenerId = null;
+         }
+     };
 
     async playSong(song: Song): Promise<void> {
         if (!this._initializePlayback(song)) {
@@ -115,8 +124,95 @@ export class SongPlayer {
         }
         this._substituteVariablesInSong(song);
         const partStates = await this._buildPartExecutionStates(song);
-        const partSoundInfo = this._extractNotesFromStates(partStates);
+        const partSoundInfo = this._extractNotesFromStates(partStates); 
         await this._schedulePlayback(partSoundInfo); 
+    }
+
+    async playPart(part: Part, song: Song): Promise<void> {
+        console.log(`[SongPlayer] Attempting to play part: ${part.name || `ID ${part.id}`}`);
+        if (!this._initializePlayback(song)) {
+            console.warn("[SongPlayer] Playback initialization failed for playPart.");
+            return;
+        }
+        // Call the song-wide substitution first, like playSong does
+        this._substituteVariablesInSong(song);
+        // Keep the part-specific one commented out unless needed later 
+        // this._substituteVariablesInPart(part);
+
+        let partState: PartExecutionState | null = null;
+        try {
+            const instrumentId = await this.audioEngine.createInstrument(part.instrumentType);
+            const player = new Player(0, part.instrumentType, instrumentId, this.audioEngine);
+            const executionUnits: ExecutionUnit[] = [];
+            const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
+                for (let i = 0; i < block.repeatingTimes; i++) {
+                    executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
+                    block.children?.forEach(childBlock => {
+                        addBlockAndChildren(childBlock, childLevel + 1, block);
+                    });
+                }
+            };
+            part.blocks.forEach(block => addBlockAndChildren(block));
+            partState = {
+                part, player, instrumentId, executionUnits,
+                currentUnitIndex: 0,
+                isFinished: executionUnits.length === 0,
+                extractedNotes: [] as NoteData[]
+            };
+        } catch (error) {
+            console.error(`[SongPlayer] Error building part execution state for playPart:`, error);
+            this.stop(); // Stop if state building fails
+            return;
+        }
+
+        // Check if partState was successfully created before proceeding
+        if (!partState) {
+            console.error("[SongPlayer] Part state is null after build attempt, cannot play part.");
+            return; // Exit if state is null
+        }
+
+        const partSoundInfo = this._extractNotesFromSingleState(partState); 
+        await this._schedulePlayback(partSoundInfo);
+    }
+
+    private _extractNotesFromSingleState(state: PartExecutionState): PartSoundInfo[] {
+        if (!state || state.isFinished) return [];
+        
+        while (!state.isFinished) {
+            const unit = state.executionUnits[state.currentUnitIndex];
+            if (unit) {
+                const { block } = unit;
+                block.commands?.forEach((command: Command) => command.execute(state.player));
+                block.executeBlockOperations(); 
+                const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player);
+                state.extractedNotes = state.extractedNotes.concat(blockNotes);
+                state.currentUnitIndex++;
+                if (state.currentUnitIndex >= state.executionUnits.length) {
+                    state.isFinished = true;
+                }
+            } else {
+                state.isFinished = true;
+            }
+        }
+
+        // Package into PartSoundInfo array (with one element)
+        let result: PartSoundInfo[] = [];
+        if (state.extractedNotes.length > 0) {
+            result = [{
+                noteDatas: state.extractedNotes,
+                player: state.player,
+                instrumentId: state.instrumentId,
+                noteDataIndex: 0,
+                pendingTurnsToPlay: 0
+            }];
+        } 
+        // Log the result before returning
+        console.log(`[SongPlayer] _extractNotesFromSingleState result:`, JSON.stringify(result));
+        return result;
+    }
+
+    private _substituteVariablesInPart(part: Part): void {
+        console.log("[SongPlayer] _substituteVariablesInPart - Not implemented.");
     }
 
     private _initializePlayback(song: Song): boolean {
@@ -139,16 +235,22 @@ export class SongPlayer {
     private _substituteVariablesInSong(song: Song): void {
         song.parts.forEach(part => {
             const processBlock = (block: Block) => {
-                // ... (lógica interna)
+                 if (block.blockContent?.isVariable && block.blockContent?.variableName) {
+                      const value = VariableContext.getValue(block.blockContent.variableName);
+                      if (typeof value === 'string') {
+                          block.blockContent.notes = value;
+                      } else {
+                          console.warn(`Variable ${block.blockContent.variableName} not found or not a string for block ${block.id}`);
+                      }
+                 }
+                 block.children?.forEach(processBlock);
             };
             part.blocks?.forEach(processBlock);
         });
     }
 
     private async _buildPartExecutionStates(song: Song): Promise<PartExecutionState[]> {
-        // InstrumentFactory.disposeAll(); // Removed - Redundant with the next line
-        
-        const partStatePromises = song.parts.map(async (part, index): Promise<PartExecutionState> => {
+         const partStatePromises = song.parts.map(async (part, index): Promise<PartExecutionState> => {
             const instrumentId = await this.audioEngine.createInstrument(part.instrumentType);
             const player = new Player(index, part.instrumentType, instrumentId, this.audioEngine);
             const executionUnits: ExecutionUnit[] = [];
@@ -161,20 +263,14 @@ export class SongPlayer {
                 }
             };
             part.blocks.forEach(block => addBlockAndChildren(block));
-
             return {
-                part,
-                player,
-                instrumentId,
-                executionUnits,
+                part, player, instrumentId, executionUnits,
                 currentUnitIndex: 0,
                 isFinished: executionUnits.length === 0,
                 extractedNotes: [] as NoteData[]
             };
         });
-        
-        const resolvedPartStates = await Promise.all(partStatePromises);
-        return resolvedPartStates;
+        return Promise.all(partStatePromises);
     }
 
     private _extractNotesFromStates(partStates: PartExecutionState[]): PartSoundInfo[] {
@@ -200,7 +296,6 @@ export class SongPlayer {
                  }
             }
         }
-
         const partSoundInfo: PartSoundInfo[] = [];
         for (const state of partStates) {
             if (state.extractedNotes.length > 0) {
@@ -213,14 +308,14 @@ export class SongPlayer {
                 });
             }
         }
-        console.log(`[SongPlayer] _extractNotesFromStates result (partSoundInfo):`, JSON.stringify(partSoundInfo, null, 2)); 
+        // console.log(`[SongPlayer] _extractNotesFromStates result (partSoundInfo):`, JSON.stringify(partSoundInfo, null, 2)); 
         return partSoundInfo;
     }
 
     private async _schedulePlayback(partSoundInfo: PartSoundInfo[]): Promise<void> {
-        console.log(`[SongPlayer] _schedulePlayback called with partSoundInfo length: ${partSoundInfo.length}`);
+        // console.log(`[SongPlayer] _schedulePlayback called with partSoundInfo length: ${partSoundInfo.length}`);
         if (partSoundInfo.length === 0) {
-            console.log(`[SongPlayer] No sound info to schedule, stopping playback logic.`);
+            // console.log(`[SongPlayer] No sound info to schedule, stopping playback logic.`);
             this._isPlaying = false;
             return;
         }
@@ -244,7 +339,7 @@ export class SongPlayer {
     }
     
     private _loopTick(time: number, partSoundInfo: PartSoundInfo[]): void {
-        console.log(`[SongPlayer] _loopTick executing @ time ${time}`); 
+        // console.log(`[SongPlayer] _loopTick executing @ time ${time}`); 
         this._metronome.next(this._beatCount);
         let turnPlayed = false;
         const sixteenthNoteDuration = this.audioEngine.timeToSeconds('16n');
@@ -263,28 +358,13 @@ export class SongPlayer {
              if (this.currentLoopId) {
                 this.audioEngine.stopLoop(this.currentLoopId);
              }
-             if (this.audioEngine.getTransportContextState() === 'running') {
-                 const currentTimeSeconds = Tone.Transport.seconds; 
-                 this.audioEngine.stopTransport(currentTimeSeconds + 0.1);
-             } else {
-                 this.audioEngine.stopTransport();
-             }
+             // Add a small delay before stopping transport completely to allow last notes to fade
+             const stopTime = Tone.Transport.seconds + 0.2; 
+             this.audioEngine.stopTransport(stopTime);
+             // No need to check context state explicitly, stopTransport handles it
         }
     }
-    
-    private _handleTransportStop = () => {
-         if (this._isPlaying) {
-             this._isPlaying = false;
-             this._currentPart = undefined;
-             this._currentBlock = undefined;
-             this._beatCount = 0; 
-             this._currentRepetition = 0;
-             this._metronome.next(0);
-             this.currentLoopId = null;
-             this.currentStopListenerId = null;
-         }
-     };
-
+   
     private _playTurn(partSoundInfo: PartSoundInfo, interval: number, time: number): boolean {
          const { instrumentId, noteDataIndex, pendingTurnsToPlay } = partSoundInfo;
          
@@ -298,12 +378,13 @@ export class SongPlayer {
          } else {
             if (noteDataIndex < partSoundInfo.noteDatas.length) {
                  const noteData = partSoundInfo.noteDatas[noteDataIndex];
-                 this._playNoteData(partSoundInfo, time);
+                 this._playNoteData(partSoundInfo, time); // Pass the whole PartSoundInfo
 
                  let calculatedPendingTurns = 0;
                  try {
                     const durationInSeconds = this.audioEngine.timeToSeconds(noteData.duration);
                     if (interval > 0) {
+                        // Calculate turns based on 16th note interval
                         calculatedPendingTurns = Math.max(0, Math.round(durationInSeconds / interval) - 1);
                     }
                  } catch (e) {
@@ -319,7 +400,8 @@ export class SongPlayer {
     }
     
     private _playNoteData(partSoundInfo: PartSoundInfo, time: number): void {
-        if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length) return;
+        // No need for this check if _playTurn ensures index is valid
+        // if (partSoundInfo.noteDataIndex >= partSoundInfo.noteDatas.length) return;
         const noteData = partSoundInfo.noteDatas[partSoundInfo.noteDataIndex];
         const instrumentId = partSoundInfo.instrumentId;
 
@@ -327,16 +409,16 @@ export class SongPlayer {
             switch (noteData.type) {
                 case 'note':
                     if (noteData.note !== undefined) {
-                        const freq = this.audioEngine.midiToFrequency(noteData.note);
-                        this.audioEngine.triggerAttackRelease(instrumentId, freq, noteData.duration, time);
+                        // Play single note
+                        this.audioEngine.triggerAttackRelease(instrumentId, this.audioEngine.midiToFrequency(noteData.note), noteData.duration, time);
                     }
                     break;
                 case 'chord':
                     if (Array.isArray(noteData.noteDatas)) {
                          const notesToPlay = this.noteDatasToNotes(noteData.noteDatas);
                          if (notesToPlay.length > 0) {
-                              const freqs = notesToPlay.map(n => this.audioEngine.midiToFrequency(n));
-                              this.audioEngine.triggerAttackRelease(instrumentId, freqs, noteData.duration, time);
+                              // Play chord notes simultaneously
+                              this.audioEngine.triggerAttackRelease(instrumentId, notesToPlay.map(n => this.audioEngine.midiToFrequency(n)), noteData.duration, time);
                          }
                     }
                     break;
@@ -346,18 +428,21 @@ export class SongPlayer {
                          if (notesToPlay.length > 0) {
                               const freqs = notesToPlay.map(n => this.audioEngine.midiToFrequency(n));
                               const totalDurationSeconds = this.audioEngine.timeToSeconds(noteData.duration);
-                              const singleNoteDurationSeconds = totalDurationSeconds / freqs.length;
+                              const singleNoteDurationSeconds = freqs.length > 0 ? totalDurationSeconds / freqs.length : totalDurationSeconds;
                               const singleNoteToneDuration = `${singleNoteDurationSeconds}s`;
+                              
                               freqs.forEach((freq, index) => {
                                   const noteStartTime = time + (index * singleNoteDurationSeconds);
-                                  this.audioEngine.triggerAttackRelease(instrumentId, freq, singleNoteToneDuration, noteStartTime);
+                                  // Ensure note start time isn't in the past relative to Tone.Transport
+                                  const transportNow = Tone.Transport.seconds;
+                                  const actualStartTime = Math.max(noteStartTime, transportNow);
+                                  this.audioEngine.triggerAttackRelease(instrumentId, freq, singleNoteToneDuration, actualStartTime);
                               });
                          }
                      }
                     break;
                 case 'rest':
                 case 'silence':
-                     // No hacer nada
                     break;
             }
         } catch (error) {
@@ -365,14 +450,7 @@ export class SongPlayer {
         }
     }
 
-    private extractBlockNotes(block: Block, noteDatas: NoteData[], player: Player, repeatingTimes: number): NoteData[] {
-        console.warn("[SongPlayer] extractBlockNotes might be redundant.");
-        return []; 
-   }
-   private extractNotesToPlay(block: Block, noteDatas: NoteData[], player: Player): NoteData[] {
-       console.warn("[SongPlayer] extractNotesToPlay might be redundant.");
-       return []; 
-   }
+    // --- Helper methods --- 
     private noteDatasToNotes(noteDatas: NoteData[]): number[] {
         return noteDatas
             .filter(nd => nd.type === 'note' && nd.note !== undefined)
@@ -382,4 +460,3 @@ export class SongPlayer {
          return notes.map(note => ({ type: 'note', note, duration }));
     }
 }
-

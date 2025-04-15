@@ -73,4 +73,19 @@ export class SongEditorComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
         }
     }
+
+    duplicatePart(partToDuplicate: Part) {
+        console.log("Duplicating part in SongEditorComponent:", partToDuplicate);
+        const index = this.song.parts.findIndex(p => p === partToDuplicate);
+        if (index !== -1) {
+            const clonedPart = partToDuplicate.clone();
+            // Assign a new unique ID if Part uses static IDs
+            // clonedPart.id = Part._id++; // Or however new IDs are handled
+            this.song.parts.splice(index + 1, 0, clonedPart);
+            this.cdr.detectChanges();
+            console.log("Part duplicated. New parts array:", this.song.parts);
+        } else {
+            console.error("Part to duplicate not found in song.");
+        }
+    }
 }

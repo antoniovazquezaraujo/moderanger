@@ -18,6 +18,7 @@ export class PartComponent implements OnInit {
     treeControl = new NestedTreeControl<Block>(node => node.children);
 
     @Input() part!: Part;
+    @Input() song!: Song;
     @Output() onDuplicatePart: EventEmitter<Part>;
     @Output() onRemovePart: EventEmitter<Part>;
 
@@ -136,11 +137,15 @@ export class PartComponent implements OnInit {
     }
 
     playPart() {
-        // Comentar temporalmente - necesita refactor usando AudioEngineService
-        // const player = new Player(0, this.part.instrumentType || InstrumentType.PIANO);
-        // const dummySong = new Song();
-        // this.songPlayer.playPart(this.part, player, dummySong);
-        console.warn("playPart functionality in PartComponent needs refactoring.");
+        // Log the inputs just before checking them
+        console.log("[PartComponent] playPart called. this.part:", this.part);
+        console.log("[PartComponent] playPart called. this.song:", this.song);
+        
+        if (this.part && this.song) { 
+            this.songPlayer.playPart(this.part, this.song);
+        } else {
+            console.error("Cannot play part: Part or Song context is missing.");
+        }
     }
 
     stopPart() {
