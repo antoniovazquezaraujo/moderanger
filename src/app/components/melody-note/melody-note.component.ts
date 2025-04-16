@@ -5,7 +5,7 @@ import { SingleNote, NoteDuration } from '../../model/melody';
     selector: 'app-melody-note',
     template: `
         <div class="note-item" [class.selected]="isSelected" (click)="onClick()">
-            <div class="note-visual" (click)="onToggleSilence($event)" (wheel)="onWheelValue($event)">
+            <div class="note-visual" (wheel)="onWheelValue($event)">
                 <span class="note-value" [class.silence]="note.value === null">
                     {{ note.value === null ? 'x' : note.value }}
                 </span>

@@ -133,27 +133,64 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   }
 
   private scrollToElement(elementId: string): void {
+    // Use setTimeout 0 to run after current cycle, hoping DOM is stable
     setTimeout(() => {
+        console.log(`[MelodyEditor] scrollToElement called for ID: ${elementId}`);
         const visualEl = this.visualElements.find(ve => ve.id === elementId);
         const componentId = visualEl?.originalElement.id;
-        if (!componentId) return; 
+        const visualType = visualEl?.type;
 
-        const allComponents = [...this.noteComponents.toArray(), ...this.groupComponents.toArray()];
-        const targetComponent = allComponents.find(comp => comp.note?.id === componentId);
+        if (!componentId) {
+             console.warn(`[MelodyEditor] scrollToElement: Could not find original component ID for visual ID ${elementId}. Focusing container.`);
+             this.editorContainer?.nativeElement?.focus({ preventScroll: true }); 
+             return; 
+        }
 
-        if (targetComponent) {
-            targetComponent.elementRef.nativeElement.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'nearest'
-            });
+        let targetElement: HTMLElement | null = null;
+
+        // Find the DOM element to focus
+        if (visualType === 'group-start' || visualType === 'group-end') {
+             // Find the span marker directly using the visual element ID (which includes _start/_end)
+             targetElement = this.elementRef.nativeElement.querySelector(`[data-element-id="${elementId}"]`);
+             console.log(`[MelodyEditor] scrollToElement: Found group marker element?`, targetElement);
+        } else {
+            // Find the component instance first for notes/rests/chords/arpeggios
+            const allComponents = [...this.noteComponents.toArray(), ...this.groupComponents.toArray()];
+            const targetComponent = allComponents.find(comp => comp.note?.id === componentId);
+            if (targetComponent) {
+                targetElement = targetComponent.elementRef.nativeElement;
+                console.log(`[MelodyEditor] scrollToElement: Found component instance element?`, targetElement);
+            }
         }
-        
-        const editorElement = this.editorContainer?.nativeElement;
-        if (editorElement && document.activeElement !== editorElement) {
-             // editorElement.focus(); // Re-focus container if needed, might steal focus unexpectedly
+
+        if (targetElement) {
+            // Scroll into view
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            
+            // Attempt to focus the found element
+            try {
+                 if (!targetElement.hasAttribute('tabindex')) {
+                     targetElement.setAttribute('tabindex', '-1'); 
+                 }
+                 console.log(`[MelodyEditor] scrollToElement: Calling focus() on element for ID: ${elementId}`);
+                 targetElement.focus({ preventScroll: true });
+
+                 // Verify focus AFTER the call
+                 if (document.activeElement === targetElement) {
+                     console.log(`[MelodyEditor] scrollToElement: Focus successful on element ${elementId}.`);
+                 } else {
+                      console.warn(`[MelodyEditor] scrollToElement: Focus call did not result in active element ${elementId}. Falling back to container.`);
+                      this.editorContainer?.nativeElement?.focus({ preventScroll: true });
+                 }
+            } catch (e) {
+                console.error("[MelodyEditor] Error focusing target element:", e);
+                this.editorContainer?.nativeElement?.focus({ preventScroll: true });
+            }
+        } else {
+             console.warn(`[MelodyEditor] scrollToElement: Could not find target DOM element for ID: ${elementId} to focus. Focusing container.`);
+             this.editorContainer?.nativeElement?.focus({ preventScroll: true });
         }
-    }, 0);
+    }, 0); 
   }
 
   private flattenElements(elements: MusicElement[]): VisualElement[] {
@@ -284,6 +321,17 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
             this.melodyEditorService.moveElementRight(originalElement.id);
             this.selectElement(originalElement.id); // Re-select element
             this.emitNotesChange(); // Moving elements changes structure
+        }
+
+        if (event.key === ' ') { 
+            event.preventDefault(); // Prevent default space behavior (scrolling)
+            if (this.focusedElement && (this.focusedElement.type === 'note' || this.focusedElement.type === 'rest')) {
+                 console.log(`[MelodyEditor] Setting duration to undefined for ${this.focusedElement.id}`);
+                 // We need the updateNote method from the service
+                 this.melodyEditorService.updateNote(this.focusedElement.id, { duration: undefined });
+                 this.emitNotesChange();
+                 return; // Action handled
+            }
         }
 
     } else { // Tecla sin Shift
@@ -458,23 +506,43 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   }
 
   private deleteNote(): void {
-    if (!this.focusedElement) return;
-    const idToDelete = this.focusedElement.id;
-    const visualIndex = this.visualElements.findIndex(ve => ve.id === this.selectedId);
-    let nextIdToSelect: string | null = null;
-    const oldVisualLength = this.visualElements.length;
+    if (!this.focusedElement || !this.selectedId) return;
 
-    if (oldVisualLength > 1) {
-      if (visualIndex > 0) {
-        nextIdToSelect = this.visualElements[visualIndex - 1].id;
-      } else if (visualIndex === 0 && oldVisualLength > 1) {
-         nextIdToSelect = this.visualElements[1].id; 
-      }
+    const selectedVisualElement = this.visualElements.find(ve => ve.id === this.selectedId);
+    if (!selectedVisualElement) return; // Should not happen if selectedId is valid
+
+    // --- Check if deleting a group marker --- 
+    if (selectedVisualElement.type === 'group-start' || selectedVisualElement.type === 'group-end') {
+        const groupId = selectedVisualElement.originalElement.id;
+        console.log(`[MelodyEditor] Deleting group via marker ${this.selectedId}. Group ID: ${groupId}`);
+        this.melodyEditorService.removeGroupAndPromoteChildren(groupId);
+        this.emitNotesChange(); // Emit change because structure changed
+        // Focus/Selection is handled by the service method now
     } 
-    
-    this.melodyEditorService.removeNote(idToDelete);
-    this.melodyEditorService.selectNote(nextIdToSelect); 
-    this.emitNotesChange();
+    // --- Handle deleting note/rest --- 
+    else if (selectedVisualElement.originalElement.type === 'note' || selectedVisualElement.originalElement.type === 'rest') {
+        const idToDelete = selectedVisualElement.originalElement.id;
+        const visualIndex = this.visualElements.findIndex(ve => ve.id === this.selectedId);
+        let nextIdToSelect: string | null = null;
+        const oldVisualLength = this.visualElements.length;
+
+        // Determine next selection ID before removing
+        if (oldVisualLength > 1) {
+            if (visualIndex > 0) {
+                nextIdToSelect = this.visualElements[visualIndex - 1].id;
+            } else { // Deleting the first element
+                nextIdToSelect = this.visualElements[1].id; 
+            }
+        }
+        
+        console.log(`[MelodyEditor] Deleting note/rest ${idToDelete}. Selecting ${nextIdToSelect} next.`);
+        this.melodyEditorService.removeNote(idToDelete); // Service removes the note
+        this.melodyEditorService.selectNote(nextIdToSelect); // Service selects next/previous
+        this.emitNotesChange(); // Emit change because data changed
+        // Focus is handled by the service selection triggering scrollToElement
+    } else {
+         console.warn("[MelodyEditor] Delete called on unexpected element type:", selectedVisualElement.type, selectedVisualElement.originalElement.type);
+    }
   }
 
   public toggleSilence(id?: string): void {

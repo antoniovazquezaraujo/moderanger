@@ -439,4 +439,77 @@ export class MelodyEditorService {
         }
         this.selectNote(groupId);
     }
+
+    // <<< NEW METHOD for removing group >>>
+    removeGroupAndPromoteChildren(groupId: string): void {
+        const { element: group, parent } = this.findElementAndParent(groupId);
+
+        if (!group || group.type !== 'group') {
+            console.warn(`[MelodyEditorService] Cannot remove group: Element ${groupId} not found or is not a group.`);
+            return;
+        }
+
+        const groupToRemove = group as GenericGroup;
+        const childrenToPromote = groupToRemove.children || [];
+        const groupDuration = groupToRemove.duration; // Get the group's duration BEFORE removing it
+
+        // Prepare children: Assign group duration if child duration is undefined
+        const preparedChildren = childrenToPromote.map(child => {
+            // Create a new object for the child to avoid modifying the original potentially shared reference
+            const childCopy = { ...child }; 
+            if (childCopy.duration === undefined && groupDuration !== undefined) {
+                childCopy.duration = groupDuration;
+                console.log(`[MelodyEditorService] Promoting child ${childCopy.id}, assigning group duration ${groupDuration}`);
+            }
+            return childCopy;
+        });
+
+        // Get the list where the group resides (either root or parent's children)
+        const sourceList = parent ? (parent as GenericGroup).children : this.elementsSubject.value;
+        const groupIndex = sourceList.findIndex(e => e.id === groupId);
+
+        if (groupIndex === -1) {
+             console.error(`[MelodyEditorService] Cannot find group ${groupId} in its expected list during removal.`);
+             return;
+        }
+
+        // Create the new list by replacing the group with its prepared children
+        const updatedList = [
+            ...sourceList.slice(0, groupIndex),
+            ...preparedChildren, // Insert children
+            ...sourceList.slice(groupIndex + 1)
+        ];
+
+        let firstChildIdToSelect: string | null = preparedChildren.length > 0 ? preparedChildren[0].id : null;
+        let nextElementIdFallback: string | null = null;
+
+        // Determine fallback selection (element before or after the removed group)
+        if (sourceList.length > preparedChildren.length) { // Check if there were elements other than the group
+             if (groupIndex > 0) {
+                 nextElementIdFallback = sourceList[groupIndex - 1].id;
+             } else if (groupIndex + 1 < sourceList.length) {
+                 // Element after the inserted children (original index + children length)
+                 const originalIndexAfterGroup = groupIndex + 1;
+                 if (originalIndexAfterGroup < updatedList.length) {
+                     nextElementIdFallback = updatedList[originalIndexAfterGroup].id;
+                 }
+             }
+        }
+        
+        // Update the list (either parent's children or root)
+        if (parent && (parent.type === 'group' || parent.type === 'arpeggio' || parent.type === 'chord')) {
+            // We need to handle different parent types if necessary, assuming GenericGroup for now
+            console.log(`[MelodyEditorService] Updating parent ${parent.id} children after removing group ${groupId}`);
+            this.updateNote(parent.id, { children: updatedList }); 
+        } else {
+            console.log(`[MelodyEditorService] Updating root elements after removing group ${groupId}`);
+            this.elementsSubject.next(updatedList);
+        }
+
+        // Select the first promoted child, or fallback to adjacent element
+        const finalIdToSelect = firstChildIdToSelect ?? nextElementIdFallback;
+        console.log(`[MelodyEditorService] Selecting element after group removal: ${finalIdToSelect}`);
+        this.selectNote(finalIdToSelect); 
+    }
+    // <<< ----------------------------- >>>
 } 
