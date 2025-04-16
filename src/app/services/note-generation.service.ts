@@ -66,17 +66,24 @@ export class NoteGenerationService {
         console.log(`[NoteGenSvc] Parsed NoteData (before propagation):`, JSON.stringify(rootNoteDatas));
       } catch (e) {
         console.error(`[NoteGenSvc] Error parsing block notes:`, notesToParse, e);
-        rootNoteDatas = [];
+        rootNoteDatas = []; // Keep empty on error
       }
     } else {
-      console.log(`[NoteGenSvc] No notes string to parse.`);
-      rootNoteDatas = [];
+      // --- If notes string is empty, create a default silence/rest --- 
+      console.log(`[NoteGenSvc] No notes string to parse. Creating default rest.`);
+      rootNoteDatas = [new NoteData({ type: 'rest', duration: '16n' })]; // Default duration 16n
+      // ---------------------------------------------------------------
     }
 
-    // 2. Propagate group durations
-    console.log(`[NoteGenSvc] Propagating durations...`);
-    rootNoteDatas.forEach(rootNote => this.propagateGroupDurations(rootNote));
-    console.log(`[NoteGenSvc] NoteData after propagation:`, JSON.stringify(rootNoteDatas));
+    // --- Skip duration propagation if we just created the default rest --- 
+    if (rootNoteDatas.length === 1 && rootNoteDatas[0].type === 'rest' && notesToParse.trim().length === 0) {
+        console.log(`[NoteGenSvc] Skipping duration propagation for default rest.`);
+    } else {
+        // 2. Propagate group durations (only needed if parsing occurred)
+        console.log(`[NoteGenSvc] Propagating durations...`);
+        rootNoteDatas.forEach(rootNote => this.propagateGroupDurations(rootNote));
+        console.log(`[NoteGenSvc] NoteData after propagation:`, JSON.stringify(rootNoteDatas));
+    }
 
     // 3. Process individual notes/groups based on PlayMode
     console.log(`[NoteGenSvc] Processing individual notes/groups...`);
@@ -85,7 +92,8 @@ export class NoteGenerationService {
         finalPlayableNotes.push(...this.processSingleNoteData(noteData, player));
     }
     
-    console.log(`[NoteGenSvc] Final generated notes:`, JSON.stringify(finalPlayableNotes));
+    // <<< Add log before final return >>>
+    console.log(`[NoteGenSvc] === generateNotesForBlock RETURNING === Count: ${finalPlayableNotes.length}, Content: ${JSON.stringify(finalPlayableNotes)}`);
     console.log(`[NoteGenSvc] === generateNotesForBlock END ===`);
     return finalPlayableNotes;
   }

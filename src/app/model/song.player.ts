@@ -119,13 +119,20 @@ export class SongPlayer {
      };
 
     async playSong(song: Song): Promise<void> {
+        console.log("[SongPlayer] playSong called.");
         if (!this._initializePlayback(song)) {
+            console.log("[SongPlayer] playSong aborted: _initializePlayback returned false.");
             return;
         }
+        console.log("[SongPlayer] playSong: Playback initialized.");
         this._substituteVariablesInSong(song);
+        console.log("[SongPlayer] playSong: Variables substituted.");
         const partStates = await this._buildPartExecutionStates(song);
+        console.log(`[SongPlayer] playSong: Built ${partStates.length} part states.`);
         const partSoundInfo = this._extractNotesFromStates(partStates); 
+        console.log(`[SongPlayer] playSong: Extracted ${partSoundInfo.length} parts with sound info.`);
         await this._schedulePlayback(partSoundInfo); 
+        console.log("[SongPlayer] playSong: Playback scheduled.");
     }
 
     async playPart(part: Part, song: Song): Promise<void> {
@@ -184,8 +191,12 @@ export class SongPlayer {
                 const { block } = unit;
                 block.commands?.forEach((command: Command) => command.execute(state.player));
                 block.executeBlockOperations(); 
-                const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player);
-                state.extractedNotes = state.extractedNotes.concat(blockNotes);
+
+                if (block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
+                    const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player);
+                    state.extractedNotes = state.extractedNotes.concat(blockNotes);
+                }
+
                 state.currentUnitIndex++;
                 if (state.currentUnitIndex >= state.executionUnits.length) {
                     state.isFinished = true;
@@ -216,8 +227,10 @@ export class SongPlayer {
     }
 
     private _initializePlayback(song: Song): boolean {
+        console.log("[SongPlayer] _initializePlayback called.");
         this.stop(); 
         if (!song || !song.parts || song.parts.length === 0) {
+            console.log("[SongPlayer] _initializePlayback: No song or no parts, returning false.");
             this._isPlaying = false; 
             return false; 
          }
@@ -229,6 +242,7 @@ export class SongPlayer {
         if (!this.currentStopListenerId) {
              this.currentStopListenerId = this.audioEngine.onTransportStop(this._handleTransportStop);
         }
+        console.log("[SongPlayer] _initializePlayback: Initialization successful, returning true.");
         return true;
     }
 
@@ -250,6 +264,7 @@ export class SongPlayer {
     }
 
     private async _buildPartExecutionStates(song: Song): Promise<PartExecutionState[]> {
+         console.log("[SongPlayer] _buildPartExecutionStates called.");
          const partStatePromises = song.parts.map(async (part, index): Promise<PartExecutionState> => {
             const instrumentId = await this.audioEngine.createInstrument(part.instrumentType);
             const player = new Player(index, part.instrumentType, instrumentId, this.audioEngine);
@@ -263,59 +278,85 @@ export class SongPlayer {
                 }
             };
             part.blocks.forEach(block => addBlockAndChildren(block));
-            return {
+            const initialState = {
                 part, player, instrumentId, executionUnits,
                 currentUnitIndex: 0,
                 isFinished: executionUnits.length === 0,
                 extractedNotes: [] as NoteData[]
             };
+            console.log(`[SongPlayer] _buildPartExecutionStates: Initial state for part ${index} - isFinished: ${initialState.isFinished}, unitCount: ${executionUnits.length}`);
+            return initialState;
         });
-        return Promise.all(partStatePromises);
+         const results = await Promise.all(partStatePromises);
+         console.log(`[SongPlayer] _buildPartExecutionStates finished. Count: ${results.length}`);
+         return results;
     }
 
     private _extractNotesFromStates(partStates: PartExecutionState[]): PartSoundInfo[] {
-        let allFinished = false;
-        while (!allFinished) {
-            allFinished = true;
-            for (const state of partStates) {
-                if (state.isFinished) continue;
-                allFinished = false;
+        console.log(`[SongPlayer] _extractNotesFromStates called with ${partStates.length} states.`);
+        const allNoteData: PartSoundInfo[] = [];
+
+        partStates.forEach((state, stateIndex) => {
+            console.log(`[SongPlayer] _extractNotesFromStates: Processing state ${stateIndex}, initial isFinished: ${state.isFinished}`);
+            if (!state || state.isFinished) return; // Skip finished or invalid states
+
+            while (!state.isFinished) {
+                console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Loop Start, currentUnitIndex: ${state.currentUnitIndex}, totalUnits: ${state.executionUnits.length}`);
                 const unit = state.executionUnits[state.currentUnitIndex];
                 if (unit) {
                     const { block } = unit;
+                    console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Processing block ${block.id}`);
+                    // Apply commands and operations FIRST
                     block.commands?.forEach((command: Command) => command.execute(state.player));
-                    block.executeBlockOperations();
-                    const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player);
-                    state.extractedNotes = state.extractedNotes.concat(blockNotes);
+                    block.executeBlockOperations(); 
+                    console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Block ${block.id} commands/operations executed.`);
+
+                    // Check if notes exist before calling generation
+                    if (block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
+                         console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Block ${block.id} has notes, calling generateNotesForBlock...`);
+                         const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player); // Call the service
+                         console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Block ${block.id} generated ${blockNotes.length} notes.`);
+                         state.extractedNotes = state.extractedNotes.concat(blockNotes);
+                    } else {
+                         console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Block ${block.id} has NO notes, skipping generation.`);
+                    }
+
                     state.currentUnitIndex++;
                     if (state.currentUnitIndex >= state.executionUnits.length) {
+                        console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} finished all units.`);
                         state.isFinished = true;
                     }
                 } else {
-                      state.isFinished = true;
+                    console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} - unit was null/undefined at index ${state.currentUnitIndex}. Marking finished.`);
+                    state.isFinished = true;
                 }
-            }
-        }
-        const partSoundInfo: PartSoundInfo[] = [];
-        for (const state of partStates) {
+                 console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Loop End, isFinished: ${state.isFinished}`);
+            } // End While
+
+            // After processing all units for the state, package its notes if any
+            console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} finished loop. Extracted notes count: ${state.extractedNotes.length}`);
             if (state.extractedNotes.length > 0) {
-                partSoundInfo.push({
+                console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} has extracted notes, packaging PartSoundInfo.`);
+                allNoteData.push({
                     noteDatas: state.extractedNotes,
                     player: state.player,
                     instrumentId: state.instrumentId,
                     noteDataIndex: 0,
-                    pendingTurnsToPlay: 0
+                    pendingTurnsToPlay: 0 // Assuming this resets or is handled later
                 });
+            } else {
+                console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} has NO extracted notes, skipping packaging.`);
             }
-        }
-        // console.log(`[SongPlayer] _extractNotesFromStates result (partSoundInfo):`, JSON.stringify(partSoundInfo, null, 2)); 
-        return partSoundInfo;
+        }); // End forEach
+
+        console.log(`[SongPlayer] _extractNotesFromStates finished. Result count: ${allNoteData.length}`);
+        return allNoteData;
     }
 
     private async _schedulePlayback(partSoundInfo: PartSoundInfo[]): Promise<void> {
-        // console.log(`[SongPlayer] _schedulePlayback called with partSoundInfo length: ${partSoundInfo.length}`);
+        console.log(`[SongPlayer] _schedulePlayback called with ${partSoundInfo.length} parts.`);
         if (partSoundInfo.length === 0) {
-            // console.log(`[SongPlayer] No sound info to schedule, stopping playback logic.`);
+            console.log(`[SongPlayer] _schedulePlayback: No sound info to schedule, stopping.`); 
             this._isPlaying = false;
             return;
         }
@@ -339,6 +380,7 @@ export class SongPlayer {
             console.error("[SongPlayer] Error starting transport or loop via AudioEngine:", e);
             this.stop();
         }
+        console.log("[SongPlayer] _schedulePlayback: Loop scheduled and transport started.");
     }
     
     private _loopTick(time: number, partSoundInfo: PartSoundInfo[]): void {

@@ -29,7 +29,11 @@
     <!-- Content section now only contains app-song (which will contain app-parts) -->
     <div class="content-section">
         <!-- Pass song down, handle remove event -->
-        <app-song [song]="song" (removePartEvent)="removePartFromSong($event)"></app-song>
+        <app-song 
+            [song]="song" 
+            (removePartEvent)="removePartFromSong($event)"
+            (onDuplicatePartEvent)="duplicatePart($event)">
+        </app-song>
     </div>
 
     <!-- Sidebar remains here, controlled by this component -->

@@ -577,5 +577,8 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
         newNoteId = this.melodyEditorService.addNote(noteData);
     }
     console.log('New note ID:', newNoteId);
+    if (newNoteId) {
+        this.emitNotesChange(); 
+    }
   }
 }

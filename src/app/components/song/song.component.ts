@@ -11,6 +11,7 @@ export class SongComponent implements OnInit {
 
     @Input() song: Song = new Song();
     @Output() removePartEvent = new EventEmitter<Part>();
+    @Output() onDuplicatePartEvent = new EventEmitter<Part>();
     
     constructor() {
     }
@@ -18,8 +19,12 @@ export class SongComponent implements OnInit {
     ngOnInit(): void {
     }
 
-    handleRemovePart(part: Part): void {
+    emitRemovePart(part: Part): void {
         this.removePartEvent.emit(part);
+    }
+
+    handleDuplicatePart(part: Part): void {
+        this.onDuplicatePartEvent.emit(part);
     }
 
     getParts() {
