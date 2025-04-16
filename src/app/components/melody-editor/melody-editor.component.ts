@@ -262,6 +262,8 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
             (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) 
         {
             const groupId = originalElement.id;
+            const markerId = selectedVisualElement.id; // Store ID before move
+
             if (selectedVisualElement.type === 'group-start') {
                 if (event.key === 'ArrowLeft') this.melodyEditorService.moveGroupStartLeft(groupId);
                 else this.melodyEditorService.moveGroupStartRight(groupId);
@@ -269,13 +271,20 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
                 if (event.key === 'ArrowLeft') this.melodyEditorService.moveGroupEndLeft(groupId);
                 else this.melodyEditorService.moveGroupEndRight(groupId);
             }
+            // Re-select the marker after the operation
+            this.selectElement(markerId);
+            this.emitNotesChange(); // Moving groups changes structure
             return; 
         }
         
         if (event.key === 'ArrowLeft') {
             this.melodyEditorService.moveElementLeft(originalElement.id);
+            this.selectElement(originalElement.id); // Re-select element
+            this.emitNotesChange(); // Moving elements changes structure
         } else if (event.key === 'ArrowRight') {
             this.melodyEditorService.moveElementRight(originalElement.id);
+            this.selectElement(originalElement.id); // Re-select element
+            this.emitNotesChange(); // Moving elements changes structure
         }
 
     } else { // Tecla sin Shift
