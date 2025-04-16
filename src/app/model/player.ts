@@ -4,10 +4,10 @@ import { PlayMode } from "./play.mode";
 import { Scale, ScaleTypes, Tonality } from "./scale";
 import { Block } from "./block";
 import { Command } from "./command";
-import { InstrumentType } from "../services/audio-engine.service";
+import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
 import { PlayState } from "./play.state";
 import { BehaviorSubject, Subject } from "rxjs";
-import { AudioEngineService } from "../services/audio-engine.service";
+import { OctavedGrade } from "./octaved-grade";
 
 // Define missing constants (assuming default values, adjust if needed)
 const DEFAULT_BPM = 120;
@@ -116,19 +116,52 @@ export class Player {
         this.errorSubject.next(error);
     }
 
-    getSelectedNotes(scaleNum: ScaleTypes, tonality: number): NoteData[] {
-        return [];
+    getSelectedNotes(): NoteData[] {
+        const scale = Scale.getScaleByName(ScaleTypes[this.scale]);
+        if (!scale) {
+            console.error(`[Player] Invalid scale type: ${this.scale}`);
+            return [];
+        }
+
+        const baseGrade = this.selectedNote;
+        const notesToGenerate = this.density + 1;
+        let grades: number[] = [];
+
+        for (let i = 0; i < notesToGenerate; i++) {
+            grades.push(baseGrade + i * this.gap);
+        }
+
+        if (this.inversion > 0 && grades.length > 1) {
+            const inversionCount = this.inversion % grades.length;
+            const notesToInvert = grades.slice(0, inversionCount);
+            const remainingNotes = grades.slice(inversionCount);
+            const scaleSize = scale.getNumNotes();
+            const invertedNotes = notesToInvert.map(g => g + scaleSize);
+            grades = [...remainingNotes, ...invertedNotes];
+        }
+        
+        let midiNotes: NoteData[] = grades.map(grade => {
+            const octavedGrade = new OctavedGrade(scale, grade, this.octave);
+            const midiNote = octavedGrade.toNote() + this.tonality;
+            return new NoteData({ type: 'note', note: midiNote });
+        });
+        
+        console.log(`[Player] getSelectedNotes for grade ${baseGrade}: Density=${this.density}, Gap=${this.gap}, Inversion=${this.inversion}, Octave=${this.octave}, Tonality=${this.tonality} -> MIDI Notes:`, midiNotes.map(n=>n.note));
+        return midiNotes; 
     }
 
     generateNoteDataFromScale(scale: any, tunnedNote: number, tonality: number): NoteData[] {
+        console.warn("[Player] generateNoteDataFromScale called, potentially redundant?");
         return [];
     }
 
     selectNotes(): void {
+        console.warn("[Player] selectNotes called, purpose unclear?");
         this.noteDatas = [];
     }
 
     setInversion(noteDatas: NoteData[]): NoteData[] {
+        console.warn("[Player] setInversion called, logic moved to getSelectedNotes.");
         var invertednoteDatas: NoteData[] = [];
         for (var n = 0; n < noteDatas.length; n++) {
             var noteData = noteDatas[n];
@@ -141,6 +174,7 @@ export class Player {
     }
 
     setOctave(chordNotes: NoteData[]): NoteData[] {
+        console.warn("[Player] setOctave called, logic moved to getSelectedNotes.");
         var octavednoteDatas: NoteData[] = [];
         for (var noteData of chordNotes) {
             if (noteData.note !== undefined) {

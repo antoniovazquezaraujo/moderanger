@@ -23,9 +23,9 @@ export class OctavedGrade {
      * @param octave La octava de la nota
      * @param duration La duración de la nota
      */
-    constructor(scale: Scale, grade: number, octave: number, duration: string) {
+    constructor(scale: Scale, grade: number, octave: number, duration?: string) {
         this.scale = scale;
-        this.duration = duration;
+        this.duration = duration ?? '';
         this.setGradeAndOctave(grade, octave);
     }
 
