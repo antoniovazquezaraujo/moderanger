@@ -1,18 +1,22 @@
 import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
-import { MusicalInstrument } from "./instrument";
 import { NoteData } from "./note";
-import { getPlayModeFromString, PlayMode } from "./play.mode";
+import { PlayMode } from "./play.mode";
 import { Scale, ScaleTypes, Tonality } from "./scale";
-import { Song } from "./song";
 import { Block } from "./block";
-import { Command, CommandType } from "./command";
-import { InstrumentType, InstrumentFactory } from "./instruments";
-import { VariableContext } from "./variable.context";
-import { OperationType } from './operation';
-import { IncrementOperation, DecrementOperation, AssignOperation } from './operation';
+import { Command } from "./command";
+import { InstrumentType } from "../services/audio-engine.service";
+import { PlayState } from "./play.state";
+import { BehaviorSubject, Subject } from "rxjs";
+import { AudioEngineService } from "../services/audio-engine.service";
+
+// Define missing constants (assuming default values, adjust if needed)
+const DEFAULT_BPM = 120;
+const MIN_BPM = 30;
+const MAX_BPM = 240;
+
+type InstrumentId = string;
 
 export class Player {
-    private static defaultInstrument = InstrumentFactory.getInstrument(InstrumentType.PIANO);
     channel: number;
     scale: ScaleTypes = ScaleTypes.WHITE;
     tonality: number = Tonality.D;
@@ -29,44 +33,101 @@ export class Player {
     decorationGap?: number = undefined;
     decorationPattern?: string = undefined;
     playMode: PlayMode = PlayMode.CHORD;
-    instrumentType: InstrumentType = InstrumentType.PIANO;
-    private instrument: MusicalInstrument;
+    instrumentType: InstrumentType;
+    instrumentId: InstrumentId;
 
-    constructor(channel: number, instrumentType: InstrumentType = InstrumentType.PIANO) {
+    private _playState = PlayState.STOPPED;
+    private _playProgress = 0;
+    private _bpm = DEFAULT_BPM;
+    private _isMuted = false;
+
+    private playStateSubject = new BehaviorSubject<PlayState>(this._playState);
+    private playProgressSubject = new BehaviorSubject<number>(this._playProgress);
+    private bpmSubject = new BehaviorSubject<number>(this._bpm);
+    private isMutedSubject = new BehaviorSubject<boolean>(this._isMuted);
+    private stopEventSubject = new Subject<void>();
+    private errorSubject = new Subject<Error>();
+
+    playState$ = this.playStateSubject.asObservable();
+    playProgress$ = this.playProgressSubject.asObservable();
+    bpm$ = this.bpmSubject.asObservable();
+    isMuted$ = this.isMutedSubject.asObservable();
+    stopEvent$ = this.stopEventSubject.asObservable();
+    error$ = this.errorSubject.asObservable();
+
+    constructor(
+        channel: number,
+        instrumentType: InstrumentType,
+        instrumentId: InstrumentId,
+        private audioEngine: AudioEngineService
+    ) {
         this.channel = channel;
         this.instrumentType = instrumentType;
-        this.instrument = InstrumentFactory.getInstrument(instrumentType);
+        this.instrumentId = instrumentId;
+        this._registerAudioEngineStopListener();
     }
 
-    static getDefaultInstrument(): MusicalInstrument {
-        return Player.defaultInstrument;
+    private _registerAudioEngineStopListener(): void {
+        this.audioEngine.onTransportStop(() => {
+            if (this._playState !== PlayState.STOPPED) {
+                this.setPlayState(PlayState.STOPPED);
+                this.setPlayProgress(0);
+                this.stopEventSubject.next();
+            }
+        });
     }
 
-    setInstrument(type: InstrumentType): void {
-        this.instrumentType = type;
-        this.instrument = InstrumentFactory.getInstrument(type);
+    get playState(): PlayState { return this._playState; }
+    get playProgress(): number { return this._playProgress; }
+    get bpm(): number { return this._bpm; }
+    get isMuted(): boolean { return this._isMuted; }
+
+    setPlayState(newState: PlayState): void {
+        if (this._playState !== newState) {
+            this._playState = newState;
+            this.playStateSubject.next(this._playState);
+        }
+    }
+
+    setPlayProgress(newProgress: number): void {
+        const clampedProgress = Math.max(0, Math.min(1, newProgress));
+        if (this._playProgress !== clampedProgress) {
+            this._playProgress = clampedProgress;
+            this.playProgressSubject.next(this._playProgress);
+        }
+    }
+
+    setBpm(newBpm: number): void {
+        const clampedBpm = Math.max(MIN_BPM, Math.min(MAX_BPM, newBpm));
+        if (this._bpm !== clampedBpm) {
+            this._bpm = clampedBpm;
+            this.audioEngine.setTransportBpm(this._bpm);
+            this.bpmSubject.next(this._bpm);
+        }
+    }
+
+    toggleMute(): void {
+        this._isMuted = !this._isMuted;
+        this.isMutedSubject.next(this._isMuted);
+    }
+
+    reportError(error: Error): void {
+        console.error("[Player] Reporting error:", error);
+        this.errorSubject.next(error);
     }
 
     getSelectedNotes(scaleNum: ScaleTypes, tonality: number): NoteData[] {
-        var scale = Scale.getScaleByName(scaleNum.toString());
-        var tunnedNote = this.selectedNote;
-        var chordnoteDatas: NoteData[] = this.generateNoteDataFromScale(scale, tunnedNote, tonality);
-        var octavednoteDatas = this.setOctave(chordnoteDatas);
-        var invertedNotes = this.setInversion(octavednoteDatas);
-        return invertedNotes;
+        return [];
     }
+
     generateNoteDataFromScale(scale: any, tunnedNote: number, tonality: number): NoteData[] {
-        let notes: NoteData[] = [];
-        var tunnedNote = this.selectedNote;
-        var chordnoteDatas = scale.gradeToChord(tunnedNote, this.density, tonality, this.gap, this.shiftStart, this.shiftSize, this.shiftValue, this.decorationPattern!, this.decorationGap!);
-        var octavednoteDatas = this.setOctave(chordnoteDatas);
-        var invertedNotes = this.setInversion(octavednoteDatas);
-        return invertedNotes;
+        return [];
     }
 
     selectNotes(): void {
-        this.noteDatas = [];//this.getSelectedNotes(this.getScale(), this.tonality);
+        this.noteDatas = [];
     }
+
     setInversion(noteDatas: NoteData[]): NoteData[] {
         var invertednoteDatas: NoteData[] = [];
         for (var n = 0; n < noteDatas.length; n++) {
@@ -90,21 +151,18 @@ export class Player {
         return octavednoteDatas;
     }
 
-
     selectScale(scale: ScaleTypes) {
         this.scale = scale;
     }
+
     getScale(): ScaleTypes {
         return this.scale;
     }
-    triggerAttackRelease(notes: Frequency[] | Frequency, duration: Time | Time[], time?: Time, velocity?: NormalRange) {
-        this.instrument.triggerAttackRelease(notes, duration, time, velocity);
-    }
 
     executeCommands(block: Block): void {
+        console.log(`[Player] Executing commands for block ${block.id} on player for instrument ${this.instrumentId}`);
         block.commands?.forEach(command => {
             command.execute(this);
         });
     }
-
 }

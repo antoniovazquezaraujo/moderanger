@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef } from '@angular/core';
 import { CompositeNote, MusicElement, NoteDuration } from '../../model/melody';
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 
@@ -20,7 +20,8 @@ import { MelodyNoteComponent } from '../melody-note/melody-note.component';
                     [isSelected]="child.id === selectedNoteId"
                     (select)="onSelectChild(child.id)"
                     (toggleSilence)="onToggleSilence(child.id)"
-                    (changeDuration)="onChangeChildDuration(child.id, $event)">
+                    (changeDuration)="onChangeChildDuration(child.id, $event)"
+                    (changeValue)="onChangeChildValue(child.id, $event)">
                 </app-melody-note>
             </div>
         </div>
@@ -88,6 +89,9 @@ export class MelodyGroupComponent {
     @Output() changeDuration = new EventEmitter<number>();
     @Output() toggleSilence = new EventEmitter<string>();
     @Output() changeChildDuration = new EventEmitter<{ id: string; delta: number }>();
+    @Output() changeChildValue = new EventEmitter<{ id: string; delta: number }>();
+    
+    constructor(public elementRef: ElementRef) {}
     
     onClick(): void {
         this.select.emit(this.note.id);
@@ -116,5 +120,9 @@ export class MelodyGroupComponent {
     
     isChildExpanded(id: string): boolean {
         return this.expandedGroups.has(id);
+    }
+    
+    onChangeChildValue(id: string, delta: number): void {
+        this.changeChildValue.emit({ id, delta });
     }
 } 

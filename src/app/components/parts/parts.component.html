@@ -1,7 +1,8 @@
 <div class="parts">
     <app-part *ngFor="let part of parts" 
         [part]="part"
-        (onDuplicatePart)="onDuplicatePart($event)"
+        [song]="song"
+        (onDuplicatePart)="handleDuplicatePart($event)"
         (onRemovePart)="removePart($event)">
     </app-part>
 </div>

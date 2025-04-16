@@ -2,6 +2,7 @@
 <div style="height: calc(100vh - 91px); overflow-y: auto;"> <!-- Updated total header height -->
     <app-parts 
         [parts] = "getParts() || []" 
+        [song] = "song"
         (onRemovePart)="handleRemovePart($event)">
     </app-parts>
 </div>

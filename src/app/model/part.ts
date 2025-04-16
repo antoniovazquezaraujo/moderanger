@@ -1,5 +1,6 @@
-import { Block } from "./block";
-import { InstrumentType } from "./instruments";
+import { Block } from './block';
+import { InstrumentType } from "../services/audio-engine.service";
+import { Command } from './command';
 
 export class Part {
     static _id: number = 0;

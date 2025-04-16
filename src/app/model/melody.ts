@@ -34,11 +34,6 @@ export interface GenericGroup extends BaseElement {
 // Tipo unión para cualquier elemento musical
 export type MusicElement = SingleNote | CompositeNote | GenericGroup;
 
-// Datos de presentación separados
-export interface EditorState {
-    selectedNoteId?: string;
-    expandedGroups: Set<string>;
-}
 
 // Clase utilitaria para generar IDs únicos
 export class NoteIdGenerator {

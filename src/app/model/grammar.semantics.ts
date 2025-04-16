@@ -1,7 +1,17 @@
 import { NoteData } from './note';
 import * as ohm from 'ohm-js';
+// Remove OctavedGrade import if no longer created here
+// import { OctavedGrade } from './octaved-grade';
 
 type Node = ohm.Node;
+
+// Define an intermediate type for semantic results
+// interface SemanticNoteInfo {
+//     type: 'note' | 'rest' | 'chord'; // Add other types if needed
+//     duration: string;
+//     grade?: number; // Grade number for notes
+//     noteDatas?: SemanticNoteInfo[]; // For chords
+// }
 
 export const ModeRangerSemantics = {
   Main(node: Node) {
@@ -59,6 +69,7 @@ export const ModeRangerSemantics = {
   Note(duration: Node, num: Node) {
     const note = num['eval']();
     const noteDuration = duration.numChildren > 0 ? duration.sourceString.slice(0, -1) : undefined;
+    if (!note) return null;
     return new NoteData({
       type: note.type,
       note: note.note,
@@ -73,7 +84,7 @@ export const ModeRangerSemantics = {
     return new NoteData({
         type: 'group',
         duration: groupDuration,
-        children: Array.isArray(childrenNotes) ? childrenNotes : [childrenNotes],
+        children: Array.isArray(childrenNotes) ? childrenNotes.filter(n => n !== null) : (childrenNotes ? [childrenNotes] : []),
         note: undefined
     });
   },
@@ -122,7 +133,7 @@ export const ModeRangerSemantics = {
     return new NoteData({ type: 'note', note: 0 });
   },
 
-  number(minus: Node, digits: Node) {
+  number(minus: Node, digits: Node): NoteData {
     const value = parseInt(digits.sourceString);
     return new NoteData({
       type: 'note',

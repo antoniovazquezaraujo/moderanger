@@ -37,4 +37,17 @@
         <h3>Variables</h3>
         <app-variable-declaration></app-variable-declaration>
     </p-sidebar>
+</div>
+
+<div class="song-editor">
+    <p-accordion>
+        <p-accordionTab *ngFor="let part of song.parts; let i = index" [header]="'Part ' + (i + 1)">
+            <app-part 
+                [part]="part" 
+                [song]="this.song"
+                (onDuplicatePart)="duplicatePart($event)" 
+                (onRemovePart)="removePartFromSong($event)">
+            </app-part>
+        </p-accordionTab>
+    </p-accordion>
 </div>   
