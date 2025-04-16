@@ -28,7 +28,6 @@
       [note]="element.originalElement"
       [isSelected]="element.id === selectedId"
       (click)="selectElement(element.id)"
-      (wheel)="onWheel($event, element)"
       (toggleSilence)="toggleSilence(element.originalElement.id)"
       (changeDuration)="changeDuration(element.originalElement.id, $event)"
       (changeValue)="changeNoteValue(element.originalElement.id, $event)">

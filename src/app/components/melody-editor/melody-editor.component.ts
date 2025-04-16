@@ -62,6 +62,8 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   private lastEmittedNotesString: string | null = null;
   expandedGroups = new Set<string>();
   readonly durations: NoteDuration[] = ['1n', '2n', '4n', '8n', '16n', '4t', '8t'];
+  private lastWheelTime: number = 0;
+  private readonly wheelThrottleDelay: number = 150;
 
   constructor(
     private melodyEditorService: MelodyEditorService,
@@ -541,20 +543,33 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   }
 
   onWheel(event: WheelEvent, visualElement: VisualElement): void { 
+    const now = Date.now();
+    if (now - this.lastWheelTime < this.wheelThrottleDelay) {
+      console.log("[MelodyEditor] onWheel throttled.");
+      event.preventDefault(); 
+      return; 
+    } 
+    this.lastWheelTime = now;
+    console.log(`[MelodyEditor] onWheel fired. deltaY: ${event.deltaY}`); 
     event.preventDefault();
     this.selectElement(visualElement.id);
     const element = visualElement.originalElement;
     if (event.shiftKey) {
+      // --- Throttle Duration Change Too ---
       const delta = event.deltaY > 0 ? 1 : -1;
       if (delta > 0) {
         this.decreaseDuration(element.id);
       } else {
         this.increaseDuration(element.id);
       }
+      // -----------------------------------
     } else {
       if (element.type === 'note' || element.type === 'rest') {
         const delta = event.deltaY > 0 ? -1 : 1;
-        this.updateNoteValue(element, (element.value ?? (delta > 0 ? -1 : 1)) + delta);
+        const currentValue = element.value;
+        const calculatedNewValue = (currentValue ?? (delta > 0 ? -1 : 1)) + delta;
+        console.log(`[MelodyEditor] onWheel: Current: ${currentValue}, Delta: ${delta}, NewValue: ${calculatedNewValue}`);
+        this.updateNoteValue(element, calculatedNewValue);
       }
     }
   }
