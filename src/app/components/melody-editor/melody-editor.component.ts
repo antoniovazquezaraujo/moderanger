@@ -104,24 +104,23 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     this.loadNotesFromString(this.notes);
 
     this.elementsSub = this.melodyEditorService.elements$.subscribe(elements => {
-      const previouslySelectedId = this.selectedId;
       this.elements = elements;
       this.visualElements = this.flattenElements(elements); 
 
-      if (previouslySelectedId && !elements.some(e => e.id === previouslySelectedId)) {
-          // Previously selected element is gone, selection state handled by selectedId$ sub
-      } else if (previouslySelectedId) {
-          this.focusedElement = this.elements.find(e => e.id === previouslySelectedId) || null;
+      if (this.selectedId) {
+          const visualEl = this.visualElements.find(ve => ve.id === this.selectedId);
+          this.focusedElement = visualEl ? visualEl.originalElement : null;
       } else {
           this.focusedElement = null;
       }
+
       this.cdr.detectChanges();
     });
 
     this.selectedIdSub = this.melodyEditorService.selectedElementId$.subscribe(id => {
       this.selectedId = id;
       const visualEl = this.visualElements.find(ve => ve.id === id);
-      this.focusedElement = visualEl ? visualEl.originalElement : null;
+      this.focusedElement = visualEl ? visualEl.originalElement : null; 
 
       this.cdr.detectChanges(); 
       
