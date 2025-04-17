@@ -355,16 +355,29 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
             this.emitNotesChange(); // Moving elements changes structure
         }
 
+        // --- Shift + Space: Assign parent group duration if inside a group ---
         if (event.key === ' ') { 
-            event.preventDefault(); // Prevent default space behavior (scrolling)
-            if (this.focusedElement && (this.focusedElement.type === 'note' || this.focusedElement.type === 'rest')) {
-                 console.log(`[MelodyEditor] Setting duration to undefined for ${this.focusedElement.id}`);
-                 // We need the updateNote method from the service
-                 this.melodyEditorService.updateNote(this.focusedElement.id, { duration: undefined });
-                 this.emitNotesChange();
-                 return; // Action handled
+            event.preventDefault(); 
+            // Use originalElement derived from selectedId, not this.focusedElement
+            if (originalElement && (originalElement.type === 'note' || originalElement.type === 'rest')) {
+                const elementId = originalElement.id;
+                const parentGroup = this.findParentGroup(elementId, this.elements);
+                
+                if (parentGroup && parentGroup.duration) {
+                    console.log(`[MelodyEditor] Shift+Space (in group ${parentGroup.id}): Setting duration to parent's duration (${parentGroup.duration}) for ${elementId}`);
+                    this.melodyEditorService.updateNote(elementId, { duration: parentGroup.duration });
+                    this.emitNotesChange();
+                } else if (parentGroup) {
+                     console.log(`[MelodyEditor] Shift+Space (in group ${parentGroup.id}): Parent group has no duration. Doing nothing for ${elementId}`);
+                     // Explicitly do nothing if parent group has no duration
+                } else {
+                    console.log(`[MelodyEditor] Shift+Space (top-level): Doing nothing for ${elementId}`);
+                    // Explicitly do nothing for top-level notes
+                }
+                return; // Action handled, whether something changed or not
             }
         }
+        // --- End Shift + Space ---
 
     } else { // Tecla sin Shift
         switch (event.key) {
