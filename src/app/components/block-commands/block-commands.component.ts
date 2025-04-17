@@ -316,7 +316,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 this.updateAvailableVariables();
                 const patternVariables = this.availableVariables.filter(v => {
                     const value = VariableContext.getValue(v.value);
-                    return typeof value === 'string' && /[0-9]/.test(value);
+                    return typeof value === 'string' && /^\s*[\d\s]+\s*$/.test(value);
                 });
                 
                 if (patternVariables.length > 0) {
@@ -420,7 +420,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             } else if (command.type === CommandType.SCALE) {
                 return typeof value === 'string' && this.scaleNames.includes(value);
             } else if (command.type === CommandType.PATTERN) {
-                return typeof value === 'string' && /[0-9]/.test(value);
+                return typeof value === 'string' && /^\s*[\d\s]+\s*$/.test(value);
             } else {
                 return typeof value === 'number';
             }
@@ -673,7 +673,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             return typeof value === 'string' && playModeNames.includes(value);
         } else if (type === 'melody') {
             // Melody es una cadena que contiene solo dígitos y espacios
-            return typeof value === 'string' && /^[\s\d]+$/.test(value);
+            return typeof value === 'string' && /^\s*[\d\s]+\s*$/.test(value);
         }
         
         return false;

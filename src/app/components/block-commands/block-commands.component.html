@@ -72,7 +72,7 @@
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
                                 <option value="">Select pattern variable</option>
-                                <option *ngFor="let variable of getFilteredVariables(command)" 
+                                <option *ngFor="let variable of getMelodyVariables()" 
                                         [value]="variable.value"
                                         [selected]="getSelectedValue(command) === variable.value">
                                     {{variable.label}}
