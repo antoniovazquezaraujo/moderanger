@@ -336,6 +336,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
                 else this.melodyEditorService.moveGroupEndRight(groupId);
             }
             this.emitNotesChange(); // Moving groups changes structure
+            this.selectElement(markerId); // Re-select the marker immediately
             // Call scrollToElement after a short delay to allow DOM updates
             setTimeout(() => {
                  if (this.selectedId === markerId) { // Optional: Check if selection is still the same
