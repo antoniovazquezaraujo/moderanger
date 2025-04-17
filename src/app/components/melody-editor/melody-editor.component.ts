@@ -428,22 +428,19 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       const currentElement = findElementRecursive(targetId, this.elements);
       if (!currentElement) return;
 
-      const currentDuration = currentElement.duration;
-      let newDuration: NoteDuration | undefined;
+      const currentDuration = currentElement.duration ?? this.durations[0]; // Default to first duration if undefined
+      let newDuration: NoteDuration;
 
-      if (currentDuration === undefined) {
-          newDuration = this.durations[this.durations.length - 1];
+      // Simplified logic: Always cycle through defined durations
+      const currentIndex = this.durations.indexOf(currentDuration); 
+      if (currentIndex === -1) { // If current duration isn't in the list, start from first
+           newDuration = this.durations[this.durations.length -1]; // Cycle up wraps to last
+      } else if (currentIndex === 0) {
+          newDuration = this.durations[this.durations.length - 1]; // Wrap around
       } else {
-          const currentIndex = this.durations.indexOf(currentDuration);
-          if (currentIndex === 0) {
-              newDuration = undefined;
-          } else if (currentIndex > 0) {
-              newDuration = this.durations[currentIndex - 1];
-          } else {
-             newDuration = undefined;
-          }
+          newDuration = this.durations[currentIndex - 1]; // Cycle up
       }
-
+      
       this.melodyEditorService.updateNote(targetId, { duration: newDuration });
       this.emitNotesChange();
   }
@@ -467,21 +464,18 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       const currentElement = findElementRecursive(targetId, this.elements);
       if (!currentElement) return;
 
-      const currentDuration = currentElement.duration;
-      let newDuration: NoteDuration | undefined;
+      const currentDuration = currentElement.duration ?? this.durations[0]; // Default to first duration if undefined
+      let newDuration: NoteDuration;
 
-      if (currentDuration === undefined) {
-          newDuration = this.durations[0];
-      } else {
-          const currentIndex = this.durations.indexOf(currentDuration);
-          if (currentIndex === this.durations.length - 1) {
-              newDuration = undefined;
-          } else if (currentIndex >= 0 && currentIndex < this.durations.length - 1) {
-              newDuration = this.durations[currentIndex + 1];
-          } else {
-              newDuration = undefined;
-          }
-      }
+       // Simplified logic: Always cycle through defined durations
+       const currentIndex = this.durations.indexOf(currentDuration);
+       if (currentIndex === -1) { // If current duration isn't in the list, start from first
+            newDuration = this.durations[0];
+       } else if (currentIndex === this.durations.length - 1) {
+           newDuration = this.durations[0]; // Wrap around
+       } else {
+           newDuration = this.durations[currentIndex + 1]; // Cycle down
+       }
 
       this.melodyEditorService.updateNote(targetId, { duration: newDuration });
       this.emitNotesChange();
@@ -724,4 +718,34 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
         this.emitNotesChange(); 
     }
   }
+
+  // --- Helper function to find the direct parent group of an element ---
+  private findParentGroup(elementId: string, elements: MusicElement[]): GenericGroup | null {
+    for (const el of elements) {
+        if (el.type === 'group' && el.children) {
+            if (el.children.some(child => child.id === elementId)) {
+                // Found as a direct child of this group
+                return el as GenericGroup; 
+            }
+            // Recursively check inside this group's children
+            const parent = this.findParentGroup(elementId, el.children);
+            if (parent) {
+                return parent; // Return the parent found deeper in the hierarchy
+            }
+        } else if ((el.type === 'arpeggio' || el.type === 'chord') && el.notes) {
+             // Also check inside chords/arpeggios, treating them like potential groups
+             // NOTE: Chords/Arpeggios typically don't have their own duration in the model, 
+             // but if they did, this logic might need adjustment depending on desired inheritance.
+             // For now, just traverse into them.
+            const parent = this.findParentGroup(elementId, el.notes);
+            if (parent) {
+                return parent; 
+            }
+        }
+        // We don't check el.id === elementId here, because we are looking for a *parent*
+    }
+    // Element not found within any group at this level or below
+    return null; 
+  }
+  // --- End helper function ---
 }

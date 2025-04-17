@@ -11,7 +11,7 @@ import { SingleNote, NoteDuration } from '../../model/melody';
                 </span>
             </div>
             <div class="note-duration" (wheel)="onWheelDuration($event)">
-                <span class="duration-value">{{ note.duration ?? '-' }}</span>
+                <span class="duration-value">{{ note.duration  }}</span>
             </div>
         </div>
     `,
