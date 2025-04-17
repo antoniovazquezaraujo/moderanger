@@ -8,6 +8,8 @@ import { VariableContext } from 'src/app/model/variable.context';
 import { Subscription } from 'rxjs';
 import { IncrementOperation, DecrementOperation, AssignOperation } from 'src/app/model/operation';
 import { MelodyEditorService } from 'src/app/services/melody-editor.service';
+import { SongPlayer } from 'src/app/model/song.player';
+import { NoteDuration } from 'src/app/model/melody';
 
 interface VariableOption {
     label: string;
@@ -44,8 +46,13 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     operations: { type: OperationType, variableName: string, value: string | number }[] = [];
 
     operationDropdownOptions = this.operationTypeNames.map(type => ({ label: type, value: type }));
+    currentDefaultDuration: NoteDuration = '4n';
+    private durationSubscription?: Subscription;
 
-    constructor(private cdr: ChangeDetectorRef, private melodyEditorService: MelodyEditorService) {         
+    constructor(
+        private cdr: ChangeDetectorRef, 
+        private songPlayer: SongPlayer
+        ) {         
         this.playModeNames = getPlayModeNames();
         this.scaleNames = Scale.getScaleNames();
         console.log('Scale names initialized in constructor:', this.scaleNames);
@@ -69,6 +76,13 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         this.initializeOperationsFromBlock();
         
         this.selectedOperationType = this.operationTypeNames[0] as OperationType;
+        
+        // Subscribe to global duration changes
+        this.durationSubscription = this.songPlayer.globalDefaultDuration$.subscribe(duration => {
+            this.currentDefaultDuration = duration;
+            console.log(`[BlockCommands] Global duration updated to: ${duration}`);
+            this.cdr.detectChanges();
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -82,6 +96,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     ngOnDestroy(): void {
         if (this.variablesSubscription) {
             this.variablesSubscription.unsubscribe();
+        }
+        if (this.durationSubscription) {
+            this.durationSubscription.unsubscribe();
         }
     }
 

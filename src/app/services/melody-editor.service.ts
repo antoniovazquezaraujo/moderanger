@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { MusicElement, SingleNote, CompositeNote, GenericGroup, NoteDuration, NoteFactory, NoteConverter } from '../model/melody';
 import { NoteData } from '../model/note';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class MelodyEditorService {
     private readonly serviceInstanceId = Math.random().toString(36).substring(2, 7);
     private readonly elementsSubject = new BehaviorSubject<MusicElement[]>([]);

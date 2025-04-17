@@ -83,6 +83,7 @@
                             <app-melody-editor 
                                 class="compact-melody-editor"
                                 [notes]="'' + command.value" 
+                                [defaultDuration]="currentDefaultDuration"
                                 (notesChange)="command.value = $event">
                             </app-melody-editor>
                         </ng-template>
@@ -152,6 +153,7 @@
                         <app-melody-editor 
                             class="inline-melody-editor"
                             [notes]="'' + operation.value" 
+                            [defaultDuration]="currentDefaultDuration"
                             (notesChange)="onMelodyChange($event, operation)">
                         </app-melody-editor>
                     </ng-container>

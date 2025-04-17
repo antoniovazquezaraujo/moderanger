@@ -43,7 +43,8 @@ interface VisualElement {
 @Component({
   selector: 'app-melody-editor',
   templateUrl: './melody-editor.component.html',
-  styleUrls: ['./melody-editor.component.scss']
+  styleUrls: ['./melody-editor.component.scss'],
+  providers: [MelodyEditorService]
 })
 export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   @Input() notes: string = '';
