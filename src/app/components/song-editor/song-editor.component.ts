@@ -4,6 +4,8 @@ import { Part } from 'src/app/model/part';
 import { SongPlayer } from 'src/app/model/song.player';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { NoteDuration } from 'src/app/model/melody';
+import { MelodyEditorService } from 'src/app/services/melody-editor.service';
 
 @Component({
     selector: 'app-song-editor',
@@ -19,11 +21,15 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     variablesSidebarVisible: boolean = false;
     isPlaying: boolean = false;
 
+    selectedDefaultDuration: NoteDuration = '4n';
+    readonly availableDurations: NoteDuration[] = ['1n', '2n', '4n', '8n', '16n', '4t', '8t'];
+
     private destroy$ = new Subject<void>();
 
     constructor(
         private songPlayer: SongPlayer,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private melodyEditorService: MelodyEditorService
     ) {
         this.metronome$ = this.songPlayer.metronome$;
         this.metronome$
@@ -38,6 +44,7 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.melodyEditorService.setDefaultDuration(this.selectedDefaultDuration);
         this.cdr.detectChanges();
     }
 
@@ -87,5 +94,10 @@ export class SongEditorComponent implements OnInit, OnDestroy {
         } else {
             console.error("Part to duplicate not found in song.");
         }
+    }
+
+    logDurationChange(newDuration: NoteDuration) {
+        console.log(`[SongEditorComponent] Default duration changed to: ${newDuration}`);
+        this.melodyEditorService.setDefaultDuration(newDuration);
     }
 }

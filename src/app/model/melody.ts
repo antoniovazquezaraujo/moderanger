@@ -77,11 +77,11 @@ export class NoteFactory {
 
 // Convertidor entre el nuevo modelo y NoteData
 export class NoteConverter {
-    static toNoteData(element: MusicElement): NoteData {
+    static toNoteData(element: MusicElement, defaultDuration: NoteDuration = '4n'): NoteData {
         if (element.type === 'note' || element.type === 'rest') {
             return new NoteData({
                 type: element.type,
-                duration: element.duration,
+                duration: element.duration ?? defaultDuration,
                 note: element.value ?? undefined
             });
         } else if (element.type === 'group') { // Manejar GenericGroup
@@ -89,14 +89,14 @@ export class NoteConverter {
             return new NoteData({
                 type: 'group',
                 duration: group.duration,
-                children: group.children.map(child => this.toNoteData(child))
+                children: group.children.map(child => this.toNoteData(child, defaultDuration))
             });
         } else { // Manejar CompositeNote (arpegio/acorde)
             const group = element as CompositeNote;
             return new NoteData({
                 type: group.type,
-                duration: group.duration,
-                noteDatas: group.notes.map(note => this.toNoteData(note))
+                duration: group.duration ?? defaultDuration,
+                noteDatas: group.notes.map(note => this.toNoteData(note, defaultDuration))
             });
         }
     }

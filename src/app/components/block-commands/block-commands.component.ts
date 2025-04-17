@@ -7,6 +7,7 @@ import { Scale } from 'src/app/model/scale';
 import { VariableContext } from 'src/app/model/variable.context';
 import { Subscription } from 'rxjs';
 import { IncrementOperation, DecrementOperation, AssignOperation } from 'src/app/model/operation';
+import { MelodyEditorService } from 'src/app/services/melody-editor.service';
 
 interface VariableOption {
     label: string;
@@ -44,7 +45,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     operationDropdownOptions = this.operationTypeNames.map(type => ({ label: type, value: type }));
 
-    constructor(private cdr: ChangeDetectorRef) {         
+    constructor(private cdr: ChangeDetectorRef, private melodyEditorService: MelodyEditorService) {         
         this.playModeNames = getPlayModeNames();
         this.scaleNames = Scale.getScaleNames();
         console.log('Scale names initialized in constructor:', this.scaleNames);
@@ -71,10 +72,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        // if (changes['variableContext']) {
-        //     this.updateAvailableVariables();
-        //     this.subscribeToVariableChanges();
-        // }
         if (changes['block'] && !changes['block'].firstChange) {
             console.log('Block changed:', changes['block'].currentValue);
             this.initializeOperationsFromBlock();

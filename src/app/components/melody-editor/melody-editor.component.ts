@@ -47,6 +47,7 @@ interface VisualElement {
 export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   @Input() notes: string = '';
   @Input() showVariableIcon: boolean = true;
+  @Input() defaultDuration: NoteDuration = '4n';
   @Output() notesChange = new EventEmitter<string>();
   @Output() toggleVariable = new EventEmitter<void>();
   @ViewChild('editorContainer') editorContainer!: ElementRef;
@@ -71,7 +72,10 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     private elementRef: ElementRef
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // NO llamar al servicio desde aquí
+    // this.melodyEditorService.setDefaultDuration(this.defaultDuration);
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['notes']) {
@@ -105,8 +109,10 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
 
     this.elementsSub = this.melodyEditorService.elements$.subscribe(elements => {
       this.elements = elements;
-      this.visualElements = this.flattenElements(elements); 
+      this.visualElements = this.flattenElements(elements);
 
+      // Update focused element based on current selection ID
+      // No longer call scrollToElement from here
       if (this.selectedId) {
           const visualEl = this.visualElements.find(ve => ve.id === this.selectedId);
           this.focusedElement = visualEl ? visualEl.originalElement : null;
@@ -119,78 +125,79 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
 
     this.selectedIdSub = this.melodyEditorService.selectedElementId$.subscribe(id => {
       this.selectedId = id;
+      // Find the element in the *current* visual list just for immediate focusedElement update
       const visualEl = this.visualElements.find(ve => ve.id === id);
-      this.focusedElement = visualEl ? visualEl.originalElement : null; 
+      this.focusedElement = visualEl ? visualEl.originalElement : null;
 
-      this.cdr.detectChanges(); 
-      
-      if (id) {
-          this.scrollToElement(id);
-      }
+      this.cdr.detectChanges();
+      // DO NOT call scrollToElement here
     });
-    
+
     this.editorContainer?.nativeElement.focus();
   }
 
   private scrollToElement(elementId: string): void {
-    // Use setTimeout 0 to run after current cycle, hoping DOM is stable
-    setTimeout(() => {
-        console.log(`[MelodyEditor] scrollToElement called for ID: ${elementId}`);
-        const visualEl = this.visualElements.find(ve => ve.id === elementId);
-        const componentId = visualEl?.originalElement.id;
-        const visualType = visualEl?.type;
+    const attemptScroll = (attempt = 1) => {
+      console.log(`[MelodyEditor] scrollToElement attempt ${attempt} for ID: ${elementId}`);
+      // Use the component's current visualElements state inside the attempt
+      const visualEl = this.visualElements.find(ve => ve.id === elementId);
+      const componentId = visualEl?.originalElement.id;
+      const visualType = visualEl?.type;
 
-        if (!componentId) {
-             console.warn(`[MelodyEditor] scrollToElement: Could not find original component ID for visual ID ${elementId}. Focusing container.`);
-             this.editorContainer?.nativeElement?.focus({ preventScroll: true }); 
-             return; 
-        }
+      if (componentId) {
+          // Found the visual element, proceed to find DOM element and focus
+          let targetElement: HTMLElement | null = null;
 
-        let targetElement: HTMLElement | null = null;
+          // Find the DOM element to focus
+          if (visualType === 'group-start' || visualType === 'group-end') {
+               targetElement = this.elementRef.nativeElement.querySelector(`[data-element-id="${elementId}"]`);
+               console.log(`[MelodyEditor] scrollToElement: Found group marker element?`, targetElement);
+          } else {
+              const allComponents = [...this.noteComponents.toArray(), ...this.groupComponents.toArray()];
+              const targetComponent = allComponents.find(comp => comp.note?.id === componentId);
+              if (targetComponent) {
+                  targetElement = targetComponent.elementRef.nativeElement;
+                  console.log(`[MelodyEditor] scrollToElement: Found component instance element?`, targetElement);
+              }
+          }
 
-        // Find the DOM element to focus
-        if (visualType === 'group-start' || visualType === 'group-end') {
-             // Find the span marker directly using the visual element ID (which includes _start/_end)
-             targetElement = this.elementRef.nativeElement.querySelector(`[data-element-id="${elementId}"]`);
-             console.log(`[MelodyEditor] scrollToElement: Found group marker element?`, targetElement);
+          if (targetElement) {
+              targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+              try {
+                   if (!targetElement.hasAttribute('tabindex')) {
+                       targetElement.setAttribute('tabindex', '-1');
+                   }
+                   targetElement.focus({ preventScroll: true });
+                   // Verify focus AFTER the call
+                   console.log('[MelodyEditor] Active element immediately after focus call:', document.activeElement);
+                   if (document.activeElement !== targetElement) {
+                        console.warn(`[MelodyEditor] scrollToElement: Focus call did not result in active element ${elementId} (Attempt ${attempt}). Falling back to container.`);
+                        this.editorContainer?.nativeElement?.focus({ preventScroll: true });
+                   } else {
+                        console.log(`[MelodyEditor] scrollToElement: Focus successful on element ${elementId} (Attempt ${attempt}).`);
+                   }
+              } catch (e) {
+                   console.error(`[MelodyEditor] Error focusing target element (Attempt ${attempt}):`, e);
+                   this.editorContainer?.nativeElement?.focus({ preventScroll: true });
+              }
+          } else {
+               console.warn(`[MelodyEditor] scrollToElement: Could not find target DOM element for ID: ${elementId} (Attempt ${attempt}). Focusing container.`);
+               this.editorContainer?.nativeElement?.focus({ preventScroll: true });
+          }
+      } else {
+        // Visual element not found in this.visualElements yet
+        if (attempt < 3) { // Retry up to 2 times more (total 3 attempts)
+          console.warn(`[MelodyEditor] scrollToElement: Could not find visual element for ID ${elementId} on attempt ${attempt}. Retrying...`);
+          setTimeout(() => attemptScroll(attempt + 1), 50); // Wait 50ms before retrying
         } else {
-            // Find the component instance first for notes/rests/chords/arpeggios
-            const allComponents = [...this.noteComponents.toArray(), ...this.groupComponents.toArray()];
-            const targetComponent = allComponents.find(comp => comp.note?.id === componentId);
-            if (targetComponent) {
-                targetElement = targetComponent.elementRef.nativeElement;
-                console.log(`[MelodyEditor] scrollToElement: Found component instance element?`, targetElement);
-            }
+          console.warn(`[MelodyEditor] scrollToElement: Could not find visual element for ID ${elementId} after ${attempt} attempts. Focusing container.`);
+          this.editorContainer?.nativeElement?.focus({ preventScroll: true });
         }
+      }
+    };
 
-        if (targetElement) {
-            // Scroll into view
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-            
-            // Attempt to focus the found element
-            try {
-                 if (!targetElement.hasAttribute('tabindex')) {
-                     targetElement.setAttribute('tabindex', '-1'); 
-                 }
-                 console.log(`[MelodyEditor] scrollToElement: Calling focus() on element for ID: ${elementId}`);
-                 targetElement.focus({ preventScroll: true });
-
-                 // Verify focus AFTER the call
-                 if (document.activeElement === targetElement) {
-                     console.log(`[MelodyEditor] scrollToElement: Focus successful on element ${elementId}.`);
-                 } else {
-                      console.warn(`[MelodyEditor] scrollToElement: Focus call did not result in active element ${elementId}. Falling back to container.`);
-                      this.editorContainer?.nativeElement?.focus({ preventScroll: true });
-                 }
-            } catch (e) {
-                console.error("[MelodyEditor] Error focusing target element:", e);
-                this.editorContainer?.nativeElement?.focus({ preventScroll: true });
-            }
-        } else {
-             console.warn(`[MelodyEditor] scrollToElement: Could not find target DOM element for ID: ${elementId} to focus. Focusing container.`);
-             this.editorContainer?.nativeElement?.focus({ preventScroll: true });
-        }
-    }, 0); 
+    // Initial call wrapped in setTimeout(0) to wait for the current cycle
+    setTimeout(() => attemptScroll(1), 0);
   }
 
   private flattenElements(elements: MusicElement[]): VisualElement[] {
@@ -307,10 +314,14 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
                 if (event.key === 'ArrowLeft') this.melodyEditorService.moveGroupEndLeft(groupId);
                 else this.melodyEditorService.moveGroupEndRight(groupId);
             }
-            // Re-select the marker after the operation
-            this.selectElement(markerId);
             this.emitNotesChange(); // Moving groups changes structure
-            return; 
+            // Call scrollToElement after a short delay to allow DOM updates
+            setTimeout(() => {
+                 if (this.selectedId === markerId) { // Optional: Check if selection is still the same
+                    this.scrollToElement(markerId);
+                 }
+            }, 0);
+            return;
         }
         
         if (event.key === 'ArrowLeft') {
@@ -367,8 +378,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
 
   private startNewGroup(): void {
       const currentSelectedVisualId = this.selectedId;
-      const defaultDuration: NoteDuration = '4n';
-      const newGroupId = this.melodyEditorService.startGroup(defaultDuration, currentSelectedVisualId);
+      const newGroupId = this.melodyEditorService.startGroup(currentSelectedVisualId);
       this.selectElement(`${newGroupId}_start`);
   }
   
@@ -652,8 +662,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
 
   insertNote(): void {
     const baseNoteValue = 1; 
-    const baseDuration: NoteDuration = '4n';
-    const noteData = { value: baseNoteValue, duration: baseDuration, type: 'note' as 'note' };
+    const noteData = { value: baseNoteValue, type: 'note' as 'note' }; 
     let newNoteId: string | null = null;
     if (this.focusedElement) {
         if (this.focusedElement.type === 'group') {

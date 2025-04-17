@@ -7,6 +7,7 @@ import { NoteData } from '../model/note';
     providedIn: 'root'
 })
 export class MelodyEditorService {
+    private readonly serviceInstanceId = Math.random().toString(36).substring(2, 7);
     private readonly elementsSubject = new BehaviorSubject<MusicElement[]>([]);
     elements$ = this.elementsSubject.asObservable();
     
@@ -14,8 +15,17 @@ export class MelodyEditorService {
     private readonly selectedElementIdSubject = new BehaviorSubject<string | null>(null);
     selectedElementId$ = this.selectedElementIdSubject.asObservable();
 
-    constructor() {}
+    private currentDefaultDuration: NoteDuration = '4n';
+
+    constructor() {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] Created`);
+    }
     
+    setDefaultDuration(duration: NoteDuration): void {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] setDefaultDuration called with: ${duration}`);
+        this.currentDefaultDuration = duration;
+    }
+
     get selectedElementId(): string | null {
         return this.selectedElementIdSubject.value;
     }
@@ -29,9 +39,12 @@ export class MelodyEditorService {
     }
     
     addNote(noteData?: Partial<SingleNote>): string | null {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNote - currentDefaultDuration before use: ${this.currentDefaultDuration}`);
+        const durationToUse: NoteDuration = noteData?.duration ?? this.currentDefaultDuration ?? '4n';
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNote - Explicitly using duration: ${durationToUse}`);
         const newNote = NoteFactory.createSingleNote(
             noteData?.value ?? 1,
-            noteData?.duration ?? '4n'
+            durationToUse
         );
         const currentElements = this.elementsSubject.value;
         this.elementsSubject.next([...currentElements, newNote]);
@@ -40,13 +53,16 @@ export class MelodyEditorService {
     }
     
     addNoteAfter(id: string, noteData?: Partial<SingleNote>): string | null {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteAfter - currentDefaultDuration before use: ${this.currentDefaultDuration}`);
         const currentElements = this.elementsSubject.value;
         const index = currentElements.findIndex(e => e.id === id);
         if (index === -1) return null;
 
+        const durationToUse: NoteDuration = noteData?.duration ?? this.currentDefaultDuration ?? '4n';
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteAfter - Explicitly using duration: ${durationToUse}`);
         const newNote = NoteFactory.createSingleNote(
             noteData?.value ?? 1,
-            noteData?.duration ?? '4n'
+            durationToUse
         );
         const newElements = [...currentElements];
         newElements.splice(index + 1, 0, newNote);
@@ -56,6 +72,7 @@ export class MelodyEditorService {
     }
     
     addNoteToGroup(groupId: string, noteData?: Partial<SingleNote>): string | null {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteToGroup - currentDefaultDuration before use: ${this.currentDefaultDuration}`);
         const { element: group } = this.findElementAndParent(groupId);
 
         if (!group || group.type !== 'group') {
@@ -63,9 +80,11 @@ export class MelodyEditorService {
             return null;
         }
 
+        const durationToUse: NoteDuration = noteData?.duration ?? this.currentDefaultDuration ?? '4n';
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteToGroup - Explicitly using duration: ${durationToUse}`);
         const newNote = NoteFactory.createSingleNote(
             noteData?.value ?? 1, 
-            noteData?.duration ?? '4n' 
+            durationToUse
         );
 
         const currentChildren = (group as GenericGroup).children || [];
@@ -174,12 +193,16 @@ export class MelodyEditorService {
     }
     
     toNoteData(): NoteData[] {
-        return this.elementsSubject.value.map(element => NoteConverter.toNoteData(element));
+        return this.elementsSubject.value.map(element => 
+            NoteConverter.toNoteData(element, this.currentDefaultDuration)
+        );
     }
 
-    startGroup(duration: NoteDuration, afterVisualElementId?: string | null): string {
-        console.log(`Service: startGroup called with duration=${duration}, afterVisualElementId=${afterVisualElementId}`);
-        const newGroup = NoteFactory.createGenericGroup([], duration);
+    startGroup(afterVisualElementId?: string | null): string {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] startGroup - currentDefaultDuration before use: ${this.currentDefaultDuration}`);
+        const durationToUse: NoteDuration = this.currentDefaultDuration ?? '4n';
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] startGroup - Explicitly using duration: ${durationToUse}`);
+        const newGroup = NoteFactory.createGenericGroup([], durationToUse);
         console.log('Service: Created new group:', newGroup);
         const currentElements = this.elementsSubject.value;
         let newElements = [...currentElements];
@@ -189,7 +212,7 @@ export class MelodyEditorService {
                 let index = -1;
                 elements.some((el, i) => {
                     if (el.id === targetId || `${el.id}_start` === targetId || `${el.id}_end` === targetId) {
-                        index = i;
+                        index = targetId.endsWith('_end') ? i : i + 1;
                         return true; 
                     }
                     return false;
@@ -198,7 +221,7 @@ export class MelodyEditorService {
             };
             const targetIndex = findOriginalIndex(afterVisualElementId, currentElements);
             if (targetIndex !== -1) {
-                insertIndex = targetIndex + 1;
+                insertIndex = targetIndex;
             }
         }
         newElements.splice(insertIndex, 0, newGroup);
