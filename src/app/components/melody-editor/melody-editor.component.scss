@@ -208,125 +208,37 @@ $z-index-selected: 100;
   }
 }
 
-// Estilos para los corchetes de grupo
-.group-bracket {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 8px;
-  font-family: monospace;
-  font-size: 14px;
-  font-weight: bold;
-  border-radius: 4px;
-  cursor: pointer;
-  z-index: $z-index-base;
-  transition: all $transition-time ease;
-  min-width: 30px;
-  min-height: 30px;
-  user-select: none;
-  
-  &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  &:active {
-    transform: scale(0.95);
-  }
-  
-  &.selected-bracket {
-    transform: scale(1.15);
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
-    z-index: $z-index-selected;
-    animation: pulse 1.5s infinite;
-  }
-}
-
-// Bracket de inicio
-.group-start {
-  left: -25px;
-  background-color: rgba(255, 200, 200, 0.4);
-  border: 2px solid $group-start-color;
-  color: $group-start-color;
-  
-  &:hover {
-    background-color: rgba(255, 200, 200, 0.7);
-  }
-  
-  &.selected-bracket {
-    background-color: rgba(255, 150, 150, 0.7);
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
-  }
-}
-
-// Bracket de fin
-.group-end {
-  right: -25px;
-  background-color: rgba(200, 200, 255, 0.4);
-  border: 2px solid $group-end-color;
-  color: $group-end-color;
-  
-  &:hover {
-    background-color: rgba(200, 200, 255, 0.7);
-  }
-  
-  &.selected-bracket {
-    background-color: rgba(150, 150, 255, 0.7);
-    box-shadow: 0 0 15px rgba(0, 0, 255, 0.7);
-  }
-}
-
-// Tooltip para brackets
-.group-bracket::after {
-  content: 'Shift+←→';
-  position: absolute;
-  top: -18px;
-  left: 50%;
-  transform: translateX(-50%) scale(0);
-  font-size: 10px;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 2px 4px;
-  border-radius: 3px;
-  opacity: 0;
-  transition: opacity $transition-time, transform $transition-time;
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: $z-index-selected + 5;
-}
-
-.group-bracket:hover::after,
-.group-bracket:focus::after,
-.group-bracket.selected-bracket::after {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
-}
-
-// NUEVO: Estilos para los marcadores de grupo
+// Marcador de grupo (contenedor para duración y corchete)
 .group-marker {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
-  padding: 2px 4px;
-  margin: 0 2px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 36px;
-  box-sizing: border-box;
+    display: inline-flex; 
+    align-items: baseline;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    margin: 0 2px;
+    padding: 2px;
+    min-height: 36px;
+    box-sizing: border-box;
+    cursor: pointer;
 
-  &.active-marker { 
-    border-color: $primary-color;
-    background-color: rgba(0, 119, 204, 0.1);
-    box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.3);
-  }
+    &:hover {
+       border-color: $primary-color;
+       background-color: rgba(0, 119, 204, 0.05);
+    }
 
-  &:hover:not(.active-marker) {
-    border-color: $border-color;
-    background-color: rgba(0, 0, 0, 0.02);
-  }
+    &.active-marker {
+        border-color: $primary-color;
+        background-color: rgba(0, 119, 204, 0.1);
+        box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.3);
+        z-index: $z-index-base + 1;
+    }
+}
+
+// Duración dentro del marcador de grupo (small, on the left)
+.group-duration {
+    font-size: 0.8em;
+    color: $secondary-color;
+    margin-right: 2px;
+    font-family: monospace;
 }
 
 .group-start-marker {
@@ -337,21 +249,6 @@ $z-index-selected: 100;
   // Estilos específicos si son necesarios para el fin
 }
 
-.group-duration {
-  font-size: 0.8em;
-  color: $secondary-color;
-  font-weight: bold;
-  order: 1;
-  margin-right: 3px;
-}
-
-.group-bracket {
-  font-size: 1.5em;
-  color: $secondary-color;
-  font-weight: bold;
-  order: 2;
-}
-
 .group-bracket-start {
   // margin-right: 0;
 }
@@ -359,4 +256,17 @@ $z-index-selected: 100;
 .group-bracket-end {
   // margin-left: 0;
   // No necesita order si es el único hijo en .group-end-marker
+}
+
+// Estilos para los corchetes de grupo (on the right)
+.group-bracket {
+  display: inline-block;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: bold;
+  color: inherit;
+  user-select: none;
 }
