@@ -16,7 +16,13 @@
                     <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
                     <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>
                     <!-- Dropdown para Default Duration -->
-                    <select id="defaultDurationSelect" class="default-duration-select p-ml-2" [(ngModel)]="selectedDefaultDuration" (ngModelChange)="logDurationChange($event)" pTooltip="Default Note Duration" tooltipPosition="top">
+                    <select 
+                        id="defaultDurationSelect" 
+                        class="default-duration-select p-ml-2" 
+                        [(ngModel)]="selectedDefaultDuration" 
+                        (ngModelChange)="songPlayer.updateGlobalDefaultDuration($event)" 
+                        pTooltip="Default Note Duration" 
+                        tooltipPosition="top">
                         <option *ngFor="let dur of availableDurations" [value]="dur">{{dur}}</option>
                     </select>
                     <!-- Use metronome$ property of this component -->

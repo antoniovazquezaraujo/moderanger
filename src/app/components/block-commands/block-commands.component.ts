@@ -359,6 +359,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 }
             } else {
                 const value = typeof event === 'object' ? event.target?.value : event;
+                console.log(`[BlockCommands] Setting command ${command.type} value to:`, value);
                 command.setValue(value);
             }
             this.cdr.detectChanges();

@@ -117,9 +117,10 @@ export class Player {
     }
 
     getSelectedNotes(): NoteData[] {
-        const scale = Scale.getScaleByName(ScaleTypes[this.scale]);
+        const scaleName = ScaleTypes[this.scale];
+        const scale = Scale.getScaleByName(scaleName);
         if (!scale) {
-            console.error(`[Player] Invalid scale type: ${this.scale}`);
+            console.error(`[Player] Invalid scale type. Enum value: ${this.scale}, Derived name: '${scaleName}'`);
             return [];
         }
 

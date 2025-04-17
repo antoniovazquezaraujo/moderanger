@@ -18,16 +18,23 @@ export class Scale {
     ];
 
     static getScaleByName(name: string): Scale {
+        console.log(`[Scale] getScaleByName called with name: '${name}'`);
+        let selectedScale: Scale;
         switch (name) {
-            case 'WHITE': return Scale.SCALES[0];
-            case 'BLUE': return Scale.SCALES[1];
-            case 'RED': return Scale.SCALES[2];
-            case 'BLACK': return Scale.SCALES[3];
-            case 'PENTA': return Scale.SCALES[4];
-            case 'TONES': return Scale.SCALES[5];
-            case 'FULL': return Scale.SCALES[6];
+            case 'WHITE': selectedScale = Scale.SCALES[0]; break;
+            case 'BLUE': selectedScale = Scale.SCALES[1]; break;
+            case 'RED': selectedScale = Scale.SCALES[2]; break;
+            case 'BLACK': selectedScale = Scale.SCALES[3]; break;
+            case 'PENTA': selectedScale = Scale.SCALES[4]; break;
+            case 'TONES': selectedScale = Scale.SCALES[5]; break;
+            case 'FULL': selectedScale = Scale.SCALES[6]; break;
+            default:
+                console.warn(`[Scale] getScaleByName: Name '${name}' not found, returning default (WHITE).`);
+                selectedScale = Scale.SCALES[0]; 
+                break;
         }
-        return Scale.SCALES[0];
+        console.log(`[Scale] getScaleByName returning scale with notes:`, selectedScale.notes);
+        return selectedScale;
     }
 
     static getScaleNames(): string[] {

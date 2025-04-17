@@ -1,5 +1,6 @@
 import { VariableContext, ScaleType } from './variable.context';
 import { getPlayModeFromString, PlayMode } from './play.mode';
+import { ScaleTypes } from './scale';
 
 export enum CommandType {
     SCALE = 'SCALE',
@@ -53,9 +54,11 @@ export class Command {
         if (this.isVariable && typeof this._value === 'string') {
             const varName = this._value.startsWith('$') ? this._value.substring(1) : this._value;
             const varValue = VariableContext.getValue(varName);
+            console.log(`[Command] Getting variable ${varName}, value from context:`, varValue);
             if (varValue !== undefined) {
                 return varValue;
             }
+            console.log(`[Command] Variable ${varName} not found, returning default.`);
             return this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
                    this.type === CommandType.PLAYMODE ? PlayMode.CHORD : 0;
         }
@@ -113,7 +116,8 @@ export class Command {
         if (this.type === CommandType.PATTERN) {
             value = String(rawValue);
         } else if (this.type === CommandType.SCALE) {
-            value = String(rawValue).toUpperCase();
+            const scaleName = String(rawValue).toUpperCase();
+            value = ScaleTypes[scaleName as keyof typeof ScaleTypes];
         } else if (this.type === CommandType.PLAYMODE) {
             value = typeof rawValue === 'string' ? getPlayModeFromString(rawValue.toUpperCase()) : rawValue;
         } else {

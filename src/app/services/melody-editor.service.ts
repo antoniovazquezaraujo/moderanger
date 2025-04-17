@@ -3,9 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { MusicElement, SingleNote, CompositeNote, GenericGroup, NoteDuration, NoteFactory, NoteConverter } from '../model/melody';
 import { NoteData } from '../model/note';
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class MelodyEditorService {
     private readonly serviceInstanceId = Math.random().toString(36).substring(2, 7);
     private readonly elementsSubject = new BehaviorSubject<MusicElement[]>([]);
@@ -15,17 +13,10 @@ export class MelodyEditorService {
     private readonly selectedElementIdSubject = new BehaviorSubject<string | null>(null);
     selectedElementId$ = this.selectedElementIdSubject.asObservable();
 
-    private currentDefaultDuration: NoteDuration = '4n';
-
     constructor() {
         console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] Created`);
     }
     
-    setDefaultDuration(duration: NoteDuration): void {
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] setDefaultDuration called with: ${duration}`);
-        this.currentDefaultDuration = duration;
-    }
-
     get selectedElementId(): string | null {
         return this.selectedElementIdSubject.value;
     }
@@ -38,13 +29,12 @@ export class MelodyEditorService {
         });
     }
     
-    addNote(noteData?: Partial<SingleNote>): string | null {
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNote - currentDefaultDuration before use: ${this.currentDefaultDuration}`);
-        const durationToUse: NoteDuration = noteData?.duration ?? this.currentDefaultDuration ?? '4n';
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNote - Explicitly using duration: ${durationToUse}`);
+    addNote(noteData: Partial<SingleNote>, duration: NoteDuration): string | null {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNote called. Input noteData:`, noteData, `Duration: ${duration}`);
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNote - Using provided duration: ${duration}`);
         const newNote = NoteFactory.createSingleNote(
             noteData?.value ?? 1,
-            durationToUse
+            duration
         );
         const currentElements = this.elementsSubject.value;
         this.elementsSubject.next([...currentElements, newNote]);
@@ -52,17 +42,16 @@ export class MelodyEditorService {
         return newNote.id;
     }
     
-    addNoteAfter(id: string, noteData?: Partial<SingleNote>): string | null {
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteAfter - currentDefaultDuration before use: ${this.currentDefaultDuration}`);
+    addNoteAfter(id: string, noteData: Partial<SingleNote>, duration: NoteDuration): string | null {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteAfter called for id ${id}. Input noteData:`, noteData, `Duration: ${duration}`);
         const currentElements = this.elementsSubject.value;
         const index = currentElements.findIndex(e => e.id === id);
         if (index === -1) return null;
 
-        const durationToUse: NoteDuration = noteData?.duration ?? this.currentDefaultDuration ?? '4n';
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteAfter - Explicitly using duration: ${durationToUse}`);
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteAfter - Using provided duration: ${duration}`);
         const newNote = NoteFactory.createSingleNote(
             noteData?.value ?? 1,
-            durationToUse
+            duration
         );
         const newElements = [...currentElements];
         newElements.splice(index + 1, 0, newNote);
@@ -71,8 +60,8 @@ export class MelodyEditorService {
         return newNote.id;
     }
     
-    addNoteToGroup(groupId: string, noteData?: Partial<SingleNote>): string | null {
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteToGroup - currentDefaultDuration before use: ${this.currentDefaultDuration}`);
+    addNoteToGroup(groupId: string, noteData: Partial<SingleNote>, duration: NoteDuration): string | null {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteToGroup called for groupId ${groupId}. Input noteData:`, noteData, `Duration: ${duration}`);
         const { element: group } = this.findElementAndParent(groupId);
 
         if (!group || group.type !== 'group') {
@@ -80,11 +69,10 @@ export class MelodyEditorService {
             return null;
         }
 
-        const durationToUse: NoteDuration = noteData?.duration ?? this.currentDefaultDuration ?? '4n';
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteToGroup - Explicitly using duration: ${durationToUse}`);
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] addNoteToGroup - Using provided duration: ${duration}`);
         const newNote = NoteFactory.createSingleNote(
             noteData?.value ?? 1, 
-            durationToUse
+            duration
         );
 
         const currentChildren = (group as GenericGroup).children || [];
@@ -131,8 +119,34 @@ export class MelodyEditorService {
                         updatedElement = { ...element, ...valueChange, ...durationChange } as SingleNote;
                         break;
                     case 'group':
+                        const originalGroup = element as GenericGroup; // Cast original element
+                        const oldGroupDuration = originalGroup.duration;
+                        const wasDurationChanged = changes.hasOwnProperty('duration');
+                        const newGroupDuration = wasDurationChanged ? changes.duration : undefined;
                         const updatedChildrenFromChanges = (changes as Partial<GenericGroup>).children;
-                        updatedElement = { ...element, ...(changes.hasOwnProperty('duration') && { duration: changes.duration }), ...(updatedChildrenFromChanges !== undefined && { children: updatedChildrenFromChanges }) } as GenericGroup;
+                        
+                        // Apply direct changes to the group first
+                        let initialUpdatedGroup = { 
+                            ...element, 
+                            ...(wasDurationChanged && { duration: newGroupDuration }), 
+                            ...(updatedChildrenFromChanges !== undefined && { children: updatedChildrenFromChanges }) 
+                        } as GenericGroup;
+
+                        // If the group's duration was changed, update children based on the new rule
+                        if (wasDurationChanged && initialUpdatedGroup.children) {
+                            console.log(`[MelodyEditorService] Propagating group duration change (${oldGroupDuration} -> ${newGroupDuration}) to children of ${element.id}`);
+                            initialUpdatedGroup.children = initialUpdatedGroup.children.map(child => {
+                                // Apply if child duration is undefined OR matches the OLD group duration
+                                if (child.duration === undefined || child.duration === oldGroupDuration) {
+                                    console.log(` - Applying duration ${newGroupDuration} to child ${child.id} (was ${child.duration})`);
+                                    return { ...child, duration: newGroupDuration }; // Apply the NEW duration
+                                } else {
+                                    console.log(` - Child ${child.id} keeps its own duration ${child.duration}`);
+                                    return child;
+                                }
+                            });
+                        }
+                        updatedElement = initialUpdatedGroup; // Assign the potentially modified group
                         break;
                     case 'arpeggio':
                     case 'chord':
@@ -194,15 +208,13 @@ export class MelodyEditorService {
     
     toNoteData(): NoteData[] {
         return this.elementsSubject.value.map(element => 
-            NoteConverter.toNoteData(element, this.currentDefaultDuration)
+            NoteConverter.toNoteData(element)
         );
     }
 
-    startGroup(afterVisualElementId?: string | null): string {
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] startGroup - currentDefaultDuration before use: ${this.currentDefaultDuration}`);
-        const durationToUse: NoteDuration = this.currentDefaultDuration ?? '4n';
-        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] startGroup - Explicitly using duration: ${durationToUse}`);
-        const newGroup = NoteFactory.createGenericGroup([], durationToUse);
+    startGroup(duration: NoteDuration, afterVisualElementId?: string | null): string {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] startGroup - Using provided duration: ${duration}`);
+        const newGroup = NoteFactory.createGenericGroup([], duration);
         console.log('Service: Created new group:', newGroup);
         const currentElements = this.elementsSubject.value;
         let newElements = [...currentElements];
@@ -323,7 +335,16 @@ export class MelodyEditorService {
         }
         const elementBefore = sourceList[groupIndex - 1];
         const currentGroup = group as GenericGroup;
-        const newGroupChildren = [elementBefore, ...(currentGroup.children || [])];
+        const groupDuration = currentGroup.duration;
+        
+        // Apply group duration to the element being included if it has no duration
+        let elementToInclude = { ...elementBefore };
+        if (elementToInclude.duration === undefined && groupDuration !== undefined) {
+            console.log(`[MelodyEditorService] Applying group duration ${groupDuration} to element ${elementToInclude.id} being included by moveGroupStartLeft.`);
+            elementToInclude.duration = groupDuration;
+        }
+
+        const newGroupChildren = [elementToInclude, ...(currentGroup.children || [])];
         if (parent && parent.type === 'group') {
             const parentChildrenCopy = [...parent.children];
             parentChildrenCopy.splice(groupIndex - 1, 1);
@@ -443,7 +464,16 @@ export class MelodyEditorService {
         }
         const elementAfter = sourceList[groupIndex + 1];
         const currentGroup = group as GenericGroup;
-        const newGroupChildren = [...(currentGroup.children || []), elementAfter];
+        const groupDuration = currentGroup.duration;
+
+        // Apply group duration to the element being included if it has no duration
+        let elementToInclude = { ...elementAfter };
+        if (elementToInclude.duration === undefined && groupDuration !== undefined) {
+            console.log(`[MelodyEditorService] Applying group duration ${groupDuration} to element ${elementToInclude.id} being included by moveGroupEndRight.`);
+            elementToInclude.duration = groupDuration;
+        }
+
+        const newGroupChildren = [...(currentGroup.children || []), elementToInclude];
         if (parent && parent.type === 'group') {
             const parentChildrenCopy = [...parent.children];
             const updatedGroupInParent = { ...currentGroup, children: newGroupChildren };

@@ -5,13 +5,14 @@ import { NoteData } from "./note";
 import { Part } from "./part";
 import { Block } from "./block";
 import { PlayMode, arpeggiate } from "./play.mode";
-import { Subject } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
 import { NoteGenerationService } from '../services/note-generation.service';
 import { VariableContext } from './variable.context';
 import { BaseOperation, IncrementOperation, DecrementOperation, AssignOperation } from './operation';
 import { Command } from './command';
 import * as Tone from 'tone';
+import { NoteDuration } from './melody';
 
 type InstrumentId = string;
 type LoopId = string;
@@ -59,6 +60,10 @@ export class SongPlayer {
     
     private currentLoopId: LoopId | null = null;
     private currentStopListenerId: ListenerId | null = null;
+
+    // Subject for global default duration
+    private globalDefaultDurationSubject = new BehaviorSubject<NoteDuration>('4n');
+    public globalDefaultDuration$ = this.globalDefaultDurationSubject.asObservable();
 
     constructor(
         private audioEngine: AudioEngineService,
@@ -523,5 +528,10 @@ export class SongPlayer {
     }
     private notesToNoteDatas(notes: number[], duration: string): NoteData[] {
          return notes.map(note => ({ type: 'note', note, duration }));
+    }
+
+    // Method to update the global default duration
+    updateGlobalDefaultDuration(duration: NoteDuration): void {
+        this.globalDefaultDurationSubject.next(duration);
     }
 }

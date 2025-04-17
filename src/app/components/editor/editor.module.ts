@@ -13,6 +13,9 @@ import { VariableDeclarationComponent } from '../variable-declaration/variable-d
 import { MetronomeComponent } from '../metronome/metronome.component';
 import { MelodyEditorWrapperComponent } from '../melody-editor-wrapper/melody-editor-wrapper.component';
 import { MelodyOptionComponent } from '../melody-option/melody-option.component';
+import { MelodyEditorComponent } from '../melody-editor/melody-editor.component';
+import { MelodyNoteComponent } from '../melody-note/melody-note.component';
+import { MelodyGroupComponent } from '../melody-group/melody-group.component';
 
 // Módulos de PrimeNG (y otros) necesarios para estos componentes
 import { TreeModule } from 'primeng/tree';
@@ -26,7 +29,6 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { SplitterModule } from 'primeng/splitter';
 import { SidebarModule } from 'primeng/sidebar';
-import { MelodyEditorModule } from '../melody-editor/melody-editor.module'; // Importar módulo existente
 
 @NgModule({
   declarations: [
@@ -39,7 +41,10 @@ import { MelodyEditorModule } from '../melody-editor/melody-editor.module'; // I
     VariableDeclarationComponent,
     MetronomeComponent,
     MelodyEditorWrapperComponent,
-    MelodyOptionComponent
+    MelodyOptionComponent,
+    MelodyEditorComponent,
+    MelodyNoteComponent,
+    MelodyGroupComponent
   ],
   imports: [
     CommonModule,
@@ -56,12 +61,11 @@ import { MelodyEditorModule } from '../melody-editor/melody-editor.module'; // I
     TooltipModule,
     SplitterModule,
     SidebarModule,
-    // Otros módulos necesarios
-    MelodyEditorModule 
   ],
   exports: [
     // Exportar el componente principal que se usa fuera (en AppComponent)
-    SongEditorComponent 
+    SongEditorComponent,
+    MelodyEditorComponent
   ]
 })
 export class EditorModule { } 

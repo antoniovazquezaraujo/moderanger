@@ -6,6 +6,7 @@ import { MusicElement, NoteDuration, SingleNote, CompositeNote, GenericGroup } f
 import { Subscription } from 'rxjs';
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 import { MelodyGroupComponent } from '../melody-group/melody-group.component';
+import { SongPlayer } from '../../model/song.player';
 
 /**
  * Interfaz para notas en el editor de melodías
@@ -61,6 +62,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   private elementsSub!: Subscription;
   private selectedIdSub!: Subscription;
   private lastEmittedNotesString: string | null = null;
+  private globalDurationSub!: Subscription;
   expandedGroups = new Set<string>();
   readonly durations: NoteDuration[] = ['1n', '2n', '4n', '8n', '16n', '4t', '8t'];
   private lastWheelTime: number = 0;
@@ -69,12 +71,23 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   constructor(
     private melodyEditorService: MelodyEditorService,
     private cdr: ChangeDetectorRef,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private songPlayer: SongPlayer
   ) {}
 
   ngOnInit(): void {
     // NO llamar al servicio desde aquí
     // this.melodyEditorService.setDefaultDuration(this.defaultDuration);
+    console.log(`[MelodyEditor] ngOnInit: Component initialized. Input defaultDuration is: ${this.defaultDuration}`);
+    // Subscribe to global duration changes
+    this.globalDurationSub = this.songPlayer.globalDefaultDuration$.subscribe(duration => {
+        if (this.defaultDuration !== duration) {
+            console.log(`[MelodyEditor] ngOnInit: Global default duration changed to ${duration}, updating local.`);
+            this.defaultDuration = duration;
+            // We might need ChangeDetectorRef here if the change doesn't reflect immediately
+            // this.cdr.detectChanges(); 
+        }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -87,6 +100,14 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
         this.loadNotesFromString(newNotes);
       } else {
         // console.log(`[MelodyEditor] ngOnChanges: Skipping reload.`);
+      }
+    }
+    if (changes['defaultDuration']) {
+      const newDuration = changes['defaultDuration'].currentValue;
+      if (newDuration) {
+        console.log(`[MelodyEditor] ngOnChanges: Input defaultDuration changed to: ${newDuration}`);
+        // Eliminar la llamada al servicio, ya no gestiona el estado global
+        // this.melodyEditorService.setDefaultDuration(newDuration);
       }
     }
   }
@@ -370,7 +391,12 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
               this.deleteNote();
               break;
             case ' ': 
-              this.toggleSilence(originalElement.id);
+              // Prevent default space behavior (like scrolling)
+              event.preventDefault(); 
+              // Check if there is a selected element and it's a note or rest
+              if (originalElement && (originalElement.type === 'note' || originalElement.type === 'rest')) {
+                  this.toggleSilence(originalElement.id);
+              }
               break;
         }
     }
@@ -378,7 +404,8 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
 
   private startNewGroup(): void {
       const currentSelectedVisualId = this.selectedId;
-      const newGroupId = this.melodyEditorService.startGroup(currentSelectedVisualId);
+      // Usar la duración por defecto del componente
+      const newGroupId = this.melodyEditorService.startGroup(this.defaultDuration, currentSelectedVisualId); 
       this.selectElement(`${newGroupId}_start`);
   }
   
@@ -470,6 +497,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   ngOnDestroy() {
     this.elementsSub?.unsubscribe();
     this.selectedIdSub?.unsubscribe();
+    this.globalDurationSub?.unsubscribe();
   }
 
   onToggleVariable(event: MouseEvent): void {
@@ -555,9 +583,18 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     }
   }
 
+  /**
+   * Toggles the silence state (note <-> rest) of the element with the given ID.
+   * If no ID is provided, uses the currently focused element.
+   */
   public toggleSilence(id?: string): void {
-    const elementId = id || this.focusedElement?.id;
-    if (!elementId) return;
+    const elementId = id ?? this.selectedId; // Use selectedId instead of focusedElement.id
+    if (!elementId) {
+        console.warn("[MelodyEditor] toggleSilence called without a selected element.");
+        return;
+    }
+    
+    // We need to find the element in the original structure, not just the visual one
     const findElementRecursive = (targetId: string, els: MusicElement[]): MusicElement | null => {
         for (const el of els) {
             if (el.id === targetId) return el;
@@ -663,18 +700,24 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   insertNote(): void {
     const baseNoteValue = 1; 
     const noteData = { value: baseNoteValue, type: 'note' as 'note' }; 
+    // Usar la duración por defecto del componente
+    const durationToUse = this.defaultDuration;
+    console.log(`[MelodyEditor] insertNote: Using component default duration: ${durationToUse}`);
     let newNoteId: string | null = null;
     if (this.focusedElement) {
         if (this.focusedElement.type === 'group') {
             console.log(`Insert note inside group ${this.focusedElement.id}`);
-            newNoteId = this.melodyEditorService.addNoteToGroup(this.focusedElement.id, noteData);
+            // Pasar la duración explícitamente
+            newNoteId = this.melodyEditorService.addNoteToGroup(this.focusedElement.id, noteData, durationToUse);
         } else {
             console.log(`Insert note after element ${this.focusedElement.id}`);
-            newNoteId = this.melodyEditorService.addNoteAfter(this.focusedElement.id, noteData);
+            // Pasar la duración explícitamente
+            newNoteId = this.melodyEditorService.addNoteAfter(this.focusedElement.id, noteData, durationToUse);
         }
     } else {
         console.log('Insert note at the end');
-        newNoteId = this.melodyEditorService.addNote(noteData);
+        // Pasar la duración explícitamente
+        newNoteId = this.melodyEditorService.addNote(noteData, durationToUse);
     }
     console.log('New note ID:', newNoteId);
     if (newNoteId) {
