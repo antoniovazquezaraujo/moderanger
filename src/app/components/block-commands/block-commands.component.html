@@ -6,7 +6,7 @@
         </div>
         <div class="container-wrapper commands-container">
             <div *ngFor="let command of block.commands" class="command">
-                <sup class="variable-icon" (click)="toggleVariableMode(command, $event)">$</sup>
+                <sup class="variable-icon" *ngIf="command.type !== commandTypes.PATTERN" (click)="toggleVariableMode(command, $event)">$</sup>
                 <sup class="remove-icon" (click)="removeCommand(command)">×</sup>
                 
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
@@ -21,10 +21,9 @@
                             <select class="command-type"
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
-                                <option value="">Select PlayMode variable</option>
+                                <option value="" disabled>Select PlayMode variable</option>
                                 <option *ngFor="let variable of getFilteredVariables(command)" 
-                                        [value]="variable.value"
-                                        [selected]="getSelectedValue(command) === variable.value">
+                                        [value]="variable.value">
                                     {{variable.label}}
                                 </option>
                             </select>
@@ -36,25 +35,14 @@
                         </ng-template>
                     </ng-container>
 
-                    <ng-container *ngSwitchCase="operationTypes.INCREMENT">
-                        <select class="command-type"
-                            [ngModel]="getSelectedValue(command)"
-                            (ngModelChange)="handleValueInput($event, command)">
-                            <option value="INCREMENT">INCREMENT</option>
-                            <option value="DECREMENT">DECREMENT</option>
-                            <option value="ASSIGN">ASSIGN</option>
-                        </select>
-                    </ng-container>
-
                     <ng-container *ngSwitchCase="commandTypes.SCALE">
                         <ng-container *ngIf="command.isVariable; else scaleSelect">
                             <select class="command-type"
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
-                                <option value="">Select Scale variable</option>
+                                <option value="" disabled>Select Scale variable</option>
                                 <option *ngFor="let variable of getFilteredVariables(command)" 
-                                        [value]="variable.value"
-                                        [selected]="getSelectedValue(command) === variable.value">
+                                        [value]="variable.value">
                                     {{variable.label}}
                                 </option>
                             </select>
@@ -67,26 +55,12 @@
                     </ng-container>
 
                     <ng-container *ngSwitchCase="commandTypes.PATTERN">
-                        <ng-container *ngIf="command.isVariable; else patternInput">
-                            <select class="command-type"
-                                [ngModel]="getSelectedValue(command)"
-                                (ngModelChange)="handleValueInput($event, command)">
-                                <option value="">Select pattern variable</option>
-                                <option *ngFor="let variable of getMelodyVariables()" 
-                                        [value]="variable.value"
-                                        [selected]="getSelectedValue(command) === variable.value">
-                                    {{variable.label}}
-                                </option>
-                            </select>
-                        </ng-container>
-                        <ng-template #patternInput>
-                            <app-melody-editor 
-                                class="compact-melody-editor"
-                                [notes]="'' + command.value" 
-                                [defaultDuration]="currentDefaultDuration"
-                                (notesChange)="command.value = $event">
-                            </app-melody-editor>
-                        </ng-template>
+                        <app-melody-editor 
+                            class="compact-melody-editor"
+                            [notes]="getPatternValueAsString(command)" 
+                            [defaultDuration]="currentDefaultDuration"
+                            (notesChange)="command.value = $event">
+                        </app-melody-editor>
                     </ng-container>
 
                     <ng-container *ngSwitchDefault>
@@ -94,10 +68,9 @@
                             <select class="command-type"
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
-                                <option value="">Select number variable</option>
+                                <option value="" disabled>Select number variable</option>
                                 <option *ngFor="let variable of getFilteredVariables(command)" 
-                                        [value]="variable.value"
-                                        [selected]="getSelectedValue(command) === variable.value">
+                                        [value]="variable.value">
                                     {{variable.label}}
                                 </option>
                             </select>
@@ -106,6 +79,7 @@
                             <input type="number" 
                                 class="command-value number-input" 
                                 [(ngModel)]="command.value"
+                                (ngModelChange)="handleValueInput($event, command)"
                                 min="-999"
                                 max="999"
                                 step="1">
@@ -133,42 +107,30 @@
                     [(ngModel)]="operation.variableName" 
                     (ngModelChange)="onVariableSelected($event)"
                     [attr.data-operation-variable]="operation.variableName">
-                    <option value="">Select variable</option>
+                    <option value="" disabled>Select variable</option>
                     <option *ngFor="let variable of availableVariables" 
-                            [value]="variable.value" 
-                            [selected]="operation.variableName === variable.value">
+                            [value]="variable.value">
                         {{variable.label}}
                     </option>
                 </select>
                 <ng-container *ngIf="operation.type === 'ASSIGN'">
-                    <!-- Debug info -->
-                    <div style="display: none;">
-                        <!-- Debug para verificar el valor de isVariableOfType -->
-                        {{ logDebug('Variable ' + operation.variableName + ' type scale: ' + isVariableOfType(operation.variableName, 'scale')) }}
-                    </div>
-                    
-                    <!-- Resolver el tipo de variable -->
-                    <ng-container *ngIf="isVariableOfType(operation.variableName, 'melody')">
-                        <!-- Editor de melodía directamente -->
-                        <app-melody-editor 
-                            class="inline-melody-editor"
-                            [notes]="'' + operation.value" 
-                            [defaultDuration]="currentDefaultDuration"
-                            (notesChange)="onMelodyChange($event, operation)">
-                        </app-melody-editor>
-                    </ng-container>
-                    
                     <ng-container *ngIf="isVariableOfType(operation.variableName, 'scale')">
-                        <!-- Selector para escalas -->
                         <select class="command-type"
                             [(ngModel)]="operation.value"
                             (ngModelChange)="onOperationValueChange(operation, $event)">
                             <option *ngFor="let scale of scaleNames" [value]="scale">{{scale}}</option>
                         </select>
                     </ng-container>
+
+                    <ng-container *ngIf="isVariableOfType(operation.variableName, 'playmode')">
+                        <select class="command-type"
+                            [(ngModel)]="operation.value"
+                            (ngModelChange)="onOperationValueChange(operation, $event)">
+                            <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+                        </select>
+                    </ng-container>
                     
-                    <ng-container *ngIf="!isVariableOfType(operation.variableName, 'melody') && !isVariableOfType(operation.variableName, 'scale')">
-                        <!-- Input para números -->
+                    <ng-container *ngIf="isVariableOfType(operation.variableName, 'number')">
                         <input type="number" 
                             class="command-value number-input" 
                             [(ngModel)]="operation.value"
@@ -178,6 +140,17 @@
                             step="1">
                     </ng-container>
                 </ng-container>
+
+                <ng-container *ngIf="operation.type === 'INCREMENT' || operation.type === 'DECREMENT'">
+                    <input type="number" 
+                        class="command-value number-input" 
+                        [(ngModel)]="operation.value" 
+                        (ngModelChange)="onOperationValueChange(operation, $event)"
+                        min="-999"
+                        max="999"
+                        step="1">
+                </ng-container>
+
                 <div class="command-controls">
                     <p-button icon="pi pi-times" (click)="removeOperation(i)"></p-button>
                 </div>

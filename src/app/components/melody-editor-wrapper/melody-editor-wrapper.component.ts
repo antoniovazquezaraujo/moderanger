@@ -8,7 +8,7 @@ import { MelodyEditorService } from '../../services/melody-editor.service';
         <app-melody-editor 
             [notes]="notes" 
             (notesChange)="onNotesChange($event)"
-            (toggleVariable)="onToggleVariable()">
+            [showVariableIcon]="showVariableIcon">
         </app-melody-editor>
     `,
     providers: [
@@ -22,7 +22,7 @@ import { MelodyEditorService } from '../../services/melody-editor.service';
 })
 export class MelodyEditorWrapperComponent implements ControlValueAccessor {
     @Input() notes: string = '';
-    @Output() toggleVariable = new EventEmitter<void>();
+    @Input() showVariableIcon: boolean = true;
 
     private onChange = (_: any) => {};
     private onTouched = () => {};
@@ -50,11 +50,6 @@ export class MelodyEditorWrapperComponent implements ControlValueAccessor {
             this.notes = newNotesValue;
             this.onChange(this.notes);
         }
-        this.onTouched();
-    }
-
-    onToggleVariable(): void {
-        this.toggleVariable.emit();
         this.onTouched();
     }
 } 

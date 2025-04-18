@@ -51,7 +51,6 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   @Input() showVariableIcon: boolean = true;
   @Input() defaultDuration: NoteDuration = '4n';
   @Output() notesChange = new EventEmitter<string>();
-  @Output() toggleVariable = new EventEmitter<void>();
   @ViewChild('editorContainer') editorContainer!: ElementRef;
   @ViewChildren(MelodyNoteComponent) noteComponents!: QueryList<MelodyNoteComponent>;
   @ViewChildren(MelodyGroupComponent) groupComponents!: QueryList<MelodyGroupComponent>;
@@ -509,13 +508,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     this.globalDurationSub?.unsubscribe();
   }
 
-  onToggleVariable(event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.toggleVariable.emit();
-  }
-
-  trackByElementId(index: number, element: MusicElement): string {
+  trackByElementId(index: number, element: VisualElement): string {
     return element.id; 
   }
 

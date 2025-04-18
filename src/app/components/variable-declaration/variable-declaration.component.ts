@@ -2,13 +2,12 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 import { VariableContext } from 'src/app/model/variable.context';
 import { getPlayModeNames } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
-import { MelodyEditorService } from 'src/app/services/melody-editor.service';
 import { Subscription } from 'rxjs';
 
 interface VariableDeclaration {
     name: string;
     value: string | number;
-    type: 'number' | 'playmode' | 'melody' | 'scale';
+    type: 'number' | 'playmode' | 'scale';
 }
 
 @Component({
@@ -51,11 +50,9 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
         if (this.newVariable.name) {
             let value: any;
             if (this.newVariable.type === 'playmode') {
-                value = this.newVariable.value;
-            } else if (this.newVariable.type === 'melody') {
-                value = String(this.newVariable.value || '');
+                value = this.newVariable.value || this.playModeNames[0];
             } else if (this.newVariable.type === 'scale') {
-                value = this.newVariable.value;
+                value = this.newVariable.value || this.scaleNames[0];
             } else {
                 value = this.newVariable.value === '' ? 0 : Number(this.newVariable.value);
             }
@@ -68,9 +65,6 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
 
     updateVariable(index: number): void {
         const variable = this.variables[index];
-        if (variable.type === 'melody') {
-            return;
-        }
         
         if (VariableContext && variable) {
             let value: any;
@@ -85,10 +79,6 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
             VariableContext.setValue(variable.name, value);
             this.variableUpdated.emit();
         }
-    }
-
-    updateVariableContext(newMelodyValue: string, variableName: string): void {
-        VariableContext.setValue(variableName, newMelodyValue || '');
     }
 
     removeVariable(index: number): void {
@@ -109,11 +99,13 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
                     } else if (this.scaleNames.includes(value)) {
                         return { name, value, type: 'scale' as const };
                     } else {
-                        return { name, value, type: 'melody' as const };
+                        return null;
                     }
+                } else if (typeof value === 'number') {
+                    return { name, value, type: 'number' as const };
                 }
-                return { name, value, type: 'number' as const };
-            });
+                return null;
+            }).filter(v => v !== null) as VariableDeclaration[];
         }
     }
 } 
