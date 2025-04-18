@@ -122,12 +122,14 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     addElement(type: 'command' | 'operation'): void {
+        console.log(`[BlockCommands] addElement called with type: ${type}`);
         if (type === 'command') {
             if (!this.block.commands) {
                 this.block.commands = [];
             }
             const newCommand = new Command({ type: CommandType.OCT, value: 0 });
             this.block.commands.push(newCommand);
+            console.log(`[BlockCommands] Added command. New count: ${this.block.commands.length}`);
         } else if (type === 'operation') {
             if (!this.operations) {
                 this.operations = [];
@@ -136,9 +138,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
             if (!this.selectedVariable && this.availableVariables.length > 0) {
                 this.selectedVariable = this.availableVariables[0].value;
+                console.log(`[BlockCommands] Defaulted selectedVariable to: ${this.selectedVariable}`);
             }
             if (!this.selectedVariable) {
-                 console.warn("Cannot add operation: No variable selected or available.");
+                 console.warn("[BlockCommands] Cannot add operation: No variable selected or available.");
                  return;
             }
 
@@ -149,51 +152,67 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 } else if (this.isVariableOfType(this.selectedVariable, 'playmode')) {
                      initialValue = this.playModeNames[0] || 'CHORD'; 
                 }
-            } else {
+            } else { 
                  initialValue = 1; 
             }
+            console.log(`[BlockCommands] Determined initialValue: ${initialValue} for variable ${this.selectedVariable}`);
 
             const newOperation = { 
                 type: defaultOpType,
                 variableName: this.selectedVariable, 
                 value: initialValue
             };
+            console.log("[BlockCommands] Created new operation object:", newOperation);
+            
+            const oldLength = this.operations.length;
             this.operations = [...this.operations, newOperation];
+            console.log(`[BlockCommands] Updated local operations array. Old length: ${oldLength}, New length: ${this.operations.length}`, this.operations);
+            
             this.updateBlockOperations();
         }
+        console.log("[BlockCommands] Triggering change detection after addElement.");
         this.cdr.detectChanges();
     }
 
     private updateBlockOperations(): void {
+        console.log("[BlockCommands] updateBlockOperations started. Input local operations:", this.operations);
         if (!this.operations) {
             this.block.operations = [];
+            console.log("[BlockCommands] updateBlockOperations: No local operations, block.operations set to empty.");
             return;
         }
-        this.block.operations = this.operations.map(op => {
-            const variableName = op.variableName || '';
-            let value = op.value;
+        try {
+            this.block.operations = this.operations.map(op => {
+                const variableName = op.variableName || '';
+                let value = op.value;
+                console.log(`[BlockCommands] Mapping operation: type=${op.type}, varName=${variableName}, value=${value}`);
 
-            switch (op.type) {
-                case OperationType.INCREMENT:
-                    const incValue = typeof value === 'number' ? value : (parseInt(String(value)) || 1);
-                    return new IncrementOperation(variableName, incValue);
-                case OperationType.DECREMENT:
-                    const decValue = typeof value === 'number' ? value : (parseInt(String(value)) || 1);
-                    return new DecrementOperation(variableName, decValue);
-                case OperationType.ASSIGN:
-                     if (this.isVariableOfType(variableName, 'scale')) {
-                         value = String(value || this.scaleNames[0] || 'WHITE');
-                     } else if (this.isVariableOfType(variableName, 'playmode')) {
-                         value = String(value || this.playModeNames[0] || 'CHORD');
-                     } else { 
-                         value = typeof value === 'number' ? value : (parseFloat(String(value)) || 0);
-                     }
-                    return new AssignOperation(variableName, value);
-                default:
-                    console.error(`Unknown operation type in updateBlockOperations: ${op.type}`);
-                    return new AssignOperation(variableName, 0); 
-            }
-        });
+                switch (op.type) {
+                    case OperationType.INCREMENT:
+                        const incValue = typeof value === 'number' ? value : (parseInt(String(value)) || 1);
+                        return new IncrementOperation(variableName, incValue);
+                    case OperationType.DECREMENT:
+                        const decValue = typeof value === 'number' ? value : (parseInt(String(value)) || 1);
+                        return new DecrementOperation(variableName, decValue);
+                    case OperationType.ASSIGN:
+                         if (this.isVariableOfType(variableName, 'scale')) {
+                             value = String(value || this.scaleNames[0] || 'WHITE');
+                         } else if (this.isVariableOfType(variableName, 'playmode')) {
+                             value = String(value || this.playModeNames[0] || 'CHORD');
+                         } else { 
+                             value = typeof value === 'number' ? value : (parseFloat(String(value)) || 0);
+                         }
+                        return new AssignOperation(variableName, value);
+                    default:
+                        console.error(`[BlockCommands] Unknown operation type in updateBlockOperations: ${op.type}`);
+                        return new AssignOperation(variableName, 0); 
+                }
+            });
+            console.log("[BlockCommands] updateBlockOperations finished. Result block.operations:", this.block.operations);
+        } catch (error) {
+             console.error("[BlockCommands] Error during updateBlockOperations mapping:", error);
+             this.block.operations = []; 
+        }
     }
 
     removeOperation(index: number): void {
