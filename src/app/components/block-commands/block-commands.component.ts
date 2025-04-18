@@ -358,7 +358,13 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     getPlayModeString(command: Command): string {
         if (command.type === CommandType.PLAYMODE) {
-             return String(command.value) || ''; 
+             const numValue = command.value;
+             if (typeof numValue === 'number' && PlayMode[numValue] !== undefined) {
+                 return PlayMode[numValue];
+             } else if (typeof numValue === 'string' && this.playModeNames.includes(numValue)) {
+                 return numValue;
+             } 
+             return this.playModeNames[0] || ''; 
         }
         return '';
     }
