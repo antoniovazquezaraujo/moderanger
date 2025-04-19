@@ -1,6 +1,8 @@
 import { VariableContext, ScaleType } from './variable.context';
 import { getPlayModeFromString, PlayMode } from './play.mode';
 import { ScaleTypes } from './scale';
+import { NoteData } from './note';
+import { parseBlockNotes } from './ohm.parser';
 
 export enum CommandType {
     SCALE = 'SCALE',
@@ -36,31 +38,31 @@ export class Command {
         }
     }
 
-    // get value(): string | number {
-    //     if (this.isVariable && typeof this._value === 'string') {
-    //         return this._value.startsWith('$') ? this._value : '$' + this._value;
-    //     }
-    //     if (this.type === CommandType.PLAYMODE && typeof this._value === 'number') {
-    //         return PlayMode[this._value];
-    //     }
-    //     return this._value;
-    // }
-
-    // set value(val: string | number) {
-    //     this.setValue(val);
-    // }
-
     get value(): number | string | ScaleType | PlayMode {
         if (this.isVariable && typeof this._value === 'string') {
             const varName = this._value.startsWith('$') ? this._value.substring(1) : this._value;
             const varValue = VariableContext.getValue(varName);
             console.log(`[Command] Getting variable ${varName}, value from context:`, varValue);
             if (varValue !== undefined) {
+                if (this.type === CommandType.SCALE && typeof varValue === 'string') return varValue.toUpperCase() as ScaleType;
+                if (this.type === CommandType.PLAYMODE) {
+                    if (typeof varValue === 'string') return getPlayModeFromString(varValue.toUpperCase());
+                    if (typeof varValue === 'number' && PlayMode[varValue]) return varValue;
+                }
+                if (this.type === CommandType.PATTERN && typeof varValue === 'string') return varValue;
+                if (typeof varValue === 'number') return varValue;
                 return varValue;
             }
             console.log(`[Command] Variable ${varName} not found, returning default.`);
             return this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
-                   this.type === CommandType.PLAYMODE ? PlayMode.CHORD : 0;
+                   this.type === CommandType.PLAYMODE ? PlayMode.CHORD :
+                   this.type === CommandType.PATTERN ? '' : 0;
+        }
+        if (this.type === CommandType.PLAYMODE && typeof this._value === 'number' && PlayMode[this._value]) {
+            return this._value;
+        }
+        if (this.type === CommandType.PATTERN && typeof this._value === 'string') {
+            return this._value;
         }
         return this._value;
     }
@@ -74,14 +76,13 @@ export class Command {
         this._value = name.startsWith('$') ? name : '$' + name;
     }
 
-
     setValue(value: string | number | ScaleType | PlayMode | null): void {
         this.value = value;
     }
     
     set value(value: string | number | ScaleType | PlayMode | null) {
         if (value === null || value === undefined) {
-            this._value = this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
+            this._value = this.type === CommandType.SCALE ? 'WHITE' :
                          this.type === CommandType.PLAYMODE ? PlayMode.CHORD :
                          this.type === CommandType.PATTERN ? '' : 0;
             this.isVariable = false;
@@ -92,43 +93,75 @@ export class Command {
             this._value = value.startsWith('$') ? value : '$' + value;
             this.isVariable = true;
         } else {
+            this.isVariable = false;
             if (this.type === CommandType.SCALE && typeof value === 'string') {
-                this._value = String(value).toUpperCase() as ScaleType;
+                this._value = String(value).toUpperCase();
             } else if (this.type === CommandType.PLAYMODE) {
                 if (typeof value === 'string') {
                     this._value = getPlayModeFromString(value.toUpperCase());
-                } else {
+                } else if (typeof value === 'number' && PlayMode[value]) {
                     this._value = value;
+                } else {
+                    this._value = PlayMode.CHORD;
                 }
             } else if (this.type === CommandType.PATTERN && typeof value === 'string') {
-                this._value = String(value);
+                this._value = value;
+            } else if (typeof value === 'number') {
+                this._value = Number(value);
             } else {
-                this._value = typeof value === 'number' ? Number(value) : value;
+                console.warn(`[Command] Setting value with unexpected type (${typeof value}) for CommandType ${this.type}. Storing as is.`);
+                this._value = value as string | number;
             }
-            this.isVariable = false;
         }
     }
 
     execute(player: any): void {
         const rawValue = this.value;
-        let value: any;
+        let value: any = rawValue;
 
         if (this.type === CommandType.PATTERN) {
-            value = String(rawValue);
-        } else if (this.type === CommandType.SCALE) {
-            const scaleName = String(rawValue).toUpperCase();
-            value = ScaleTypes[scaleName as keyof typeof ScaleTypes];
-        } else if (this.type === CommandType.PLAYMODE) {
-            value = typeof rawValue === 'string' ? getPlayModeFromString(rawValue.toUpperCase()) : rawValue;
-        } else {
-            value = Number(rawValue) || 0;
+            const patternString = String(value);
+            try {
+                player.currentPattern = parseBlockNotes(patternString);
+                console.log(`[Command] Parsed and set pattern for player:`, player.currentPattern);
+            } catch (e) {
+                console.error(`[Command] Failed to parse pattern string "${patternString}":`, e);
+                player.currentPattern = null;
+            }
+            return;
+        }
+        
+        if (this.type === CommandType.SCALE) {
+             const scaleName = String(value).toUpperCase();
+             value = ScaleTypes[scaleName as keyof typeof ScaleTypes];
+             if (value === undefined) {
+                 console.warn(`[Command] Invalid scale name resolved: ${scaleName}. Using default.`);
+                 value = ScaleTypes.WHITE;
+             }
+        } 
+        else if (this.type === CommandType.PLAYMODE) {
+             if (typeof value !== 'number' || PlayMode[value] === undefined) {
+                  console.warn(`[Command] Invalid PlayMode value resolved: ${value}. Using default CHORD.`);
+                  value = PlayMode.CHORD;
+             }
+        } 
+        else {
+             value = Number(value) || 0;
         }
 
         switch (this.type) {
             case CommandType.GAP: player.gap = value; break;
             case CommandType.OCT: player.octave = value; break;
-            case CommandType.SCALE: player.selectScale(value); break;
-            case CommandType.PLAYMODE: player.playMode = value; break;
+            case CommandType.SCALE: player.scale = value; break;
+            case CommandType.PLAYMODE: 
+                player.playMode = value; 
+                if (value !== PlayMode.PATTERN) {
+                     player.currentPattern = null;
+                     console.log(`[Command] Reset player.currentPattern because PlayMode changed to ${PlayMode[value]}`);
+                } else {
+                     console.log(`[Command] Set PlayMode to PATTERN. Player pattern is:`, player.currentPattern);
+                }
+                break; 
             case CommandType.WIDTH: player.density = value; break;
             case CommandType.INVERSION: player.inversion = value; break;
             case CommandType.KEY: player.tonality = value; break;
@@ -136,14 +169,9 @@ export class Command {
             case CommandType.SHIFTSIZE: player.shiftSize = value; break;
             case CommandType.SHIFTVALUE: player.shiftValue = value; break;
             case CommandType.PATTERN_GAP: player.decorationGap = value; break;
-            case CommandType.PATTERN: player.decorationPattern = value; break;
         }
     }
     
-    /**
-     * Devuelve el nombre de la variable si este comando utiliza una variable
-     * @returns El nombre de la variable sin el prefijo '$', o null si no usa una variable
-     */
     getVariableName(): string | null {
         if (this.isVariable && typeof this._value === 'string') {
             return this._value.startsWith('$') ? this._value.substring(1) : this._value;

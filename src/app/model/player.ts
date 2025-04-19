@@ -35,6 +35,7 @@ export class Player {
     playMode: PlayMode = PlayMode.CHORD;
     instrumentType: InstrumentType;
     instrumentId: InstrumentId;
+    currentPattern: NoteData[] | null = null;
 
     private _playState = PlayState.STOPPED;
     private _playProgress = 0;
