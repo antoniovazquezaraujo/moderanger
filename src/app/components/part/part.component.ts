@@ -21,8 +21,14 @@ export class PartComponent implements OnInit {
     @Input() song!: Song;
     @Output() onDuplicatePart: EventEmitter<Part>;
     @Output() onRemovePart: EventEmitter<Part>;
+    @Output() duplicateBlockEvent = new EventEmitter<{ block: Block, partId: number }>();
+    @Output() removeBlockEvent = new EventEmitter<{ blockId: number, partId: number }>();
+    @Output() addChildEvent = new EventEmitter<{ parentBlock: Block | null, partId: number }>();
+    @Output() playPartEvent = new EventEmitter<number>();
+    @Output() stopPartEvent = new EventEmitter<number>();
 
     currentBlock: Block = new Block();
+    isExpanded: boolean = true;
 
     constructor(private songPlayer: SongPlayer) {
         this.onDuplicatePart = new EventEmitter<Part>();
@@ -53,6 +59,8 @@ export class PartComponent implements OnInit {
             // Si el bloque está en la lista principal de bloques de la parte,
             // añadir la copia justo después del bloque original
             this.part.blocks.splice(blockIndex + 1, 0, copy);
+            // Emit the event AFTER modifying the structure
+            this.duplicateBlockEvent.emit({ block: copy, partId: this.part.id });
         } else {
             // Si el bloque es un bloque hijo, tenemos que encontrar su padre
             let found = false;
@@ -65,6 +73,8 @@ export class PartComponent implements OnInit {
                 if (childIndex !== -1) {
                     // Si lo encontramos, añadir la copia como hermano
                     parentBlock.children.splice(childIndex + 1, 0, copy);
+                    // Emit the event AFTER modifying the structure
+                    this.duplicateBlockEvent.emit({ block: copy, partId: this.part.id });
                     return true;
                 }
                 
@@ -89,6 +99,8 @@ export class PartComponent implements OnInit {
             // Si no encontramos el padre, añadir el bloque al final de la lista principal
             if (!found) {
                 this.part.blocks.push(copy);
+                // Emit the event AFTER modifying the structure
+                this.duplicateBlockEvent.emit({ block: copy, partId: this.part.id });
             }
         }
         
@@ -99,7 +111,9 @@ export class PartComponent implements OnInit {
     }
 
     onRemoveBlock(block: Block) {
+        const blockIdToRemove = block.id; // Capture id before potential removal
         this.part.removeBlock(block);
+        this.removeBlockEvent.emit({ blockId: blockIdToRemove, partId: this.part.id });
     }
 
     onAddNewCommand(block: Block) {
@@ -109,10 +123,16 @@ export class PartComponent implements OnInit {
         }
     }
 
-    onAddChild(block: Block) {
+    onAddChild(parentBlock: Block | null) {
         const newBlock = new Block();
-        block.children.push(newBlock);
+        if (parentBlock) {
+            parentBlock.children.push(newBlock);
+        } else {
+            this.part.blocks.push(newBlock);
+        }
         this.ensureUniqueBlocks();
+        // Emit event AFTER adding the block
+        this.addChildEvent.emit({ parentBlock, partId: this.part.id });
         console.log('Child block added:', newBlock);
         console.log('Current blocks:', this.part.blocks);
     }
@@ -143,6 +163,7 @@ export class PartComponent implements OnInit {
         
         if (this.part && this.song) { 
             this.songPlayer.playPart(this.part, this.song);
+            this.playPartEvent.emit(this.part.id);
         } else {
             console.error("Cannot play part: Part or Song context is missing.");
         }
@@ -150,9 +171,14 @@ export class PartComponent implements OnInit {
 
     stopPart() {
         this.songPlayer.stop();
+        this.stopPartEvent.emit(this.part.id); // Emit part ID on stop
     }
 
     setCurrentBlock(block: Block) {
         this.currentBlock = block;
+    }
+
+    toggleExpansion(): void {
+        this.isExpanded = !this.isExpanded;
     }
 }
