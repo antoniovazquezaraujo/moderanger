@@ -29,6 +29,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { SplitterModule } from 'primeng/splitter';
 import { SidebarModule } from 'primeng/sidebar';
+import { SharedModule } from 'primeng/api';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { SidebarModule } from 'primeng/sidebar';
     FormsModule,
     // Módulos PrimeNG
     TreeModule,
+    SharedModule,
     ButtonModule,
     InputTextModule,
     KnobModule,

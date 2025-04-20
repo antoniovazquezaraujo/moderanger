@@ -22,8 +22,18 @@
     [style]="{'height': 'auto', 'overflow-y': 'auto'}">
     <ng-template let-node pTemplate="default">
     <div class="block-content">
-      <!-- Header: Contains label, controls, repetitions AND NOW MELODY EDITOR -->
+      <!-- Header: Contains toggler, label, controls, repetitions, melody editor -->
       <div class="block-header">
+          <!-- Remove p-treeToggler -->
+          
+          <!-- Add Toggle Button/Icon - Always visible -->
+          <p-button 
+              [icon]="node.expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" 
+              (click)="toggleNodeExpansion(node)" 
+              styleClass="p-button-text p-button-sm block-toggler-button">
+          </p-button>
+          <!-- Remove placeholder span -->
+
           <span class="header-item block-label"><input type="text" [(ngModel)]="node.label" class="block-name-input" placeholder="Block {{node.id}}"></span>
           <span class="header-item block-controls"><p-button (click)="addChild(node)" icon="pi pi-plus" pTooltip="Add Block" tooltipPosition="top"></p-button><p-button (click)="removeChild(node)" icon="pi pi-times" pTooltip="Remove Block" tooltipPosition="top"></p-button><p-button (click)="duplicateBlock(node)" icon="pi pi-copy" pTooltip="Duplicate Block" tooltipPosition="top"></p-button></span>
           <span class="header-item repetitions-container"><span class="repetitions-label">Repeat</span><input type="number" id="repeatingTimes" class="repetitions-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="node.repeatingTimes" min="0" max="99" step="1"></span>
@@ -51,8 +61,8 @@
       </div>
       -->
 
-      <!-- Block Body (Commands) -->
-      <div class="block-body">
+      <!-- Block Body (Commands) - Render only if expanded -->
+      <div class="block-body" *ngIf="node.expanded">
         <app-block-commands 
           [block]="node" 
           >
@@ -60,6 +70,9 @@
       </div>
     </div>
   </ng-template>
+
+  <!-- Add empty template to hide default toggler icon -->
+  <ng-template pTemplate="togglericon"></ng-template>
 </p-tree>
 </ng-container> <!-- Close the conditional container -->
 

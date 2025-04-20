@@ -11,6 +11,7 @@ import { BlockCommandsComponent } from '../block-commands/block-commands.compone
 import { parseBlockNotes } from '../../model/ohm.parser';
 import { NoteData } from '../../model/note';
 import { Subscription } from 'rxjs';
+import { TreeNode } from 'primeng/api';
 
 @Component({
   selector: 'app-block',
@@ -137,5 +138,11 @@ export class BlockComponent implements OnInit, OnDestroy {
 
   // Fix: Remove unused handleRemoveCommand method (if handled by child)
   // handleRemoveCommand(event: any) { ... }
+
+  toggleNodeExpansion(node: TreeNode): void {
+    if (node) {
+        node.expanded = !node.expanded;
+    }
+  }
 
 }
