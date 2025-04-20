@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
-import { OperationType, BaseOperation, IncrementOperation, DecrementOperation, AssignOperation } from 'src/app/model/operation';
+import { OperationType, BaseOperation, VaryOperation, AssignOperation } from 'src/app/model/operation';
 import { getPlayModeNames, PlayMode, getPlayModeFromString } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
 import { VariableContext } from 'src/app/model/variable.context';
@@ -155,8 +155,8 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 } else if (this.isVariableOfType(this.selectedVariable, 'playmode')) {
                      initialValue = this.playModeNames[0] || 'CHORD'; 
                 }
-            } else { 
-                 initialValue = 1; 
+            } else if (defaultOpType === OperationType.VARY) {
+                 initialValue = 1;
             }
             console.log(`[BlockCommands] Determined initialValue: ${initialValue} for variable ${this.selectedVariable}`);
 
@@ -191,12 +191,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 console.log(`[BlockCommands] Mapping operation: type=${op.type}, varName=${variableName}, value=${value}`);
 
                 switch (op.type) {
-                    case OperationType.INCREMENT:
-                        const incValue = typeof value === 'number' ? value : (parseInt(String(value)) || 1);
-                        return new IncrementOperation(variableName, incValue);
-                    case OperationType.DECREMENT:
-                        const decValue = typeof value === 'number' ? value : (parseInt(String(value)) || 1);
-                        return new DecrementOperation(variableName, decValue);
+                    case OperationType.VARY:
+                        const varyStep = typeof value === 'number' ? value : (parseInt(String(value)) || 1);
+                        return new VaryOperation(variableName, varyStep);
                     case OperationType.ASSIGN:
                          if (this.isVariableOfType(variableName, 'scale')) {
                              value = String(value || this.scaleNames[0] || 'WHITE');
@@ -331,7 +328,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                  } else {
                      op.value = typeof op.value === 'number' ? op.value : (parseFloat(String(op.value)) || 0);
                  }
-             } else {
+             } else if (op.type === OperationType.VARY) {
                  op.value = typeof op.value === 'number' ? op.value : (parseInt(String(op.value)) || 1);
              }
         });
@@ -346,11 +343,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         }
         this.operations = this.block.operations.map(operation => {
             let type: OperationType;
-            if (operation instanceof IncrementOperation) type = OperationType.INCREMENT;
-            else if (operation instanceof DecrementOperation) type = OperationType.DECREMENT;
+            if (operation instanceof VaryOperation) type = OperationType.VARY;
             else if (operation instanceof AssignOperation) type = OperationType.ASSIGN;
             else { 
-                type = OperationType.ASSIGN; 
+                console.warn("[BlockCommands] Unknown operation type during initialization:", operation);
+                type = OperationType.ASSIGN;
             }                 
             return {
                 type: type,
@@ -404,10 +401,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             newValue = event;
         }
 
-        if (this.isVariableOfType(operation.variableName, 'number')) {
+        if (operation.type === OperationType.VARY || this.isVariableOfType(operation.variableName, 'number')) {
             const numVal = parseFloat(String(newValue));
-            operation.value = isNaN(numVal) ? 0 : numVal;
-        } else { 
+            operation.value = isNaN(numVal) ? (operation.type === OperationType.VARY ? 1 : 0) : numVal;
+        } else {
             operation.value = String(newValue);
         }
         

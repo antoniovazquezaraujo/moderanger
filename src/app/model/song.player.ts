@@ -9,7 +9,7 @@ import { Subject, BehaviorSubject } from 'rxjs';
 import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
 import { NoteGenerationService } from '../services/note-generation.service';
 import { VariableContext } from './variable.context';
-import { BaseOperation, IncrementOperation, DecrementOperation, AssignOperation } from './operation';
+import { BaseOperation, VaryOperation, AssignOperation } from './operation';
 import { Command } from './command';
 import * as Tone from 'tone';
 import { NoteDuration } from './melody';
@@ -195,12 +195,23 @@ export class SongPlayer {
             const player = new Player(0, part.instrumentType, instrumentId, this.audioEngine);
             const executionUnits: ExecutionUnit[] = [];
             const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
+                // --- DEBUG LOG START ---
+                console.log(`[SongPlayer DEBUG] addBlockAndChildren called for block ${block.id}, repeatingTimes: ${block.repeatingTimes} (Type: ${typeof block.repeatingTimes})`); 
+                // --- DEBUG LOG END ---
                 for (let i = 0; i < block.repeatingTimes; i++) {
+                    // --- DEBUG LOG START ---
+                    console.log(`[SongPlayer DEBUG]   -> Adding ExecutionUnit for block ${block.id}, repetition ${i+1} of ${block.repeatingTimes}`);
+                    // --- DEBUG LOG END ---
                     executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
                     block.children?.forEach(childBlock => {
-                        addBlockAndChildren(childBlock, childLevel + 1, block);
+                            addBlockAndChildren(childBlock, childLevel + 1, block);
                     });
                 }
+                // --- DEBUG LOG START ---
+                if (block.repeatingTimes <= 0) { // Log if the loop was (correctly) skipped
+                     console.log(`[SongPlayer DEBUG]   -> Loop skipped for block ${block.id} due to repeatingTimes <= 0.`);
+                }
+                // --- DEBUG LOG END ---
             };
             part.blocks.forEach(block => addBlockAndChildren(block));
             partState = {
@@ -313,12 +324,23 @@ export class SongPlayer {
             const player = new Player(index, part.instrumentType, instrumentId, this.audioEngine);
             const executionUnits: ExecutionUnit[] = [];
             const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
+                // --- DEBUG LOG START ---
+                console.log(`[SongPlayer DEBUG] addBlockAndChildren called for block ${block.id}, repeatingTimes: ${block.repeatingTimes} (Type: ${typeof block.repeatingTimes})`); 
+                // --- DEBUG LOG END ---
                 for (let i = 0; i < block.repeatingTimes; i++) {
+                    // --- DEBUG LOG START ---
+                    console.log(`[SongPlayer DEBUG]   -> Adding ExecutionUnit for block ${block.id}, repetition ${i+1} of ${block.repeatingTimes}`);
+                    // --- DEBUG LOG END ---
                     executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
                     block.children?.forEach(childBlock => {
                             addBlockAndChildren(childBlock, childLevel + 1, block);
                     });
                 }
+                // --- DEBUG LOG START ---
+                if (block.repeatingTimes <= 0) { // Log if the loop was (correctly) skipped
+                     console.log(`[SongPlayer DEBUG]   -> Loop skipped for block ${block.id} due to repeatingTimes <= 0.`);
+                }
+                // --- DEBUG LOG END ---
             };
             part.blocks.forEach(block => addBlockAndChildren(block));
             const initialState = {

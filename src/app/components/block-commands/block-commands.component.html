@@ -140,13 +140,12 @@
                     </ng-container>
                 </ng-container>
 
-                <ng-container *ngIf="operation.type === 'INCREMENT' || operation.type === 'DECREMENT'">
+                <ng-container *ngIf="operation.type === 'VARY'">
                     <input type="number" 
                         class="command-value number-input" 
                         [(ngModel)]="operation.value" 
                         (ngModelChange)="onOperationValueChange(operation, $event)"
-                        min="-999"
-                        max="999"
+                        placeholder="Step" 
                         step="1">
                 </ng-container>
 
