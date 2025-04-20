@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { Command, CommandType } from 'src/app/model/command';
 import { OperationType, BaseOperation, IncrementOperation, DecrementOperation, AssignOperation } from 'src/app/model/operation';
@@ -7,7 +7,9 @@ import { Scale } from 'src/app/model/scale';
 import { VariableContext } from 'src/app/model/variable.context';
 import { Subscription } from 'rxjs';
 import { SongPlayer } from 'src/app/model/song.player';
-import { NoteDuration } from 'src/app/model/melody';
+import { NoteDuration, NoteConverter, MusicElement } from 'src/app/model/melody';
+import { NoteData } from 'src/app/model/note';
+import { MelodyEditorComponent } from '../melody-editor/melody-editor.component';
 
 interface VariableOption {
     label: string;
@@ -21,6 +23,7 @@ interface VariableOption {
 })
 export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() block: Block = new Block();
+    public PlayMode = PlayMode;
 
     commandTypeNames: string[] = [];
     commandTypes = CommandType;
@@ -224,9 +227,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     toggleVariableMode(command: Command, event: Event): void {
         event.preventDefault();
         event.stopPropagation();
-
+        
         if (command.type === CommandType.PATTERN) {
-            return; 
+            return;
         }
         
         const wasVariable = command.isVariable;
@@ -260,7 +263,9 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                  }
             } else {
                 valueToSet = typeof event === 'object' ? event.target?.value : event;
-                command.setValue(valueToSet);
+                if (command.type !== CommandType.PATTERN) {
+                    command.setValue(valueToSet);
+                }
             }
             this.cdr.detectChanges();
         } catch (error) {
@@ -424,7 +429,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
     getPatternValueAsString(command: Command): string {
         if (command.type === CommandType.PATTERN) {
-            return String(command.value || '');
+            return String(command.value || ''); 
         }
         return '';
     }

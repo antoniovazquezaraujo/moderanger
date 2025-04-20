@@ -75,6 +75,19 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     private songPlayer: SongPlayer
   ) {}
 
+  // <<< NEW PUBLIC METHODS FOR EXTERNAL CONTROL >>>
+  public loadMelody(elements: MusicElement[]): void {
+    console.log(`[MelodyEditor] loadMelody called externally with ${elements.length} elements.`);
+    this.melodyEditorService.loadElements(elements);
+    // Ensure change detection runs if called after initialization
+    this.cdr.detectChanges();
+  }
+
+  public getCurrentMelody(): MusicElement[] {
+    return this.melodyEditorService.getElements();
+  }
+  // <<< --------------------------------------- >>>
+
   ngOnInit(): void {
     // NO llamar al servicio desde aquí
     // this.melodyEditorService.setDefaultDuration(this.defaultDuration);

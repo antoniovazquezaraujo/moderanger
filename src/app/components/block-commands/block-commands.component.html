@@ -6,7 +6,7 @@
         </div>
         <div class="container-wrapper commands-container">
             <div *ngFor="let command of block.commands" class="command">
-                <sup class="variable-icon" *ngIf="command.type !== commandTypes.PATTERN" (click)="toggleVariableMode(command, $event)">$</sup>
+                <sup class="variable-icon" *ngIf="command.type !== commandTypes.PLAYMODE && command.type !== commandTypes.SCALE && command.type !== commandTypes.PATTERN" (click)="toggleVariableMode(command, $event)">$</sup>
                 <sup class="remove-icon" (click)="removeCommand(command)">×</sup>
                 
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
@@ -56,7 +56,6 @@
 
                     <ng-container *ngSwitchCase="commandTypes.PATTERN">
                         <app-melody-editor 
-                            class="compact-melody-editor"
                             [notes]="getPatternValueAsString(command)" 
                             [defaultDuration]="currentDefaultDuration"
                             (notesChange)="command.value = $event">

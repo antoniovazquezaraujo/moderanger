@@ -22,29 +22,37 @@
     [style]="{'height': 'auto', 'overflow-y': 'auto'}">
     <ng-template let-node pTemplate="default">
     <div class="block-content">
-      <!-- Bloque (información principal) - Todo en la misma línea -->
-      <div class="block-header"><span class="header-item block-label"><input type="text" [(ngModel)]="node.label" class="block-name-input" placeholder="Block {{node.id}}"></span><span class="header-item block-controls"><p-button (click)="addChild(node)" icon="pi pi-plus" pTooltip="Add Block" tooltipPosition="top"></p-button><p-button (click)="removeChild(node)" icon="pi pi-times" pTooltip="Remove Block" tooltipPosition="top"></p-button><p-button (click)="duplicateBlock(node)" icon="pi pi-copy" pTooltip="Duplicate Block" tooltipPosition="top"></p-button></span><span class="header-item repetitions-container"><span class="repetitions-label">Repeat</span><input type="number" id="repeatingTimes" class="repetitions-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="node.repeatingTimes" min="0" max="99" step="1"></span></div>
+      <!-- Header: Contains label, controls, repetitions AND NOW MELODY EDITOR -->
+      <div class="block-header">
+          <span class="header-item block-label"><input type="text" [(ngModel)]="node.label" class="block-name-input" placeholder="Block {{node.id}}"></span>
+          <span class="header-item block-controls"><p-button (click)="addChild(node)" icon="pi pi-plus" pTooltip="Add Block" tooltipPosition="top"></p-button><p-button (click)="removeChild(node)" icon="pi pi-times" pTooltip="Remove Block" tooltipPosition="top"></p-button><p-button (click)="duplicateBlock(node)" icon="pi pi-copy" pTooltip="Duplicate Block" tooltipPosition="top"></p-button></span>
+          <span class="header-item repetitions-container"><span class="repetitions-label">Repeat</span><input type="number" id="repeatingTimes" class="repetitions-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="node.repeatingTimes" min="0" max="99" step="1"></span>
+          
+          <!-- Melody Editor integrated into header -->
+          <span class="header-item melody-editor-inline-container">
+              <!-- Remove the outer wrapper and title, keep the editor container -->
+             <div class="melody-editor-container">
+                <div class="p-field p-col-12">
+                  <app-melody-editor-wrapper 
+                    id="melody-{{node.id}}" 
+                    [(ngModel)]="node.blockContent.notes"
+                    [showVariableIcon]="false"
+                    >
+                  </app-melody-editor-wrapper>
+                </div>
+             </div>
+          </span>
+      </div> <!-- End of block-header -->
       
-      <!-- Melody Editor y Comandos -->
+      <!-- REMOVE Melody Editor Wrapper from here -->
+      <!-- 
+      <div class="melody-editor-wrapper"> 
+        ...
+      </div>
+      -->
+
+      <!-- Block Body (Commands) -->
       <div class="block-body">
-        <!-- Editor de melodías siempre visible -->
-        <div class="melody-editor-wrapper">
-          <div class="melody-title">Melody</div>
-          <div class="melody-header">
-            <div class="melody-editor-container">
-              <!-- Use wrapper for direct editing -->
-              <div class="p-field p-col-12">
-                <app-melody-editor-wrapper 
-                  id="melody-{{node.id}}" 
-                  [(ngModel)]="node.blockContent.notes"
-                  [showVariableIcon]="false"
-                  >
-                </app-melody-editor-wrapper>
-              </div>
-            </div>
-          </div>
-        </div>
-        
         <app-block-commands 
           [block]="node" 
           >

@@ -56,6 +56,14 @@ export class SongPlayer {
     private _songRepetitions = 1;
     private _currentRepetition = 0;
 
+    // <<< NEW PUBLIC STATE SUBJECTS >>>
+    private currentPatternSubject = new BehaviorSubject<NoteData[]>([]);
+    public currentPattern$ = this.currentPatternSubject.asObservable();
+
+    private playModeSubject = new BehaviorSubject<PlayMode>(PlayMode.CHORD); // Default to CHORD
+    public playMode$ = this.playModeSubject.asObservable();
+    // <<< --------------------------- >>>
+
     metronome$ = this._metronome.asObservable();
     
     private currentLoopId: LoopId | null = null;
@@ -69,6 +77,36 @@ export class SongPlayer {
         private audioEngine: AudioEngineService,
         private noteGenerationService: NoteGenerationService 
     ) { }
+
+    // <<< NEW GETTERS/SETTERS for pattern and playMode >>>
+    get currentPattern(): NoteData[] {
+        return this.currentPatternSubject.value;
+    }
+
+    set currentPattern(pattern: NoteData[]) {
+        // Basic validation: ensure it's an array
+        if (Array.isArray(pattern)) {
+             this.currentPatternSubject.next(pattern);
+             console.log(`[SongPlayer] Global pattern updated. Length: ${pattern.length}`);
+        } else {
+            console.warn('[SongPlayer] Attempted to set non-array value to currentPattern. Ignoring.');
+        }
+    }
+
+    get playMode(): PlayMode {
+        return this.playModeSubject.value;
+    }
+
+    set playMode(mode: PlayMode) {
+        // Basic validation: ensure it's a valid PlayMode enum value
+        if (Object.values(PlayMode).includes(mode)) {
+            this.playModeSubject.next(mode);
+            console.log(`[SongPlayer] Global PlayMode updated to: ${PlayMode[mode]}`);
+        } else {
+             console.warn(`[SongPlayer] Attempted to set invalid PlayMode value: ${mode}. Ignoring.`);
+        }
+    }
+    // <<< ---------------------------------------------- >>>
 
     get isPlaying(): boolean {
         return this._isPlaying;
