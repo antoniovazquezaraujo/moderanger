@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Block } from '../model/block';
 import { Player } from '../model/player';
 import { NoteData } from '../model/note';
-// Scale and OctavedGrade likely not needed if parser gives NoteData directly
-// import { Scale, ScaleTypes } from '../model/scale';
-// import { OctavedGrade } from '../model/octaved-grade';
+// Import necessary classes for scale degree calculation
+import { Scale, ScaleTypes } from '../model/scale';
+import { OctavedGrade } from '../model/octaved-grade';
 import { PlayMode, arpeggiate } from '../model/play.mode'; 
 // VariableContext might be needed if substituting variables here, keep for now
 import { VariableContext } from '../model/variable.context';
@@ -110,79 +110,93 @@ export class NoteGenerationService {
               if (baseGrade !== undefined) {
                   // Set the base grade on the player for getSelectedNotes to use
                   player.selectedNote = baseGrade;
-                  // Get the actual MIDI notes based on player state (scale, octave, tonality, gap, density, inversion)
-                  const derivedNoteDatas = player.getSelectedNotes(); // Call the Player method
-                  const midiNotes = this.noteDatasToNotes(derivedNoteDatas); // Extract MIDI numbers
+                  
+                  // --- PATTERN MODE LOGIC ---
+                  if (player.playMode === PlayMode.PATTERN && player.currentPattern && player.currentPattern.length > 0) {
+                      const patternMelody = player.currentPattern;
+                      const scaleName = ScaleTypes[player.scale];
+                      const currentScale = Scale.getScaleByName(scaleName);
+                      if (!currentScale) {
+                          console.error(`[NoteGenSvc] PATTERN Error: Invalid scale ${scaleName}. Skipping pattern application.`);
+                          results.push(new NoteData({ type: 'rest', duration })); // Push a rest on error
+                          break; // Exit case 'note'
+                      }
 
-                  if (midiNotes.length > 0) { 
-                      // --- PATTERN MODE LOGIC ---
-                      if (player.playMode === PlayMode.PATTERN && player.currentPattern && player.currentPattern.length > 0) {
-                          const baseMidiNote = midiNotes[0]; // Use the first derived note as the base for transposition
-                          const patternMelody = player.currentPattern;
-                          
-                          // Calculate total duration of the original note (if specified)
-                          const originalNoteDurationSeconds = duration ? Tone.Time(duration).toSeconds() : Tone.Time('16n').toSeconds();
-                          
-                          // Calculate total duration of the pattern
-                          let patternDurationSeconds = 0;
-                          patternMelody.forEach(nd => {
-                              const patternNoteDuration = nd.duration ?? '16n'; // Default if pattern note has no duration
-                              patternDurationSeconds += Tone.Time(patternNoteDuration).toSeconds();
-                          });
-
-                          // Calculate time scaling factor
-                          const scaleFactor = patternDurationSeconds > 0 ? originalNoteDurationSeconds / patternDurationSeconds : 1;
-
-                          console.log(`[NoteGenSvc] Applying PATTERN. BaseMIDI: ${baseMidiNote}, PatternLength: ${patternMelody.length}, OrigDuration: ${originalNoteDurationSeconds}s, PatternDuration: ${patternDurationSeconds}s, ScaleFactor: ${scaleFactor}`);
-
-                          patternMelody.forEach(patternNoteData => {
-                              // Deep clone the pattern note data to avoid modifying the original pattern
-                              const transposedNoteData = JSON.parse(JSON.stringify(patternNoteData)) as NoteData;
-
-                              // Transpose note if it's a note type
-                              if (transposedNoteData.type === 'note' && transposedNoteData.note !== undefined) {
-                                  // Simple transposition: add base MIDI note to pattern note
-                                  // TODO: Consider relative vs absolute transposition if needed
-                                  transposedNoteData.note += baseMidiNote;
-                              }
-                              
-                              // Scale duration
-                              const currentDuration = transposedNoteData.duration ?? '16n';
-                              try {
-                                   const scaledDurationSeconds = Tone.Time(currentDuration).toSeconds() * scaleFactor;
-                                   // Convert back to Tone notation (this might not be perfectly accurate for complex rhythms)
-                                   // Simplification: Use seconds directly if conversion is tricky, AudioEngine might handle it.
-                                   // Or find a better way to represent scaled durations.
-                                   // For now, let's try to convert back to a standard notation approximately
-                                   transposedNoteData.duration = `${scaledDurationSeconds}s`; 
-                                   // A more robust approach might involve calculating ticks/beats.
-                              } catch(e) {
-                                  console.warn(`[NoteGenSvc] Could not scale duration ${currentDuration}. Using original.`);
-                                  transposedNoteData.duration = currentDuration; // Keep original on error
-                              }
-
-                              results.push(transposedNoteData);
-                          });
-
-                      // --- CHORD MODE LOGIC ---
-                      } else if (player.playMode === PlayMode.CHORD) {
-                          // Use the derived NoteData directly if playing chords
-                          // Ensure they have the correct final duration
-                          derivedNoteDatas.forEach(nd => nd.duration = duration);
-                          results.push(new NoteData({ type: 'chord', duration, noteDatas: derivedNoteDatas }));
+                      // Calculate total duration of the original note (if specified)
+                      const originalNoteDurationSeconds = duration ? Tone.Time(duration).toSeconds() : Tone.Time('16n').toSeconds();
                       
-                      // --- OTHER ARPEGGIATE MODES LOGIC ---
-                      } else { 
-                          const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
-                          const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
-                          if (arpeggioNoteDatas.length > 0) {
-                               results.push(new NoteData({ type: 'arpeggio', duration, noteDatas: arpeggioNoteDatas }));
+                      // Calculate total duration of the pattern
+                      let patternDurationSeconds = 0;
+                      patternMelody.forEach(nd => {
+                          const patternNoteDuration = nd.duration ?? '16n'; // Default if pattern note has no duration
+                          patternDurationSeconds += Tone.Time(patternNoteDuration).toSeconds();
+                      });
+
+                      // Calculate time scaling factor
+                      const scaleFactor = patternDurationSeconds > 0 ? originalNoteDurationSeconds / patternDurationSeconds : 1;
+
+                      console.log(`[NoteGenSvc] Applying PATTERN. BaseGrade: ${baseGrade}, Scale: ${scaleName}, Octave: ${player.octave}, Tonality: ${player.tonality}, PatternLength: ${patternMelody.length}, OrigDuration: ${originalNoteDurationSeconds}s, PatternDuration: ${patternDurationSeconds}s, ScaleFactor: ${scaleFactor}`);
+
+                      patternMelody.forEach(patternNoteData => {
+                          const transposedNoteData = JSON.parse(JSON.stringify(patternNoteData)) as NoteData;
+
+                          // Transpose note using scale degrees
+                          if (transposedNoteData.type === 'note' && transposedNoteData.note !== undefined) {
+                              const patternGrade = transposedNoteData.note; // Assuming pattern notes are scale degrees
+                              const targetGrade = baseGrade + patternGrade;
+                              
+                              try {
+                                  const octavedGrade = new OctavedGrade(currentScale, targetGrade, player.octave);
+                                  const targetMidiNote = octavedGrade.toNote() + player.tonality;
+                                  transposedNoteData.note = targetMidiNote;
+                                  console.log(`  [Pattern] BaseGrade: ${baseGrade}, PatternGrade: ${patternGrade} -> TargetGrade: ${targetGrade} -> MIDI: ${targetMidiNote}`);
+                              } catch (e) {
+                                  console.error(`[NoteGenSvc] Error calculating OctavedGrade for targetGrade ${targetGrade}:`, e);
+                                  // What to do on error? Skip note? Make it a rest?
+                                  transposedNoteData.type = 'rest'; // Make it a rest for safety
+                                  delete transposedNoteData.note;
+                              }
                           }
+                          
+                          // Scale duration (existing logic)
+                          const currentDuration = transposedNoteData.duration ?? '16n';
+                          try {
+                               const scaledDurationSeconds = Tone.Time(currentDuration).toSeconds() * scaleFactor;
+                               transposedNoteData.duration = `${scaledDurationSeconds}s`; 
+                          } catch(e) {
+                              console.warn(`[NoteGenSvc] Could not scale duration ${currentDuration}. Using original.`);
+                              transposedNoteData.duration = currentDuration; // Keep original on error
+                          }
+
+                          results.push(transposedNoteData);
+                      });
+                  
+                  // --- CHORD / OTHER ARPEGGIATE MODES LOGIC ---
+                  } else { 
+                      // Get the actual MIDI notes based on player state (scale, octave, tonality, gap, density, inversion)
+                      const derivedNoteDatas = player.getSelectedNotes(); // Call the Player method
+                      const midiNotes = this.noteDatasToNotes(derivedNoteDatas); // Extract MIDI numbers
+
+                      if (midiNotes.length > 0) { 
+                          if (player.playMode === PlayMode.CHORD) {
+                              // Use the derived NoteData directly if playing chords
+                              // Ensure they have the correct final duration
+                              derivedNoteDatas.forEach(nd => nd.duration = duration);
+                              results.push(new NoteData({ type: 'chord', duration, noteDatas: derivedNoteDatas }));
+                          } else { // Other Arpeggiate modes
+                              const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
+                              const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
+                              if (arpeggioNoteDatas.length > 0) {
+                                  results.push(new NoteData({ type: 'arpeggio', duration, noteDatas: arpeggioNoteDatas }));
+                              }
+                          }
+                      } else {
+                         // If getSelectedNotes returns empty even with a baseGrade
+                         results.push(new NoteData({ type: 'rest', duration }));
                       }
                   }
               } else {
                   // If baseGrade is undefined (e.g., explicit rest in input)
-                  // In PATTERN mode, should this silence also trigger the pattern? For now, let's treat it as a rest.
                   results.push(new NoteData({ type: 'rest', duration }));
               }
               break;
