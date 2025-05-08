@@ -36,6 +36,7 @@ export class VariableContext {
      * según su tipo.
      */
     static resetAll(): void {
+        console.log("[VariableContext] resetAll() CALLED");
         const variableBackup = new Map<string, VariableValue>();
         
         const variables = Array.from(VariableContext.context.entries());

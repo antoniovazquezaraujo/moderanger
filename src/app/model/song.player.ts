@@ -94,6 +94,7 @@ export class SongPlayer {
     }
 
     get playMode(): PlayMode {
+        // Return the current value, not the observable
         return this.playModeSubject.value;
     }
 
@@ -282,20 +283,33 @@ export class SongPlayer {
 
     private _initializePlayback(song: Song): boolean {
         console.log("[SongPlayer] _initializePlayback called.");
-        this.stop(); 
-        if (!song || !song.parts || song.parts.length === 0) {
-            console.log("[SongPlayer] _initializePlayback: No song or no parts, returning false.");
-            this._isPlaying = false; 
-            return false; 
-         }
-        this.audioEngine.setTransportBpm(100);
-        this.audioEngine.setTransportPosition(0);
-        this._isPlaying = true; 
-        this._beatCount = 0;
-        this._currentRepetition = 0; 
+        if (this._isPlaying) {
+            console.warn("[SongPlayer] Already playing. Stop previous playback first.");
+            // Consider stopping or returning false based on desired behavior
+            // this.stop();
+            return false;
+        }
+
+        // Remove the non-existent initialize call
+        // this.audioEngine.initialize();
+
+        this._isPlaying = true;
+        this._currentRepetition = 0; // Reset repetition count for new playback
+        this._beatCount = 0; // Reset beat count
+
+        // Correctly set BPM using AudioEngineService transport methods
+        // Assuming song.bpm exists and is the correct property name
+        const bpm = 120; // Use a default BPM as Song class does not have a bpm property
+        this.audioEngine.setTransportBpm(bpm); // Use the correct method
+        console.log(`[SongPlayer] _initializePlayback: BPM set to ${bpm}`);
+        this.audioEngine.setTransportPosition(0); // Also reset transport position
+
+        // Hook up the stop listener *after* setting _isPlaying to true
+        // to avoid race conditions if stop is called immediately
         if (!this.currentStopListenerId) {
              this.currentStopListenerId = this.audioEngine.onTransportStop(this._handleTransportStop);
         }
+
         console.log("[SongPlayer] _initializePlayback: Initialization successful, returning true.");
         return true;
     }
