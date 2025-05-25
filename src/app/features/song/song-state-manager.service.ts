@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Song } from '../../model/song';
 import { Part } from '../../model/part';
 import { Block } from '../../model/block';
@@ -7,6 +7,7 @@ import { VariableContext } from '../../model/variable.context';
 import { PlayMode } from '../../model/play.mode';
 import { NoteData } from '../../model/note';
 import { NoteDuration } from '../../model/melody';
+import { GlobalStateService, GlobalApplicationState } from '../../shared/services/global-state.service';
 
 export interface SongState {
   currentSong?: Song;
@@ -23,21 +24,22 @@ export interface SongState {
   providedIn: 'root'
 })
 export class SongStateManagerService {
-  private readonly songState = new BehaviorSubject<SongState>({
-    repetitions: 1,
-    currentRepetition: 0,
-    globalPattern: [],
-    globalPlayMode: PlayMode.CHORD,
-    globalDefaultDuration: '4n'
-  });
+  
+  // Public observables - delegated to GlobalStateService
+  readonly state$: Observable<GlobalApplicationState>;
+  readonly currentPattern$: Observable<NoteData[]>;
+  readonly playMode$: Observable<PlayMode>;
+  readonly globalDefaultDuration$: Observable<NoteDuration>;
 
-  // Public observables
-  readonly state$ = this.songState.asObservable();
-  readonly currentPattern$ = new BehaviorSubject<NoteData[]>([]);
-  readonly playMode$ = new BehaviorSubject<PlayMode>(PlayMode.CHORD);
-  readonly globalDefaultDuration$ = new BehaviorSubject<NoteDuration>('4n');
-
-  constructor() {}
+  constructor(private globalState: GlobalStateService) {
+    // Delegate all observables to the global state service
+    this.state$ = this.globalState.globalState$;
+    this.currentPattern$ = this.globalState.globalPattern$;
+    this.playMode$ = this.globalState.playMode$;
+    this.globalDefaultDuration$ = this.globalState.globalDefaultDuration$;
+    
+    console.log('[SongStateManager] Initialized with GlobalStateService delegation');
+  }
 
   // ============= PUBLIC API =============
 
@@ -45,126 +47,109 @@ export class SongStateManagerService {
    * Get current song state
    */
   getCurrentState(): SongState {
-    return this.songState.value;
+    const globalState = this.globalState.getFullState();
+    return {
+      currentSong: globalState.playback.currentSong,
+      currentPart: globalState.playback.currentPart,
+      currentBlock: globalState.playback.currentBlock,
+      repetitions: globalState.repetition.songRepetitions,
+      currentRepetition: globalState.repetition.currentRepetition,
+      globalPattern: globalState.pattern.globalPattern,
+      globalPlayMode: globalState.pattern.playMode,
+      globalDefaultDuration: globalState.pattern.defaultDuration
+    };
   }
 
   /**
    * Set the current song
    */
   setCurrentSong(song: Song): void {
-    this.updateState({ currentSong: song });
-    console.log(`[SongStateManager] Current song set: ${song.name || 'Unnamed'}`);
+    this.globalState.setCurrentSong(song);
   }
 
   /**
    * Set the current part being played
    */
   setCurrentPart(part: Part): void {
-    this.updateState({ currentPart: part });
-    console.log(`[SongStateManager] Current part set: ${part.name || `ID ${part.id}`}`);
+    this.globalState.setCurrentPart(part);
   }
 
   /**
    * Set the current block being played
    */
   setCurrentBlock(block: Block): void {
-    this.updateState({ currentBlock: block });
-    console.log(`[SongStateManager] Current block set: ID ${block.id}`);
+    this.globalState.setCurrentBlock(block);
   }
 
   /**
    * Clear current context
    */
   clearCurrentContext(): void {
-    this.updateState({
-      currentSong: undefined,
-      currentPart: undefined,
-      currentBlock: undefined,
-      currentRepetition: 0
-    });
-    console.log('[SongStateManager] Current context cleared');
+    this.globalState.clearPlaybackContext();
+    this.globalState.resetRepetition();
   }
 
   /**
    * Set number of repetitions for playback
    */
   setRepetitions(repetitions: number): void {
-    const validRepetitions = Math.max(1, repetitions);
-    this.updateState({ repetitions: validRepetitions });
-    console.log(`[SongStateManager] Repetitions set to: ${validRepetitions}`);
+    this.globalState.setSongRepetitions(repetitions);
   }
 
   /**
    * Advance to next repetition
    */
   nextRepetition(): void {
-    const state = this.songState.value;
-    const newRepetition = state.currentRepetition + 1;
-    this.updateState({ currentRepetition: newRepetition });
-    console.log(`[SongStateManager] Advanced to repetition: ${newRepetition}`);
+    this.globalState.nextRepetition();
   }
 
   /**
    * Reset repetition counter
    */
   resetRepetition(): void {
-    this.updateState({ currentRepetition: 0 });
+    this.globalState.resetRepetition();
   }
 
   /**
    * Set global pattern
    */
   setGlobalPattern(pattern: NoteData[]): void {
-    if (Array.isArray(pattern)) {
-      this.updateState({ globalPattern: pattern });
-      this.currentPattern$.next(pattern);
-      console.log(`[SongStateManager] Global pattern updated. Length: ${pattern.length}`);
-    } else {
-      console.warn('[SongStateManager] Attempted to set non-array value to globalPattern. Ignoring.');
-    }
+    this.globalState.setGlobalPattern(pattern);
   }
 
   /**
    * Get current global pattern
    */
   getGlobalPattern(): NoteData[] {
-    return this.songState.value.globalPattern;
+    return this.globalState.globalPattern;
   }
 
   /**
    * Set global play mode
    */
   setGlobalPlayMode(mode: PlayMode): void {
-    if (Object.values(PlayMode).includes(mode)) {
-      this.updateState({ globalPlayMode: mode });
-      this.playMode$.next(mode);
-      console.log(`[SongStateManager] Global PlayMode updated to: ${PlayMode[mode]}`);
-    } else {
-      console.warn(`[SongStateManager] Attempted to set invalid PlayMode value: ${mode}. Ignoring.`);
-    }
+    this.globalState.setPlayMode(mode);
   }
 
   /**
    * Get current global play mode
    */
   getGlobalPlayMode(): PlayMode {
-    return this.songState.value.globalPlayMode;
+    return this.globalState.playMode;
   }
 
   /**
    * Set global default duration
    */
   setGlobalDefaultDuration(duration: NoteDuration): void {
-    this.updateState({ globalDefaultDuration: duration });
-    this.globalDefaultDuration$.next(duration);
-    console.log(`[SongStateManager] Global default duration updated to: ${duration}`);
+    this.globalState.setGlobalDefaultDuration(duration);
   }
 
   /**
    * Get current global default duration
    */
   getGlobalDefaultDuration(): NoteDuration {
-    return this.songState.value.globalDefaultDuration;
+    return this.globalState.globalDefaultDuration;
   }
 
   /**
@@ -208,23 +193,13 @@ export class SongStateManagerService {
    * Check if we can advance to next repetition
    */
   canAdvanceRepetition(): boolean {
-    const state = this.songState.value;
-    return state.currentRepetition < state.repetitions - 1;
+    return this.globalState.getCurrentRepetitionState().canAdvance;
   }
 
   /**
    * Check if all repetitions are completed
    */
   isAllRepetitionsCompleted(): boolean {
-    const state = this.songState.value;
-    return state.currentRepetition >= state.repetitions - 1;
-  }
-
-  // ============= PRIVATE METHODS =============
-
-  private updateState(changes: Partial<SongState>): void {
-    const currentState = this.songState.value;
-    const newState = { ...currentState, ...changes };
-    this.songState.next(newState);
+    return this.globalState.getCurrentRepetitionState().isCompleted;
   }
 } 

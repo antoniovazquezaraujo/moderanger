@@ -5,7 +5,7 @@ import { NoteData } from "./note";
 import { Part } from "./part";
 import { Block } from "./block";
 import { PlayMode, arpeggiate } from "./play.mode";
-import { Subject, BehaviorSubject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
 import { NoteGenerationService } from '../services/note-generation.service';
 import { VariableContext } from './variable.context';
@@ -13,6 +13,7 @@ import { BaseOperation, VaryOperation, AssignOperation } from './operation';
 import { Command } from './command';
 import * as Tone from 'tone';
 import { NoteDuration } from './melody';
+import { GlobalStateService } from '../shared/services/global-state.service';
 
 type InstrumentId = string;
 type LoopId = string;
@@ -47,86 +48,65 @@ type PartExecutionState = {
     providedIn: 'root'
 })
 export class SongPlayer {
-    private _isPlaying: boolean = false;
-    private _currentPart?: Part;
-    private _currentBlock?: Block;
     private _metronome = new Subject<number>();
-    private _beatCount = 0;
-    private _beatsPerBar = 32;
-    private _songRepetitions = 1;
-    private _currentRepetition = 0;
-
-    // <<< NEW PUBLIC STATE SUBJECTS >>>
-    private currentPatternSubject = new BehaviorSubject<NoteData[]>([]);
-    public currentPattern$ = this.currentPatternSubject.asObservable();
-
-    private playModeSubject = new BehaviorSubject<PlayMode>(PlayMode.CHORD); // Default to CHORD
-    public playMode$ = this.playModeSubject.asObservable();
-    // <<< --------------------------- >>>
-
-    metronome$ = this._metronome.asObservable();
     
     private currentLoopId: LoopId | null = null;
     private currentStopListenerId: ListenerId | null = null;
 
-    // Subject for global default duration
-    private globalDefaultDurationSubject = new BehaviorSubject<NoteDuration>('4n');
-    public globalDefaultDuration$ = this.globalDefaultDurationSubject.asObservable();
+    // Public observables - delegated to GlobalStateService
+    readonly currentPattern$: Observable<NoteData[]>;
+    readonly playMode$: Observable<PlayMode>;
+    readonly globalDefaultDuration$: Observable<NoteDuration>;
+    readonly metronome$ = this._metronome.asObservable();
 
     constructor(
         private audioEngine: AudioEngineService,
-        private noteGenerationService: NoteGenerationService 
-    ) { }
+        private noteGenerationService: NoteGenerationService,
+        private globalState: GlobalStateService
+    ) {
+        // Delegate observables to global state
+        this.currentPattern$ = this.globalState.globalPattern$;
+        this.playMode$ = this.globalState.playMode$;
+        this.globalDefaultDuration$ = this.globalState.globalDefaultDuration$;
+        
+        console.log('[SongPlayer] Initialized with GlobalStateService delegation');
+    }
 
-    // <<< NEW GETTERS/SETTERS for pattern and playMode >>>
+    // Getters/setters - delegated to GlobalStateService
     get currentPattern(): NoteData[] {
-        return this.currentPatternSubject.value;
+        return this.globalState.globalPattern;
     }
 
     set currentPattern(pattern: NoteData[]) {
-        // Basic validation: ensure it's an array
-        if (Array.isArray(pattern)) {
-             this.currentPatternSubject.next(pattern);
-             console.log(`[SongPlayer] Global pattern updated. Length: ${pattern.length}`);
-        } else {
-            console.warn('[SongPlayer] Attempted to set non-array value to currentPattern. Ignoring.');
-        }
+        this.globalState.setGlobalPattern(pattern);
     }
 
     get playMode(): PlayMode {
-        // Return the current value, not the observable
-        return this.playModeSubject.value;
+        return this.globalState.playMode;
     }
 
     set playMode(mode: PlayMode) {
-        // Basic validation: ensure it's a valid PlayMode enum value
-        if (Object.values(PlayMode).includes(mode)) {
-            this.playModeSubject.next(mode);
-            console.log(`[SongPlayer] Global PlayMode updated to: ${PlayMode[mode]}`);
-        } else {
-             console.warn(`[SongPlayer] Attempted to set invalid PlayMode value: ${mode}. Ignoring.`);
-        }
+        this.globalState.setPlayMode(mode);
     }
-    // <<< ---------------------------------------------- >>>
 
     get isPlaying(): boolean {
-        return this._isPlaying;
+        return this.globalState.isPlaying;
     }
 
     get currentPart(): Part | undefined {
-        return this._currentPart;
+        return this.globalState.currentPart;
     }
 
     get currentBlock(): Block | undefined {
-        return this._currentBlock;
+        return this.globalState.currentBlock;
     }
 
     get songRepetitions(): number {
-        return this._songRepetitions;
+        return this.globalState.songRepetitions;
     }
 
     set songRepetitions(value: number) {
-        this._songRepetitions = value > 0 ? value : 1;
+        this.globalState.setSongRepetitions(value);
     }
 
     stop(): void {
@@ -141,21 +121,21 @@ export class SongPlayer {
             this.currentStopListenerId = null;
         }
         VariableContext.resetAll();
-        this._isPlaying = false;
-        this._currentPart = undefined;
-        this._currentBlock = undefined;
-        this._beatCount = 0;
-        this._currentRepetition = 0;
+        
+        // Update global state
+        this.globalState.setIsPlaying(false);
+        this.globalState.clearPlaybackContext();
+        this.globalState.setBeatCount(0);
+        this.globalState.resetRepetition();
         this._metronome.next(0);
     }
 
     private _handleTransportStop = () => {
-         if (this._isPlaying) {
-             this._isPlaying = false;
-             this._currentPart = undefined;
-             this._currentBlock = undefined;
-             this._beatCount = 0; 
-             this._currentRepetition = 0;
+         if (this.globalState.isPlaying) {
+             this.globalState.setIsPlaying(false);
+             this.globalState.clearPlaybackContext();
+             this.globalState.setBeatCount(0);
+             this.globalState.resetRepetition();
              this._metronome.next(0);
              this.currentLoopId = null;
              this.currentStopListenerId = null;
@@ -283,29 +263,24 @@ export class SongPlayer {
 
     private _initializePlayback(song: Song): boolean {
         console.log("[SongPlayer] _initializePlayback called.");
-        if (this._isPlaying) {
+        if (this.globalState.isPlaying) {
             console.warn("[SongPlayer] Already playing. Stop previous playback first.");
-            // Consider stopping or returning false based on desired behavior
-            // this.stop();
             return false;
         }
 
-        // Remove the non-existent initialize call
-        // this.audioEngine.initialize();
+        // Update global state
+        this.globalState.setIsPlaying(true);
+        this.globalState.setCurrentSong(song);
+        this.globalState.resetRepetition();
+        this.globalState.setBeatCount(0);
 
-        this._isPlaying = true;
-        this._currentRepetition = 0; // Reset repetition count for new playback
-        this._beatCount = 0; // Reset beat count
-
-        // Correctly set BPM using AudioEngineService transport methods
-        // Assuming song.bpm exists and is the correct property name
+        // Set BPM and transport position
         const bpm = 120; // Use a default BPM as Song class does not have a bpm property
-        this.audioEngine.setTransportBpm(bpm); // Use the correct method
+        this.audioEngine.setTransportBpm(bpm);
         console.log(`[SongPlayer] _initializePlayback: BPM set to ${bpm}`);
-        this.audioEngine.setTransportPosition(0); // Also reset transport position
+        this.audioEngine.setTransportPosition(0);
 
-        // Hook up the stop listener *after* setting _isPlaying to true
-        // to avoid race conditions if stop is called immediately
+        // Hook up the stop listener
         if (!this.currentStopListenerId) {
              this.currentStopListenerId = this.audioEngine.onTransportStop(this._handleTransportStop);
         }
@@ -436,12 +411,12 @@ export class SongPlayer {
         console.log(`[SongPlayer] _schedulePlayback called with ${partSoundInfo.length} parts.`);
         if (partSoundInfo.length === 0) {
             console.log(`[SongPlayer] _schedulePlayback: No sound info to schedule, stopping.`); 
-            this._isPlaying = false;
+            this.globalState.setIsPlaying(false);
             return;
         }
         // Reset beat count and repetition for new playback
-        this._beatCount = 0;
-        this._currentRepetition = 0;
+        this.globalState.setBeatCount(0);
+        this.globalState.resetRepetition();
 
         const loopCallback = (time: number) => {
             this._loopTick(time, partSoundInfo);
@@ -464,7 +439,9 @@ export class SongPlayer {
     
     private _loopTick(time: number, partSoundInfo: PartSoundInfo[]): void {
         // console.log(`[SongPlayer] _loopTick executing @ time ${time}`); 
-        this._metronome.next(this._beatCount % this._beatsPerBar); // Use modulo for metronome display
+        const currentBeatCount = this.globalState.beatCount;
+        const beatsPerBar = this.globalState.getCurrentPlaybackState().beatsPerBar;
+        this._metronome.next(currentBeatCount % beatsPerBar); // Use modulo for metronome display
         let turnPlayed = false;
         const sixteenthNoteDuration = this.audioEngine.timeToSeconds('16n');
 
@@ -472,7 +449,7 @@ export class SongPlayer {
             turnPlayed = this._playTurn(psi, sixteenthNoteDuration, time) || turnPlayed;
         });
 
-        this._beatCount++; // Increment beat count unconditionally per tick
+        this.globalState.setBeatCount(currentBeatCount + 1); // Increment beat count unconditionally per tick
         
         const allPartsFinishedCurrentRep = partSoundInfo.every(psi => 
             psi.noteDataIndex >= psi.noteDatas.length && psi.pendingTurnsToPlay <= 0 // Use <= 0 for pending turns
@@ -480,10 +457,11 @@ export class SongPlayer {
         
         // --- Repetition Logic Reintegration --- 
         if (allPartsFinishedCurrentRep) {
-            if (this._currentRepetition < this._songRepetitions - 1) {
-                this._currentRepetition++;
-                this._beatCount = 0; // Reset beat count for new repetition
-                console.log(`[SongPlayer] Starting repetition ${this._currentRepetition + 1} / ${this._songRepetitions}`);
+            const repetitionState = this.globalState.getCurrentRepetitionState();
+            if (repetitionState.canAdvance) {
+                this.globalState.nextRepetition();
+                this.globalState.setBeatCount(0); // Reset beat count for new repetition
+                console.log(`[SongPlayer] Starting repetition ${repetitionState.currentRepetition + 2} / ${repetitionState.songRepetitions}`);
                 // Reset each part's state for the next repetition
                 partSoundInfo.forEach(psi => {
                     psi.noteDataIndex = 0;
@@ -606,6 +584,6 @@ export class SongPlayer {
 
     // Method to update the global default duration
     updateGlobalDefaultDuration(duration: NoteDuration): void {
-        this.globalDefaultDurationSubject.next(duration);
+        this.globalState.setGlobalDefaultDuration(duration);
     }
 }
