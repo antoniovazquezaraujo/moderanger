@@ -232,7 +232,7 @@ export class MelodyElementManagerService {
   }
 
   private updateSingleNote(note: SingleNote, changes: Partial<MusicElement>): SingleNote {
-    const valueChange = this.isPartialSingleNote(changes) ? { value: changes.value } : {};
+    const valueChange = this.isPartialSingleNote(changes) && changes.value !== undefined ? { value: changes.value } : {};
     const durationChange = changes.hasOwnProperty('duration') ? { duration: changes.duration } : {};
     return { ...note, ...valueChange, ...durationChange };
   }

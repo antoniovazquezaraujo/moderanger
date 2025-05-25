@@ -17,6 +17,13 @@ import { MelodyEditorComponent } from '../melody-editor/melody-editor.component'
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 import { MelodyGroupComponent } from '../melody-group/melody-group.component';
 
+// New specialized melody-editor components
+import { MelodyEditorV2Component } from '../melody-editor/melody-editor-v2.component';
+import { MelodyDisplayComponent } from '../melody-editor/melody-display/melody-display.component';
+import { MelodyKeyboardHandlerComponent } from '../melody-editor/melody-keyboard-handler/melody-keyboard-handler.component';
+import { MelodySelectionComponent } from '../melody-editor/melody-selection/melody-selection.component';
+import { MelodyOperationsComponent } from '../melody-editor/melody-operations/melody-operations.component';
+
 // Módulos de PrimeNG (y otros) necesarios para estos componentes
 import { TreeModule } from 'primeng/tree';
 import { ButtonModule } from 'primeng/button';
@@ -45,7 +52,13 @@ import { SharedModule } from 'primeng/api';
     MelodyOptionComponent,
     MelodyEditorComponent,
     MelodyNoteComponent,
-    MelodyGroupComponent
+    MelodyGroupComponent,
+    // New specialized melody-editor components
+    MelodyEditorV2Component,
+    MelodyDisplayComponent,
+    MelodyKeyboardHandlerComponent,
+    MelodySelectionComponent,
+    MelodyOperationsComponent
   ],
   imports: [
     CommonModule,
@@ -67,7 +80,8 @@ import { SharedModule } from 'primeng/api';
   exports: [
     // Exportar el componente principal que se usa fuera (en AppComponent)
     SongEditorComponent,
-    MelodyEditorComponent
+    MelodyEditorComponent,
+    MelodyEditorV2Component
   ]
 })
 export class EditorModule { } 

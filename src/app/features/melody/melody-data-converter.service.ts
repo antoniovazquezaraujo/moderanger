@@ -175,7 +175,8 @@ export class MelodyDataConverterService {
 
   private convertElementToNoteData(element: MusicElement, options: ConversionOptions): NoteData[] {
     try {
-      return NoteConverter.convertFromMusicElement(element);
+      const noteData = NoteConverter.toNoteData(element);
+      return [noteData];
     } catch (error) {
       console.warn(`[MelodyDataConverter] Error converting element ${element.id}:`, error);
       return [];
@@ -184,7 +185,7 @@ export class MelodyDataConverterService {
 
   private convertNoteDataToElement(noteData: NoteData, options: ConversionOptions): MusicElement | null {
     try {
-      return NoteConverter.convertToMusicElement(noteData);
+      return NoteConverter.fromNoteData(noteData);
     } catch (error) {
       console.warn('[MelodyDataConverter] Error converting NoteData:', error);
       return null;
