@@ -19,4 +19,26 @@ export {
 } from './player/note-scheduler.service';
 
 // 🎼 New Orchestrator (replaces old SongPlayer)
-export { SongPlayerV2Service, PlayerState } from './player/song-player-v2.service'; 
+export { SongPlayerV2Service, PlayerState } from './player/song-player-v2.service';
+
+// 🎵 NEW: Melody Editor Services (replaces MelodyEditorService)
+
+// 📝 Element Management
+export { MelodyElementManagerService, ElementOperation } from './melody/melody-element-manager.service';
+
+// 🎯 Selection Management  
+export { MelodySelectionService, SelectionState } from './melody/melody-selection.service';
+
+// 🔗 Group Management
+export { MelodyGroupManagerService, GroupOperation } from './melody/melody-group-manager.service';
+
+// 🔄 Data Conversion
+export { 
+  MelodyDataConverterService, 
+  ConversionOptions, 
+  StructureAnalysis, 
+  ValidationResult 
+} from './melody/melody-data-converter.service';
+
+// 🎼 New Melody Editor Orchestrator (replaces old MelodyEditorService)
+export { MelodyEditorV2Service, MelodyEditorState } from './melody/melody-editor-v2.service'; 

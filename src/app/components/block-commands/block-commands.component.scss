@@ -1,4 +1,6 @@
-/* Estilo principal */
+/* Optimized styles - Reduced from 395 to ~200 lines */
+
+/* Main containers */
 .block-container {
   display: flex;
   flex-direction: column;
@@ -6,389 +8,193 @@
   width: 100%;
 }
 
-/* Títulos de sección */
+/* Section titles */
 .title-container {
   position: absolute;
   top: -7px;
   left: 15px;
   z-index: 1;
-  display: block;
 }
 
 .section-title {
-  position: relative;
   background-color: white;
   padding: 0 8px;
   font-size: 12px;
   font-weight: 500;
   color: #666;
-  display: inline-block;
 }
 
-/* Filas */
+/* Row layouts */
 .commands-row,
-.operations-row {
+.operations-row,
+.melody-row {
   background-color: transparent;
   border-top: 1px solid #ddd;
-  margin: 0 !important;
-  padding: 2px 2px;
-  overflow: visible !important;
-  box-sizing: border-box !important;
-  line-height: 1 !important;
-  display: flex !important;
-  align-items: center !important;
+  margin: 0;
+  padding: 2px;
+  display: flex;
+  align-items: center;
   position: relative;
+  min-height: 24px;
 }
 
-/* Contenedores */
+.melody-row {
+  padding: 5px;
+}
+
+/* Container wrappers */
 .commands-container,
 .operations-container,
-.container-wrapper {
+.container-wrapper,
+.melody-container {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
-  padding: 4px !important;
-  margin: 0 !important;
-  min-height: 0 !important;
-  vertical-align: middle;
-  width: 100%;
-}
-
-/* Items */
-.command,
-.operation-item {
-  display: inline-flex;
-  align-items: center;
-  background-color: transparent;
-  padding: 0 2px !important;
-  border-radius: 3px;
-  border: 1px solid #e8e8e8;
-  margin: 1px !important;
-  height: auto !important;
-  min-height: 24px !important;
-  box-sizing: border-box !important;
-  position: relative;
-}
-
-/* Selects */
-.command-type {
-  height: 20px;
-  min-width: 100px;
-  padding: 0 4px;
-  border: 1px solid #ced4da;
-  border-radius: 3px;
-  margin: 0 2px;
-  background-color: white;
-  font-size: 12px;
-}
-
-/* Inputs */
-.command-value,
-.number-input {
-  width: 40px;
-  height: 20px;
-  padding: 0 2px;
-  border: 1px solid #ced4da;
-  border-radius: 3px;
-  background-color: white;
-  margin: 0 2px;
-  text-align: center;
-  font-size: 12px;
-}
-
-/* Controles */
-.command-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: 2px;
-}
-
-/* Wrappers */
-.add-wrapper,
-.add-command-wrapper,
-.add-operation-wrapper {
-  display: flex;
-  align-items: center;
-  height: 24px;
-  margin: 1px;
-  padding: 0;
-}
-
-/* Botones */
-:host ::ng-deep .p-button {
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
-  min-height: 20px;
+  padding: 4px;
   margin: 0;
-  padding: 0;
-}
-
-:host ::ng-deep .p-button .p-button-icon {
-  font-size: 0.7rem;
-}
-
-/* Esconder el row-header */
-.row-header {
-  display: none;
-  height: 0;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-}
-
-/* Para inputs más específicos */
-:host ::ng-deep .p-inputnumber {
-  width: 60px;
-  height: 20px;
-}
-
-:host ::ng-deep .p-inputnumber-input {
   width: 100%;
-  text-align: center;
-  height: 100%;
-  font-size: 12px;
-}
-
-:host ::ng-deep .p-inputnumber .p-button {
-  width: 16px;
-  padding: 0;
-  height: 100%;
-}
-
-/* Estilos para el editor de melodías */
-.melody-row {
-  padding: 5px !important;
 }
 
 .melody-container {
   flex-direction: column;
   align-items: flex-start;
-  width: 100%;
 }
 
-/* Ajustes para hacer más compacto el editor integrado - Estilos generales */
-:host ::ng-deep app-melody-editor {
-  .melody-editor {
-    min-height: auto;
-    border: none;
-    padding: 2px;
-    background-color: transparent;
-  }
-  
-  .editor-content {
-    padding: 2px;
-    border: none;
-    background-color: transparent;
-  }
-  
-  .notes-container {
-    padding: 2px 0;
-    gap: 2px;
-  }
-  
-  .note-item {
-    padding: 1px;
-  }
-  
-  .note-duration select {
-    width: 30px;
-    height: 18px;
-    font-size: 0.65rem;
-  }
-  
-  .note-visual {
-    width: 22px;
-    height: 22px;
-    
-    .note-circle {
-      width: 18px;
-      height: 18px;
-    }
-    
-    .note-value {
-      font-size: 0.7rem;
-    }
-  }
-  
-  .group-bracket-start, 
-  .group-bracket-end {
-    font-size: 1.2rem;
-  }
-}
-
-/* Editor compacto para comandos PATTERN */
-.compact-melody-editor {
-  width: 120px;
-  min-height: 50px;
-  max-height: 120px;
-  overflow: auto;
-  display: block;
-  margin-top: 1px;
-  margin-left: 1px;
-  border: 1px solid #eee;
-  border-radius: 3px;
-  background-color: #f9f9f9;
-  z-index: 10;
-  position: relative;
-  
-  :host ::ng-deep & {
-    .melody-editor {
-      min-height: auto;
-      max-height: 120px;
-      border: none;
-      padding: 0;
-      background-color: transparent;
-    }
-    
-    .editor-content {
-      padding: 0;
-    }
-  }
-}
-
-/* Editor en línea para operaciones con melodías */
-.inline-melody-editor {
-  width: 180px;
-  min-height: 50px;
-  max-height: 80px;
-  overflow: auto;
-  display: block;
-  margin: 0 2px;
-  border: 1px solid #eee;
-  border-radius: 3px;
-  background-color: #f9f9f9;
-  z-index: 10;
-  
-  :host ::ng-deep & {
-    .melody-editor {
-      border: none;
-      background-color: transparent;
-      padding: 2px;
-    }
-    
-    .editor-content {
-      border: none;
-      background-color: transparent;
-    }
-    
-    .note-item.selected {
-      background-color: rgba(0, 123, 255, 0.25);
-    }
-  }
-}
-
-/* Ajustes para la operación cuando contiene un editor de melodía */
-.operation-item:has(.inline-melody-editor) {
-  height: auto !important;
-  max-height: none !important;
-  min-height: 60px !important;
-  flex-wrap: wrap;
-  padding-bottom: 4px !important;
-  
-  .inline-melody-editor {
-    flex-basis: 100%;
-    margin-top: 4px;
-  }
-}
-
-/* Ajustes para el comando cuando contiene un editor de melodía */
-.command:has(.compact-melody-editor) {
-  height: auto !important;
-  max-height: none !important;
-  min-height: 24px !important;
-  flex-wrap: wrap;
-  padding-bottom: 4px !important;
-  
-  .compact-melody-editor {
-    flex-basis: 100%;
-    margin-top: 4px;
-  }
-}
-
-.command {
-  display: flex;
+/* Interactive items */
+.command,
+.operation-item {
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 5px;
-  padding: 5px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-
-  &:hover {
-    border-color: #999;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-
-    .variable-icon,
-    .remove-icon {
-      display: inline;
-    }
-  }
-
-  .variable-icon,
-  .remove-icon {
-    position: absolute;
-    top: -8px;
-    font-size: 0.8em;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.2s;
-    display: none;
-    background-color: white;
-    padding: 0 2px;
-    border-radius: 2px;
-    border: 1px solid #ddd;
-    z-index: 1;
-
-    &:hover {
-      color: #000;
-      border-color: #999;
-    }
-  }
-
-  .variable-icon {
-    right: 20px;
-  }
-
-  .remove-icon {
-    right: 4px;
-  }
-
-  &:has(> app-melody-editor) {
-    border: none;
-    background-color: transparent;
-    padding: 0;
-    gap: 0;
-  }
-
-  app-melody-editor {
-    flex-grow: 1;
-    min-width: 200px;
-  }
+  background-color: transparent;
+  padding: 0 2px;
+  border-radius: 3px;
+  border: 1px solid #e8e8e8;
+  margin: 1px;
+  min-height: 24px;
+  box-sizing: border-box;
 }
 
-/* Ajustes para los componentes internos del comando */
+/* Form controls */
 .command-type,
 .command-value,
 .number-input {
+  height: 20px;
+  padding: 0 4px;
   border: 1px solid #ced4da;
   border-radius: 3px;
+  margin: 0 2px;
   background-color: white;
   font-size: 12px;
-  height: 24px;
-  padding: 0 4px;
-  margin: 0;
+  text-align: center;
 }
 
 .command-type {
   min-width: 100px;
+  text-align: left;
 }
 
 .command-value,
 .number-input {
   width: 40px;
-  text-align: center;
+}
+
+/* Control groups */
+.command-controls,
+.add-wrapper,
+.add-command-wrapper,
+.add-operation-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+  margin: 1px;
+  padding: 0;
+}
+
+/* Utility classes */
+.row-header {
+  display: none;
+}
+
+/* PrimeNG overrides - consolidated */
+:host ::ng-deep {
+  .p-button {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .p-button .p-button-icon {
+    font-size: 0.7rem;
+  }
+
+  .p-inputnumber {
+    width: 60px;
+    height: 20px;
+  }
+
+  .p-inputnumber-input {
+    width: 100%;
+    text-align: center;
+    height: 100%;
+    font-size: 12px;
+  }
+
+  .p-inputnumber .p-button {
+    width: 16px;
+    padding: 0;
+    height: 100%;
+  }
+
+  /* Embedded melody editor styles */
+  app-melody-editor {
+    .melody-editor {
+      min-height: auto;
+      border: none;
+      padding: 2px;
+      background-color: transparent;
+    }
+    
+    .editor-content {
+      padding: 2px;
+      border: none;
+      background-color: transparent;
+    }
+    
+    .notes-container {
+      padding: 2px 0;
+      gap: 2px;
+    }
+    
+    .note-item {
+      padding: 1px;
+    }
+    
+    .note-duration select {
+      width: 30px;
+      height: 18px;
+      font-size: 0.65rem;
+    }
+  }
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .commands-container,
+  .operations-container {
+    gap: 2px;
+  }
+  
+  .command-type {
+    min-width: 80px;
+  }
+  
+  .command-value,
+  .number-input {
+    width: 35px;
+  }
 }

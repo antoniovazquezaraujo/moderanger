@@ -28,29 +28,30 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             cursor: pointer;
             background-color: white;
             min-width: 40px;
-            
-            &:hover {
-                background-color: #f0f0f0;
-            }
-            
-            &.selected {
-                border-color: #2196F3;
-                background-color: #E3F2FD;
-            }
+        }
+        
+        .note-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .note-item.selected {
+            border-color: #2196F3;
+            background-color: #E3F2FD;
         }
         
         .note-visual {
             cursor: ns-resize;
             padding: 0;
             margin-right: 4px;
-            
-            .note-value {
-               font-size: 1.2em; 
-               font-weight: bold;
-            }
-            .silence {
-                color: #666;
-            }
+        }
+        
+        .note-visual .note-value {
+           font-size: 1.2em; 
+           font-weight: bold;
+        }
+        
+        .note-visual .silence {
+            color: #666;
         }
         
         .note-duration {
