@@ -198,3 +198,11 @@
     width: 35px;
   }
 }
+
+/* Command action buttons */
+.command-actions {
+  display: flex;
+  gap: 2px;
+  margin-left: 4px;
+  align-items: center;
+}

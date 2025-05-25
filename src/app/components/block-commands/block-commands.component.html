@@ -6,9 +6,6 @@
         </div>
         <div class="container-wrapper commands-container">
             <div *ngFor="let command of block.commands" class="command">
-                <sup class="variable-icon" *ngIf="command.type !== commandTypes.PATTERN" (click)="toggleVariableMode(command, $event)">$</sup>
-                <sup class="remove-icon" (click)="removeCommand(command)">×</sup>
-                
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
                     <optgroup label="">
                         <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
@@ -85,6 +82,21 @@
                         </ng-template>
                     </ng-container>
                 </ng-container>
+                
+                <!-- Command Action Icons - Positioned at the end -->
+                <div class="command-actions">
+                    <p-button *ngIf="command.type !== commandTypes.PATTERN" 
+                              icon="pi pi-dollar"
+                              (click)="showVariableSelector(command, $event)"
+                              [pTooltip]="command.isVariable ? 'Convert to direct value (Currently using: ' + (command.getVariableName() || 'none') + ')' : 'Convert to variable'"
+                              tooltipPosition="top">
+                    </p-button>
+                    <p-button icon="pi pi-times" 
+                              (click)="removeCommand(command)"
+                              pTooltip="Remove command"
+                              tooltipPosition="top">
+                    </p-button>
+                </div>
             </div>
             <div class="add-wrapper">
                 <p-button class="add-button" (click)="addElement('command')" icon="pi pi-plus" pTooltip="Add Command" tooltipPosition="top"></p-button>

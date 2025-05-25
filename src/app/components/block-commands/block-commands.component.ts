@@ -247,6 +247,41 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         this.cdr.detectChanges();
     }
 
+    /**
+     * New improved method for variable selection with proper user choice
+     */
+    showVariableSelector(command: Command, event: Event): void {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (command.type === CommandType.PATTERN) {
+            return;
+        }
+        
+        if (command.isVariable) {
+            // If already a variable, convert back to direct value
+            command.isVariable = false;
+            command.setValue(this.getDefaultValueForCommandType(command.type));
+            console.log(`[BlockCommands] Converted command ${command.type} from variable to direct value`);
+        } else {
+            // Convert to variable mode and pre-select the first compatible variable
+            this.updateAvailableVariables();
+            const compatibleVars = this.getFilteredVariables(command);
+            
+            if (compatibleVars.length > 0) {
+                command.isVariable = true;
+                command.setVariable(compatibleVars[0].value); // Pre-select first compatible variable
+                console.log(`[BlockCommands] Converted command ${command.type} to variable mode. Pre-selected: ${compatibleVars[0].value}`);
+            } else {
+                console.warn(`[BlockCommands] No compatible variables found for command type ${command.type}`);
+                alert('No compatible variables available for this command type. Please create variables first.');
+                return;
+            }
+        }
+        
+        this.cdr.detectChanges();
+    }
+
     handleValueInput(event: any, command: Command): void {
         try {
             let valueToSet: string | number | null;
@@ -273,11 +308,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    getSelectedValue(command: Command): string | null {
+    getSelectedValue(command: Command): string {
         if (command.isVariable) {
-            return command.getVariableName();
+            return command.getVariableName() || '';
         }
-        return null; 
+        return ''; 
     }
 
     getFilteredVariables(command: Command): VariableOption[] {
