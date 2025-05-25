@@ -24,34 +24,34 @@
   color: #666;
 }
 
-/* Row layouts */
+/* Row layouts - MÁS COMPACTO */
 .commands-row,
 .operations-row,
 .melody-row {
   background-color: transparent;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #eee;
   margin: 0;
-  padding: 2px;
+  padding: 1px;
   display: flex;
   align-items: center;
   position: relative;
-  min-height: 24px;
+  min-height: 20px;
 }
 
 .melody-row {
   padding: 5px;
 }
 
-/* Container wrappers */
+/* Container wrappers - MÁS COMPACTO */
 .commands-container,
 .operations-container,
 .container-wrapper,
 .melody-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 2px;
   align-items: center;
-  padding: 4px;
+  padding: 2px;
   margin: 0;
   width: 100%;
 }
@@ -75,28 +75,28 @@
   box-sizing: border-box;
 }
 
-/* Form controls */
+/* Form controls - MÁS PEQUEÑOS POSIBLE */
 .command-type,
 .command-value,
 .number-input {
-  height: 20px;
-  padding: 0 4px;
+  height: 18px;
+  padding: 0 2px;
   border: 1px solid #ced4da;
-  border-radius: 3px;
-  margin: 0 2px;
+  border-radius: 2px;
+  margin: 0 1px;
   background-color: white;
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
 }
 
 .command-type {
-  min-width: 100px;
+  min-width: 80px;
   text-align: left;
 }
 
 .command-value,
 .number-input {
-  width: 40px;
+  width: 32px;
 }
 
 /* Control groups */
@@ -119,33 +119,34 @@
 
 /* PrimeNG overrides - consolidated */
 :host ::ng-deep {
+  /* Botones MÁS PEQUEÑOS POSIBLE */
   .p-button {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    min-height: 20px;
-    margin: 0;
-    padding: 0;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    margin: 0 1px !important;
+    padding: 0 !important;
   }
 
   .p-button .p-button-icon {
-    font-size: 0.7rem;
+    font-size: 0.65rem !important;
   }
 
   .p-inputnumber {
-    width: 60px;
-    height: 20px;
+    width: 50px;
+    height: 18px;
   }
 
   .p-inputnumber-input {
     width: 100%;
     text-align: center;
     height: 100%;
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .p-inputnumber .p-button {
-    width: 16px;
+    width: 14px;
     padding: 0;
     height: 100%;
   }
