@@ -8,6 +8,7 @@ import { InstrumentType, AudioEngineService } from "../services/audio-engine.ser
 import { PlayState } from "./play.state";
 import { BehaviorSubject, Subject } from "rxjs";
 import { OctavedGrade } from "./octaved-grade";
+import { NoteGenerationUnifiedService } from "../shared/services/note-generation-unified.service";
 
 // Define missing constants (assuming default values, adjust if needed)
 const DEFAULT_BPM = 120;
@@ -36,6 +37,9 @@ export class Player {
     instrumentType: InstrumentType;
     instrumentId: InstrumentId;
     currentPattern: NoteData[] | null = null;
+
+    // Unified note generation service for consistent note creation
+    private noteGenUnified = new NoteGenerationUnifiedService();
 
     private _playState = PlayState.STOPPED;
     private _playProgress = 0;
@@ -145,7 +149,10 @@ export class Player {
         let midiNotes: NoteData[] = grades.map(grade => {
             const octavedGrade = new OctavedGrade(scale, grade, this.octave);
             const midiNote = octavedGrade.toNote() + this.tonality;
-            return new NoteData({ type: 'note', note: midiNote });
+            
+            // Use unified service for consistent note creation
+            const noteResult = this.noteGenUnified.createNoteNoteData(midiNote);
+            return noteResult.success && noteResult.data ? noteResult.data : new NoteData({ type: 'note', note: midiNote });
         });
         
         console.log(`[Player] getSelectedNotes for grade ${baseGrade}: Density=${this.density}, Gap=${this.gap}, Inversion=${this.inversion}, Octave=${this.octave}, Tonality=${this.tonality} -> MIDI Notes:`, midiNotes.map(n=>n.note));

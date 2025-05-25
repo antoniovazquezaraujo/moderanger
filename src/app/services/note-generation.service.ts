@@ -11,6 +11,11 @@ import { VariableContext } from '../model/variable.context';
 // Import the NoteData parser directly
 import { parseBlockNotes } from '../model/ohm.parser';
 import * as Tone from 'tone'; // Import Tone
+// Import unified note generation service
+import { 
+  NoteGenerationUnifiedService, 
+  NoteDataCreationOptions 
+} from '../shared/services/note-generation-unified.service';
 
 // SemanticNoteInfo removed
 
@@ -19,7 +24,7 @@ import * as Tone from 'tone'; // Import Tone
 })
 export class NoteGenerationService {
 
-  constructor() { }
+  constructor(private noteGenUnified: NoteGenerationUnifiedService) { }
 
   // <<< Reintroduce propagateGroupDurations >>>
   private propagateGroupDurations(noteData: NoteData, parentDuration?: string): void {
@@ -71,8 +76,14 @@ export class NoteGenerationService {
       }
     } else {
       // --- If notes string is empty, create a default silence/rest --- 
-      console.log(`[NoteGenSvc] No notes string to parse. Creating default rest.`);
-      rootNoteDatas = [new NoteData({ type: 'rest', duration: '16n' })]; // Default duration 16n
+      console.log(`[NoteGenSvc] No notes string to parse. Creating default rest with unified service.`);
+      const restResult = this.noteGenUnified.createRestNoteData('16n');
+      if (restResult.success && restResult.data) {
+        rootNoteDatas = [restResult.data];
+      } else {
+        console.error(`[NoteGenSvc] Failed to create default rest: ${restResult.error}`);
+        rootNoteDatas = [];
+      }
       // ---------------------------------------------------------------
     }
 
@@ -118,7 +129,10 @@ export class NoteGenerationService {
                       const currentScale = Scale.getScaleByName(scaleName);
                       if (!currentScale) {
                           console.error(`[NoteGenSvc] PATTERN Error: Invalid scale ${scaleName}. Skipping pattern application.`);
-                          results.push(new NoteData({ type: 'rest', duration })); // Push a rest on error
+                          const errorRestResult = this.noteGenUnified.createRestNoteData(duration);
+                          if (errorRestResult.success && errorRestResult.data) {
+                            results.push(errorRestResult.data);
+                          }
                           break; // Exit case 'note'
                       }
 
@@ -182,28 +196,51 @@ export class NoteGenerationService {
                               // Use the derived NoteData directly if playing chords
                               // Ensure they have the correct final duration
                               derivedNoteDatas.forEach(nd => nd.duration = duration);
-                              results.push(new NoteData({ type: 'chord', duration, noteDatas: derivedNoteDatas }));
+                              const chordResult = this.noteGenUnified.createNoteData({ 
+                                type: 'chord', 
+                                duration, 
+                                noteDatas: derivedNoteDatas 
+                              });
+                              if (chordResult.success && chordResult.data) {
+                                results.push(chordResult.data);
+                              }
                           } else { // Other Arpeggiate modes
                               const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
                               const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
                               if (arpeggioNoteDatas.length > 0) {
-                                  results.push(new NoteData({ type: 'arpeggio', duration, noteDatas: arpeggioNoteDatas }));
+                                  const arpeggioResult = this.noteGenUnified.createNoteData({ 
+                                    type: 'arpeggio', 
+                                    duration, 
+                                    noteDatas: arpeggioNoteDatas 
+                                  });
+                                  if (arpeggioResult.success && arpeggioResult.data) {
+                                    results.push(arpeggioResult.data);
+                                  }
                               }
                           }
                       } else {
                          // If getSelectedNotes returns empty even with a baseGrade
-                         results.push(new NoteData({ type: 'rest', duration }));
+                         const emptyRestResult = this.noteGenUnified.createRestNoteData(duration);
+                         if (emptyRestResult.success && emptyRestResult.data) {
+                           results.push(emptyRestResult.data);
+                         }
                       }
                   }
               } else {
                   // If baseGrade is undefined (e.g., explicit rest in input)
-                  results.push(new NoteData({ type: 'rest', duration }));
+                  const undefinedRestResult = this.noteGenUnified.createRestNoteData(duration);
+                  if (undefinedRestResult.success && undefinedRestResult.data) {
+                    results.push(undefinedRestResult.data);
+                  }
               }
               break;
           case 'rest':
           case 'silence':
                // Rests/Silences generally shouldn't trigger patterns. Pass them through.
-              results.push(new NoteData({ type: 'rest', duration }));
+               const passRestResult = this.noteGenUnified.createRestNoteData(duration);
+               if (passRestResult.success && passRestResult.data) {
+                 results.push(passRestResult.data);
+               }
               break;
           case 'chord': 
           case 'arpeggio': 

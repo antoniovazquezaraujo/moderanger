@@ -1,5 +1,6 @@
 import { NoteData } from "./note";
 import { Scale } from "./scale";
+import { NoteGenerationUnifiedService } from "../shared/services/note-generation-unified.service";
 
 /**
  * Representa una nota musical dentro de una escala con su grado y octava.
@@ -15,6 +16,8 @@ export class OctavedGrade {
     scale: Scale;
     /** La duración de la nota (ej: "1/4", "1/8", etc.) */
     duration: string;
+    /** Servicio unificado para creación consistente de notas */
+    private noteGenUnified = new NoteGenerationUnifiedService();
 
     /**
      * Crea una nueva instancia de OctavedGrade
@@ -120,6 +123,16 @@ export class OctavedGrade {
      * @returns Un objeto NoteData con la información de la nota
      */
     tonoteData() {
-        return new NoteData({ duration: this.duration, note: this.toNote() });
+        const midiNote = this.toNote();
+        
+        // Use unified service for consistent note creation
+        const noteResult = this.noteGenUnified.createNoteData({
+            type: 'note',
+            note: midiNote,
+            duration: this.duration,
+            validateOutput: false // Skip validation for performance in MIDI conversion
+        });
+        
+        return noteResult.success && noteResult.data ? noteResult.data : new NoteData({ duration: this.duration, note: midiNote });
     }
 } 

@@ -5,6 +5,7 @@ import { PlayMode } from '../../model/play.mode';
 import { Scale, ScaleTypes } from '../../model/scale';
 import { OctavedGrade } from '../../model/octaved-grade';
 import * as Tone from 'tone';
+import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
 
 export interface PatternApplicationResult {
   success: boolean;
@@ -18,6 +19,8 @@ export interface PatternApplicationResult {
   providedIn: 'root'
 })
 export class NotePatternProcessorService {
+
+  private noteGenUnified = new NoteGenerationUnifiedService();
 
   constructor() {
     console.log('[NotePatternProcessor] Service initialized');
@@ -244,9 +247,13 @@ export class NotePatternProcessorService {
   }
 
   private createErrorResult(duration: string): PatternApplicationResult {
+    // Use unified service for consistent error result creation
+    const restResult = this.noteGenUnified.createRestNoteData(duration);
+    const restNote = restResult.success && restResult.data ? restResult.data : new NoteData({ type: 'rest', duration });
+    
     return {
       success: false,
-      notes: [new NoteData({ type: 'rest', duration })],
+      notes: [restNote],
       originalDuration: this.calculateDurationSeconds(duration),
       patternDuration: 0,
       scaleFactor: 1

@@ -1,9 +1,14 @@
 import { NoteData } from './note';
 import * as ohm from 'ohm-js';
+// Import unified note generation service for consistent note creation
+import { NoteGenerationUnifiedService } from '../shared/services/note-generation-unified.service';
 // Remove OctavedGrade import if no longer created here
 // import { OctavedGrade } from './octaved-grade';
 
 type Node = ohm.Node;
+
+// Create unified note generation service instance for consistent note creation
+const noteGenUnified = new NoteGenerationUnifiedService();
 
 // Define an intermediate type for semantic results
 // interface SemanticNoteInfo {
@@ -55,7 +60,9 @@ export const ModeRangerSemantics = {
   },
 
   VarRef(_dollar: Node, name: Node) {
-    return new NoteData({ type: 'note', duration: '4t', note: 0 });
+    // Use unified service for consistent note creation in grammar parsing
+    const noteResult = noteGenUnified.createNoteNoteData(0, '4t');
+    return noteResult.success && noteResult.data ? noteResult.data : new NoteData({ type: 'note', duration: '4t', note: 0 });
   },
 
   nonemptyListOf(first: Node, _sep: Node, rest: Node) {
@@ -70,7 +77,16 @@ export const ModeRangerSemantics = {
     const note = num['eval']();
     const noteDuration = duration.numChildren > 0 ? duration.sourceString.slice(0, -1) : undefined;
     if (!note) return null;
-    return new NoteData({
+    
+    // Use unified service for consistent note creation
+    const noteResult = noteGenUnified.createNoteData({
+      type: note.type,
+      note: note.note,
+      duration: noteDuration,
+      validateOutput: false // Skip validation in grammar parsing for performance
+    });
+    
+    return noteResult.success && noteResult.data ? noteResult.data : new NoteData({
       type: note.type,
       note: note.note,
       duration: noteDuration
@@ -80,11 +96,20 @@ export const ModeRangerSemantics = {
   NoteGroup(duration: Node, _open: Node, _sp1: Node, notes: Node, _sp2: Node, _close: Node) {
     const groupDuration = duration.sourceString.slice(0, -1);
     const childrenNotes = notes['eval']();
+    const children = Array.isArray(childrenNotes) ? childrenNotes.filter(n => n !== null) : (childrenNotes ? [childrenNotes] : []);
     
-    return new NoteData({
+    // Use unified service for consistent group creation
+    const groupResult = noteGenUnified.createNoteData({
         type: 'group',
         duration: groupDuration,
-        children: Array.isArray(childrenNotes) ? childrenNotes.filter(n => n !== null) : (childrenNotes ? [childrenNotes] : []),
+        children: children,
+        validateOutput: false // Skip validation in grammar parsing for performance
+    });
+    
+    return groupResult.success && groupResult.data ? groupResult.data : new NoteData({
+        type: 'group',
+        duration: groupDuration,
+        children: children,
         note: undefined
     });
   },
@@ -130,20 +155,29 @@ export const ModeRangerSemantics = {
   },
 
   ScaleOperation(_scale: Node, _space: Node, type: Node) {
-    return new NoteData({ type: 'note', note: 0 });
+    // Use unified service for consistent note creation
+    const noteResult = noteGenUnified.createNoteNoteData(0);
+    return noteResult.success && noteResult.data ? noteResult.data : new NoteData({ type: 'note', note: 0 });
   },
 
   number(minus: Node, digits: Node): NoteData {
     const value = parseInt(digits.sourceString);
-    return new NoteData({
+    const finalValue = minus.sourceString ? -value : value;
+    
+    // Use unified service for consistent note creation
+    const noteResult = noteGenUnified.createNoteNoteData(finalValue);
+    return noteResult.success && noteResult.data ? noteResult.data : new NoteData({
       type: 'note',
-      note: minus.sourceString ? -value : value
+      note: finalValue
     });
   },
 
   _terminal(this: { sourceString: string }): NoteData | null {
-    return this.sourceString === 's'
-      ? new NoteData({ type: 'rest', duration: '4t', note: undefined })
-      : null;
+    if (this.sourceString === 's') {
+      // Use unified service for consistent rest creation
+      const restResult = noteGenUnified.createRestNoteData('4t');
+      return restResult.success && restResult.data ? restResult.data : new NoteData({ type: 'rest', duration: '4t', note: undefined });
+    }
+    return null;
   }
 }; 

@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { MusicElement, SingleNote, GenericGroup, NoteDuration } from '../../model/melody';
-import { v4 as uuidv4 } from 'uuid';
+import { 
+  NoteGenerationUnifiedService, 
+  NoteCreationOptions,
+  GroupCreationOptions,
+  NoteCreationResult 
+} from './note-generation-unified.service';
 import { 
   isSingleNote, 
   isGenericGroup, 
@@ -70,6 +75,8 @@ export interface ElementValidationResult {
 })
 export class MusicElementOperationsService {
 
+  constructor(private noteGenUnified: NoteGenerationUnifiedService) {}
+
   // ============= SEARCH OPERATIONS =============
 
   /**
@@ -124,33 +131,35 @@ export class MusicElementOperationsService {
    * Universal note creation - replaces all addNote implementations
    */
   addNote(elements: MusicElement[], noteData: Partial<SingleNote>, duration: NoteDuration): OperationResult<{ elements: MusicElement[]; noteId: string }> {
-    console.log(`[MusicElementOps] Adding note with duration: ${duration}`);
+    console.log(`[MusicElementOps] Adding note with duration: ${duration} - USING UNIFIED GENERATION`);
 
     try {
-      const noteId = uuidv4();
-      const newNote: SingleNote = {
-        id: noteId,
-        type: 'note',
-        duration,
+      // Use unified note generation service
+      const noteCreationOptions: NoteCreationOptions = {
         value: noteData.value ?? 0,
-        ...noteData
+        duration,
+        validateOutput: true,
+        includeMetadata: false
       };
 
-      // Validate the new note
-      const validation = this.validateElement(newNote);
-      if (!validation.isValid) {
+      const noteResult = this.noteGenUnified.createSingleNote(noteCreationOptions);
+      
+      if (!noteResult.success || !noteResult.data) {
         return {
           success: false,
-          error: `Invalid note data: ${validation.issues.join(', ')}`
+          error: `Failed to create note: ${noteResult.error}`
         };
       }
 
+      const newNote = noteResult.data;
       const updatedElements = [...elements, newNote];
+
+      console.log(`[MusicElementOps] Note created successfully with unified service: ${newNote.id}`);
 
       return {
         success: true,
-        data: { elements: updatedElements, noteId },
-        elementId: noteId
+        data: { elements: updatedElements, noteId: newNote.id },
+        elementId: newNote.id
       };
     } catch (error) {
       return {
@@ -164,7 +173,7 @@ export class MusicElementOperationsService {
    * Add note after specific element
    */
   addNoteAfter(elements: MusicElement[], targetId: string, noteData: Partial<SingleNote>, duration: NoteDuration): OperationResult<{ elements: MusicElement[]; noteId: string }> {
-    console.log(`[MusicElementOps] Adding note after: ${targetId}`);
+    console.log(`[MusicElementOps] Adding note after: ${targetId} - USING UNIFIED GENERATION`);
 
     const searchResult = this.findElement(targetId, elements);
     if (!searchResult.element) {
@@ -175,21 +184,31 @@ export class MusicElementOperationsService {
     }
 
     try {
-      const noteId = uuidv4();
-      const newNote: SingleNote = {
-        id: noteId,
-        type: 'note',
-        duration,
+      // Use unified note generation service
+      const noteCreationOptions: NoteCreationOptions = {
         value: noteData.value ?? 0,
-        ...noteData
+        duration,
+        validateOutput: true
       };
 
+      const noteResult = this.noteGenUnified.createSingleNote(noteCreationOptions);
+      
+      if (!noteResult.success || !noteResult.data) {
+        return {
+          success: false,
+          error: `Failed to create note: ${noteResult.error}`
+        };
+      }
+
+      const newNote = noteResult.data;
       const updatedElements = this.insertElementAfter(elements, targetId, newNote);
+
+      console.log(`[MusicElementOps] Note created after ${targetId} with unified service: ${newNote.id}`);
 
       return {
         success: true,
-        data: { elements: updatedElements, noteId },
-        elementId: noteId
+        data: { elements: updatedElements, noteId: newNote.id },
+        elementId: newNote.id
       };
     } catch (error) {
       return {
@@ -203,7 +222,7 @@ export class MusicElementOperationsService {
    * Add note to group
    */
   addNoteToGroup(elements: MusicElement[], groupId: string, noteData: Partial<SingleNote>, duration: NoteDuration): OperationResult<{ elements: MusicElement[]; noteId: string }> {
-    console.log(`[MusicElementOps] Adding note to group: ${groupId}`);
+    console.log(`[MusicElementOps] Adding note to group: ${groupId} - USING UNIFIED GENERATION`);
 
     const searchResult = this.findElement(groupId, elements);
     if (!searchResult.element || !isGenericGroup(searchResult.element)) {
@@ -214,24 +233,34 @@ export class MusicElementOperationsService {
     }
 
     try {
-      const noteId = uuidv4();
-      const newNote: SingleNote = {
-        id: noteId,
-        type: 'note',
-        duration,
+      // Use unified note generation service
+      const noteCreationOptions: NoteCreationOptions = {
         value: noteData.value ?? 0,
-        ...noteData
+        duration,
+        validateOutput: true
       };
 
+      const noteResult = this.noteGenUnified.createSingleNote(noteCreationOptions);
+      
+      if (!noteResult.success || !noteResult.data) {
+        return {
+          success: false,
+          error: `Failed to create note: ${noteResult.error}`
+        };
+      }
+
+      const newNote = noteResult.data;
       const group = searchResult.element as GenericGroup;
       const currentChildren = getChildren(group) || [];
       const updatedGroup = withUpdatedChildren(group, [...currentChildren, newNote]);
       const updatedElements = this.updateElementInList(elements, groupId, updatedGroup);
 
+      console.log(`[MusicElementOps] Note created in group ${groupId} with unified service: ${newNote.id}`);
+
       return {
         success: true,
-        data: { elements: updatedElements, noteId },
-        elementId: noteId
+        data: { elements: updatedElements, noteId: newNote.id },
+        elementId: newNote.id
       };
     } catch (error) {
       return {
