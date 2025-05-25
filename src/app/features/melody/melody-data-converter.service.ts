@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import { MusicElement, NoteConverter } from '../../model/melody';
 import { NoteData } from '../../model/note';
+import { 
+  isGenericGroup, 
+  isCompositeNote, 
+  isSingleNote,
+  getChildren, 
+  walkElements,
+  validateElements as validateElementStructure,
+  countElementsByType 
+} from '../../model/music-element-utils';
 
 export interface ConversionOptions {
   includeMetadata?: boolean;
@@ -204,7 +213,7 @@ export class MelodyDataConverterService {
   }
 
   private hasChildren(element: MusicElement): boolean {
-    return element.type === 'group' || element.type === 'chord' || element.type === 'arpeggio';
+    return isGenericGroup(element) || isCompositeNote(element);
   }
 
   private processImportedElements(elements: any[], options: ConversionOptions): MusicElement[] {
@@ -222,21 +231,15 @@ export class MelodyDataConverterService {
   }
 
   private flattenElementRecursively(element: MusicElement, result: MusicElement[]): void {
-    if (element.type === 'group') {
-      const group = element as any; // GenericGroup type
-      if (group.children) {
-        for (const child of group.children) {
-          this.flattenElementRecursively(child, result);
-        }
-      }
-    } else if (element.type === 'chord' || element.type === 'arpeggio') {
-      const composite = element as any; // CompositeNote type
-      if (composite.notes) {
-        for (const note of composite.notes) {
-          this.flattenElementRecursively(note, result);
-        }
+    const children = getChildren(element);
+    
+    if (children.length > 0) {
+      // Element has children - recurse into them
+      for (const child of children) {
+        this.flattenElementRecursively(child, result);
       }
     } else {
+      // Leaf element - add to result
       result.push(element);
     }
   }
@@ -247,34 +250,19 @@ export class MelodyDataConverterService {
     for (const element of elements) {
       analysis.totalElements++;
       
+      // Count by type
       switch (element.type) {
-        case 'note':
-          analysis.noteCount++;
-          break;
-        case 'rest':
-          analysis.restCount++;
-          break;
-        case 'group':
-          analysis.groupCount++;
-          const group = element as any;
-          if (group.children) {
-            this.analyzeElementsRecursively(group.children, analysis, nestingLevel + 1);
-          }
-          break;
-        case 'chord':
-          analysis.chordCount++;
-          const chord = element as any;
-          if (chord.notes) {
-            this.analyzeElementsRecursively(chord.notes, analysis, nestingLevel + 1);
-          }
-          break;
-        case 'arpeggio':
-          analysis.arpeggioCount++;
-          const arpeggio = element as any;
-          if (arpeggio.notes) {
-            this.analyzeElementsRecursively(arpeggio.notes, analysis, nestingLevel + 1);
-          }
-          break;
+        case 'note': analysis.noteCount++; break;
+        case 'rest': analysis.restCount++; break;
+        case 'group': analysis.groupCount++; break;
+        case 'chord': analysis.chordCount++; break;
+        case 'arpeggio': analysis.arpeggioCount++; break;
+      }
+      
+      // Recurse into children if present
+      const children = getChildren(element);
+      if (children.length > 0) {
+        this.analyzeElementsRecursively(children, analysis, nestingLevel + 1);
       }
     }
   }
@@ -299,37 +287,26 @@ export class MelodyDataConverterService {
       this.validateElementByType(element, result, currentPath);
       
       // Validate children if present
-      if (element.type === 'group') {
-        const group = element as any;
-        if (group.children) {
-          this.validateElementsRecursively(group.children, result, [...currentPath, 'children']);
-        }
+      const children = getChildren(element);
+      if (children.length > 0) {
+        this.validateElementsRecursively(children, result, [...currentPath, 'children']);
       }
     }
   }
 
   private validateElementByType(element: MusicElement, result: ValidationResult, path: string[]): void {
-    switch (element.type) {
-      case 'note':
-      case 'rest':
-        const singleNote = element as any;
-        if (singleNote.value === undefined) {
-          result.warnings.push(`Single note at ${path.join('.')} has no value`);
-        }
-        break;
-      case 'group':
-        const group = element as any;
-        if (!group.children || group.children.length === 0) {
-          result.warnings.push(`Group at ${path.join('.')} has no children`);
-        }
-        break;
-      case 'chord':
-      case 'arpeggio':
-        const composite = element as any;
-        if (!composite.notes || composite.notes.length === 0) {
-          result.warnings.push(`${element.type} at ${path.join('.')} has no notes`);
-        }
-        break;
+    if (isSingleNote(element)) {
+      if (element.value === undefined) {
+        result.warnings.push(`Single note at ${path.join('.')} has no value`);
+      }
+    } else if (isGenericGroup(element)) {
+      if (!element.children || element.children.length === 0) {
+        result.warnings.push(`Group at ${path.join('.')} has no children`);
+      }
+    } else if (isCompositeNote(element)) {
+      if (!element.notes || element.notes.length === 0) {
+        result.warnings.push(`${element.type} at ${path.join('.')} has no notes`);
+      }
     }
   }
 

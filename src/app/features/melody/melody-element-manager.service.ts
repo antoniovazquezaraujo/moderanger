@@ -1,6 +1,16 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MusicElement, SingleNote, CompositeNote, GenericGroup, NoteDuration, NoteFactory } from '../../model/melody';
+import { 
+  isGenericGroup, 
+  isCompositeNote, 
+  isSingleNote,
+  getChildren,
+  withUpdatedChildren,
+  withUpdatedValue,
+  withUpdatedDuration,
+  findElementWithParent
+} from '../../model/music-element-utils';
 
 export interface ElementOperation {
   type: 'add' | 'remove' | 'update';
@@ -93,7 +103,7 @@ export class MelodyElementManagerService {
     
     const { element: group } = this.findElementAndParent(groupId);
 
-    if (!group || group.type !== 'group') {
+    if (!group || !isGenericGroup(group)) {
       console.warn(`[MelodyElementManager] Group ${groupId} not found or is not a group`);
       return null;
     }
@@ -103,7 +113,7 @@ export class MelodyElementManagerService {
       duration
     );
 
-    const currentChildren = (group as GenericGroup).children || [];
+    const currentChildren = group.children || [];
     const newChildren = [...currentChildren, newNote];
 
     this.updateElement(groupId, { children: newChildren });
@@ -161,16 +171,10 @@ export class MelodyElementManagerService {
         return { element, parent };
       }
       
-      // Search in children
-      let childrenToSearch: MusicElement[] | undefined;
-      if (element.type === 'group') {
-        childrenToSearch = (element as GenericGroup).children;
-      } else if (element.type === 'arpeggio' || element.type === 'chord') {
-        childrenToSearch = (element as CompositeNote).notes;
-      }
-      
-      if (childrenToSearch) {
-        const result = this.findElementAndParent(elementId, childrenToSearch, element);
+      // Search in children using type-safe utilities
+      const children = getChildren(element);
+      if (children.length > 0) {
+        const result = this.findElementAndParent(elementId, children, element);
         if (result.element) {
           return result;
         }
@@ -217,18 +221,14 @@ export class MelodyElementManagerService {
   }
 
   private applyChangesToElement(element: MusicElement, changes: Partial<MusicElement>): MusicElement {
-    switch (element.type) {
-      case 'note':
-      case 'rest':
-        return this.updateSingleNote(element as SingleNote, changes);
-      case 'group':
-        return this.updateGroup(element as GenericGroup, changes);
-      case 'arpeggio':
-      case 'chord':
-        return this.updateCompositeNote(element as CompositeNote, changes);
-      default:
-        return element;
+    if (isSingleNote(element)) {
+      return this.updateSingleNote(element, changes);
+    } else if (isGenericGroup(element)) {
+      return this.updateGroup(element, changes);
+    } else if (isCompositeNote(element)) {
+      return this.updateCompositeNote(element, changes);
     }
+    return element;
   }
 
   private updateSingleNote(note: SingleNote, changes: Partial<MusicElement>): SingleNote {
@@ -268,23 +268,12 @@ export class MelodyElementManagerService {
   }
 
   private updateChildrenIfNeeded(element: MusicElement, id: string, changes: Partial<MusicElement>): { modified: boolean, element: MusicElement } {
-    let currentChildren: MusicElement[] | undefined;
-    let updateProp: 'children' | 'notes' | null = null;
+    const currentChildren = getChildren(element);
     
-    if (element.type === 'group' && (element as GenericGroup).children) {
-      currentChildren = (element as GenericGroup).children;
-      updateProp = 'children';
-    } else if ((element.type === 'arpeggio' || element.type === 'chord') && (element as CompositeNote).notes) {
-      currentChildren = (element as CompositeNote).notes;
-      updateProp = 'notes';
-    }
-    
-    if (currentChildren && updateProp) {
+    if (currentChildren.length > 0) {
       const result = this.findAndUpdateRecursively(currentChildren, id, changes);
       if (result.modified) {
-        const updatedElement = updateProp === 'children' 
-          ? { ...element, children: result.newElements } as GenericGroup
-          : { ...element, notes: result.newElements as SingleNote[] } as CompositeNote;
+        const updatedElement = withUpdatedChildren(element, result.newElements);
         return { modified: true, element: updatedElement };
       }
     }
@@ -310,10 +299,9 @@ export class MelodyElementManagerService {
     let count = elements.length;
     
     for (const element of elements) {
-      if (element.type === 'group' && (element as GenericGroup).children) {
-        count += this.countElementsRecursively((element as GenericGroup).children);
-      } else if ((element.type === 'arpeggio' || element.type === 'chord') && (element as CompositeNote).notes) {
-        count += this.countElementsRecursively((element as CompositeNote).notes);
+      const children = getChildren(element);
+      if (children.length > 0) {
+        count += this.countElementsRecursively(children);
       }
     }
     
