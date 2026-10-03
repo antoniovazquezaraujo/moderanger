@@ -1,0 +1,32 @@
+song "Órbita"
+version 1
+repeats 3
+
+vars
+  $oct = 2
+  $mode = ASCENDING
+  $scale = WHITE
+  $motif = "4t:0 4t:2 4t:-1"
+
+part Piano
+  block "Hélice" repeats 4
+    notes
+      4n:0
+      4n:2
+      4n:4
+    commands
+      OCT $oct
+      SCALE $scale
+      PLAYMODE PATTERN
+      PATTERN 4t:0 4t:2 4t:-1
+      PATTERN_GAP 1
+    operations
+      VARY $oct 1
+
+    block Eco
+      notes $motif
+      commands
+        OCT 1
+      operations
+        ASSIGN $mode RANDOM
+        ASSIGN $scale BLACK

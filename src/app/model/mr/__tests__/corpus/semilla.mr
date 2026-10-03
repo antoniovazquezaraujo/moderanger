@@ -1,0 +1,10 @@
+song Semilla
+version 1
+
+part Piano
+  block Origen
+    notes
+      4n:0
+      4n:2
+      4n:4
+      4n:2

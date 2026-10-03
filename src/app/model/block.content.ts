@@ -5,6 +5,7 @@ export class BlockContent {
     private _notes: string = '';
     private _isVariable: boolean = false;
     private _variableName: string = '';
+    private _defaultDuration?: string;
     private variableSubscription?: Subscription;
 
     constructor() {
@@ -41,6 +42,27 @@ export class BlockContent {
         }
     }
 
+    /** Duración por defecto del bloque (`notes default <duración>` en `.mr`). */
+    get defaultDuration(): string | undefined {
+        return this._defaultDuration;
+    }
+
+    set defaultDuration(value: string | undefined) {
+        this._defaultDuration = value;
+    }
+
+    /**
+     * Declara que las notas del bloque vienen de una variable **sin** leer ni
+     * suscribirse a `VariableContext` (lo usa el parser `.mr`, que no debe
+     * tener efectos sobre el estado global de reproducción).
+     */
+    setVariableReference(name: string): void {
+        this._variableName = name;
+        this._isVariable = true;
+        this._notes = '';
+        this.unsubscribeFromVariables();
+    }
+
 
     private subscribeToVariable() {
         this.unsubscribeFromVariables();
@@ -66,10 +88,14 @@ export class BlockContent {
     }
 
     toJSON() {
-        return {
+        const json: Record<string, unknown> = {
             notes: this._notes,
             isVariable: this._isVariable,
             variableName: this._variableName
         };
+        if (this._defaultDuration !== undefined) {
+            json['defaultDuration'] = this._defaultDuration;
+        }
+        return json;
     }
 } 

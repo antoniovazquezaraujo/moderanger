@@ -1,0 +1,37 @@
+song Estructura
+version 1
+
+vars
+  $texto = "línea 1"
+  $con_comillas = "dice \"hola\""
+  $motivo = "4n:0 4n:-2"
+
+part
+  block "repeats"
+    notes default 8n
+      0
+      2
+      s
+
+    block "Hijo directo"
+      notes
+        4n:5
+
+  block Salta repeats 0
+    notes
+      4t:1
+
+  block "Con instrumento"
+    notes
+      4t:2
+
+part Cuerpo
+  block
+    commands
+      INV 1
+
+part Anidado
+  block Padre
+    block Hijo
+      notes
+        4n:0

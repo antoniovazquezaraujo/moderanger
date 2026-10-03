@@ -63,6 +63,18 @@ describe('Block.clone', () => {
     expect(clone.children[0]).not.toBe(child);
     expect(clone.children[0].label).toBe('hijo');
   });
+
+  it('clona la duración por defecto y la referencia a variable sin suscribirse', () => {
+    const block = new Block();
+    block.blockContent.defaultDuration = '8n';
+    block.blockContent.setVariableReference('motif');
+
+    const clone = block.clone();
+
+    expect(clone.blockContent.defaultDuration).toBe('8n');
+    expect(clone.blockContent.isVariable).toBe(true);
+    expect(clone.blockContent.variableName).toBe('motif');
+  });
 });
 
 describe('Block.toJSON', () => {

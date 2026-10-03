@@ -1,0 +1,13 @@
+song Patrones
+version 1
+
+vars
+  $grado = -5
+
+part Ritmos
+  block "Patrón"
+    notes
+      4n:0
+    commands
+      PLAYMODE PATTERN
+      PATTERN 4n:( 0 2 ) 8n:s 4t:-1 4t:$grado
