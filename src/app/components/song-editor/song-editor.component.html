@@ -11,14 +11,18 @@
                     <!-- Use methods from this component (SongEditorComponent) -->
                     <button pButton type="button" icon="pi pi-plus" (click)="addPart()" class="p-mr-2" pTooltip="Add Part" tooltipPosition="top"></button>
                     <span>Repeat:</span>
-                    <!-- Repeticiones canónicas en Song.repeats (1-99 en la UI) -->
+                    <!-- Repeticiones canónicas en Song.repeats (1-99 en la UI).
+                         `ngModelChange` sincroniza el modelo MIENTRAS se escribe
+                         (no solo al salir del campo), para que guardar/aplicar
+                         usen siempre el valor visible. -->
                     <input type="number" id="repetitions" class="number-input" style="width:45px !important; max-width:45px !important;"
-                           [ngModel]="song.repeats" (change)="onRepeatsChange($event)" min="1" max="99" step="1"
+                           [ngModel]="song.repeats" (ngModelChange)="onRepeatsChange($event)" min="1" max="99" step="1"
                            pTooltip="Repeticiones de la canción" tooltipPosition="top" aria-label="Repeat">
                     <span class="p-ml-2">BPM:</span>
-                    <!-- BPM canónico en Song.bpm (30-240, rango del formato .mr) -->
+                    <!-- BPM canónico en Song.bpm (30-240, rango del formato .mr);
+                         `ngModelChange` mantiene el modelo en sync al teclear. -->
                     <input type="number" id="bpm" class="number-input" style="width:52px !important; max-width:52px !important;"
-                           [ngModel]="song.bpm" (change)="onBpmChange($event)" min="30" max="240" step="1"
+                           [ngModel]="song.bpm" (ngModelChange)="onBpmChange($event)" min="30" max="240" step="1"
                            pTooltip="Tempo (BPM)" tooltipPosition="top" aria-label="BPM">
                     <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
                     <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>

@@ -96,7 +96,6 @@ const EXAMPLE = [
 const change = (previousValue: unknown, currentValue: unknown, firstChange: boolean): SimpleChange =>
   ({ previousValue, currentValue, firstChange } as SimpleChange);
 
-const changeEvent = (value: string): Event => ({ target: { value } } as unknown as Event);
 
 const createEditor = (): { component: MrTextEditorComponent; cdr: { markForCheck: jest.Mock; detectChanges: jest.Mock } } => {
   const cdr = { markForCheck: jest.fn(), detectChanges: jest.fn() };
@@ -321,36 +320,36 @@ describe('SongEditorComponent · cabecera (Repeat y BPM)', () => {
   it('onRepeatsChange fija Song.repeats y recorta al rango 1-99', () => {
     const { component } = createSongEditor();
 
-    component.onRepeatsChange(changeEvent('3'));
+    component.onRepeatsChange('3');
     expect(component.song.repeats).toBe(3);
 
-    component.onRepeatsChange(changeEvent('0'));
+    component.onRepeatsChange('0');
     expect(component.song.repeats).toBe(1);
 
-    component.onRepeatsChange(changeEvent('999'));
+    component.onRepeatsChange('999');
     expect(component.song.repeats).toBe(99);
 
-    component.onRepeatsChange(changeEvent(''));
+    component.onRepeatsChange('');
     expect(component.song.repeats).toBe(1);
   });
 
   it('onBpmChange recorta al rango 30-240 y vuelve a 120 si está vacío', () => {
     const { component } = createSongEditor();
 
-    component.onBpmChange(changeEvent('90'));
+    component.onBpmChange('90');
     expect(component.song.bpm).toBe(90);
 
-    component.onBpmChange(changeEvent('999'));
+    component.onBpmChange('999');
     expect(component.song.bpm).toBe(240);
 
-    component.onBpmChange(changeEvent(''));
+    component.onBpmChange('');
     expect(component.song.bpm).toBe(120);
   });
 
   it('live-tempo: con reproducción en curso el Transport se reajusta ya (#18)', () => {
     const { component, songPlayer } = createSongEditor(true);
 
-    component.onBpmChange(changeEvent('100'));
+    component.onBpmChange('100');
 
     expect(component.song.bpm).toBe(100);
     expect(songPlayer.setTransportBpm).toHaveBeenCalledTimes(1);
@@ -360,7 +359,7 @@ describe('SongEditorComponent · cabecera (Repeat y BPM)', () => {
   it('en parado no toca el Transport: el bpm se aplica al siguiente Play', () => {
     const { component, songPlayer } = createSongEditor(false);
 
-    component.onBpmChange(changeEvent('100'));
+    component.onBpmChange('100');
 
     expect(component.song.bpm).toBe(100);
     expect(songPlayer.setTransportBpm).not.toHaveBeenCalled();
