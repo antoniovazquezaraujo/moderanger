@@ -152,32 +152,22 @@ export class SongPlayer {
      };
 
     async playSong(song: Song): Promise<void> {
-        console.log("[SongPlayer] playSong called.");
         if (!this._initializePlayback(song)) {
-            console.log("[SongPlayer] playSong aborted: _initializePlayback returned false.");
             return;
         }
-        console.log("[SongPlayer] playSong: Playback initialized.");
         this._substituteVariablesInSong(song);
-        console.log("[SongPlayer] playSong: Variables substituted.");
         const partStates = await this._buildPartExecutionStates(song);
-        console.log(`[SongPlayer] playSong: Built ${partStates.length} part states.`);
         const partSoundInfo = this._extractNotesFromStates(partStates); 
-        console.log(`[SongPlayer] playSong: Extracted ${partSoundInfo.length} parts with sound info.`);
         await this._schedulePlayback(partSoundInfo); 
-        console.log("[SongPlayer] playSong: Playback scheduled.");
     }
 
     async playPart(part: Part, song: Song): Promise<void> {
-        console.log(`[SongPlayer] Attempting to play part: ${part.name || `ID ${part.id}`}`);
         if (!this._initializePlayback(song)) {
             console.warn("[SongPlayer] Playback initialization failed for playPart.");
             return;
         }
-        // Call the song-wide substitution first, like playSong does
+        // Sustitución canónica de variables (misma ruta que playSong).
         this._substituteVariablesInSong(song);
-        // Keep the part-specific one commented out unless needed later 
-        // this._substituteVariablesInPart(part);
 
         let partState: PartExecutionState | null = null;
         try {
@@ -185,20 +175,12 @@ export class SongPlayer {
             const player = new Player(0, part.instrumentType, instrumentId, this.audioEngine);
             const executionUnits: ExecutionUnit[] = [];
             const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
-                // --- DEBUG LOG START ---
-                // --- DEBUG LOG END ---
                 for (let i = 0; i < block.repeatingTimes; i++) {
-                    // --- DEBUG LOG START ---
-                    // --- DEBUG LOG END ---
                     executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
                     block.children?.forEach(childBlock => {
                             addBlockAndChildren(childBlock, childLevel + 1, block);
                     });
                 }
-                // --- DEBUG LOG START ---
-                if (block.repeatingTimes <= 0) { // Log if the loop was (correctly) skipped
-                }
-                // --- DEBUG LOG END ---
             };
             part.blocks.forEach(block => addBlockAndChildren(block));
             partState = {
@@ -258,17 +240,10 @@ export class SongPlayer {
                 pendingTurnsToPlay: 0
             }];
         } 
-        // Log the result before returning
-        console.log(`[SongPlayer] _extractNotesFromSingleState result:`, JSON.stringify(result));
         return result;
     }
 
-    private _substituteVariablesInPart(part: Part): void {
-        console.log("[SongPlayer] _substituteVariablesInPart - Not implemented.");
-    }
-
     private _initializePlayback(song: Song): boolean {
-        console.log("[SongPlayer] _initializePlayback called.");
         if (this.globalState.isPlaying) {
             console.warn("[SongPlayer] Already playing. Stop previous playback first.");
             return false;
@@ -294,7 +269,6 @@ export class SongPlayer {
              this.currentStopListenerId = this.audioEngine.onTransportStop(this._handleTransportStop);
         }
 
-        console.log("[SongPlayer] _initializePlayback: Initialization successful, returning true.");
         return true;
     }
 
@@ -316,26 +290,17 @@ export class SongPlayer {
     }
 
     private async _buildPartExecutionStates(song: Song): Promise<PartExecutionState[]> {
-         console.log("[SongPlayer] _buildPartExecutionStates called.");
          const partStatePromises = song.parts.map(async (part, index): Promise<PartExecutionState> => {
             const instrumentId = await this.audioEngine.createInstrument(part.instrumentType);
             const player = new Player(index, part.instrumentType, instrumentId, this.audioEngine);
             const executionUnits: ExecutionUnit[] = [];
             const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
-                // --- DEBUG LOG START ---
-                // --- DEBUG LOG END ---
                 for (let i = 0; i < block.repeatingTimes; i++) {
-                    // --- DEBUG LOG START ---
-                    // --- DEBUG LOG END ---
                     executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
                     block.children?.forEach(childBlock => {
                             addBlockAndChildren(childBlock, childLevel + 1, block);
                     });
                 }
-                // --- DEBUG LOG START ---
-                if (block.repeatingTimes <= 0) { // Log if the loop was (correctly) skipped
-                }
-                // --- DEBUG LOG END ---
             };
             part.blocks.forEach(block => addBlockAndChildren(block));
             const initialState = {
@@ -344,59 +309,43 @@ export class SongPlayer {
                 isFinished: executionUnits.length === 0,
                 extractedNotes: [] as NoteData[]
             };
-            console.log(`[SongPlayer] _buildPartExecutionStates: Initial state for part ${index} - isFinished: ${initialState.isFinished}, unitCount: ${executionUnits.length}`);
             return initialState;
         });
          const results = await Promise.all(partStatePromises);
-         console.log(`[SongPlayer] _buildPartExecutionStates finished. Count: ${results.length}`);
          return results;
     }
 
     private _extractNotesFromStates(partStates: PartExecutionState[]): PartSoundInfo[] {
-        console.log(`[SongPlayer] _extractNotesFromStates called with ${partStates.length} states.`);
         const allNoteData: PartSoundInfo[] = [];
 
-        partStates.forEach((state, stateIndex) => {
-            console.log(`[SongPlayer] _extractNotesFromStates: Processing state ${stateIndex}, initial isFinished: ${state.isFinished}`);
+        partStates.forEach((state) => {
             if (!state || state.isFinished) return; // Skip finished or invalid states
 
             while (!state.isFinished) {
-                console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Loop Start, currentUnitIndex: ${state.currentUnitIndex}, totalUnits: ${state.executionUnits.length}`);
                 const unit = state.executionUnits[state.currentUnitIndex];
                 if (unit) {
                     const { block } = unit;
-                    console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Processing block ${block.id}`);
                     // Apply commands and operations FIRST
                     block.commands?.forEach((command: Command) => command.execute(state.player));
                     block.executeBlockOperations(); 
-                    console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Block ${block.id} commands/operations executed.`);
 
                     // Check if notes exist before calling generation
                     if (block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
-                         console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Block ${block.id} has notes, calling generateNotesForBlock...`);
                          const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player); // Call the service
-                         console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Block ${block.id} generated ${blockNotes.length} notes.`);
                          state.extractedNotes = state.extractedNotes.concat(blockNotes);
-                    } else {
-                         console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Block ${block.id} has NO notes, skipping generation.`);
                     }
 
                     state.currentUnitIndex++;
                     if (state.currentUnitIndex >= state.executionUnits.length) {
-                        console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} finished all units.`);
                         state.isFinished = true;
                     }
                 } else {
-                    console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} - unit was null/undefined at index ${state.currentUnitIndex}. Marking finished.`);
                     state.isFinished = true;
                 }
-                 console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex}, Loop End, isFinished: ${state.isFinished}`);
             } // End While
 
             // After processing all units for the state, package its notes if any
-            console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} finished loop. Extracted notes count: ${state.extractedNotes.length}`);
             if (state.extractedNotes.length > 0) {
-                console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} has extracted notes, packaging PartSoundInfo.`);
                 allNoteData.push({
                     noteDatas: state.extractedNotes,
                     player: state.player,
@@ -404,19 +353,14 @@ export class SongPlayer {
                     noteDataIndex: 0,
                     pendingTurnsToPlay: 0 // Assuming this resets or is handled later
                 });
-            } else {
-                console.log(`[SongPlayer] _extractNotesFromStates: State ${stateIndex} has NO extracted notes, skipping packaging.`);
             }
         }); // End forEach
 
-        console.log(`[SongPlayer] _extractNotesFromStates finished. Result count: ${allNoteData.length}`);
         return allNoteData;
     }
 
     private async _schedulePlayback(partSoundInfo: PartSoundInfo[]): Promise<void> {
-        console.log(`[SongPlayer] _schedulePlayback called with ${partSoundInfo.length} parts.`);
         if (partSoundInfo.length === 0) {
-            console.log(`[SongPlayer] _schedulePlayback: No sound info to schedule, stopping.`); 
             this.globalState.setIsPlaying(false);
             return;
         }
@@ -440,11 +384,9 @@ export class SongPlayer {
             console.error("[SongPlayer] Error starting transport or loop via AudioEngine:", e);
             this.stop();
         }
-        console.log("[SongPlayer] _schedulePlayback: Loop scheduled and transport started.");
     }
     
     private _loopTick(time: number, partSoundInfo: PartSoundInfo[]): void {
-        // console.log(`[SongPlayer] _loopTick executing @ time ${time}`); 
         const currentBeatCount = this.globalState.beatCount;
         const beatsPerBar = this.globalState.getCurrentPlaybackState().beatsPerBar;
         this._metronome.next(currentBeatCount % beatsPerBar); // Use modulo for metronome display
@@ -477,12 +419,10 @@ export class SongPlayer {
                 // Last repetition finished
                  if (this.currentLoopId) {
                     this.audioEngine.stopLoop(this.currentLoopId);
-                    console.log("[SongPlayer] Loop stopped after final repetition.");
                  }
                  // Add a small delay before stopping transport completely to allow last notes to fade
                  const currentTransportSeconds = this.audioEngine.timeToSeconds(this.audioEngine.getTransportTime()); 
                  const stopTime = currentTransportSeconds + 0.2; 
-                 console.log(`[SongPlayer] Scheduling transport stop at ${stopTime.toFixed(3)}`);
                  this.audioEngine.stopTransport(stopTime);
             }
         }
