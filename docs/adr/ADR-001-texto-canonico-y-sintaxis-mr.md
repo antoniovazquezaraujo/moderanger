@@ -1,6 +1,6 @@
 # ADR-001: Texto canónico y sintaxis `.mr`
 
-- **Estado:** Propuesto (pendiente de revisión y aprobación del usuario)
+- **Estado:** Aceptado (2026-10-03). El usuario aprobó todas las opciones recomendadas de la sección 18 de la propuesta.
 - **Fecha:** 2026-10-03
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Decisores:** DANI (producto) + ROBER (implementación)
@@ -35,7 +35,7 @@ Al mismo tiempo, el repositorio ya asume que el texto es un artefacto de primera
 
 ## 2. Decisión
 
-Se decide, en estado **Propuesto** hasta la revisión del usuario:
+Se decide (aprobado por el usuario el 2026-10-03):
 
 1. **El texto `.mr` será la representación canónica de una canción completa.** El modelo en memoria y la GUI pasan a ser una vista derivada.
 2. **La sintaxis canónica es line-based e indentada (estilo YAML), en UTF-8 y LF** (opción sujeta a la pregunta Q1 de la propuesta: la alternativa son llaves). Reutiliza el sublenguaje de notas existente (`4n:( 0 2 )`, `s`, `-7`, `$var`) sin cambios de vocabulario, y añade estructura (`song`, `version`, `vars`, `part`, `block`, `notes`, `commands`, `operations`).

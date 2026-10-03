@@ -1,6 +1,6 @@
 # Propuesta de sintaxis canónica `.mr`
 
-- **Estado:** Borrador para revisión (solo diseño; sin implementación)
+- **Estado:** Aprobada (2026-10-03); pendiente de implementación (Fase 1)
 - **Fecha:** 2026-10-03
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Decisión asociada:** `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
@@ -91,7 +91,7 @@ Estas brechas **no cambian la sintaxis**, pero condicionan la implementación:
 | Palabras estructurales | minúsculas: `song`, `version`, `repeats`, `bpm`, `vars`, `part`, `block`, `instrument`, `notes`, `commands`, `operations`; las operaciones usan las palabras del modelo en mayúsculas: `VARY`, `ASSIGN` |
 | Vocabulario musical | mayúsculas como hoy: `SCALE`, `PLAYMODE`, `WHITE`, `ASCENDING`, `PIANO` |
 | Número | `-?[0-9]+`, sin ceros a la izquierda ni `+` |
-| Duración | `[0-9]+(n|t|m):` (Tone.js: `4n`, `8t`, `1m`) |
+| Duración | `[0-9]+(n\|t\|m):` (Tone.js: `4n`, `8t`, `1m`) |
 | Nota (grado) | número entero (puede ser negativo y fuera de octava) |
 | Silencio | `s`, con duración opcional delante (`8n:s`) |
 | Variable | `$nombre`, con `nombre = [A-Za-z_][A-Za-z0-9_]*` (el `_` es extensión sobre la gramática actual) |
@@ -603,6 +603,8 @@ Criterios de aceptación: los de la sección 6 del ADR-001.
 ## 18. Preguntas abiertas para la revisión
 
 > Cada pregunta lleva opciones y recomendación. Basta con responder la letra elegida (o "la recomendada").
+>
+> **Resolución (2026-10-03):** el usuario aprobó todas las opciones recomendadas (a). La sintaxis queda aprobada para implementación (Fase 1).
 
 **Q1. ¿Qué estilo estructural usamos?**
 - (a) **Indentación tipo YAML, sin llaves** (recomendada). Ejemplo: `part "Piano"` / `  block "Tema"`. Coincide con la visión de `ideas.adoc`, diffs más limpios, menos ruido.
