@@ -565,4 +565,17 @@ export class MelodyEditorService {
         this.selectNote(finalIdToSelect); 
     }
     // <<< ----------------------------- >>>
+
+    // <<< NEW HELPER METHODS for direct element manipulation >>>
+    public loadElements(elements: MusicElement[]): void {
+        console.log(`[MelodyEditorService INSTANCE ${this.serviceInstanceId}] loadElements called with ${elements.length} elements.`);
+        // Clear selection and set new elements
+        this.elementsSubject.next(elements);
+        this.selectedElementIdSubject.next(elements.length > 0 ? elements[0].id : null); // Select first or null
+    }
+
+    public getElements(): MusicElement[] {
+        return this.elementsSubject.value;
+    }
+    // <<< ------------------------------------------------ >>>
 } 

@@ -51,7 +51,6 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   @Input() showVariableIcon: boolean = true;
   @Input() defaultDuration: NoteDuration = '4n';
   @Output() notesChange = new EventEmitter<string>();
-  @Output() toggleVariable = new EventEmitter<void>();
   @ViewChild('editorContainer') editorContainer!: ElementRef;
   @ViewChildren(MelodyNoteComponent) noteComponents!: QueryList<MelodyNoteComponent>;
   @ViewChildren(MelodyGroupComponent) groupComponents!: QueryList<MelodyGroupComponent>;
@@ -75,6 +74,19 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     private elementRef: ElementRef,
     private songPlayer: SongPlayer
   ) {}
+
+  // <<< NEW PUBLIC METHODS FOR EXTERNAL CONTROL >>>
+  public loadMelody(elements: MusicElement[]): void {
+    console.log(`[MelodyEditor] loadMelody called externally with ${elements.length} elements.`);
+    this.melodyEditorService.loadElements(elements);
+    // Ensure change detection runs if called after initialization
+    this.cdr.detectChanges();
+  }
+
+  public getCurrentMelody(): MusicElement[] {
+    return this.melodyEditorService.getElements();
+  }
+  // <<< --------------------------------------- >>>
 
   ngOnInit(): void {
     // NO llamar al servicio desde aquí
@@ -509,13 +521,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     this.globalDurationSub?.unsubscribe();
   }
 
-  onToggleVariable(event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-    this.toggleVariable.emit();
-  }
-
-  trackByElementId(index: number, element: MusicElement): string {
+  trackByElementId(index: number, element: VisualElement): string {
     return element.id; 
   }
 

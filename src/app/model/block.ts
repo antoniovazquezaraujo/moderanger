@@ -1,6 +1,6 @@
 import { BlockContent } from './block.content';
 import { Command } from './command';
-import { BaseOperation, IncrementOperation, DecrementOperation, AssignOperation } from './operation';
+import { BaseOperation, VaryOperation, AssignOperation } from './operation';
 import { VariableContext } from './variable.context';
 
 export class Block {
@@ -91,7 +91,6 @@ export class Block {
                     console.error(`Error executing operation:`, error);
                 }
             });
-            this.children.forEach(child => child.executeBlockOperations());
     }
 
     removeBlock(block: Block) {
@@ -135,20 +134,17 @@ export class Block {
         clonedBlock.children = this.children.map(child => child.clone());
 
         clonedBlock.operations = this.operations.map(operation => {
-            if (operation instanceof IncrementOperation) {
-                // Garantizar que el valor sea numérico
+            if (operation instanceof VaryOperation) {
+                // Ensure value is number (step)
                 const numValue = typeof operation.value === 'number' ? operation.value : 
                     (parseInt(String(operation.value)) || 1);
-                return new IncrementOperation(operation.variableName, numValue);
-            } else if (operation instanceof DecrementOperation) {
-                // Garantizar que el valor sea numérico
-                const numValue = typeof operation.value === 'number' ? operation.value : 
-                    (parseInt(String(operation.value)) || 1);
-                return new DecrementOperation(operation.variableName, numValue);
+                return new VaryOperation(operation.variableName, numValue);
             } else if (operation instanceof AssignOperation) {
                 return new AssignOperation(operation.variableName, operation.value);
             } else {
-                throw new Error(`Unknown operation type: ${operation.constructor.name}`);
+                console.error(`Cloning Error: Unknown operation type: ${operation.constructor.name}. Defaulting to Assign.`);
+                // Defaulting might be safer than throwing error during clone
+                return new AssignOperation(operation.variableName, operation.value);
             }
         });
         return clonedBlock;
@@ -165,9 +161,8 @@ export class Block {
             repeatingTimes: this.repeatingTimes,
             operations: this.operations.map(operation => {
                 return {
-                    type: operation instanceof IncrementOperation ? 'INCREMENT' :
-                        operation instanceof DecrementOperation ? 'DECREMENT' :
-                            operation instanceof AssignOperation ? 'ASSIGN' : 'UNKNOWN',
+                    type: operation instanceof VaryOperation ? 'VARY' :
+                        operation instanceof AssignOperation ? 'ASSIGN' : 'UNKNOWN',
                     variableName: operation.variableName,
                     value: operation.value
                 };

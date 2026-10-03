@@ -2,14 +2,20 @@ import { Injectable } from '@angular/core';
 import { Block } from '../model/block';
 import { Player } from '../model/player';
 import { NoteData } from '../model/note';
-// Scale and OctavedGrade likely not needed if parser gives NoteData directly
-// import { Scale, ScaleTypes } from '../model/scale';
-// import { OctavedGrade } from '../model/octaved-grade';
+// Import necessary classes for scale degree calculation
+import { Scale, ScaleTypes } from '../model/scale';
+import { OctavedGrade } from '../model/octaved-grade';
 import { PlayMode, arpeggiate } from '../model/play.mode'; 
 // VariableContext might be needed if substituting variables here, keep for now
 import { VariableContext } from '../model/variable.context';
 // Import the NoteData parser directly
 import { parseBlockNotes } from '../model/ohm.parser';
+import * as Tone from 'tone'; // Import Tone
+// Import unified note generation service
+import { 
+  NoteGenerationUnifiedService, 
+  NoteDataCreationOptions 
+} from '../shared/services/note-generation-unified.service';
 
 // SemanticNoteInfo removed
 
@@ -18,7 +24,7 @@ import { parseBlockNotes } from '../model/ohm.parser';
 })
 export class NoteGenerationService {
 
-  constructor() { }
+  constructor(private noteGenUnified: NoteGenerationUnifiedService) { }
 
   // <<< Reintroduce propagateGroupDurations >>>
   private propagateGroupDurations(noteData: NoteData, parentDuration?: string): void {
@@ -70,8 +76,14 @@ export class NoteGenerationService {
       }
     } else {
       // --- If notes string is empty, create a default silence/rest --- 
-      console.log(`[NoteGenSvc] No notes string to parse. Creating default rest.`);
-      rootNoteDatas = [new NoteData({ type: 'rest', duration: '16n' })]; // Default duration 16n
+      console.log(`[NoteGenSvc] No notes string to parse. Creating default rest with unified service.`);
+      const restResult = this.noteGenUnified.createRestNoteData('16n');
+      if (restResult.success && restResult.data) {
+        rootNoteDatas = [restResult.data];
+      } else {
+        console.error(`[NoteGenSvc] Failed to create default rest: ${restResult.error}`);
+        rootNoteDatas = [];
+      }
       // ---------------------------------------------------------------
     }
 
@@ -109,41 +121,140 @@ export class NoteGenerationService {
               if (baseGrade !== undefined) {
                   // Set the base grade on the player for getSelectedNotes to use
                   player.selectedNote = baseGrade;
-                  // Get the actual MIDI notes based on player state (scale, octave, tonality, gap, density, inversion)
-                  const derivedNoteDatas = player.getSelectedNotes(); // Call the Player method
-                  const midiNotes = this.noteDatasToNotes(derivedNoteDatas); // Extract MIDI numbers
-
-                  if (midiNotes.length > 0) { 
-                      if (player.playMode === PlayMode.CHORD) {
-                          // Use the derived NoteData directly if playing chords
-                          // Ensure they have the correct final duration
-                          derivedNoteDatas.forEach(nd => nd.duration = duration);
-                          results.push(new NoteData({ type: 'chord', duration, noteDatas: derivedNoteDatas }));
-                      } else { // Arpeggiate modes
-                          const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
-                          const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
-                          if (arpeggioNoteDatas.length > 0) {
-                               results.push(new NoteData({ type: 'arpeggio', duration, noteDatas: arpeggioNoteDatas }));
+                  
+                  // --- PATTERN MODE LOGIC ---
+                  if (player.playMode === PlayMode.PATTERN && player.currentPattern && player.currentPattern.length > 0) {
+                      const patternMelody = player.currentPattern;
+                      const scaleName = ScaleTypes[player.scale];
+                      const currentScale = Scale.getScaleByName(scaleName);
+                      if (!currentScale) {
+                          console.error(`[NoteGenSvc] PATTERN Error: Invalid scale ${scaleName}. Skipping pattern application.`);
+                          const errorRestResult = this.noteGenUnified.createRestNoteData(duration);
+                          if (errorRestResult.success && errorRestResult.data) {
+                            results.push(errorRestResult.data);
                           }
+                          break; // Exit case 'note'
+                      }
+
+                      // Calculate total duration of the original note (if specified)
+                      const originalNoteDurationSeconds = duration ? Tone.Time(duration).toSeconds() : Tone.Time('16n').toSeconds();
+                      
+                      // Calculate total duration of the pattern
+                      let patternDurationSeconds = 0;
+                      patternMelody.forEach(nd => {
+                          const patternNoteDuration = nd.duration ?? '16n'; // Default if pattern note has no duration
+                          patternDurationSeconds += Tone.Time(patternNoteDuration).toSeconds();
+                      });
+
+                      // Calculate time scaling factor
+                      const scaleFactor = patternDurationSeconds > 0 ? originalNoteDurationSeconds / patternDurationSeconds : 1;
+
+                      console.log(`[NoteGenSvc] Applying PATTERN. BaseGrade: ${baseGrade}, Scale: ${scaleName}, Octave: ${player.octave}, Tonality: ${player.tonality}, PatternLength: ${patternMelody.length}, OrigDuration: ${originalNoteDurationSeconds}s, PatternDuration: ${patternDurationSeconds}s, ScaleFactor: ${scaleFactor}`);
+
+                      patternMelody.forEach(patternNoteData => {
+                          const transposedNoteData = JSON.parse(JSON.stringify(patternNoteData)) as NoteData;
+
+                          // Transpose note using scale degrees
+                          if (transposedNoteData.type === 'note' && transposedNoteData.note !== undefined) {
+                              const patternGrade = transposedNoteData.note; // Assuming pattern notes are scale degrees
+                              const targetGrade = baseGrade + patternGrade;
+                              
+                              try {
+                                  const octavedGrade = new OctavedGrade(currentScale, targetGrade, player.octave);
+                                  const targetMidiNote = octavedGrade.toNote() + player.tonality;
+                                  transposedNoteData.note = targetMidiNote;
+                                  console.log(`  [Pattern] BaseGrade: ${baseGrade}, PatternGrade: ${patternGrade} -> TargetGrade: ${targetGrade} -> MIDI: ${targetMidiNote}`);
+                              } catch (e) {
+                                  console.error(`[NoteGenSvc] Error calculating OctavedGrade for targetGrade ${targetGrade}:`, e);
+                                  // What to do on error? Skip note? Make it a rest?
+                                  transposedNoteData.type = 'rest'; // Make it a rest for safety
+                                  delete transposedNoteData.note;
+                              }
+                          }
+                          
+                          // Scale duration (existing logic)
+                          const currentDuration = transposedNoteData.duration ?? '16n';
+                          try {
+                               const scaledDurationSeconds = Tone.Time(currentDuration).toSeconds() * scaleFactor;
+                               transposedNoteData.duration = `${scaledDurationSeconds}s`; 
+                          } catch(e) {
+                              console.warn(`[NoteGenSvc] Could not scale duration ${currentDuration}. Using original.`);
+                              transposedNoteData.duration = currentDuration; // Keep original on error
+                          }
+
+                          results.push(transposedNoteData);
+                      });
+                  
+                  // --- CHORD / OTHER ARPEGGIATE MODES LOGIC ---
+                  } else { 
+                      // Get the actual MIDI notes based on player state (scale, octave, tonality, gap, density, inversion)
+                      const derivedNoteDatas = player.getSelectedNotes(); // Call the Player method
+                      const midiNotes = this.noteDatasToNotes(derivedNoteDatas); // Extract MIDI numbers
+
+                      if (midiNotes.length > 0) { 
+                          if (player.playMode === PlayMode.CHORD) {
+                              // Use the derived NoteData directly if playing chords
+                              // Ensure they have the correct final duration
+                              derivedNoteDatas.forEach(nd => nd.duration = duration);
+                              const chordResult = this.noteGenUnified.createNoteData({ 
+                                type: 'chord', 
+                                duration, 
+                                noteDatas: derivedNoteDatas 
+                              });
+                              if (chordResult.success && chordResult.data) {
+                                results.push(chordResult.data);
+                              }
+                          } else { // Other Arpeggiate modes
+                              const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
+                              const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
+                              if (arpeggioNoteDatas.length > 0) {
+                                  const arpeggioResult = this.noteGenUnified.createNoteData({ 
+                                    type: 'arpeggio', 
+                                    duration, 
+                                    noteDatas: arpeggioNoteDatas 
+                                  });
+                                  if (arpeggioResult.success && arpeggioResult.data) {
+                                    results.push(arpeggioResult.data);
+                                  }
+                              }
+                          }
+                      } else {
+                         // If getSelectedNotes returns empty even with a baseGrade
+                         const emptyRestResult = this.noteGenUnified.createRestNoteData(duration);
+                         if (emptyRestResult.success && emptyRestResult.data) {
+                           results.push(emptyRestResult.data);
+                         }
                       }
                   }
               } else {
-                  results.push(new NoteData({ type: 'rest', duration }));
+                  // If baseGrade is undefined (e.g., explicit rest in input)
+                  const undefinedRestResult = this.noteGenUnified.createRestNoteData(duration);
+                  if (undefinedRestResult.success && undefinedRestResult.data) {
+                    results.push(undefinedRestResult.data);
+                  }
               }
               break;
           case 'rest':
           case 'silence':
-              results.push(new NoteData({ type: 'rest', duration }));
+               // Rests/Silences generally shouldn't trigger patterns. Pass them through.
+               const passRestResult = this.noteGenUnified.createRestNoteData(duration);
+               if (passRestResult.success && passRestResult.data) {
+                 results.push(passRestResult.data);
+               }
               break;
           case 'chord': 
           case 'arpeggio': 
+              // How should predefined chords/arpeggios interact with PATTERN mode?
+              // Option 1: Pass them through unchanged.
+              // Option 2: Apply the pattern to each note within them (complex).
+              // Option 3: Ignore them in PATTERN mode.
+              // For now, let's pass them through (Option 1).
               if (noteData.noteDatas) {
                   results.push(noteData); 
-              } else {
-                  // console.warn(`[NoteGenSvc] Parsed ${noteData.type} without noteDatas.`);
               }
               break;
           case 'group': 
+               // Process children recursively. The PATTERN mode will be applied to individual notes within the group.
                if (noteData.children) {
                    const processedChildren: NoteData[] = [];
                    noteData.children.forEach(child => {

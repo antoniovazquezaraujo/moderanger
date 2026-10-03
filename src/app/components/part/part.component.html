@@ -1,5 +1,11 @@
 <div class="part">
     <div class="part-header">
+        <p-button 
+            [icon]="isExpanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" 
+            (click)="toggleExpansion()" 
+            styleClass="p-button-text p-button-sm part-toggler-button">
+        </p-button>
+
         <div class="part-info">
             <input type="text" [(ngModel)]="part.name" class="part-name-input" placeholder="Part {{part.id}}">
         </div>
@@ -13,7 +19,7 @@
             <button pButton type="button" icon="pi pi-stop" (click)="stopPart()" pTooltip="Stop part"></button>
         </div>
     </div>
-    <div class="part-content">
+    <div class="part-content" *ngIf="isExpanded">
         <ng-container *ngFor="let block of part.blocks">
             <app-block 
                 [block]="block" 

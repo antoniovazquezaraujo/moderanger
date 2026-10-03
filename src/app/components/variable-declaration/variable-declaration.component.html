@@ -5,7 +5,6 @@
         <select [(ngModel)]="newVariable.type" name="type" required>
             <option value="number">Number</option>
             <option value="playmode">Play Mode</option>
-            <option value="melody">Melody</option>
             <option value="scale">Scale</option>
         </select>
 
@@ -16,13 +15,6 @@
                 required>
                 <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
             </select>
-
-            <ng-container *ngSwitchCase="'melody'">
-                <app-melody-editor-wrapper 
-                    [(ngModel)]="newVariable.value" 
-                    name="value">
-                </app-melody-editor-wrapper>
-            </ng-container>
 
             <ng-container *ngSwitchCase="'scale'">
                 <select [(ngModel)]="newVariable.value" name="value" required>
@@ -74,13 +66,6 @@
                     [min]="-999"
                     [max]="999"
                     step="1">
-
-                <ng-container *ngSwitchCase="'melody'">
-                    <app-melody-editor-wrapper 
-                        [(ngModel)]="variable.value" 
-                        (ngModelChange)="updateVariableContext($event, variable.name)">
-                    </app-melody-editor-wrapper>
-                </ng-container>
             </ng-container>
 
             <p-button (click)="removeVariable(i)" icon="pi pi-times" pTooltip="Remove Variable" tooltipPosition="top"></p-button>

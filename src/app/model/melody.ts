@@ -45,7 +45,14 @@ export class NoteIdGenerator {
 }
 
 // Factory para crear notas
+/**
+ * @deprecated Use NoteGenerationUnifiedService instead for consistent note creation
+ * This factory will be removed in future versions
+ */
 export class NoteFactory {
+    /**
+     * @deprecated Use NoteGenerationUnifiedService.createSingleNote() instead
+     */
     static createSingleNote(value: number | null, duration: NoteDuration = '4n'): SingleNote {
         return {
             id: NoteIdGenerator.generateId(),
@@ -55,6 +62,9 @@ export class NoteFactory {
         };
     }
     
+    /**
+     * @deprecated Use NoteGenerationUnifiedService.createCompositeNote() instead
+     */
     static createCompositeNote(type: 'arpeggio' | 'chord', notes: SingleNote[], duration: NoteDuration = '4n'): CompositeNote {
         return {
             id: NoteIdGenerator.generateId(),
@@ -64,7 +74,9 @@ export class NoteFactory {
         };
     }
 
-    // NUEVO: Factory para grupos genéricos
+    /**
+     * @deprecated Use NoteGenerationUnifiedService.createGenericGroup() instead
+     */
     static createGenericGroup(children: MusicElement[], duration: NoteDuration): GenericGroup {
         return {
             id: NoteIdGenerator.generateId(),

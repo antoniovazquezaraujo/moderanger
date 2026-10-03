@@ -63,7 +63,7 @@
 
 /* Sidebar styles (optional) */
 :host ::ng-deep .variables-sidebar {
-  width: 400px; 
+  width: 500px; 
 }
 
 :host ::ng-deep .variables-sidebar .p-sidebar-content {
@@ -86,19 +86,7 @@
   vertical-align: middle;
 }
 
-:host ::ng-deep .variables-control .p-button.p-button-text {
-  width: 30px !important;
-  height: 30px !important;
-  font-size: 1.2rem; 
-  padding: 0 !important;
-  background-color: transparent !important;
-  color: #333 !important;
-  border: none !important;
-}
 
-:host ::ng-deep .variables-control .p-button.p-button-text:hover {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-}
 
 /* Removed p-splitter specific styles */
 

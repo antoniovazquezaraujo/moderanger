@@ -32,11 +32,11 @@ import { MelodyNoteComponent } from '../melody-note/melody-note.component';
             border-radius: 4px;
             margin: 5px;
             background-color: white;
-            
-            &.selected {
-                border-color: #2196F3;
-                background-color: #E3F2FD;
-            }
+        }
+        
+        .group-container.selected {
+            border-color: #2196F3;
+            background-color: #E3F2FD;
         }
         
         .group-header {
@@ -46,10 +46,10 @@ import { MelodyNoteComponent } from '../melody-note/melody-note.component';
             cursor: pointer;
             background-color: #f5f5f5;
             border-bottom: 1px solid #eee;
-            
-            &:hover {
-                background-color: #eee;
-            }
+        }
+        
+        .group-header:hover {
+            background-color: #eee;
         }
         
         .group-type {

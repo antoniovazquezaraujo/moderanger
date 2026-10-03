@@ -45,4 +45,12 @@
 
 .part-content {
     margin-left: 0.75rem;
+}
+
+/* Styles for the part toggler button */
+.part-toggler-button {
+  width: 2rem; /* Match block toggler width approx */
+  display: inline-block; /* Ensure it takes up space */
+  vertical-align: middle; /* Align vertically with other header items */
+  margin-right: 0.5rem; /* Add some spacing */
 } 
