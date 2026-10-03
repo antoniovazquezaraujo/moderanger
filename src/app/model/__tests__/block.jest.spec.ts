@@ -91,6 +91,57 @@ describe('Block.toJSON', () => {
   });
 });
 
+describe('Block.hasOwnContent', () => {
+  it('es false para un bloque contenedor vacío (caso Parte nueva de la GUI)', () => {
+    expect(new Block().hasOwnContent()).toBe(false);
+  });
+
+  it('es false para un contenedor con hijos pero sin contenido propio', () => {
+    const container = new Block();
+    const child = new Block();
+    child.label = 'Hijo';
+    container.children = [child];
+
+    expect(container.hasOwnContent()).toBe(false);
+  });
+
+  it('es true si el bloque tiene label (caso raíz .mr)', () => {
+    const block = new Block();
+    block.label = 'Origen';
+
+    expect(block.hasOwnContent()).toBe(true);
+  });
+
+  it('ignora labels y notas en blanco', () => {
+    const block = new Block();
+    block.label = '   ';
+    block.blockContent.notes = '  \n ';
+
+    expect(block.hasOwnContent()).toBe(false);
+  });
+
+  it('es true si el bloque tiene notas', () => {
+    const block = new Block();
+    block.blockContent.notes = '4n:0 4n:2';
+
+    expect(block.hasOwnContent()).toBe(true);
+  });
+
+  it('es true si el bloque tiene comandos', () => {
+    const block = new Block();
+    block.commands = [new Command({ type: CommandType.SCALE, value: 'BLACK' })];
+
+    expect(block.hasOwnContent()).toBe(true);
+  });
+
+  it('es true si el bloque tiene operaciones', () => {
+    const block = new Block();
+    block.operations = [new VaryOperation('oct', 1)];
+
+    expect(block.hasOwnContent()).toBe(true);
+  });
+});
+
 describe('Block.executeBlockOperations', () => {
   beforeEach(() => {
     VariableContext.context.clear();
