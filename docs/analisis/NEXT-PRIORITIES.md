@@ -1,5 +1,7 @@
 # 🚀 PRÓXIMAS PRIORIDADES - MODERANGER PROJECT
 
+> ⚠️ **Documento histórico (mayo 2025).** Parte de su contenido está desactualizado (menciona Angular 15 y refactors ya realizados o descartados). Las prioridades vigentes están en `docs/analisis/BACKLOG.md`.
+
 ## 📊 **Estado Actual: EXCELENTE ✅**
 - ✅ **Build production**: Funciona perfectamente
 - ✅ **Arquitectura SongPlayer**: Refactorizada (611 → 5 servicios)
