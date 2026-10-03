@@ -1,10 +1,11 @@
 {
-  // For more information, visit: https://go.microsoft.com/fwlink/?LinkId=733558
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
   "version": "2.0.0",
   "tasks": [
     {
       "type": "npm",
       "script": "start",
+      "label": "npm: start",
       "isBackground": true,
       "problemMatcher": {
         "owner": "typescript",
@@ -23,27 +24,19 @@
     {
       "type": "npm",
       "script": "test",
-      "isBackground": true,
-      "problemMatcher": {
-        "owner": "typescript",
-        "pattern": "$tsc",
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": {
-            "regexp": "(.*?)"
-          },
-          "endsPattern": {
-            "regexp": "bundle generation complete"
-          }
-        }
+      "label": "npm: test",
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
       }
     },
     {
       "type": "npm",
-      "script": "jasmine-test",
-      "problemMatcher": [],
-      "label": "npm: jasmine-test",
-      "detail": "rimraf ./dist && tsc && jasmine"
+      "script": "test:watch",
+      "label": "npm: test:watch",
+      "isBackground": true,
+      "problemMatcher": []
     }
   ]
 }
