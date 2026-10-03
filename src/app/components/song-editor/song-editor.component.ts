@@ -72,8 +72,9 @@ export class SongEditorComponent implements OnInit, OnDestroy {
             this.songPlayer.stop();
         }
         this.repetitions = event.meta.repeats ?? 1;
+        // No forzar CD aquí: el tick global posterior al evento propaga la
+        // canción nueva al input `song` del editor `.mr` en la misma pasada.
         this.songChange.emit(event.song);
-        this.cdr.detectChanges();
     }
 
     addPart() {
