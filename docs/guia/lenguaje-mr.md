@@ -214,12 +214,12 @@ Una nota es un **grado entero** de la escala activa: `0` es la raíz, `2` el ter
 
 ### 4.4. Grupos
 
-Un grupo reparte una duración entre varios eventos: `duración:( … )`.
+Un grupo da una **duración común** a varios eventos: `duración:( … )`. Los eventos sin duración propia **heredan** la del grupo más cercano; los que llevan duración explícita la conservan. El grupo **no reparte ni divide** su duración entre los hijos: los eventos suenan en secuencia, cada uno con su duración.
 
 ```text
-4n:( 0 2 )             # dos notas dentro de una negra
-2n:( 8n:0 8n:2 )       # dentro de una blanca, dos corcheas
-4n:( 2 8n:( 0 2 ) )    # grupos anidados
+4n:( 0 2 )             # dos negras (≡ 4n:0 4n:2)
+2n:( 8n:0 8n:2 )       # dos corcheas (cada hija manda con su duración)
+4n:( 2 8n:( 0 2 ) )    # anidados: el 2 hereda 4n; dentro, 0 y 2 son corcheas
 2n:()                  # grupo vacío (silencio)
 ```
 
