@@ -16,7 +16,7 @@ import { AssignOperation, BaseOperation, VaryOperation } from '../operation';
 import { Part } from '../part';
 import { getPlayModeNames } from '../play.mode';
 import { Scale } from '../scale';
-import { DEFAULT_BPM, MAX_BPM, MIN_BPM, Song } from '../song';
+import { DEFAULT_BPM, DEFAULT_REPEATS, MAX_BPM, MIN_BPM, MIN_REPEATS, Song } from '../song';
 import { VariableValue } from '../variable.context';
 import { MrParseError } from './mr.errors';
 import {
@@ -210,9 +210,11 @@ class MrDocumentParser {
         `clave desconocida '${word}' en el nivel raíz; se esperaba 'song', 'version', 'repeats', 'bpm', 'vars' o 'part'`
       );
     }
-    // El bpm canónico vive en `Song`; la meta (`meta.bpm`) es solo su reflejo
-    // en el fichero. Sin `bpm` en la cabecera se aplica el valor por defecto.
+    // El bpm y las repeticiones canónicos viven en `Song`; la meta
+    // (`meta.bpm`/`meta.repeats`) es solo su reflejo en el fichero. Sin la
+    // clave en la cabecera se aplican los valores por defecto.
     this.document.song.bpm = this.document.meta.bpm ?? DEFAULT_BPM;
+    this.document.song.repeats = this.document.meta.repeats ?? DEFAULT_REPEATS;
     return this.document;
   }
 
@@ -260,8 +262,8 @@ class MrDocumentParser {
         }
         this.advance();
         const { value, word: raw } = this.parseIntegerArgument(line, 'repeats');
-        if (value < 1) {
-          throw errorAt(line, raw.column, `'repeats' de canción debe ser un entero >= 1`);
+        if (value < MIN_REPEATS) {
+          throw errorAt(line, raw.column, `'repeats' de canción debe ser un entero >= ${MIN_REPEATS}`);
         }
         this.document.meta.repeats = value;
         seenRepeats = true;

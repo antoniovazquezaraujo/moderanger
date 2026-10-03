@@ -59,13 +59,21 @@ part Piano
     );
   });
 
-  it('omite repeats 1 y bpm 120; emite el resto', () => {
+  it('emite repeats desde Song y omite los valores por defecto', () => {
     const document = createDocument();
     document.meta = { version: 1, repeats: 1, bpm: 120 };
     expect(serializeSong(document)).toBe('song X\nversion 1\n');
 
+    document.song.repeats = 2;
     document.meta = { version: 1, repeats: 2, bpm: 90 };
     expect(serializeSong(document)).toBe('song X\nversion 1\nrepeats 2\nbpm 90\n');
+  });
+
+  it('ignora meta.repeats: Song.repeats es la fuente de verdad (#20)', () => {
+    const document = createDocument();
+    document.meta = { version: 1, repeats: 5, bpm: 90 };
+
+    expect(serializeSong(document)).toBe('song X\nversion 1\nbpm 90\n');
   });
 
   it('emite song "" para nombres vacíos y comillas cuando hacen falta', () => {
@@ -304,7 +312,7 @@ describe('serializeSong: operaciones y variables', () => {
     expect(() => serializeSong(badBpm)).toThrow(MrSerializeError);
 
     const badRepeats = createDocument();
-    badRepeats.meta = { version: 1, repeats: 0 };
+    badRepeats.song.repeats = 0;
     expect(() => serializeSong(badRepeats)).toThrow(MrSerializeError);
   });
 });

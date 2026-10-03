@@ -9,6 +9,14 @@ export const DEFAULT_BPM = 120;
 export const MIN_BPM = 30;
 export const MAX_BPM = 240;
 
+/** Repeticiones de canción por defecto (una vez). */
+export const DEFAULT_REPEATS = 1;
+
+/** Rango válido de `repeats` de canción: el parser/serializador exige >= 1. */
+export const MIN_REPEATS = 1;
+/** Tope de la UI (el formato `.mr` no impone máximo). */
+export const MAX_REPEATS = 99;
+
 export class Song {
     name: string = "Untitled Song";
     parts: Part[] = [];
@@ -18,6 +26,12 @@ export class Song {
      * Transport al iniciar la reproducción (mismo rango que el parser).
      */
     bpm: number = DEFAULT_BPM;
+    /**
+     * Repeticiones de canción. Es la fuente de verdad en memoria (igual que
+     * `bpm`): el `.mr` la guarda en su cabecera (`repeats`) y `SongPlayer` la
+     * aplica al iniciar la reproducción. Mínimo 1.
+     */
+    repeats: number = DEFAULT_REPEATS;
 
     constructor() {
 
@@ -26,6 +40,7 @@ export class Song {
         const clonedSong = new Song();
         clonedSong.name = this.name;
         clonedSong.bpm = this.bpm;
+        clonedSong.repeats = this.repeats;
         clonedSong.parts = this.parts.map(part => part.clone());
         return clonedSong;
     }
@@ -45,6 +60,7 @@ export class Song {
         return {
             name: this.name,
             bpm: this.bpm,
+            repeats: this.repeats,
             parts: this.parts.map(part => part.blocks)
         };
     }

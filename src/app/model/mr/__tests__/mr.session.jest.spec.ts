@@ -1,10 +1,11 @@
+import { Song } from '../../song';
+import { parseSong } from '../mr.parser';
 import {
   buildMrFileName,
   DEFAULT_MR_BASE_NAME,
   MAX_MR_BASE_NAME_LENGTH,
-  mrMetaToSessionMeta,
   sanitizeMrBaseName,
-  sessionMetaToMrMeta
+  songToMrMeta
 } from '../mr.session';
 
 describe('sanitizeMrBaseName', () => {
@@ -71,19 +72,31 @@ describe('buildMrFileName', () => {
   });
 });
 
-describe('sessionMetaToMrMeta / mrMetaToSessionMeta', () => {
-  it('serializa repeats 1 como ausente y conserva bpm y versión', () => {
-    expect(sessionMetaToMrMeta({ repeats: 1 })).toEqual({ version: 1, repeats: undefined, bpm: undefined });
-    expect(sessionMetaToMrMeta({ repeats: 2, bpm: 90 })).toEqual({ version: 1, repeats: 2, bpm: 90 });
+describe('songToMrMeta: la cabecera se deriva del modelo canónico', () => {
+  it('omite repeats 1 y bpm 120 por defecto', () => {
+    expect(songToMrMeta(new Song())).toEqual({ version: 1, repeats: undefined, bpm: undefined });
   });
 
-  it('normaliza repeats ausente a 1 al leer la meta', () => {
-    expect(mrMetaToSessionMeta({ version: 1 })).toEqual({ repeats: 1, bpm: undefined });
-    expect(mrMetaToSessionMeta({ version: 1, repeats: 3, bpm: 108 })).toEqual({ repeats: 3, bpm: 108 });
+  it('refleja Song.repeats y Song.bpm', () => {
+    const song = new Song();
+    song.repeats = 2;
+    song.bpm = 90;
+
+    expect(songToMrMeta(song)).toEqual({ version: 1, repeats: 2, bpm: 90 });
   });
 
-  it('hace round-trip meta de sesión → MrMeta → meta de sesión', () => {
-    const session = { repeats: 4, bpm: 75 };
-    expect(mrMetaToSessionMeta(sessionMetaToMrMeta(session))).toEqual(session);
+  it('hace round-trip Song → MrMeta → Song (con el parser)', () => {
+    const song = new Song();
+    song.name = 'Round';
+    song.repeats = 4;
+    song.bpm = 75;
+
+    const header = songToMrMeta(song);
+    const reparsed = parseSong(
+      `song ${song.name}\nversion ${header.version}\nrepeats ${String(header.repeats)}\nbpm ${String(header.bpm)}\n`
+    );
+
+    expect(reparsed.song.repeats).toBe(4);
+    expect(reparsed.song.bpm).toBe(75);
   });
 });

@@ -10,7 +10,7 @@ import {
   EventEmitter,
   ViewChild
 } from '@angular/core';
-import { Song, DEFAULT_BPM, MAX_BPM, MIN_BPM } from 'src/app/model/song';
+import { Song, DEFAULT_BPM, DEFAULT_REPEATS, MAX_BPM, MAX_REPEATS, MIN_BPM, MIN_REPEATS } from 'src/app/model/song';
 import { Part } from 'src/app/model/part';
 import { SongPlayer } from 'src/app/model/song.player';
 import { Observable, Subject } from 'rxjs';
@@ -21,12 +21,11 @@ import {
   applyDocumentVariables,
   buildMrFileName,
   createDocumentFromContext,
-  mrMetaToSessionMeta,
   MrMeta,
   MrSerializeError,
   prepareSongText,
   serializeSong,
-  sessionMetaToMrMeta,
+  songToMrMeta,
   SongDocument
 } from 'src/app/model/mr';
 import { downloadTextFile, readFileAsText } from 'src/app/model/mr/mr.file.browser';
@@ -42,7 +41,6 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     /** Nueva canción cuando se aplica la vista de texto `.mr`. */
     @Output() songChange = new EventEmitter<Song>();
     
-    repetitions: number = 1;
     public metronome$: Observable<number>;
     variablesSidebarVisible: boolean = false;
     mrTextVisible: boolean = false;
@@ -95,12 +93,13 @@ export class SongEditorComponent implements OnInit, OnDestroy {
 
     /**
      * La vista de texto `.mr` ha reemplazado el modelo (sus variables ya están
-     * aplicadas): se detiene la reproducción, se sincroniza la meta de sesión
-     * y se reemite la nueva canción hacia arriba (AppComponent es el dueño).
+     * aplicadas): se detiene la reproducción y se reemite la nueva canción
+     * hacia arriba (AppComponent es el dueño). La canción ya trae `repeats` y
+     * `bpm` (los copia `parseSong`), así que aquí no hay meta de sesión.
      */
     onMrTextApplied(event: MrTextAppliedEvent): void {
         this.stopIfPlaying();
-        this.syncSessionMetaAndEmit(event.song, event.meta);
+        this.songChange.emit(event.song);
     }
 
     /** Serializa el modelo actual y descarga `<nombre-saneado>.mr`. */
@@ -152,17 +151,19 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     /**
      * Adopta un documento `.mr` ya validado: para el player ANTES de aplicar
      * variables (`stop()` reinicia `VariableContext`), las sincroniza y emite
-     * la canción por el mismo camino que la vista de texto.
+     * la canción por el mismo camino que la vista de texto. La canción ya trae
+     * `repeats`/`bpm` de la cabecera (los copia `parseSong`).
      */
     applyLoadedDocument(document: SongDocument): void {
         this.stopIfPlaying();
         applyDocumentVariables(document);
-        this.syncSessionMetaAndEmit(document.song, document.meta);
+        this.songChange.emit(document.song);
     }
 
     private currentMeta(): MrMeta {
-        // El bpm canónico vive en `Song.bpm`; la meta solo lo refleja al guardar.
-        return sessionMetaToMrMeta({ repeats: this.repetitions, bpm: this.song.bpm });
+        // `Song.repeats` y `Song.bpm` son la fuente de verdad; la meta solo los
+        // refleja al guardar.
+        return songToMrMeta(this.song);
     }
 
     /**
@@ -182,20 +183,28 @@ export class SongEditorComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
     }
 
+    /**
+     * Recorta y aplica el Repeat del input de cabecera al modelo. Rango de la
+     * UI (1-99) para que `Song.repeats` siempre sea serializable; un valor
+     * vacío o no numérico vuelve a 1. Con reproducción en curso el valor se
+     * aplica al siguiente Play (la secuencia ya está programada).
+     */
+    onRepeatsChange(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const parsed = Number.parseInt(input.value, 10);
+        this.song.repeats = Number.isFinite(parsed)
+            ? Math.min(MAX_REPEATS, Math.max(MIN_REPEATS, parsed))
+            : DEFAULT_REPEATS;
+        // Refleja el valor recortado aunque coincida con el anterior (p. ej.
+        // "999" -> 99): `[ngModel]` no reescribe el DOM si no cambia el modelo.
+        input.value = String(this.song.repeats);
+        this.cdr.markForCheck();
+    }
+
     private stopIfPlaying(): void {
         if (this.songPlayer.isPlaying) {
             this.songPlayer.stop();
         }
-    }
-
-    private syncSessionMetaAndEmit(song: Song, meta: MrMeta): void {
-        const session = mrMetaToSessionMeta(meta);
-        this.repetitions = session.repeats;
-        const bpm = session.bpm ?? DEFAULT_BPM;
-        song.bpm = bpm;
-        // No forzar CD aquí: el tick global posterior al evento propaga la
-        // canción nueva al input `song` del editor `.mr` en la misma pasada.
-        this.songChange.emit(song);
     }
 
     private showMrErrors(title: string, lines: string[]): void {
@@ -214,7 +223,8 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     }
 
     playSong() {
-        this.songPlayer.songRepetitions = this.repetitions;
+        // `SongPlayer` aplica `Song.repeats` y `Song.bpm` al iniciar (no hay
+        // copia de sesión que asignar aquí).
         this.songPlayer.playSong(this.song);
     }
 

@@ -15,9 +15,15 @@ export const MR_FORMAT_VERSION = 1;
 export interface MrMeta {
   /** Versión del formato `.mr` (siempre presente al serializar). */
   version: number;
-  /** Repeticiones de canción `[ext]`; `undefined`/1 = una vez. */
+  /**
+   * Repeticiones de canción leídas de la cabecera (`repeats`). Reflejo de
+   * `Song.repeats` (canónico): `undefined`/1 = una vez.
+   */
   repeats?: number;
-  /** Tempo `[ext]`; `undefined`/120 = el valor por defecto del player. */
+  /**
+   * Tempo leído de la cabecera (`bpm`). Reflejo de `Song.bpm` (canónico):
+   * `undefined`/120 = el valor por defecto del player.
+   */
   bpm?: number;
 }
 

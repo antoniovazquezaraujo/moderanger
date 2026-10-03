@@ -1,15 +1,14 @@
 /**
- * Estado de sesión del editor para `.mr` (Fase 3 del ADR-001): traducción de
- * la meta (`repeats`, `bpm`) a/desde `MrMeta` y nombres de fichero.
+ * Estado de sesión del editor para `.mr` (Fase 3 del ADR-001): nombres de
+ * fichero y derivación de la meta del documento desde el modelo.
  * Angular-free para poder probarlo con Jest.
  *
- * Dónde vive el bpm (decisión de la ronda de pulido): el bpm canónico vive en
- * `Song.bpm` (lo aplica `SongPlayer` y lo edita la cabecera). `MrMeta.bpm` es
- * solo su reflejo en el fichero: `parseSong` lo copia a `Song.bpm` y al
- * guardar se traduce desde el modelo con `sessionMetaToMrMeta`. Este módulo
- * conserva las funciones de traducción (incluido `bpm`) para el resto de la
- * app y sus tests.
+ * Dónde vive la cabecera (decisiones #16 y #20): `Song.bpm` y `Song.repeats`
+ * son la fuente de verdad en memoria. `MrMeta` es solo el reflejo en el
+ * fichero: `parseSong` copia la cabecera a `Song` al cargar y al guardar se
+ * deriva con `songToMrMeta` (los valores por defecto se omiten).
  */
+import { DEFAULT_BPM, DEFAULT_REPEATS, Song } from '../song';
 import { MR_FILE_EXTENSION } from './mr.file';
 import { MR_FORMAT_VERSION, MrMeta } from './mr.types';
 
@@ -20,29 +19,14 @@ export const DEFAULT_MR_BASE_NAME = 'cancion';
 export const MAX_MR_BASE_NAME_LENGTH = 80;
 
 /**
- * Meta de sesión del editor: lo que no vive en `Song` (hoy solo `repeats`)
- * más el bpm, que sí vive en `Song` y aquí aparece como espejo de `MrMeta`.
- * `repeats` normalizado a 1 cuando no hay repetición extra.
+ * `MrMeta` derivada del modelo canónico: `repeats` y `bpm` se toman de `Song`
+ * y los valores por defecto (1 / 120) se omiten, como manda el formato.
  */
-export interface MrSessionMeta {
-  repeats: number;
-  bpm?: number;
-}
-
-/** Meta de sesión → `MrMeta` lista para `serializeSong`/`createDocumentFromContext`. */
-export function sessionMetaToMrMeta(session: MrSessionMeta): MrMeta {
+export function songToMrMeta(song: Song): MrMeta {
   return {
     version: MR_FORMAT_VERSION,
-    repeats: session.repeats > 1 ? session.repeats : undefined,
-    bpm: session.bpm
-  };
-}
-
-/** `MrMeta` de un documento → meta de sesión del editor (por defecto, una repetición). */
-export function mrMetaToSessionMeta(meta: MrMeta): MrSessionMeta {
-  return {
-    repeats: meta.repeats ?? 1,
-    bpm: meta.bpm
+    repeats: song.repeats !== DEFAULT_REPEATS ? song.repeats : undefined,
+    bpm: song.bpm !== DEFAULT_BPM ? song.bpm : undefined
   };
 }
 

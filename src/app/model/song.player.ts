@@ -267,6 +267,10 @@ export class SongPlayer {
         // Update global state
         this.globalState.setIsPlaying(true);
         this.globalState.setCurrentSong(song);
+        // Las repeticiones de canción son canónicas en `Song.repeats` (igual
+        // que el bpm): se aplican al iniciar y antes de `resetRepetition` para
+        // que `canAdvance` se calcule con el valor nuevo.
+        this.globalState.setSongRepetitions(song.repeats);
         this.globalState.resetRepetition();
         this.globalState.setBeatCount(0);
 

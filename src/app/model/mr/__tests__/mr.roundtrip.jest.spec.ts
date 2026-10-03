@@ -178,6 +178,10 @@ describe('round-trip: modelo construido a mano', () => {
   function buildDocument(): SongDocument {
     const song = new Song();
     song.name = 'Modelo';
+    // La cabecera de reproducción es canónica en `Song` (#16/#20); la meta
+    // solo la refleja como haría `parseSong`.
+    song.repeats = 2;
+    song.bpm = 90;
 
     const part = new Part();
     part.name = 'P';
@@ -221,6 +225,8 @@ describe('round-trip: modelo construido a mano', () => {
 
   it('tolera bpm 120 y repeats 1 como equivalentes a ausentes', () => {
     const document = buildDocument();
+    document.song.repeats = 1;
+    document.song.bpm = 120;
     document.meta = { version: 1, repeats: 1, bpm: 120 };
 
     const reparsed = parseSong(serializeSong(document));

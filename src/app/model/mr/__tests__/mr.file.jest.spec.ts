@@ -92,6 +92,7 @@ describe('mr.file.node: integración real con disco', () => {
       const service = new MrFileService(createNodeMrFileSystem());
       const songPath = path.join(directory, 'orbita.mr');
       const document = createDocument('Órbita');
+      document.song.repeats = 2;
       document.meta = { version: 1, repeats: 2, bpm: 90 };
 
       await service.write(songPath, document);

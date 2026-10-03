@@ -82,6 +82,20 @@ describe('parseSong: cabecera', () => {
     expect(document.song.bpm).toBe(120);
   });
 
+  it('copia repeats a Song.repeats (fuente de verdad en memoria)', () => {
+    const document = parseSong('song "X"\nversion 1\nrepeats 3\n');
+
+    expect(document.meta.repeats).toBe(3);
+    expect(document.song.repeats).toBe(3);
+  });
+
+  it('aplica 1 a Song.repeats cuando la cabecera no declara repeats', () => {
+    const document = parseSong('song "X"\nversion 1\n');
+
+    expect(document.meta.repeats).toBeUndefined();
+    expect(document.song.repeats).toBe(1);
+  });
+
   it('rechaza versiones desconocidas con posición', () => {
     const error = expectParseError('song "X"\nversion 2\n');
 

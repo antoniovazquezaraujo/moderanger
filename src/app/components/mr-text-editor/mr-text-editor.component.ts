@@ -22,17 +22,18 @@ import {
   positionToOffset,
   prepareSongText,
   serializeSong,
-  sessionMetaToMrMeta,
+  songToMrMeta,
   validateSongText
 } from 'src/app/model/mr';
 import { Song } from 'src/app/model/song';
 
 /** Resultado de aplicar la vista de texto al modelo de la app. */
 export interface MrTextAppliedEvent {
-  /** Nueva canción parseada (instancia nueva; sustituye a la anterior). */
+  /**
+   * Nueva canción parseada (instancia nueva; sustituye a la anterior). Incluye
+   * `repeats` y `bpm` en el propio modelo (`Song.repeats`/`Song.bpm`).
+   */
   song: Song;
-  /** Metadatos del texto aplicado (`repeats`, `bpm`, versión). */
-  meta: MrMeta;
 }
 
 /**
@@ -53,8 +54,6 @@ export interface MrTextAppliedEvent {
 export class MrTextEditorComponent implements OnChanges, OnDestroy {
   @Input() song!: Song;
   @Input() visible = false;
-  /** Repeticiones actuales del editor (campo "Repeat"); se escriben como `repeats`. */
-  @Input() repeats = 1;
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() applied = new EventEmitter<MrTextAppliedEvent>();
 
@@ -84,14 +83,10 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
     if (changes['visible']?.currentValue === true) {
       this.reloadIfClean();
     }
-    // El tick del padre puede entregar `repeats` y `song` en pasadas distintas
-    // (p. ej. justo después de Aplicar): reaccionar solo a `repeats` recargaba
-    // el texto con el modelo todavía viejo. Cualquiera de los dos cambios debe
-    // regenerar el texto cuando no hay ediciones pendientes. El bpm viaja
-    // dentro de `song` (`Song.bpm` es la fuente de verdad).
-    const repeatsChanged = changes['repeats'] !== undefined && !changes['repeats'].firstChange;
+    // La canción nueva ya trae `repeats` y `bpm` (el parser los copia a
+    // `Song`): regenerar el texto cuando llega y no hay ediciones pendientes.
     const songChanged = changes['song'] !== undefined && !changes['song'].firstChange;
-    if (repeatsChanged || songChanged) {
+    if (songChanged) {
       this.reloadIfClean();
     }
   }
@@ -161,7 +156,7 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
     // Emitir antes de tocar `VariableContext`: si el padre para el player al
     // recibir `applied`, `SongPlayer.stop()` reinicia variables y borraría lo
     // recién aplicado (p. ej. `$mode = RANDOM` volvería a CHORD).
-    this.applied.emit({ song: document.song, meta: document.meta });
+    this.applied.emit({ song: document.song });
     applyDocumentVariables(document);
   }
 
@@ -209,7 +204,8 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
   }
 
   private currentMeta(): MrMeta {
-    // El bpm canónico vive en `Song.bpm`; la meta solo lo refleja en el texto.
-    return sessionMetaToMrMeta({ repeats: this.repeats, bpm: this.song.bpm });
+    // `Song.bpm` y `Song.repeats` son la fuente de verdad; la meta solo los
+    // refleja en el texto canónico.
+    return songToMrMeta(this.song);
   }
 }
