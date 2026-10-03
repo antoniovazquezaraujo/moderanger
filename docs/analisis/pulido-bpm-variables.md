@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-10-03
 - **Autor:** ROBER (full-stack TS/Angular)
-- **Rama:** `fix/pulido-mr` (desde `origin/main` = `d728037`)
+- **Rama:** `fix/pulido-mr` (desde `origin/main` = `d728037`); cabos sueltos #18-#20 cerrados en `chore/consolidacion-a` (§8)
 - **Estado:** implementada; pendiente de revisión de DANI
 - **Referencias:** `docs/analisis/mr-fase3-guardar-cargar.md` (§7), `docs/analisis/BACKLOG.md` (#12, #16, #17), `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
 - **Alcance:** cerrar los tres pendientes pequeños de la ronda: #16 (bpm al player), #17 (variables string en el editor de melodía) y #12 (doble renderizado de partes). No se toca la semántica de reproducción ni el formato `.mr`.
@@ -205,21 +205,109 @@ Resultado (resumen del JSON):
   y no hay ningún error de consola del editor al cargar (`editorNoise: []`).
 - **#12:** dos partes ⇒ `app-part` = 2 (antes 4), un `block-name-input` por
   bloque y `.p-accordion` = 0.
-- **Ruido de playback (preexistente):** al pulsar Play, `NoteGenerationService`
-  registra 4 `Error parsing block notes… $motif no contiene un número`. Es el
-  camino de reproducción, que esta ronda **no** cambia (véase §7.3).
+- **Ruido de playback (preexistente en esta ronda):** al pulsar Play,
+  `NoteGenerationService` registraba 4 `Error parsing block notes… $motif no
+  contiene un número`. Es el camino de reproducción, que esta ronda **no**
+  cambió; quedó cerrado después en el Bloque A (véase §8.3).
 
-## 7. Pendientes y limitaciones
+## 7. Pendientes y limitaciones (estado tras el Bloque A)
 
-1. **BPM en caliente:** cambiar el input mientras suena no reajusta el Transport;
-   se aplica al siguiente Play. Decidir si el producto quiere live-tempo.
+1. ~~**BPM en caliente:** cambiar el input mientras suena no reajusta el
+   Transport; se aplica al siguiente Play.~~ **Resuelto (#18, ver §8.2):** con
+   reproducción en curso el input aplica el BPM al Transport inmediatamente
+   (`SongPlayer.setTransportBpm`); en parado, al siguiente Play.
 2. **Edición de tokens en el editor:** `$motif` no es editable por valor (sí por
    duración/posición); para cambiar el patrón se edita la variable o el `.mr`.
-3. **Variable string no reproducible:** el editor ya pinta y conserva `$motif`
-   (pulido #17), pero al pulsar Play `NoteGenerationService` sigue registrando
-   `Error parsing block notes… $motif no contiene un número` y el bloque queda
-   sin eventos. Es la semántica de reproducción preexistente (solo variables
-   numéricas); resolver patrones string en notas sería una tarea de producto
-   aparte, fuera de esta ronda.
-4. **`Repeat` sigue siendo meta de sesión** (no vive en `Song`), a diferencia del
-   bpm; unificarlo sería otra tarea si se quiere persistir por canción.
+   Se mantiene: la edición del token es una feature de producto aparte.
+3. ~~**Variable string no reproducible:** al pulsar Play `NoteGenerationService`
+   registraba `Error parsing block notes… $motif no contiene un número` y el
+   bloque quedaba sin eventos.~~ **Resuelto (#19, ver §8.3):** la referencia
+   string se convierte en un silencio de su duración, sin `console.error`, y el
+   resto del bloque suena igual. La expansión real del patrón queda como feature
+   futura en el backlog ("expansión de melodías variables").
+4. ~~**`Repeat` sigue siendo meta de sesión** (no vive en `Song`).~~ **Resuelto
+   (#20, ver §8.1):** `Song.repeats` (default 1) es canónico, el parser lo copia
+   de la cabecera, el serializador lo emite desde el modelo y el player lo
+   aplica al iniciar. Desaparece la meta de sesión (`repetitions`).
+
+Limitación restante y aceptada: cambiar el *Repeat* con la reproducción en
+curso no re-programa la secuencia actual (se aplica al siguiente Play), igual
+que la inicialización del resto de la reproducción.
+
+## 8. Bloque A de consolidación (2026-10-03, rama `chore/consolidacion-a`)
+
+Cierre de los cabos sueltos #18, #19 y #20 con la fuente de verdad de la
+cabecera en `Song`, sin features nuevas ni cambios en la semántica del `.mr`.
+
+### 8.1 #20 · `Repeat` canónico en `Song`
+
+- `Song.repeats` (default `DEFAULT_REPEATS = 1`) con `clone()`/`toJSON()`;
+  constantes `MIN_REPEATS` (parser/serializador) y `MAX_REPEATS = 99` (UI).
+- `parseSong` copia `meta.repeats ?? 1` a `Song.repeats` (igual que ya hacía con
+  `bpm`); `serializeSong` emite la línea `repeats` **desde `Song.repeats`** y
+  valida entero >= 1. `meta.repeats` queda como reflejo de la cabecera parseada.
+- La cabecera del editor edita `song.repeats` (`#repetitions`, 1-99, recorte al
+  salir/Enter como el BPM) y `SongPlayer._initializePlayback` aplica
+  `song.repeats` al estado de repetición antes de `resetRepetition()`.
+- Se elimina el espejo de sesión: fuera `SongEditorComponent.repetitions`,
+  `MrSessionMeta`, `sessionMetaToMrMeta` y `mrMetaToSessionMeta`. En su lugar,
+  `songToMrMeta(song)` deriva la meta del fichero desde el modelo canónico.
+  `MrTextEditorComponent` pierde el `@Input() repeats` y el evento `applied`
+  pasa a ser solo `{ song }`: la canción ya trae `repeats`/`bpm` del parser.
+- Tests: default/clone/toJSON, parse→`Song.repeats`, serializado desde `Song`
+  (incluido que `meta.repeats` no decide la salida), round-trip, guardado, y
+  `SongPlayer` aplicando 3/1 repeticiones al estado.
+
+### 8.2 #18 · Live-tempo
+
+- `SongPlayer.setTransportBpm(bpm)` reajusta el Transport sin arrancar ni parar
+  la reproducción. `SongEditorComponent.onBpmChange` lo llama solo si
+  `songPlayer.isPlaying`; en parado el nuevo tempo se aplica en el siguiente
+  Play (`_initializePlayback` sigue leyendo `Song.bpm`).
+- Tests: player (el Transport pasa a 100 en caliente, no cambia `isPlaying`) y
+  componente (con reproducción se delega; en parado no).
+
+### 8.3 #19 · Variables string en playback
+
+- Política: omitir el evento **sin ruido**. `NoteGenerationService` detecta el
+  `MrParseError` de variable no numérica ("no contiene un número") y reintenta
+  con `parseBlockNotesForEditor`: la referencia se conserva como token y
+  `processSingleNoteData` la convierte en un silencio con su duración, de modo
+  que el resto del bloque conserva su posición. Errores de sintaxis y variables
+  no definidas siguen registrándose en consola.
+- El token se conserva en modelo/editor (ronda anterior) y `parseBlockNotes`
+  no cambia: la semántica del parser `.mr` queda intacta.
+- Tests: bloque con `4t:0 8t:$motif 4t:2` → acorde/silencio 8t/acorde sin
+  `console.error`; grupo con referencia string; variable no definida sí
+  registra; `parseBlockNotes` sigue lanzando.
+
+### 8.4 Verificación
+
+```sh
+npm test          # 26 suites, 341 tests
+npm run build     # exit 0
+```
+
+E2E CDP en el worktree (`ng serve` :4600, Chrome :9222; script
+`/tmp/opencode/cdp-consol-a.js`, fixture `/tmp/opencode/consol-a.mr`): carga
+del `.mr` con `repeats 2`/`bpm 90` (inputs 2/90), Play (Transport 90), cambio
+de BPM a 100 en caliente (Transport 100), reproducción del bloque `8t:$motif`
+**sin** errores `[NoteGenSvc]`, y guardado con `repeats 2`/`bpm 100`.
+
+```json
+{
+  "ready": true,
+  "checks": {
+    "load":     { "repeatsInputIs2": true, "bpmInputIs90": true, "songRepeatsIs2": true,
+                  "songBpmIs90": true, "partsRenderedOnce": true, "motifTokenVisible": true },
+    "playback": { "transportStartsAt90": true, "transportLiveAt100": true,
+                  "playingDuringChange": true, "songBpmUpdated": true, "songRepeatsStill2": true },
+    "noteGen":  { "noNoteGenErrors": true },
+    "save":     { "hasRepeats2": true, "hasBpm100": true, "hasMotifDeclaration": true,
+                  "hasVariableNote": true, "endsWithLf": true }
+  },
+  "exceptions": [],
+  "consoleErrors": [],
+  "pass": true
+}
+```
