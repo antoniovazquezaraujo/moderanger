@@ -107,9 +107,13 @@ export class Block {
         clonedBlock.repeatingTimes = this.repeatingTimes;
 
         const clonedContent = new BlockContent();
-        clonedContent.notes = this.blockContent.notes;
-        clonedContent.isVariable = this.blockContent.isVariable;
-        clonedContent.variableName = this.blockContent.variableName;
+        if (this.blockContent.isVariable) {
+            // Sin suscripción a VariableContext: el clon no debe observar el estado global.
+            clonedContent.setVariableReference(this.blockContent.variableName);
+        } else {
+            clonedContent.notes = this.blockContent.notes;
+        }
+        clonedContent.defaultDuration = this.blockContent.defaultDuration;
         clonedBlock.blockContent = clonedContent;
 
         clonedBlock.commands = this.commands.map(command => {
