@@ -25,7 +25,6 @@ export class InstrumentManagerService {
    * Create and register a new instrument
    */
   async createInstrument(type: InstrumentType, name?: string): Promise<string> {
-    console.log(`[InstrumentManager] Creating instrument: ${type}`);
     
     try {
       const instrumentId = await this.audioEngine.createInstrument(type);
@@ -39,7 +38,6 @@ export class InstrumentManagerService {
       };
       
       this.instruments.set(instrumentId, instance);
-      console.log(`[InstrumentManager] Instrument created: ${instrumentId}`);
       
       return instrumentId;
     } catch (error) {
@@ -128,7 +126,6 @@ export class InstrumentManagerService {
           break;
         case 'rest':
           // Rests don't produce sound, just wait
-          console.log(`[InstrumentManager] Rest for ${noteData.duration}`);
           break;
         default:
           console.warn(`[InstrumentManager] Unknown note type: ${noteData.type}`);
@@ -150,7 +147,6 @@ export class InstrumentManagerService {
 
     try {
       this.audioEngine.stopInstrumentNotes(instrumentId);
-      console.log(`[InstrumentManager] Stopped instrument ${instrumentId}`);
     } catch (error) {
       console.error(`[InstrumentManager] Error stopping instrument ${instrumentId}:`, error);
     }
@@ -160,7 +156,6 @@ export class InstrumentManagerService {
    * Stop all instruments
    */
   stopAllInstruments(): void {
-    console.log('[InstrumentManager] Stopping all instruments');
     
     for (const [instrumentId] of this.instruments) {
       this.stopInstrument(instrumentId);
@@ -180,7 +175,6 @@ export class InstrumentManagerService {
     try {
       this.audioEngine.disposeInstrument(instrumentId);
       this.instruments.delete(instrumentId);
-      console.log(`[InstrumentManager] Disposed instrument ${instrumentId}`);
     } catch (error) {
       console.error(`[InstrumentManager] Error disposing instrument ${instrumentId}:`, error);
     }
@@ -190,7 +184,6 @@ export class InstrumentManagerService {
    * Dispose of all instruments
    */
   disposeAllInstruments(): void {
-    console.log('[InstrumentManager] Disposing all instruments');
     
     const instrumentIds = Array.from(this.instruments.keys());
     for (const instrumentId of instrumentIds) {

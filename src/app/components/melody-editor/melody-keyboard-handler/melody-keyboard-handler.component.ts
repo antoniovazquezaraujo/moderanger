@@ -63,11 +63,6 @@ export class MelodyKeyboardHandlerComponent {
 
   @HostListener('keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent): void {
-    console.log('[MelodyKeyboard] RAW Keydown Event:', { 
-      key: event.key, 
-      code: event.code, 
-      shiftKey: event.shiftKey 
-    });
 
     if (event.repeat) return;
 
@@ -79,7 +74,6 @@ export class MelodyKeyboardHandlerComponent {
     // Process keyboard shortcuts
     const action = this.translateKeyboardEvent(event);
     if (action) {
-      console.log('[MelodyKeyboard] Emitting action:', action);
       this.keyboardAction.emit(action);
     }
   }
@@ -95,7 +89,6 @@ export class MelodyKeyboardHandlerComponent {
     }
 
     if (key === ')') {
-      console.log('[MelodyKeyboard] Close group (pending implementation)');
       return null; // TODO: Implement group closing
     }
 

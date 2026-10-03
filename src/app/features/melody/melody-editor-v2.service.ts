@@ -37,7 +37,6 @@ export class MelodyEditorV2Service {
     private groupManager: MelodyGroupManagerService,
     private dataConverter: MelodyDataConverterService
   ) {
-    console.log(`[MelodyEditorV2 INSTANCE ${this.serviceInstanceId}] Created`);
 
     // Combine all states into a single observable
     this.state$ = combineLatest([
@@ -66,7 +65,6 @@ export class MelodyEditorV2Service {
    * Load elements from external source
    */
   loadElements(elements: MusicElement[]): void {
-    console.log(`[MelodyEditorV2] Loading ${elements.length} elements`);
     this.elementManager.loadElements(elements);
     this.selectionManager.clearSelection();
   }
@@ -75,7 +73,6 @@ export class MelodyEditorV2Service {
    * Clear all elements
    */
   clearElements(): void {
-    console.log('[MelodyEditorV2] Clearing all elements');
     this.elementManager.loadElements([]);
     this.selectionManager.clearSelection();
   }
@@ -123,7 +120,6 @@ export class MelodyEditorV2Service {
       if (wasSelected) {
         this.selectionManager.clearSelection();
       }
-      console.log(`[MelodyEditorV2] Element ${id} removed`);
     }
   }
 
@@ -132,7 +128,6 @@ export class MelodyEditorV2Service {
    */
   updateNote(id: string, changes: Partial<MusicElement>): void {
     if (this.elementManager.updateElement(id, changes)) {
-      console.log(`[MelodyEditorV2] Element ${id} updated`);
     }
   }
 
@@ -206,7 +201,6 @@ export class MelodyEditorV2Service {
   removeGroupAndPromoteChildren(groupId: string): void {
     if (this.groupManager.removeGroupAndPromoteChildren(groupId)) {
       this.selectionManager.clearSelection();
-      console.log(`[MelodyEditorV2] Group ${groupId} removed and children promoted`);
     }
   }
 
@@ -234,7 +228,6 @@ export class MelodyEditorV2Service {
    * Load from NoteData array
    */
   loadFromNoteData(noteData: NoteData[]): void {
-    console.log(`[MelodyEditorV2] Loading from ${noteData.length} NoteData items`);
     const elements = this.dataConverter.fromNoteData(noteData);
     this.loadElements(elements);
   }
@@ -260,7 +253,6 @@ export class MelodyEditorV2Service {
   flattenGroups(): void {
     const flattened = this.dataConverter.flatten(this.getElements());
     this.loadElements(flattened);
-    console.log('[MelodyEditorV2] All groups flattened');
   }
 
   /**
@@ -332,7 +324,6 @@ export class MelodyEditorV2Service {
    * Reset to empty state
    */
   reset(): void {
-    console.log('[MelodyEditorV2] Resetting to empty state');
     this.clearElements();
     this.selectionManager.clearHistory();
   }

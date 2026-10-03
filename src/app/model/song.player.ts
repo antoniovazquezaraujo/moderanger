@@ -69,7 +69,6 @@ export class SongPlayer {
         this.playMode$ = this.globalState.playMode$;
         this.globalDefaultDuration$ = this.globalState.globalDefaultDuration$;
         
-        console.log('[SongPlayer] Initialized with GlobalStateService delegation');
     }
 
     // Getters/setters - delegated to GlobalStateService
@@ -177,11 +176,9 @@ export class SongPlayer {
             const executionUnits: ExecutionUnit[] = [];
             const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
                 // --- DEBUG LOG START ---
-                console.log(`[SongPlayer DEBUG] addBlockAndChildren called for block ${block.id}, repeatingTimes: ${block.repeatingTimes} (Type: ${typeof block.repeatingTimes})`); 
                 // --- DEBUG LOG END ---
                 for (let i = 0; i < block.repeatingTimes; i++) {
                     // --- DEBUG LOG START ---
-                    console.log(`[SongPlayer DEBUG]   -> Adding ExecutionUnit for block ${block.id}, repetition ${i+1} of ${block.repeatingTimes}`);
                     // --- DEBUG LOG END ---
                     executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
                     block.children?.forEach(childBlock => {
@@ -190,7 +187,6 @@ export class SongPlayer {
                 }
                 // --- DEBUG LOG START ---
                 if (block.repeatingTimes <= 0) { // Log if the loop was (correctly) skipped
-                     console.log(`[SongPlayer DEBUG]   -> Loop skipped for block ${block.id} due to repeatingTimes <= 0.`);
                 }
                 // --- DEBUG LOG END ---
             };
@@ -277,7 +273,6 @@ export class SongPlayer {
         // Set BPM and transport position
         const bpm = 120; // Use a default BPM as Song class does not have a bpm property
         this.audioEngine.setTransportBpm(bpm);
-        console.log(`[SongPlayer] _initializePlayback: BPM set to ${bpm}`);
         this.audioEngine.setTransportPosition(0);
 
         // Hook up the stop listener
@@ -314,11 +309,9 @@ export class SongPlayer {
             const executionUnits: ExecutionUnit[] = [];
             const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
                 // --- DEBUG LOG START ---
-                console.log(`[SongPlayer DEBUG] addBlockAndChildren called for block ${block.id}, repeatingTimes: ${block.repeatingTimes} (Type: ${typeof block.repeatingTimes})`); 
                 // --- DEBUG LOG END ---
                 for (let i = 0; i < block.repeatingTimes; i++) {
                     // --- DEBUG LOG START ---
-                    console.log(`[SongPlayer DEBUG]   -> Adding ExecutionUnit for block ${block.id}, repetition ${i+1} of ${block.repeatingTimes}`);
                     // --- DEBUG LOG END ---
                     executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
                     block.children?.forEach(childBlock => {
@@ -327,7 +320,6 @@ export class SongPlayer {
                 }
                 // --- DEBUG LOG START ---
                 if (block.repeatingTimes <= 0) { // Log if the loop was (correctly) skipped
-                     console.log(`[SongPlayer DEBUG]   -> Loop skipped for block ${block.id} due to repeatingTimes <= 0.`);
                 }
                 // --- DEBUG LOG END ---
             };
@@ -461,7 +453,6 @@ export class SongPlayer {
             if (repetitionState.canAdvance) {
                 this.globalState.nextRepetition();
                 this.globalState.setBeatCount(0); // Reset beat count for new repetition
-                console.log(`[SongPlayer] Starting repetition ${repetitionState.currentRepetition + 2} / ${repetitionState.songRepetitions}`);
                 // Reset each part's state for the next repetition
                 partSoundInfo.forEach(psi => {
                     psi.noteDataIndex = 0;

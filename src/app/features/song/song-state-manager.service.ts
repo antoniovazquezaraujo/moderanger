@@ -38,7 +38,6 @@ export class SongStateManagerService {
     this.playMode$ = this.globalState.playMode$;
     this.globalDefaultDuration$ = this.globalState.globalDefaultDuration$;
     
-    console.log('[SongStateManager] Initialized with GlobalStateService delegation');
   }
 
   // ============= PUBLIC API =============
@@ -156,7 +155,6 @@ export class SongStateManagerService {
    * Substitute variables in entire song
    */
   substituteVariablesInSong(song: Song): void {
-    console.log('[SongStateManager] Substituting variables in song');
     
     const processBlock = (block: Block) => {
       // Process commands and operations in the block
@@ -178,7 +176,6 @@ export class SongStateManagerService {
       }
     }
     
-    console.log('[SongStateManager] Variable substitution completed');
   }
 
   /**
@@ -186,7 +183,6 @@ export class SongStateManagerService {
    */
   resetVariables(): void {
     VariableContext.resetAll();
-    console.log('[SongStateManager] All variables reset');
   }
 
   /**

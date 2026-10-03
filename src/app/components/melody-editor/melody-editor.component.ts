@@ -77,7 +77,6 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
 
   // <<< NEW PUBLIC METHODS FOR EXTERNAL CONTROL >>>
   public loadMelody(elements: MusicElement[]): void {
-    console.log(`[MelodyEditor] loadMelody called externally with ${elements.length} elements.`);
     this.melodyEditorService.loadElements(elements);
     // Ensure change detection runs if called after initialization
     this.cdr.detectChanges();

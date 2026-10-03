@@ -35,7 +35,6 @@ export class MelodyElementManagerService {
   readonly elements$ = this.elementsSubject.asObservable();
 
   constructor(private musicElementOps: MusicElementOperationsService) {
-    console.log(`[MelodyElementManager INSTANCE ${this.serviceInstanceId}] Created with unified operations`);
   }
 
   // ============= PUBLIC API =============
@@ -51,7 +50,6 @@ export class MelodyElementManagerService {
    * Load elements from external source
    */
   loadElements(elements: MusicElement[]): void {
-    console.log(`[MelodyElementManager] Loading ${elements.length} elements`);
     this.elementsSubject.next([...elements]);
   }
 
@@ -59,14 +57,12 @@ export class MelodyElementManagerService {
    * Add a new note to the end of the melody
    */
   addNote(noteData: Partial<SingleNote>, duration: NoteDuration): string {
-    console.log(`[MelodyElementManager] Adding note with duration: ${duration}`);
     
     const currentElements = this.elementsSubject.value;
     const result = this.musicElementOps.addNote(currentElements, noteData, duration);
     
     if (result.success && result.data) {
       this.elementsSubject.next(result.data.elements);
-      console.log(`[MelodyElementManager] Note added with ID: ${result.data.noteId}`);
       return result.data.noteId;
     } else {
       console.error(`[MelodyElementManager] Failed to add note: ${result.error}`);
@@ -78,14 +74,12 @@ export class MelodyElementManagerService {
    * Add a note after a specific element
    */
   addNoteAfter(targetId: string, noteData: Partial<SingleNote>, duration: NoteDuration): string | null {
-    console.log(`[MelodyElementManager] Adding note after element: ${targetId}`);
     
     const currentElements = this.elementsSubject.value;
     const result = this.musicElementOps.addNoteAfter(currentElements, targetId, noteData, duration);
     
     if (result.success && result.data) {
       this.elementsSubject.next(result.data.elements);
-      console.log(`[MelodyElementManager] Note added after ${targetId} with ID: ${result.data.noteId}`);
       return result.data.noteId;
     } else {
       console.warn(`[MelodyElementManager] Failed to add note after ${targetId}: ${result.error}`);
@@ -97,14 +91,12 @@ export class MelodyElementManagerService {
    * Add a note to a group
    */
   addNoteToGroup(groupId: string, noteData: Partial<SingleNote>, duration: NoteDuration): string | null {
-    console.log(`[MelodyElementManager] Adding note to group: ${groupId}`);
     
     const currentElements = this.elementsSubject.value;
     const result = this.musicElementOps.addNoteToGroup(currentElements, groupId, noteData, duration);
     
     if (result.success && result.data) {
       this.elementsSubject.next(result.data.elements);
-      console.log(`[MelodyElementManager] Note added to group ${groupId} with ID: ${result.data.noteId}`);
       return result.data.noteId;
     } else {
       console.warn(`[MelodyElementManager] Failed to add note to group: ${result.error}`);
@@ -116,14 +108,12 @@ export class MelodyElementManagerService {
    * Remove an element by ID
    */
   removeElement(id: string): boolean {
-    console.log(`[MelodyElementManager] Removing element: ${id}`);
     
     const currentElements = this.elementsSubject.value;
     const result = this.musicElementOps.removeElement(currentElements, id);
     
     if (result.success && result.data) {
       this.elementsSubject.next(result.data);
-      console.log(`[MelodyElementManager] Element ${id} removed successfully`);
       return true;
     } else {
       console.warn(`[MelodyElementManager] Failed to remove element ${id}: ${result.error}`);
@@ -135,14 +125,12 @@ export class MelodyElementManagerService {
    * Update an element with partial changes
    */
   updateElement(id: string, changes: Partial<MusicElement>): boolean {
-    console.log(`[MelodyElementManager] Updating element ${id}:`, changes);
     
     const currentElements = this.elementsSubject.value;
     const result = this.musicElementOps.updateElement(currentElements, id, changes);
     
     if (result.success && result.data) {
       this.elementsSubject.next(result.data);
-      console.log(`[MelodyElementManager] Element ${id} updated successfully`);
       return true;
     } else {
       console.warn(`[MelodyElementManager] Failed to update element ${id}: ${result.error}`);

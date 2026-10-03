@@ -76,7 +76,6 @@ export class NoteGenerationService {
       }
     } else {
       // --- If notes string is empty, create a default silence/rest --- 
-      console.log(`[NoteGenSvc] No notes string to parse. Creating default rest with unified service.`);
       const restResult = this.noteGenUnified.createRestNoteData('16n');
       if (restResult.success && restResult.data) {
         rootNoteDatas = [restResult.data];
@@ -149,8 +148,6 @@ export class NoteGenerationService {
                       // Calculate time scaling factor
                       const scaleFactor = patternDurationSeconds > 0 ? originalNoteDurationSeconds / patternDurationSeconds : 1;
 
-                      console.log(`[NoteGenSvc] Applying PATTERN. BaseGrade: ${baseGrade}, Scale: ${scaleName}, Octave: ${player.octave}, Tonality: ${player.tonality}, PatternLength: ${patternMelody.length}, OrigDuration: ${originalNoteDurationSeconds}s, PatternDuration: ${patternDurationSeconds}s, ScaleFactor: ${scaleFactor}`);
-
                       patternMelody.forEach(patternNoteData => {
                           const transposedNoteData = JSON.parse(JSON.stringify(patternNoteData)) as NoteData;
 
@@ -163,7 +160,6 @@ export class NoteGenerationService {
                                   const octavedGrade = new OctavedGrade(currentScale, targetGrade, player.octave);
                                   const targetMidiNote = octavedGrade.toNote() + player.tonality;
                                   transposedNoteData.note = targetMidiNote;
-                                  console.log(`  [Pattern] BaseGrade: ${baseGrade}, PatternGrade: ${patternGrade} -> TargetGrade: ${targetGrade} -> MIDI: ${targetMidiNote}`);
                               } catch (e) {
                                   console.error(`[NoteGenSvc] Error calculating OctavedGrade for targetGrade ${targetGrade}:`, e);
                                   // What to do on error? Skip note? Make it a rest?

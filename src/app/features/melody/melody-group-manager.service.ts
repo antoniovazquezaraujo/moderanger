@@ -15,7 +15,6 @@ export interface GroupOperation {
 export class MelodyGroupManagerService {
 
   constructor(private elementManager: MelodyElementManagerService) {
-    console.log('[MelodyGroupManager] Service initialized');
   }
 
   // ============= PUBLIC API =============
@@ -24,7 +23,6 @@ export class MelodyGroupManagerService {
    * Start a new group at the end or after a specific element
    */
   startGroup(duration: NoteDuration, afterVisualElementId?: string | null): string {
-    console.log(`[MelodyGroupManager] Starting group with duration: ${duration}`);
     
     const newGroup = NoteFactory.createGenericGroup([], duration);
     const currentElements = this.elementManager.getElements();
@@ -35,7 +33,6 @@ export class MelodyGroupManagerService {
         const newElements = [...currentElements];
         newElements.splice(targetIndex + 1, 0, newGroup);
         this.elementManager.loadElements(newElements);
-        console.log(`[MelodyGroupManager] Group ${newGroup.id} inserted after ${afterVisualElementId}`);
         return newGroup.id;
       }
     }
@@ -43,7 +40,6 @@ export class MelodyGroupManagerService {
     // Add to end if no specific position
     const newElements = [...currentElements, newGroup];
     this.elementManager.loadElements(newElements);
-    console.log(`[MelodyGroupManager] Group ${newGroup.id} added to end`);
     return newGroup.id;
   }
 
@@ -51,7 +47,6 @@ export class MelodyGroupManagerService {
    * Move group start position left
    */
   moveGroupStartLeft(groupId: string): boolean {
-    console.log(`[MelodyGroupManager] Moving group start left: ${groupId}`);
     
     const { element: group, parent } = this.elementManager.findElementAndParent(groupId);
     if (!group || group.type !== 'group') {
@@ -61,7 +56,6 @@ export class MelodyGroupManagerService {
 
     const typedGroup = group as GenericGroup;
     if (!typedGroup.children || typedGroup.children.length === 0) {
-      console.log(`[MelodyGroupManager] Group ${groupId} has no children to move`);
       return false;
     }
 
@@ -72,7 +66,6 @@ export class MelodyGroupManagerService {
    * Move group start position right
    */
   moveGroupStartRight(groupId: string): boolean {
-    console.log(`[MelodyGroupManager] Moving group start right: ${groupId}`);
     
     const { element: group, parent } = this.elementManager.findElementAndParent(groupId);
     if (!group || group.type !== 'group') {
@@ -82,7 +75,6 @@ export class MelodyGroupManagerService {
 
     const typedGroup = group as GenericGroup;
     if (!typedGroup.children || typedGroup.children.length === 0) {
-      console.log(`[MelodyGroupManager] Group ${groupId} has no children to move`);
       return false;
     }
 
@@ -93,7 +85,6 @@ export class MelodyGroupManagerService {
    * Move group end position left
    */
   moveGroupEndLeft(groupId: string): boolean {
-    console.log(`[MelodyGroupManager] Moving group end left: ${groupId}`);
     
     const { element: group, parent } = this.elementManager.findElementAndParent(groupId);
     if (!group || group.type !== 'group') {
@@ -103,7 +94,6 @@ export class MelodyGroupManagerService {
 
     const typedGroup = group as GenericGroup;
     if (!typedGroup.children || typedGroup.children.length === 0) {
-      console.log(`[MelodyGroupManager] Group ${groupId} has no children to move`);
       return false;
     }
 
@@ -114,7 +104,6 @@ export class MelodyGroupManagerService {
    * Move group end position right
    */
   moveGroupEndRight(groupId: string): boolean {
-    console.log(`[MelodyGroupManager] Moving group end right: ${groupId}`);
     
     const { element: group, parent } = this.elementManager.findElementAndParent(groupId);
     if (!group || group.type !== 'group') {
@@ -124,7 +113,6 @@ export class MelodyGroupManagerService {
 
     const typedGroup = group as GenericGroup;
     if (!typedGroup.children || typedGroup.children.length === 0) {
-      console.log(`[MelodyGroupManager] Group ${groupId} has no children to move`);
       return false;
     }
 
@@ -135,7 +123,6 @@ export class MelodyGroupManagerService {
    * Remove group and promote its children to parent level
    */
   removeGroupAndPromoteChildren(groupId: string): boolean {
-    console.log(`[MelodyGroupManager] Removing group and promoting children: ${groupId}`);
     
     const { element: group, parent } = this.elementManager.findElementAndParent(groupId);
     if (!group || group.type !== 'group') {
@@ -159,18 +146,15 @@ export class MelodyGroupManagerService {
    * Move element left in its container
    */
   moveElementLeft(id: string): boolean {
-    console.log(`[MelodyGroupManager] Moving element left: ${id}`);
     
     const currentElements = this.elementManager.getElements();
     const result = this.findAndReorderRecursively(currentElements, id, -1);
     
     if (result.modified) {
       this.elementManager.loadElements(result.newElements);
-      console.log(`[MelodyGroupManager] Element ${id} moved left successfully`);
       return true;
     }
     
-    console.log(`[MelodyGroupManager] Could not move element ${id} left`);
     return false;
   }
 
@@ -178,18 +162,15 @@ export class MelodyGroupManagerService {
    * Move element right in its container
    */
   moveElementRight(id: string): boolean {
-    console.log(`[MelodyGroupManager] Moving element right: ${id}`);
     
     const currentElements = this.elementManager.getElements();
     const result = this.findAndReorderRecursively(currentElements, id, 1);
     
     if (result.modified) {
       this.elementManager.loadElements(result.newElements);
-      console.log(`[MelodyGroupManager] Element ${id} moved right successfully`);
       return true;
     }
     
-    console.log(`[MelodyGroupManager] Could not move element ${id} right`);
     return false;
   }
 
@@ -226,7 +207,6 @@ export class MelodyGroupManagerService {
   private moveGroupBoundaryInParent(groupId: string, group: GenericGroup, parent: MusicElement, targetChild: MusicElement, moveOut: boolean): boolean {
     // Complex logic for moving group boundaries within nested structures
     // This would implement the specific logic based on parent type (group vs composite note)
-    console.log(`[MelodyGroupManager] Moving group boundary in parent (moveOut: ${moveOut})`);
     
     // For now, return false to indicate operation not supported
     // Real implementation would handle GenericGroup and CompositeNote parent types
@@ -271,7 +251,6 @@ export class MelodyGroupManagerService {
 
   private promoteChildrenInNestedGroup(groupId: string, children: MusicElement[], parent: MusicElement): boolean {
     // Handle promotion in nested structures
-    console.log(`[MelodyGroupManager] Promoting children in nested group`);
     
     if (parent.type === 'group') {
       const parentGroup = parent as GenericGroup;
@@ -297,7 +276,6 @@ export class MelodyGroupManagerService {
       newElements.splice(groupIndex, 1, ...children); // Replace group with its children
       
       this.elementManager.loadElements(newElements);
-      console.log(`[MelodyGroupManager] Promoted ${children.length} children to root level`);
       return true;
     }
     

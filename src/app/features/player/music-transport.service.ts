@@ -62,7 +62,6 @@ export class MusicTransportService {
         this.handleTransportStop();
       });
       
-      console.log('[MusicTransport] Started successfully');
     } catch (error) {
       console.error('[MusicTransport] Error starting:', error);
       throw error;
@@ -73,7 +72,6 @@ export class MusicTransportService {
    * Stop the music transport
    */
   stop(): void {
-    console.log('[MusicTransport] Stopping...');
     
     // Stop audio engine
     this.audioEngine.cancelTransportEvents();
@@ -93,7 +91,6 @@ export class MusicTransportService {
 
     // Reset state
     this.resetState();
-    console.log('[MusicTransport] Stopped');
   }
 
   /**
@@ -104,7 +101,6 @@ export class MusicTransportService {
     
     this.audioEngine.stopTransport();
     this.updateState({ isPlaying: false });
-    console.log('[MusicTransport] Paused');
   }
 
   /**
@@ -167,7 +163,6 @@ export class MusicTransportService {
   }
 
   private handleTransportStop(): void {
-    console.log('[MusicTransport] Transport stopped externally');
     this.resetState();
     this.currentLoopId = null;
     this.currentStopListenerId = null;

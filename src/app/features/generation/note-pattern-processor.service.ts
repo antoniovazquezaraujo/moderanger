@@ -23,7 +23,6 @@ export class NotePatternProcessorService {
   private noteGenUnified = new NoteGenerationUnifiedService();
 
   constructor() {
-    console.log('[NotePatternProcessor] Service initialized');
   }
 
   // ============= PUBLIC API =============
@@ -41,7 +40,6 @@ export class NotePatternProcessorService {
    * Apply pattern to a base note
    */
   applyPattern(baseGrade: number, duration: string, player: Player): PatternApplicationResult {
-    console.log(`[NotePatternProcessor] Applying pattern to base grade: ${baseGrade}`);
     
     if (!this.shouldApplyPattern(player)) {
       return {
@@ -68,8 +66,6 @@ export class NotePatternProcessorService {
       const originalNoteDurationSeconds = this.calculateDurationSeconds(duration);
       const patternDurationSeconds = this.calculatePatternDuration(patternMelody);
       const scaleFactor = patternDurationSeconds > 0 ? originalNoteDurationSeconds / patternDurationSeconds : 1;
-
-      console.log(`[NotePatternProcessor] Pattern analysis - BaseGrade: ${baseGrade}, Scale: ${scaleName}, Octave: ${player.octave}, PatternLength: ${patternMelody.length}, ScaleFactor: ${scaleFactor}`);
 
       // Process each note in the pattern
       const transposedNotes = this.transposePatternNotes(
@@ -98,7 +94,6 @@ export class NotePatternProcessorService {
    * Analyze pattern characteristics
    */
   analyzePattern(pattern: NoteData[]): PatternAnalysis {
-    console.log(`[NotePatternProcessor] Analyzing pattern with ${pattern.length} notes`);
     
     const analysis: PatternAnalysis = {
       noteCount: 0,
@@ -124,7 +119,6 @@ export class NotePatternProcessorService {
       analysis.gradeRange = { min: 0, max: 0 };
     }
 
-    console.log('[NotePatternProcessor] Pattern analysis:', analysis);
     return analysis;
   }
 
@@ -132,7 +126,6 @@ export class NotePatternProcessorService {
    * Validate pattern structure
    */
   validatePattern(pattern: NoteData[]): PatternValidation {
-    console.log(`[NotePatternProcessor] Validating pattern with ${pattern.length} notes`);
     
     const validation: PatternValidation = {
       isValid: true,
@@ -151,7 +144,6 @@ export class NotePatternProcessorService {
       this.validatePatternNote(note, i, validation);
     }
 
-    console.log(`[NotePatternProcessor] Pattern validation completed. Valid: ${validation.isValid}`);
     return validation;
   }
 
@@ -219,7 +211,6 @@ export class NotePatternProcessorService {
         const targetMidiNote = octavedGrade.toNote() + player.tonality;
         transposedNoteData.note = targetMidiNote;
         
-        console.log(`[NotePatternProcessor] Transpose: BaseGrade(${baseGrade}) + PatternGrade(${patternGrade}) = TargetGrade(${targetGrade}) -> MIDI(${targetMidiNote})`);
       } catch (error) {
         console.error(`[NotePatternProcessor] Error transposing note:`, error);
         // Convert to rest on error

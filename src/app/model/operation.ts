@@ -26,14 +26,10 @@ export class VaryOperation extends BaseOperation {
     }
     
     execute(): void {
-        console.log(`[VaryOperation EXECUTE START] Variable: ${this.variableName}`);
         const currentValue = VariableContext.getValue(this.variableName);
         const playModeNames = getPlayModeNames();
         const scaleNames = Scale.getScaleNames();
         const step = typeof this.value === 'number' ? this.value : 1;
-
-        console.log(`  -> Current Value: ${currentValue} (Type: ${typeof currentValue})`);
-        console.log(`  -> Step Value: ${step}`);
 
         if (currentValue === undefined) {
             console.warn(`   Variable ${this.variableName} is undefined. Aborting execute.`);
@@ -47,30 +43,24 @@ export class VaryOperation extends BaseOperation {
                 const currentIndex = playModeNames.indexOf(currentValue);
                 const nextIndex = (currentIndex + step) % playModeNames.length;
                 newValue = playModeNames[(nextIndex + playModeNames.length) % playModeNames.length];
-                console.log(`   Calculated PlayMode New Value: ${newValue}`);
             } else if (scaleNames.includes(currentValue)) {
                 const currentIndex = scaleNames.indexOf(currentValue);
                 const nextIndex = (currentIndex + step) % scaleNames.length;
                 newValue = scaleNames[(nextIndex + scaleNames.length) % scaleNames.length];
-                console.log(`   Calculated Scale New Value: ${newValue}`);
             } else {
                 console.warn(`   Cannot vary variable ${this.variableName}: String value '${currentValue}' is not recognized. Aborting execute.`);
                 return;
             }
         } else if (typeof currentValue === 'number') {
             newValue = currentValue + step;
-            console.log(`   Calculated Number New Value: ${newValue}`);
         } else {
             console.warn(`   Cannot vary variable ${this.variableName}: Unexpected value type '${typeof currentValue}'. Aborting execute.`);
             return;
         }
 
         if (newValue !== undefined) {
-            console.log(`   Attempting to set Variable ${this.variableName} to ${newValue}`);
             VariableContext.setValue(this.variableName, newValue);
-            console.log(`[VaryOperation EXECUTE END] Variable ${this.variableName} set.`);
         } else {
-            console.log(`[VaryOperation EXECUTE END] No new value calculated. Variable ${this.variableName} not set.`);
         }
     }
 }

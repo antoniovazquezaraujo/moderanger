@@ -52,7 +52,6 @@ export class MelodyOperationsComponent {
    * Handle keyboard actions by converting them to specific operations
    */
   handleKeyboardAction(action: KeyboardAction): void {
-    console.log('[MelodyOperations] Handling keyboard action:', action);
 
     let result: OperationResult;
 
