@@ -106,6 +106,24 @@ export class BlockComponent implements OnInit, OnDestroy {
   hasChildren() {
     return !!this._block?.children && this._block.children.length > 0;
   }
+
+  /**
+   * `true` si el bloque debe pintarse como fila propia. Los bloques
+   * "contenedor" que crea la GUI (sin label/notas/comandos/operaciones)
+   * siguen mostrando únicamente a sus hijos.
+   */
+  get hasOwnContent(): boolean {
+    return this._block?.hasOwnContent() ?? false;
+  }
+
+  /**
+   * Raíz del `p-tree`: el propio bloque cuando tiene contenido (caso `.mr`);
+   * si no, sus hijos (contenedor clásico de la GUI). PrimeNG anida los
+   * descendientes a partir de `children`, así que no se duplica nada.
+   */
+  get treeValue(): Block[] {
+    return this.hasOwnContent ? [this._block] : (this._block?.children ?? []);
+  }
   
   dragStart(block: Block) {
     this.draggedBlock = block;

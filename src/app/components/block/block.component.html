@@ -9,10 +9,15 @@
     <button pButton type="button" icon="pi pi-times" (click)="removeChild(block)"></button>
     <app-block-commands [block]="block" (removeCommand)="onRemoveCommand($event)"></app-block-commands> -->
 
-<!-- Conditionally render the p-tree only if there are children -->
-<ng-container *ngIf="block.children && block.children.length > 0">
+<!--
+  El bloque raíz de `Part.blocks` puede ser contenido real (`.mr`) o un
+  contenedor vacío creado por la GUI. `treeValue` devuelve el propio bloque
+  cuando tiene contenido (PrimeNG anida sus hijos vía `children`) y sólo los
+  hijos cuando es un contenedor, preservando el comportamiento clásico.
+-->
+<ng-container *ngIf="treeValue.length > 0">
   <p-tree 
-    [value]="block.children ||[]" 
+    [value]="treeValue" 
     [draggableNodes]="true" 
     [droppableNodes]="true" 
     draggableScope="self" 
