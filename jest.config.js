@@ -39,5 +39,16 @@ module.exports = {
     '!src/app/**/__tests__/**',
     '!src/app/**/__mocks__/**'
   ],
-  coverageDirectory: 'coverage'
+  coverageDirectory: 'coverage',
+  // Umbral global ligeramente por debajo de la cobertura real (2026-10-03:
+  // 74,19 % stmts / 66,81 % branch / 68,6 % funcs / 74,83 % lines) para que
+  // CI no se rompa por fluctuaciones menores sin dejar caer el nivel.
+  coverageThreshold: {
+    global: {
+      statements: 73,
+      branches: 65,
+      functions: 67,
+      lines: 73
+    }
+  }
 };
