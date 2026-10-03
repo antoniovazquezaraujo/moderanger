@@ -7,5 +7,5 @@
 
 <!-- Mostrar el editor solo cuando el audio esté listo -->
 <div class="container" *ngIf="isAudioReady">
-    <app-song-editor [song]="currentSong"></app-song-editor>
+    <app-song-editor [(song)]="currentSong"></app-song-editor>
 </div>

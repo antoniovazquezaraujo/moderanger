@@ -29,6 +29,8 @@
                     <app-metronome class="inline-metronome p-ml-2"></app-metronome> 
                     <!-- Variables button next to metronome -->
                     <p-button (click)="toggleVariablesSidebar()" label="$" pTooltip="Show/Hide Variables" tooltipPosition="top" class="p-ml-2"></p-button>
+                    <!-- Vista avanzada de texto .mr (divulgación progresiva) -->
+                    <p-button (click)="toggleMrTextEditor()" label=".mr" icon="pi pi-code" pTooltip="Texto (.mr)" tooltipPosition="top" class="p-ml-2"></p-button>
                 </div>
             </div>
         </div>
@@ -48,6 +50,14 @@
         <h3>Variables</h3>
         <app-variable-declaration></app-variable-declaration>
     </p-sidebar>
+
+    <!-- Vista avanzada de texto canónico .mr -->
+    <app-mr-text-editor
+        [song]="song"
+        [repeats]="repetitions"
+        [(visible)]="mrTextVisible"
+        (applied)="onMrTextApplied($event)">
+    </app-mr-text-editor>
 </div>
 
 <div class="song-editor">
