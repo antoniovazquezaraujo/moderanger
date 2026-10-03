@@ -85,14 +85,16 @@ export class Block {
 
     /**
      * `true` si el bloque tiene contenido propio que merece una fila visible
-     * (label, notas, comandos u operaciones). Un bloque sin contenido actúa
-     * como contenedor: la GUI pinta únicamente a sus hijos.
+     * (label, notas, `notes default` u operaciones). Un bloque sin contenido
+     * actúa como contenedor: la GUI pinta únicamente a sus hijos.
      */
     hasOwnContent(): boolean {
         const notes = this.blockContent?.notes ?? '';
+        const defaultDuration = this.blockContent?.defaultDuration ?? '';
         return (
             (this.label ?? '').trim() !== '' ||
             notes.trim() !== '' ||
+            defaultDuration.trim() !== '' ||
             (this.commands?.length ?? 0) > 0 ||
             (this.operations?.length ?? 0) > 0
         );

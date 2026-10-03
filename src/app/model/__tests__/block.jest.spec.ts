@@ -140,6 +140,20 @@ describe('Block.hasOwnContent', () => {
 
     expect(block.hasOwnContent()).toBe(true);
   });
+
+  it('es true si el bloque solo declara `notes default` (caso .mr)', () => {
+    const block = new Block();
+    block.blockContent.defaultDuration = '8n';
+
+    expect(block.hasOwnContent()).toBe(true);
+  });
+
+  it('ignora una duración por defecto en blanco', () => {
+    const block = new Block();
+    block.blockContent.defaultDuration = '   ';
+
+    expect(block.hasOwnContent()).toBe(false);
+  });
 });
 
 describe('Block.executeBlockOperations', () => {
