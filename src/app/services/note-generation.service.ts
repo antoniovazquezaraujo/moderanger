@@ -9,7 +9,7 @@ import { PlayMode, arpeggiate } from '../model/play.mode';
 // VariableContext might be needed if substituting variables here, keep for now
 import { VariableContext } from '../model/variable.context';
 // Import the NoteData parser directly
-import { parseBlockNotes } from '../model/ohm.parser';
+import { parseBlockNotes } from '../model/mr/notes.parser';
 import * as Tone from 'tone'; // Import Tone
 // Import unified note generation service
 import { 

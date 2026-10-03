@@ -1,4 +1,4 @@
-import { parseBlockNotes } from '../ohm.parser';
+import { parseBlockNotes } from '../mr/notes.parser';
 import { NoteData } from '../note';
 
 describe('parseBlockNotes: duraciones en grupos', () => {

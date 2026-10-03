@@ -2,7 +2,7 @@ import { VariableContext, ScaleType } from './variable.context';
 import { getPlayModeFromString, PlayMode } from './play.mode';
 import { ScaleTypes } from './scale';
 import { NoteData } from './note';
-import { parseBlockNotes } from './ohm.parser';
+import { parseBlockNotes } from './mr/notes.parser';
 
 export enum CommandType {
     OCT = 'OCT',
