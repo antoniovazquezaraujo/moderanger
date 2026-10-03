@@ -2,21 +2,9 @@
 $primary-color: #0077cc;
 $secondary-color: #666;
 $white: #fff;
-$border-color: #ccc;
-$hover-color: #e6f2ff;
 $selected-color: rgba(0, 119, 204, 0.2);
-$group-start-color: #cc0000;
-$group-end-color: #0000cc;
 $transition-time: 0.2s;
 $z-index-base: 10;
-$z-index-selected: 100;
-
-// Animaciones
-@keyframes pulse {
-  0% { box-shadow: 0 0 5px rgba(0, 119, 204, 0.3); }
-  50% { box-shadow: 0 0 12px rgba(0, 119, 204, 0.6); }
-  100% { box-shadow: 0 0 5px rgba(0, 119, 204, 0.3); }
-}
 
 // Contenedor principal
 .melody-editor {
@@ -137,13 +125,7 @@ $z-index-selected: 100;
     z-index: $z-index-base + 1;
   }
   
-  &.inside-group {
-    border-color: rgba(119, 153, 187, 0.3);
-    background-color: rgba(119, 153, 187, 0.05);
-    margin-left: 10px;
-  }
-  
-  &.add-note, &.add-first-note {
+  &.add-note {
     opacity: 0.7;
     background-color: transparent;
     border-style: dashed;
@@ -167,12 +149,6 @@ $z-index-selected: 100;
     font-weight: bold;
     color: #333;
   }
-  
-  .note-rest {
-    font-size: 16px;
-    font-weight: bold;
-    color: #999;
-  }
 }
 
 // Duración de la nota
@@ -191,11 +167,6 @@ $z-index-selected: 100;
     font-family: monospace;
     font-weight: bold;
     color: #444;
-  }
-  
-  .note-placeholder {
-    font-size: 12px;
-    color: $secondary-color;
   }
 }
 
@@ -230,23 +201,6 @@ $z-index-selected: 100;
     color: $secondary-color;
     margin-right: 2px;
     font-family: monospace;
-}
-
-.group-start-marker {
-  // padding-left: 4px;
-}
-
-.group-end-marker {
-  // Estilos específicos si son necesarios para el fin
-}
-
-.group-bracket-start {
-  // margin-right: 0;
-}
-
-.group-bracket-end {
-  // margin-left: 0;
-  // No necesita order si es el único hijo en .group-end-marker
 }
 
 // Estilos para los corchetes de grupo (on the right)
