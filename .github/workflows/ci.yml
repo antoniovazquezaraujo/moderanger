@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    name: tests + build (Node 16)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 16
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tests unitarios
+        run: npm test
+
+      # `npm test` no recolecta cobertura; este paso aplica el
+      # `coverageThreshold` de jest.config.js.
+      - name: Cobertura (umbral)
+        run: npm run test:cov
+
+      - name: Build de producción
+        run: npm run build

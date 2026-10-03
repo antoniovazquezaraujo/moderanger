@@ -67,7 +67,6 @@ export class VaryOperation extends BaseOperation {
 
 export class AssignOperation extends BaseOperation {
     execute(): void {
-        console.log(`AssignOperation: Asignando a ${this.variableName} el valor: ${this.value} (tipo: ${typeof this.value})`);
         VariableContext.setValue(this.variableName, this.value);
     }
 }
