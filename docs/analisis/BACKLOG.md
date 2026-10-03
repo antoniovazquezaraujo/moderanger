@@ -24,6 +24,8 @@
 | 13 | **Bloques raíz `.mr` colapsados por defecto** | El árbol muestra los hijos de un bloque raíz con contenido colapsados; decidir si auto-expandirlos al aplicar. | S | Bajo | E2E Fase 2 |
 | 14 | **`hasOwnContent()` y `notes default`** | Un bloque con solo `notes default <dur>` (sin notas, comandos ni operaciones) no se renderiza; decidir si debe contar como contenido propio. | S | Bajo | `src/app/model/block.ts` |
 | 15 | ✅ **Guardar/cargar `.mr` desde la UI (Fase 3)** | **Resuelto (2026-10-03, rama `feat/mr-fase3`):** botones Guardar (`serializeSong` → descarga `<nombre-saneado>.mr`, fallback `cancion.mr`) y Cargar (`prepareSongText`, errores `fichero:línea:columna` sin tocar la canción, stop del player antes de aplicar variables); bpm de sesión centralizado en `SongEditorComponent` (sigue sin aplicarse al player); sin persistencia automática. | M | Medio | `docs/analisis/mr-fase3-guardar-cargar.md` |
+| 16 | **BPM no llega al player** | El `.mr` y la sesión respetan `bpm`, pero `SongPlayer._initializePlayback` sigue fijo a 120; añadir bpm al modelo o pasarlo al player. | S | Bajo | `docs/analisis/mr-fase3-guardar-cargar.md` §7 |
+| 17 | **`$var` de nota/patrón en el editor de melodía** | `MelodyEditorComponent.loadNotesFromString` no resuelve variables string (`8t:$motif` falla al pintar, aunque el parser `.mr` y el player sí); error de consola preexistente. | S | Bajo | E2E Fase 3 |
 
 ## Ramas archivadas (tags)
 
