@@ -96,16 +96,18 @@ export class NoteFactory {
 export class NoteConverter {
     static toNoteData(element: MusicElement, defaultDuration: NoteDuration = '4n'): NoteData {
         if (element.type === 'note' || element.type === 'rest') {
+            // Sin duración explícita se emite SIN duración (los grupos la
+            // heredan al generar); no se materializa el default.
             if (element.variableName !== undefined) {
                 return new NoteData({
                     type: 'note',
-                    duration: element.duration ?? defaultDuration,
+                    duration: element.duration,
                     variable: element.variableName
                 });
             }
             return new NoteData({
                 type: element.type,
-                duration: element.duration ?? defaultDuration,
+                duration: element.duration,
                 note: element.value ?? undefined
             });
         } else if (element.type === 'group') { // Manejar GenericGroup
@@ -127,10 +129,17 @@ export class NoteConverter {
     
     static fromNoteData(noteData: NoteData): MusicElement {
         if (noteData.type === 'note' || noteData.type === 'rest') {
-            const note = NoteFactory.createSingleNote(
-                noteData.note ?? null,
-                noteData.duration as NoteDuration
-            );
+            // La duración se conserva SOLO si era explícita: un hijo de grupo
+            // sin duración propia se queda sin ella y la hereda al generar
+            // (antes se materializaba el default `4n` en cada hijo).
+            const note: SingleNote = {
+                id: NoteIdGenerator.generateId(),
+                type: noteData.type,
+                value: noteData.note ?? null
+            };
+            if (noteData.duration !== undefined) {
+                note.duration = noteData.duration as NoteDuration;
+            }
             if (noteData.variable !== undefined) {
                 // El token es un evento de nota (`$var`), no un silencio.
                 note.type = 'note';

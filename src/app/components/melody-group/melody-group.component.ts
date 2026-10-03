@@ -8,7 +8,7 @@ import { MelodyNoteComponent } from '../melody-note/melody-note.component';
         <div class="group-container" [class.selected]="isSelected">
             <div class="group-header" (click)="onClick()">
                 <span class="group-type">{{ note.type }}</span>
-                <span class="group-duration">{{ note.duration }}</span>
+                <span class="group-duration" (wheel)="onWheelDuration($event)">{{ note.duration }}</span>
                 <button class="expand-button" (click)="onToggleExpand($event)">
                     {{ isExpanded ? '▼' : '▶' }}
                 </button>
@@ -112,6 +112,16 @@ export class MelodyGroupComponent {
     
     onChangeChildDuration(id: string, delta: number): void {
         this.changeChildDuration.emit({ id, delta });
+    }
+
+    /**
+     * Rueda sobre la duración del grupo (acorde/arpegio): la cambia sin
+     * necesidad de Shift, igual que la rueda sobre la duración de una nota.
+     */
+    onWheelDuration(event: WheelEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.changeDuration.emit(event.deltaY > 0 ? 1 : -1);
     }
     
     onToggleSilence(id: string): void {

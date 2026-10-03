@@ -58,8 +58,8 @@ export class NoteData implements NoteData {
             
             case 'group': 
                 const groupNotes = this.children?.map(note => note.toString()).join(' ') ?? '';
-                // Usar el prefijo
-                return `${durationPrefix}(${groupNotes})`; 
+                // Canoniza con espacios como el DSL: `4n:( 0 2 )`; vacío: `()`.
+                return groupNotes === '' ? `${durationPrefix}()` : `${durationPrefix}( ${groupNotes} )`; 
             
             default:
                 console.warn(`NoteData.toString: Unknown type ${this.type}`);

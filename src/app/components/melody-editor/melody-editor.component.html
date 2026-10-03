@@ -58,7 +58,8 @@
             (click)="selectElement(element.id)"
             (wheel)="onWheel($event, element)">
         <!-- Quitar contenedor extra -->
-        <span *ngIf="element.type === 'group-start'" class="group-duration">{{element.duration}}:</span>
+        <span *ngIf="element.type === 'group-start'" class="group-duration"
+              (wheel)="onGroupDurationWheel($event, element)">{{element.duration}}:</span>
         <span class="group-bracket">{{ element.type === 'group-start' ? '(' : ')' }}</span>
       </span>
     </ng-container>
