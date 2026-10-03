@@ -1,10 +1,11 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { Song } from 'src/app/model/song';
 import { Part } from 'src/app/model/part';
 import { SongPlayer } from 'src/app/model/song.player';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { NoteDuration } from 'src/app/model/melody';
+import { MrTextAppliedEvent } from '../mr-text-editor/mr-text-editor.component';
 
 @Component({
     selector: 'app-song-editor',
@@ -14,10 +15,13 @@ import { NoteDuration } from 'src/app/model/melody';
 })
 export class SongEditorComponent implements OnInit, OnDestroy {
     @Input() song!: Song;
+    /** Nueva canción cuando se aplica la vista de texto `.mr`. */
+    @Output() songChange = new EventEmitter<Song>();
     
     repetitions: number = 1;
     public metronome$: Observable<number>;
     variablesSidebarVisible: boolean = false;
+    mrTextVisible: boolean = false;
     isPlaying: boolean = false;
 
     selectedDefaultDuration: NoteDuration = '4n';
@@ -52,6 +56,24 @@ export class SongEditorComponent implements OnInit, OnDestroy {
 
     toggleVariablesSidebar(): void {
         this.variablesSidebarVisible = !this.variablesSidebarVisible;
+    }
+
+    toggleMrTextEditor(): void {
+        this.mrTextVisible = !this.mrTextVisible;
+    }
+
+    /**
+     * La vista de texto `.mr` ha reemplazado el modelo: se detiene la
+     * reproducción (para no mezclar la canción antigua) y se reemite la nueva
+     * canción hacia arriba (AppComponent es el dueño del modelo).
+     */
+    onMrTextApplied(event: MrTextAppliedEvent): void {
+        if (this.songPlayer.isPlaying) {
+            this.songPlayer.stop();
+        }
+        this.repetitions = event.meta.repeats ?? 1;
+        this.songChange.emit(event.song);
+        this.cdr.detectChanges();
     }
 
     addPart() {

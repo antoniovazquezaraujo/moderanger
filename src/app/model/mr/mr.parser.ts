@@ -27,6 +27,7 @@ import {
   splitLineWords,
   UNQUOTED_NAME_PATTERN
 } from './mr.text';
+import { MrParsedSong, MrSourceMapEntry, MrSourceNode, MrSourceNodeKind } from './mr.source-map';
 import { MR_FORMAT_VERSION, SongDocument } from './mr.types';
 import { NoteEvent, parseNoteEvents, printNoteEvent } from './notes.parser';
 
@@ -167,9 +168,13 @@ function prepareLines(text: string): SourceLine[] {
 
 class MrDocumentParser {
   private index = 0;
+  /** Última línea consumida (para cerrar rangos del source map). */
+  private lastConsumed: SourceLine | undefined;
   private readonly document: SongDocument;
+  private readonly sourceMap?: MrSourceMapEntry[];
 
-  constructor(private readonly lines: SourceLine[]) {
+  constructor(private readonly lines: SourceLine[], sourceMap?: MrSourceMapEntry[]) {
+    this.sourceMap = sourceMap;
     this.document = {
       song: new Song(),
       variables: new Map<string, VariableValue>(),
@@ -189,7 +194,7 @@ class MrDocumentParser {
       }
       if (startsWithWord(line.code, 'part')) {
         this.advance();
-        this.parsePart(line);
+        this.parsePart(line, this.document.song.parts.length);
         continue;
       }
       const word = firstWord(line.code);
@@ -371,7 +376,7 @@ class MrDocumentParser {
 
   // ----- partes y bloques --------------------------------------------------
 
-  private parsePart(line: SourceLine): void {
+  private parsePart(line: SourceLine, partIndex: number): void {
     const part = new Part();
     part.blocks = [];
     this.parsePartHeader(part, line);
@@ -389,9 +394,10 @@ class MrDocumentParser {
         );
       }
       this.advance();
-      part.blocks.push(this.parseBlock(blockLine));
+      part.blocks.push(this.parseBlock(blockLine, partIndex, [part.blocks.length]));
     }
     this.document.song.parts.push(part);
+    this.recordSourceEntry('part', part, partIndex, [], line);
   }
 
   private parsePartHeader(part: Part, line: SourceLine): void {
@@ -418,10 +424,11 @@ class MrDocumentParser {
     }
   }
 
-  private parseBlock(line: SourceLine): Block {
+  private parseBlock(line: SourceLine, partIndex: number, blockPath: readonly number[]): Block {
     const block = new Block();
     this.parseBlockHeader(block, line);
-    this.parseBlockBody(block, line.indent + 2);
+    this.parseBlockBody(block, line.indent + 2, partIndex, blockPath);
+    this.recordSourceEntry('block', block, partIndex, blockPath, line);
     return block;
   }
 
@@ -449,7 +456,7 @@ class MrDocumentParser {
     }
   }
 
-  private parseBlockBody(block: Block, bodyIndent: number): void {
+  private parseBlockBody(block: Block, bodyIndent: number, partIndex: number, blockPath: readonly number[]): void {
     const sections = new Set<string>();
     for (;;) {
       const line = this.peek();
@@ -475,7 +482,7 @@ class MrDocumentParser {
         }
       } else if (word === 'block') {
         this.advance();
-        block.children.push(this.parseBlock(line));
+        block.children.push(this.parseBlock(line, partIndex, [...blockPath, block.children.length]));
       } else {
         throw errorAt(
           line,
@@ -728,18 +735,58 @@ class MrDocumentParser {
   }
 
   private advance(): SourceLine | undefined {
-    return this.lines[this.index++];
+    const line = this.lines[this.index++];
+    if (line !== undefined) {
+      this.lastConsumed = line;
+    }
+    return line;
+  }
+
+  /**
+   * Registra el rango de líneas del nodo (incluidos sus hijos, ya consumidos)
+   * cuando el parser está construyendo un source map.
+   */
+  private recordSourceEntry(
+    kind: MrSourceNodeKind,
+    node: MrSourceNode,
+    partIndex: number,
+    blockPath: readonly number[],
+    start: SourceLine
+  ): void {
+    if (this.sourceMap === undefined) {
+      return;
+    }
+    const end = this.lastConsumed ?? start;
+    this.sourceMap.push({
+      kind,
+      node,
+      partIndex,
+      blockPath: [...blockPath],
+      range: {
+        start: { line: start.number, column: start.indent + 1 },
+        end: { line: end.number, column: end.indent + end.code.length }
+      }
+    });
   }
 }
 
 /**
- * Parsea un documento `.mr` completo. No toca `VariableContext`; las
- * variables declaradas quedan en `SongDocument.variables`.
+ * Parsea un documento `.mr` completo.
  *
- * Admite documentos vacíos o sin partes (la gramática de la propuesta pide
- * `parte+`, pero permitirlo hace que cualquier modelo serializado pueda
- * volver a parsearse).
+ * No toca `VariableContext`; las variables declaradas quedan en
+ * `SongDocument.variables`.
  */
 export function parseSong(text: string): SongDocument {
   return new MrDocumentParser(prepareLines(text)).parse();
+}
+
+/**
+ * Igual que `parseSong`, pero además devuelve un source map con el rango de
+ * líneas de cada parte y cada bloque (anidados incluidos). Las entradas
+ * referencian las mismas instancias que el documento resultante.
+ */
+export function parseSongWithSourceMap(text: string): MrParsedSong {
+  const sourceMap: MrSourceMapEntry[] = [];
+  const document = new MrDocumentParser(prepareLines(text), sourceMap).parse();
+  return { document, sourceMap };
 }

@@ -8,4 +8,6 @@ export * from './mr.types';
 export * from './notes.parser';
 export * from './mr.parser';
 export * from './mr.serializer';
+export * from './mr.source-map';
 export * from './mr.file';
+export * from './mr.integration';

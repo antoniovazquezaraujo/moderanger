@@ -1,0 +1,53 @@
+<p-dialog
+    header="Texto (.mr)"
+    [visible]="visible"
+    (visibleChange)="onDialogVisibleChange($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '70rem', maxWidth: '95vw' }"
+    styleClass="mr-text-dialog">
+    <div class="mr-toolbar">
+        <button pButton type="button" class="p-button-sm" icon="pi pi-check" label="Validar" (click)="validateNow()"></button>
+        <button pButton type="button" class="p-button-sm" icon="pi pi-upload" label="Aplicar" [disabled]="!canApply" (click)="apply()"
+                pTooltip="Reemplaza el modelo de la canción por el texto" tooltipPosition="top"></button>
+        <button pButton type="button" class="p-button-sm p-button-outlined" icon="pi pi-refresh" label="Revertir" [disabled]="!canRevert" (click)="revert()"
+                pTooltip="Recarga el texto desde el modelo actual" tooltipPosition="top"></button>
+        <span class="mr-status"
+              [class.mr-status-dirty]="dirty && errors.length === 0 && serializeError === null"
+              [class.mr-status-error]="errors.length > 0 || serializeError !== null">
+            <i [ngClass]="statusIcon"></i>
+            {{ statusLabel }}
+        </span>
+    </div>
+
+    <textarea #editor
+        class="mr-textarea"
+        [ngModel]="text"
+        (ngModelChange)="onTextChange($event)"
+        spellcheck="false"
+        autocomplete="off"
+        autocapitalize="off"
+        wrap="off"
+        aria-label="Texto de la canción en formato .mr"></textarea>
+
+    <div class="mr-errors" *ngIf="errors.length > 0">
+        <div class="mr-error" *ngFor="let error of errors">
+            <button type="button" class="mr-error-position" (click)="focusError(error)"
+                    pTooltip="Seleccionar la posición en el texto" tooltipPosition="top">
+                <i class="pi pi-arrow-right"></i> línea {{ error.line }}, columna {{ error.column }}
+            </button>
+            <span class="mr-error-message">{{ error.message }}</span>
+        </div>
+    </div>
+
+    <div class="mr-serialize-error" *ngIf="serializeError !== null">
+        {{ serializeError }}
+    </div>
+
+    <p class="mr-hint">
+        Vista avanzada: la GUI sigue siendo la vista principal. Al pulsar <strong>Aplicar</strong>, el texto
+        reemplaza la canción y las variables declaradas. Los comentarios <code>#</code> y las diferencias de
+        formato no se conservan al aplicar.
+    </p>
+</p-dialog>

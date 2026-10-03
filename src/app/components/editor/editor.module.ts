@@ -16,6 +16,7 @@ import { MelodyOptionComponent } from '../melody-option/melody-option.component'
 import { MelodyEditorComponent } from '../melody-editor/melody-editor.component';
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 import { MelodyGroupComponent } from '../melody-group/melody-group.component';
+import { MrTextEditorComponent } from '../mr-text-editor/mr-text-editor.component';
 
 // New specialized melody-editor components
 import { MelodyEditorV2Component } from '../melody-editor/melody-editor-v2.component';
@@ -36,6 +37,7 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { TooltipModule } from 'primeng/tooltip';
 import { SplitterModule } from 'primeng/splitter';
 import { SidebarModule } from 'primeng/sidebar';
+import { DialogModule } from 'primeng/dialog';
 import { SharedModule } from 'primeng/api';
 
 @NgModule({
@@ -53,6 +55,7 @@ import { SharedModule } from 'primeng/api';
     MelodyEditorComponent,
     MelodyNoteComponent,
     MelodyGroupComponent,
+    MrTextEditorComponent,
     // New specialized melody-editor components
     MelodyEditorV2Component,
     MelodyDisplayComponent,
@@ -76,6 +79,7 @@ import { SharedModule } from 'primeng/api';
     TooltipModule,
     SplitterModule,
     SidebarModule,
+    DialogModule,
   ],
   exports: [
     // Exportar el componente principal que se usa fuera (en AppComponent)
