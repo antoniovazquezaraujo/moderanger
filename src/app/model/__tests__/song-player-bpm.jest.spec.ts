@@ -91,3 +91,35 @@ describe('SongPlayer · cabecera de la canción → Transport/estado', () => {
     expect(globalState.songRepetitions).toBe(1);
   });
 });
+
+describe('SongPlayer · live-tempo (#18)', () => {
+  let audioEngine: AudioEngineService;
+  let globalState: GlobalStateService;
+  let player: SongPlayer;
+
+  beforeEach(() => {
+    Tone.Transport.bpm.value = 120;
+    audioEngine = new AudioEngineService();
+    globalState = new GlobalStateService();
+    player = new SongPlayer(audioEngine, {} as NoteGenerationService, globalState);
+  });
+
+  it('setTransportBpm reajusta el Transport con la reproducción en curso', () => {
+    const song = new Song();
+    song.bpm = 90;
+    expect(initializePlayback(player, song)).toBe(true);
+
+    player.setTransportBpm(100);
+
+    expect(audioEngine.getTransportBpm()).toBe(100);
+    expect(globalState.isPlaying).toBe(true);
+    expect(globalState.currentSong).toBe(song);
+  });
+
+  it('no arranca ni para la reproducción por sí solo', () => {
+    player.setTransportBpm(100);
+
+    expect(audioEngine.getTransportBpm()).toBe(100);
+    expect(globalState.isPlaying).toBe(false);
+  });
+});

@@ -222,6 +222,7 @@ const createSongPlayerMock = (isPlaying = false) => ({
   metronome$: new Subject<number>(),
   isPlaying,
   stop: jest.fn(),
+  setTransportBpm: jest.fn(),
   songRepetitions: 1
 });
 
@@ -344,5 +345,24 @@ describe('SongEditorComponent · cabecera (Repeat y BPM)', () => {
 
     component.onBpmChange(changeEvent(''));
     expect(component.song.bpm).toBe(120);
+  });
+
+  it('live-tempo: con reproducción en curso el Transport se reajusta ya (#18)', () => {
+    const { component, songPlayer } = createSongEditor(true);
+
+    component.onBpmChange(changeEvent('100'));
+
+    expect(component.song.bpm).toBe(100);
+    expect(songPlayer.setTransportBpm).toHaveBeenCalledTimes(1);
+    expect(songPlayer.setTransportBpm).toHaveBeenCalledWith(100);
+  });
+
+  it('en parado no toca el Transport: el bpm se aplica al siguiente Play', () => {
+    const { component, songPlayer } = createSongEditor(false);
+
+    component.onBpmChange(changeEvent('100'));
+
+    expect(component.song.bpm).toBe(100);
+    expect(songPlayer.setTransportBpm).not.toHaveBeenCalled();
   });
 });

@@ -169,7 +169,8 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     /**
      * Recorta y aplica el BPM del input de cabecera al modelo. El rango es el
      * del formato `.mr` (30-240) para que el modelo siempre sea serializable;
-     * un valor vacío o no numérico vuelve al valor por defecto.
+     * un valor vacío o no numérico vuelve al valor por defecto. Live-tempo
+     * (#18): si la canción está sonando, el Transport se reajusta ya.
      */
     onBpmChange(event: Event): void {
         const input = event.target as HTMLInputElement;
@@ -180,6 +181,9 @@ export class SongEditorComponent implements OnInit, OnDestroy {
         // Refleja el valor recortado aunque coincida con el anterior (p. ej.
         // "999" -> 240): `[ngModel]` no reescribe el DOM si no cambia el modelo.
         input.value = String(this.song.bpm);
+        if (this.songPlayer.isPlaying) {
+            this.songPlayer.setTransportBpm(this.song.bpm);
+        }
         this.cdr.markForCheck();
     }
 

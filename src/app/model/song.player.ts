@@ -129,6 +129,16 @@ export class SongPlayer {
         this._metronome.next(0);
     }
 
+    /**
+     * Live-tempo (#18): reajusta el BPM del Transport con la reproducción en
+     * curso, sin reiniciar la secuencia. El editor lo llama al cambiar el
+     * input de BPM; en el siguiente Play `_initializePlayback` vuelve a
+     * aplicar `Song.bpm` (misma fuente de verdad).
+     */
+    setTransportBpm(bpm: number): void {
+        this.audioEngine.setTransportBpm(bpm);
+    }
+
     private _handleTransportStop = () => {
          if (this.globalState.isPlaying) {
              this.globalState.setIsPlaying(false);
