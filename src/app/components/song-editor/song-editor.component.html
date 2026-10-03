@@ -13,6 +13,11 @@
                     <span>Repeat:</span>
                     <!-- Bind to repetitions property of this component -->
                     <input type="number" id="repetitions" class="number-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="repetitions" min="1" max="99" step="1">
+                    <span class="p-ml-2">BPM:</span>
+                    <!-- BPM canónico en Song.bpm (30-240, rango del formato .mr) -->
+                    <input type="number" id="bpm" class="number-input" style="width:52px !important; max-width:52px !important;"
+                           [ngModel]="song.bpm" (change)="onBpmChange($event)" min="30" max="240" step="1"
+                           pTooltip="Tempo (BPM)" tooltipPosition="top" aria-label="BPM">
                     <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
                     <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>
                     <!-- Dropdown para Default Duration -->
@@ -62,7 +67,6 @@
     <app-mr-text-editor
         [song]="song"
         [repeats]="repetitions"
-        [bpm]="bpm"
         [(visible)]="mrTextVisible"
         (applied)="onMrTextApplied($event)">
     </app-mr-text-editor>

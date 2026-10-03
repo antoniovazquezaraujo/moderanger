@@ -55,11 +55,6 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
   @Input() visible = false;
   /** Repeticiones actuales del editor (campo "Repeat"); se escriben como `repeats`. */
   @Input() repeats = 1;
-  /**
-   * BPM de la sesión; lo posee `SongEditorComponent` (meta, no va en `Song`).
-   * Se recibe por input y el `applied` devuelve el del documento aplicado.
-   */
-  @Input() bpm?: number;
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() applied = new EventEmitter<MrTextAppliedEvent>();
 
@@ -89,14 +84,14 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
     if (changes['visible']?.currentValue === true) {
       this.reloadIfClean();
     }
-    // El tick del padre puede entregar `repeats`, `bpm` y `song` en pasadas
-    // distintas (p. ej. justo después de Aplicar): reaccionar solo a `repeats`
-    // recargaba el texto con el modelo todavía viejo. Cualquiera de los tres
-    // cambios debe regenerar el texto cuando no hay ediciones pendientes.
+    // El tick del padre puede entregar `repeats` y `song` en pasadas distintas
+    // (p. ej. justo después de Aplicar): reaccionar solo a `repeats` recargaba
+    // el texto con el modelo todavía viejo. Cualquiera de los dos cambios debe
+    // regenerar el texto cuando no hay ediciones pendientes. El bpm viaja
+    // dentro de `song` (`Song.bpm` es la fuente de verdad).
     const repeatsChanged = changes['repeats'] !== undefined && !changes['repeats'].firstChange;
-    const bpmChanged = changes['bpm'] !== undefined && !changes['bpm'].firstChange;
     const songChanged = changes['song'] !== undefined && !changes['song'].firstChange;
-    if (repeatsChanged || bpmChanged || songChanged) {
+    if (repeatsChanged || songChanged) {
       this.reloadIfClean();
     }
   }
@@ -214,6 +209,7 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
   }
 
   private currentMeta(): MrMeta {
-    return sessionMetaToMrMeta({ repeats: this.repeats, bpm: this.bpm });
+    // El bpm canónico vive en `Song.bpm`; la meta solo lo refleja en el texto.
+    return sessionMetaToMrMeta({ repeats: this.repeats, bpm: this.song.bpm });
   }
 }

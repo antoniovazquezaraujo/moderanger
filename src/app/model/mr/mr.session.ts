@@ -1,13 +1,14 @@
 /**
- * Estado de sesión del editor para `.mr` (Fase 3 del ADR-001): meta
- * (`repeats`, `bpm`) y nombres de fichero. Angular-free para poder probarlo
- * con Jest.
+ * Estado de sesión del editor para `.mr` (Fase 3 del ADR-001): traducción de
+ * la meta (`repeats`, `bpm`) a/desde `MrMeta` y nombres de fichero.
+ * Angular-free para poder probarlo con Jest.
  *
- * Decisión de dónde vive el bpm: `Song` no guarda bpm (el modelo no lo
- * necesita para tocar; `SongPlayer` fija 120). El bpm es *meta de sesión* y
- * vive en `SongEditorComponent` junto a `repeats`; la vista de texto lo recibe
- * por `@Input()` y lo devuelve dentro de `applied`. Guardar/cargar traducen
- * entre esa meta de sesión y `MrMeta` con las funciones de este módulo.
+ * Dónde vive el bpm (decisión de la ronda de pulido): el bpm canónico vive en
+ * `Song.bpm` (lo aplica `SongPlayer` y lo edita la cabecera). `MrMeta.bpm` es
+ * solo su reflejo en el fichero: `parseSong` lo copia a `Song.bpm` y al
+ * guardar se traduce desde el modelo con `sessionMetaToMrMeta`. Este módulo
+ * conserva las funciones de traducción (incluido `bpm`) para el resto de la
+ * app y sus tests.
  */
 import { MR_FILE_EXTENSION } from './mr.file';
 import { MR_FORMAT_VERSION, MrMeta } from './mr.types';
@@ -19,7 +20,8 @@ export const DEFAULT_MR_BASE_NAME = 'cancion';
 export const MAX_MR_BASE_NAME_LENGTH = 80;
 
 /**
- * Meta de sesión del editor: lo que no vive en `Song` pero viaja en el `.mr`.
+ * Meta de sesión del editor: lo que no vive en `Song` (hoy solo `repeats`)
+ * más el bpm, que sí vive en `Song` y aquí aparece como espejo de `MrMeta`.
  * `repeats` normalizado a 1 cuando no hay repetición extra.
  */
 export interface MrSessionMeta {

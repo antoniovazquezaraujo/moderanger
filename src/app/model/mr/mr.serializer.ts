@@ -13,14 +13,11 @@ import { AssignOperation, BaseOperation, VaryOperation } from '../operation';
 import { Part } from '../part';
 import { getPlayModeNames, PlayMode } from '../play.mode';
 import { Scale } from '../scale';
+import { DEFAULT_BPM, MAX_BPM, MIN_BPM } from '../song';
 import { MrParseError, MrSerializeError } from './mr.errors';
 import { DURATION_PATTERN, escapeMrString, formatName, IDENTIFIER_PATTERN } from './mr.text';
 import { MR_FORMAT_VERSION, SongDocument } from './mr.types';
 import { NoteEvent, parseNoteEvents, printNoteEvent } from './notes.parser';
-
-const DEFAULT_BPM = 120;
-const MIN_BPM = 30;
-const MAX_BPM = 240;
 
 const INSTRUMENT_KEYS: ReadonlyArray<keyof typeof InstrumentType> = Object.keys(InstrumentType) as Array<
   keyof typeof InstrumentType

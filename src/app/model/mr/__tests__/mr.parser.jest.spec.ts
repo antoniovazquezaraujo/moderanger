@@ -69,6 +69,19 @@ describe('parseSong: cabecera', () => {
     expect(document.meta).toEqual({ version: 1, repeats: 3, bpm: 108 });
   });
 
+  it('copia el bpm a Song.bpm (fuente de verdad en memoria)', () => {
+    const document = parseSong('song "X"\nversion 1\nbpm 90\n');
+
+    expect(document.song.bpm).toBe(90);
+  });
+
+  it('aplica 120 a Song.bpm cuando la cabecera no declara bpm', () => {
+    const document = parseSong('song "X"\nversion 1\n');
+
+    expect(document.meta.bpm).toBeUndefined();
+    expect(document.song.bpm).toBe(120);
+  });
+
   it('rechaza versiones desconocidas con posición', () => {
     const error = expectParseError('song "X"\nversion 2\n');
 

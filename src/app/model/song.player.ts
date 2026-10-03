@@ -270,9 +270,9 @@ export class SongPlayer {
         this.globalState.resetRepetition();
         this.globalState.setBeatCount(0);
 
-        // Set BPM and transport position
-        const bpm = 120; // Use a default BPM as Song class does not have a bpm property
-        this.audioEngine.setTransportBpm(bpm);
+        // Set BPM and transport position. El bpm canónico vive en `Song`; el
+        // parser lo deja listo (30-240) y aquí se aplica al Transport.
+        this.audioEngine.setTransportBpm(song.bpm);
         this.audioEngine.setTransportPosition(0);
 
         // Hook up the stop listener

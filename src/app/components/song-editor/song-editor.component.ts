@@ -10,7 +10,7 @@ import {
   EventEmitter,
   ViewChild
 } from '@angular/core';
-import { Song } from 'src/app/model/song';
+import { Song, DEFAULT_BPM, MAX_BPM, MIN_BPM } from 'src/app/model/song';
 import { Part } from 'src/app/model/part';
 import { SongPlayer } from 'src/app/model/song.player';
 import { Observable, Subject } from 'rxjs';
@@ -43,11 +43,6 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     @Output() songChange = new EventEmitter<Song>();
     
     repetitions: number = 1;
-    /**
-     * BPM de la sesión (meta del `.mr`, no vive en `Song`): se pasa a la vista
-     * de texto, viaja al guardar y se recibe al cargar/aplicar.
-     */
-    bpm: number | undefined;
     public metronome$: Observable<number>;
     variablesSidebarVisible: boolean = false;
     mrTextVisible: boolean = false;
@@ -166,7 +161,25 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     }
 
     private currentMeta(): MrMeta {
-        return sessionMetaToMrMeta({ repeats: this.repetitions, bpm: this.bpm });
+        // El bpm canónico vive en `Song.bpm`; la meta solo lo refleja al guardar.
+        return sessionMetaToMrMeta({ repeats: this.repetitions, bpm: this.song.bpm });
+    }
+
+    /**
+     * Recorta y aplica el BPM del input de cabecera al modelo. El rango es el
+     * del formato `.mr` (30-240) para que el modelo siempre sea serializable;
+     * un valor vacío o no numérico vuelve al valor por defecto.
+     */
+    onBpmChange(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const parsed = Number.parseInt(input.value, 10);
+        this.song.bpm = Number.isFinite(parsed)
+            ? Math.min(MAX_BPM, Math.max(MIN_BPM, parsed))
+            : DEFAULT_BPM;
+        // Refleja el valor recortado aunque coincida con el anterior (p. ej.
+        // "999" -> 240): `[ngModel]` no reescribe el DOM si no cambia el modelo.
+        input.value = String(this.song.bpm);
+        this.cdr.markForCheck();
     }
 
     private stopIfPlaying(): void {
@@ -178,7 +191,8 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     private syncSessionMetaAndEmit(song: Song, meta: MrMeta): void {
         const session = mrMetaToSessionMeta(meta);
         this.repetitions = session.repeats;
-        this.bpm = session.bpm;
+        const bpm = session.bpm ?? DEFAULT_BPM;
+        song.bpm = bpm;
         // No forzar CD aquí: el tick global posterior al evento propaga la
         // canción nueva al input `song` del editor `.mr` en la misma pasada.
         this.songChange.emit(song);

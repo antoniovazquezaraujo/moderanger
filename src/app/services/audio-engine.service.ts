@@ -71,6 +71,11 @@ export class AudioEngineService {
     Tone.Transport.bpm.value = bpm;
   }
 
+  /** BPM actual del Transport (diagnóstico/tests/E2E). */
+  getTransportBpm(): number {
+    return Tone.Transport.bpm.value;
+  }
+
   setTransportPosition(position: Time): void {
     // console.log(`[AudioEngineService] Setting Transport position to ${position}.`);
     Tone.Transport.position = position;
