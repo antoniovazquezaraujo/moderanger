@@ -1,7 +1,7 @@
 # 📋 Backlog de Mode Ranger
 
 - **Actualizado:** 2026-10-03
-- **Contexto:** tras la consolidación del repositorio (merge de `testing-things`, limpieza, fix de duraciones de grupo y archivado de ramas históricas), la Fase 1 de la sintaxis `.mr` (rama `feat/mr-fase1`) y la limpieza de restos del parser antiguo (rama `chore/mr-cleanup`).
+- **Contexto:** tras la consolidación del repositorio (merge de `testing-things`, limpieza, fix de duraciones de grupo y archivado de ramas históricas), la sintaxis `.mr` (Fase 1 + Fase 2: vista de texto en la app) y los fixes de integración (recarga tras Aplicar, bloques raíz visibles).
 
 > Estado del repo: una sola rama (`main`), 5 ramas históricas archivadas como tags `archive/*` y auditorías en `docs/audits/`.
 
@@ -20,6 +20,9 @@
 | 9 | **Umbral de cobertura / CI** | Fijar threshold en Jest y decidir pipeline de CI. | S | Bajo | baseline Jest |
 | 10 | **Paridad repeticiones de canción** | `main` recicla la secuencia extraída en repeticiones de canción; una rama archivada re-procesaba. Ajuste pequeño si el producto lo pide. | S | Bajo | `docs/audits/ramas-pendientes-vs-main.md` |
 | 11 | **Actualización de Angular 13 (EOL)** | Plan de upgrade por fases; proyecto propio. | L | Alto | observación general |
+| 12 | **Doble renderizado de partes en `song-editor`** | `app-song`→`app-parts` y el acordeón legado renderizan las mismas partes (duplicados en el DOM; preexistente). Decidir cuál se queda y retirar el otro con validación visual. | S | Bajo | E2E Fase 2 |
+| 13 | **Bloques raíz `.mr` colapsados por defecto** | El árbol muestra los hijos de un bloque raíz con contenido colapsados; decidir si auto-expandirlos al aplicar. | S | Bajo | E2E Fase 2 |
+| 14 | **`hasOwnContent()` y `notes default`** | Un bloque con solo `notes default <dur>` (sin notas, comandos ni operaciones) no se renderiza; decidir si debe contar como contenido propio. | S | Bajo | `src/app/model/block.ts` |
 
 ## Ramas archivadas (tags)
 
