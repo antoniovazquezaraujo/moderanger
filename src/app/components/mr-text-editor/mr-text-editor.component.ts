@@ -148,8 +148,10 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
     if (document === undefined) {
       return;
     }
-    applyDocumentVariables(document);
+    // Serializar antes de tocar nada: si el documento no fuese serializable,
+    // no se habría aplicado ni el modelo ni las variables.
     const canonical = serializeSong(document);
+    applyDocumentVariables(document);
     this.bpm = document.meta.bpm;
     this.text = canonical;
     this.baseline = canonical;
