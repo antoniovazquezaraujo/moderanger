@@ -1,12 +1,22 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "module": "commonjs",
     "types": [
       "jest",
       "node"
-    ]
+    ],
+    "typeRoots": [
+      "../node_modules/@types"
+    ],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true
   },
   "include": [
-    "**/*.jest.spec.ts"
+    "**/*.jest.spec.ts",
+    "**/__mocks__/**/*.ts",
+    "jest.setup.ts",
+    "**/*.d.ts"
   ]
-} 
+}
