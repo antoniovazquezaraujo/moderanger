@@ -38,6 +38,13 @@ export interface NoteDataCreationOptions {
   children?: NoteData[];
   noteDatas?: NoteData[];
   validateOutput?: boolean;
+  /**
+   * Aplica la duración por defecto de gramática ('4t') cuando no se indica `duration`.
+   * Por defecto `true` para no romper los valores de comando; el parser de notas
+   * pasa `false` para que una nota sin duración explícita quede sin duración y
+   * pueda heredar la del grupo que la contiene.
+   */
+  useDefaultDuration?: boolean;
 }
 
 // ============= CREATION RESULTS =============
@@ -272,7 +279,7 @@ export class NoteGenerationUnifiedService {
     try {
       // Apply defaults
       const type = options.type ?? 'note';
-      const duration = options.duration ?? this.GRAMMAR_DURATION;
+      const duration = options.duration ?? (options.useDefaultDuration === false ? undefined : this.GRAMMAR_DURATION);
       const shouldValidate = options.validateOutput ?? true;
       
       // Create base NoteData structure
