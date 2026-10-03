@@ -132,12 +132,10 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
   // ============= LIFECYCLE METHODS =============
 
   ngOnInit(): void {
-    console.log(`[MelodyEditorV2] ngOnInit: Component initialized. defaultDuration: ${this.defaultDuration}`);
     
     // Subscribe to global duration changes
     this.globalDurationSub = this.songPlayer.globalDefaultDuration$.subscribe(duration => {
       if (this.defaultDuration !== duration) {
-        console.log(`[MelodyEditorV2] Global default duration changed to ${duration}`);
         this.defaultDuration = duration;
       }
     });
@@ -157,7 +155,6 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
     if (changes['defaultDuration']) {
       const newDuration = changes['defaultDuration'].currentValue;
       if (newDuration) {
-        console.log(`[MelodyEditorV2] Input defaultDuration changed to: ${newDuration}`);
       }
     }
   }
@@ -178,7 +175,6 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
   private setupServiceSubscriptions(): void {
     // Subscribe to elements changes
     this.elementsSub = this.melodyEditorService.elements$.subscribe(elements => {
-      console.log(`[MelodyEditorV2] Elements updated: ${elements.length} elements`);
       this.elements = elements;
       this.visualElements = this.flattenElements(elements);
       this.cdr.detectChanges();
@@ -186,7 +182,6 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
 
     // Subscribe to selection changes
     this.selectedIdSub = this.melodyEditorService.selectedElementId$.subscribe(id => {
-      console.log(`[MelodyEditorV2] Selection changed to: ${id}`);
       this.selectedElementId = id;
       this.cdr.detectChanges();
     });
@@ -251,17 +246,14 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
   // ============= EVENT HANDLERS =============
 
   onElementClick(elementId: string): void {
-    console.log(`[MelodyEditorV2] Element clicked: ${elementId}`);
     this.melodyEditorService.selectNote(elementId);
   }
 
   onSelectionChange(elementId: string | null): void {
-    console.log(`[MelodyEditorV2] Selection change requested: ${elementId}`);
     this.melodyEditorService.selectNote(elementId);
   }
 
   onKeyboardAction(action: KeyboardAction): void {
-    console.log(`[MelodyEditorV2] Keyboard action: ${action.type}`);
     
     // Handle focus movement directly (doesn't require operations component)
     if (action.type === 'move-focus') {
@@ -274,7 +266,6 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
   }
 
   onOperationResult(result: OperationResult): void {
-    console.log(`[MelodyEditorV2] Operation result:`, result);
     
     // Handle selection changes from operations
     if (result.newSelectedId !== undefined) {
@@ -288,12 +279,10 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
   }
 
   onElementsChange(): void {
-    console.log(`[MelodyEditorV2] Elements changed, emitting notes change`);
     this.emitNotesChange();
   }
 
   onAddNote(): void {
-    console.log(`[MelodyEditorV2] Add note requested`);
     const result = this.operationsManager.addNewNote();
     this.onOperationResult(result);
   }
@@ -306,7 +295,6 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
                         target.classList.contains('selection-manager');
     
     if (isEmptySpace) {
-      console.log(`[MelodyEditorV2] Clicked on empty space, clearing selection`);
       this.melodyEditorService.selectNote(null);
     }
   }
@@ -317,7 +305,6 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
    * Load melody from external source
    */
   public loadMelody(elements: MusicElement[]): void {
-    console.log(`[MelodyEditorV2] loadMelody called with ${elements.length} elements`);
     this.melodyEditorService.loadElements(elements);
     this.cdr.detectChanges();
   }
@@ -352,7 +339,6 @@ export class MelodyEditorV2Component implements OnInit, AfterViewInit, OnDestroy
     if (notesString !== this.lastEmittedNotesString) {
       this.lastEmittedNotesString = notesString;
       this.notesChange.emit(notesString);
-      console.log(`[MelodyEditorV2] Emitted notes change: ${notesString.substring(0, 50)}...`);
     }
   }
 

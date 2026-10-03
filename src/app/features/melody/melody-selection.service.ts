@@ -30,7 +30,6 @@ export class MelodySelectionService {
       }))
     );
 
-    console.log('[MelodySelection] Service initialized');
   }
 
   // ============= PUBLIC API =============
@@ -56,7 +55,6 @@ export class MelodySelectionService {
       }
       
       this.selectedElementIdSubject.next(id);
-      console.log(`[MelodySelection] Element selected: ${id}`);
     }
   }
 
@@ -86,14 +84,12 @@ export class MelodySelectionService {
    */
   selectPrevious(): string | null {
     if (this.selectionHistory.length === 0) {
-      console.log('[MelodySelection] No previous selection available');
       return null;
     }
 
     const previousId = this.selectionHistory.pop()!;
     this.selectedElementIdSubject.next(previousId);
     
-    console.log(`[MelodySelection] Selected previous element: ${previousId}`);
     return previousId;
   }
 
@@ -102,7 +98,6 @@ export class MelodySelectionService {
    */
   clearHistory(): void {
     this.selectionHistory.length = 0;
-    console.log('[MelodySelection] Selection history cleared');
   }
 
   /**
@@ -179,7 +174,6 @@ export class MelodySelectionService {
    */
   addToMultiSelection(id: string): void {
     this.multiSelection.add(id);
-    console.log(`[MelodySelection] Added to multi-selection: ${id}`);
   }
 
   /**
@@ -187,7 +181,6 @@ export class MelodySelectionService {
    */
   removeFromMultiSelection(id: string): void {
     this.multiSelection.delete(id);
-    console.log(`[MelodySelection] Removed from multi-selection: ${id}`);
   }
 
   /**
@@ -202,7 +195,6 @@ export class MelodySelectionService {
    */
   clearMultiSelection(): void {
     this.multiSelection.clear();
-    console.log('[MelodySelection] Multi-selection cleared');
   }
 
   /**

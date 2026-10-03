@@ -23,7 +23,6 @@ export interface ConversionOptions {
 export class MelodyDataConverterService {
 
   constructor() {
-    console.log('[MelodyDataConverter] Service initialized');
   }
 
   // ============= PUBLIC API =============
@@ -32,7 +31,6 @@ export class MelodyDataConverterService {
    * Convert music elements to NoteData array
    */
   toNoteData(elements: MusicElement[], options: ConversionOptions = {}): NoteData[] {
-    console.log(`[MelodyDataConverter] Converting ${elements.length} elements to NoteData`);
     
     try {
       const noteDataArray: NoteData[] = [];
@@ -42,7 +40,6 @@ export class MelodyDataConverterService {
         noteDataArray.push(...converted);
       }
       
-      console.log(`[MelodyDataConverter] Converted to ${noteDataArray.length} NoteData items`);
       return noteDataArray;
       
     } catch (error) {
@@ -55,7 +52,6 @@ export class MelodyDataConverterService {
    * Convert NoteData array to music elements
    */
   fromNoteData(noteDataArray: NoteData[], options: ConversionOptions = {}): MusicElement[] {
-    console.log(`[MelodyDataConverter] Converting ${noteDataArray.length} NoteData items to elements`);
     
     try {
       const elements: MusicElement[] = [];
@@ -67,7 +63,6 @@ export class MelodyDataConverterService {
         }
       }
       
-      console.log(`[MelodyDataConverter] Converted to ${elements.length} elements`);
       return elements;
       
     } catch (error) {
@@ -80,7 +75,6 @@ export class MelodyDataConverterService {
    * Convert elements to JSON string
    */
   toJSON(elements: MusicElement[], options: ConversionOptions = {}): string {
-    console.log(`[MelodyDataConverter] Converting ${elements.length} elements to JSON`);
     
     try {
       const data = {
@@ -101,7 +95,6 @@ export class MelodyDataConverterService {
    * Convert JSON string to elements
    */
   fromJSON(jsonString: string, options: ConversionOptions = {}): MusicElement[] {
-    console.log('[MelodyDataConverter] Converting JSON to elements');
     
     try {
       const data = JSON.parse(jsonString);
@@ -122,7 +115,6 @@ export class MelodyDataConverterService {
    * Flatten nested groups into a linear sequence
    */
   flatten(elements: MusicElement[]): MusicElement[] {
-    console.log(`[MelodyDataConverter] Flattening ${elements.length} elements`);
     
     const flatElements: MusicElement[] = [];
     
@@ -130,7 +122,6 @@ export class MelodyDataConverterService {
       this.flattenElementRecursively(element, flatElements);
     }
     
-    console.log(`[MelodyDataConverter] Flattened to ${flatElements.length} elements`);
     return flatElements;
   }
 
@@ -138,7 +129,6 @@ export class MelodyDataConverterService {
    * Get metadata about element structure
    */
   analyzeStructure(elements: MusicElement[]): StructureAnalysis {
-    console.log(`[MelodyDataConverter] Analyzing structure of ${elements.length} elements`);
     
     const analysis: StructureAnalysis = {
       totalElements: 0,
@@ -158,7 +148,6 @@ export class MelodyDataConverterService {
       analysis.averageGroupSize = analysis.totalElements / analysis.groupCount;
     }
     
-    console.log('[MelodyDataConverter] Structure analysis completed:', analysis);
     return analysis;
   }
 
@@ -166,7 +155,6 @@ export class MelodyDataConverterService {
    * Validate element structure
    */
   validateStructure(elements: MusicElement[]): ValidationResult {
-    console.log(`[MelodyDataConverter] Validating structure of ${elements.length} elements`);
     
     const result: ValidationResult = {
       isValid: true,
@@ -176,7 +164,6 @@ export class MelodyDataConverterService {
     
     this.validateElementsRecursively(elements, result, []);
     
-    console.log(`[MelodyDataConverter] Validation completed. Valid: ${result.isValid}, Errors: ${result.errors.length}, Warnings: ${result.warnings.length}`);
     return result;
   }
 

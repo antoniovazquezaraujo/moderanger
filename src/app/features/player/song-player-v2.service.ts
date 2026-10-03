@@ -60,7 +60,6 @@ export class SongPlayerV2Service {
    * Play an entire song
    */
   async playSong(song: Song): Promise<void> {
-    console.log(`[SongPlayerV2] Playing song: ${song.name || 'Unnamed'}`);
     
     try {
       // 1. Initialize playback
@@ -83,7 +82,6 @@ export class SongPlayerV2Service {
       // 6. Schedule playback
       await this.scheduler.schedulePartPlayback(partSoundInfo);
 
-      console.log('[SongPlayerV2] Song playback started successfully');
       
     } catch (error) {
       console.error('[SongPlayerV2] Error playing song:', error);
@@ -96,7 +94,6 @@ export class SongPlayerV2Service {
    * Play a single part
    */
   async playPart(part: Part, song: Song): Promise<void> {
-    console.log(`[SongPlayerV2] Playing part: ${part.name || `ID ${part.id}`}`);
     
     try {
       // 1. Initialize playback
@@ -120,7 +117,6 @@ export class SongPlayerV2Service {
       // 6. Schedule playback
       await this.scheduler.schedulePartPlayback(partSoundInfo);
 
-      console.log('[SongPlayerV2] Part playback started successfully');
       
     } catch (error) {
       console.error('[SongPlayerV2] Error playing part:', error);
@@ -133,19 +129,16 @@ export class SongPlayerV2Service {
    * Stop playback
    */
   stop(): void {
-    console.log('[SongPlayerV2] Stopping playback');
     
     this.scheduler.stopScheduledPlayback();
     // Transport, instruments, and state are cleaned up by the scheduler
     
-    console.log('[SongPlayerV2] Playback stopped');
   }
 
   /**
    * Pause playback (can be resumed)
    */
   pause(): void {
-    console.log('[SongPlayerV2] Pausing playback');
     this.transport.pause();
   }
 
@@ -153,7 +146,6 @@ export class SongPlayerV2Service {
    * Resume playback from pause
    */
   async resume(): Promise<void> {
-    console.log('[SongPlayerV2] Resuming playback');
     await this.transport.start();
   }
 
@@ -202,14 +194,12 @@ export class SongPlayerV2Service {
     this.songState.resetVariables();
     this.songState.resetRepetition();
 
-    console.log('[SongPlayerV2] Playback initialized successfully');
     return true;
   }
 
   private async buildPartExecutionStates(song: Song, specificParts?: Part[]): Promise<PartExecutionState[]> {
     const partsToProcess = specificParts || song.parts;
     
-    console.log(`[SongPlayerV2] Building execution states for ${partsToProcess.length} parts`);
     
     const partStates: PartExecutionState[] = [];
 

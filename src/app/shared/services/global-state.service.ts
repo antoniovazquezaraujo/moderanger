@@ -114,7 +114,6 @@ export class GlobalStateService {
   );
 
   constructor() {
-    console.log('[GlobalStateService] Universal state service initialized');
   }
 
   // ============= PLAYBACK STATE MANAGEMENT =============
@@ -125,22 +124,18 @@ export class GlobalStateService {
 
   setIsPlaying(isPlaying: boolean): void {
     this.updatePlaybackState({ isPlaying });
-    console.log(`[GlobalState] Playing state: ${isPlaying}`);
   }
 
   setCurrentSong(song: Song | undefined): void {
     this.updatePlaybackState({ currentSong: song });
-    console.log(`[GlobalState] Current song: ${song?.name || 'None'}`);
   }
 
   setCurrentPart(part: Part | undefined): void {
     this.updatePlaybackState({ currentPart: part });
-    console.log(`[GlobalState] Current part: ${part?.name || 'None'}`);
   }
 
   setCurrentBlock(block: Block | undefined): void {
     this.updatePlaybackState({ currentBlock: block });
-    console.log(`[GlobalState] Current block: ${block?.id || 'None'}`);
   }
 
   setBeatCount(beatCount: number): void {
@@ -149,7 +144,6 @@ export class GlobalStateService {
 
   setBeatsPerBar(beatsPerBar: number): void {
     this.updatePlaybackState({ beatsPerBar });
-    console.log(`[GlobalState] Beats per bar: ${beatsPerBar}`);
   }
 
   clearPlaybackContext(): void {
@@ -159,7 +153,6 @@ export class GlobalStateService {
       currentBlock: undefined,
       beatCount: 0
     });
-    console.log('[GlobalState] Playback context cleared');
   }
 
   // ============= REPETITION STATE MANAGEMENT =============
@@ -179,7 +172,6 @@ export class GlobalStateService {
     };
     
     this.repetitionStateSubject.next(newState);
-    console.log(`[GlobalState] Song repetitions: ${validRepetitions}`);
   }
 
   nextRepetition(): boolean {
@@ -195,7 +187,6 @@ export class GlobalStateService {
       };
       
       this.repetitionStateSubject.next(newState);
-      console.log(`[GlobalState] Advanced to repetition: ${nextRepetition}`);
       return true;
     }
     
@@ -212,7 +203,6 @@ export class GlobalStateService {
     };
     
     this.repetitionStateSubject.next(newState);
-    console.log('[GlobalState] Repetition reset to 0');
   }
 
   // ============= PATTERN STATE MANAGEMENT =============
@@ -228,7 +218,6 @@ export class GlobalStateService {
     }
 
     this.updatePatternState({ globalPattern: pattern });
-    console.log(`[GlobalState] Global pattern updated. Length: ${pattern.length}`);
   }
 
   setPlayMode(mode: PlayMode): void {
@@ -238,12 +227,10 @@ export class GlobalStateService {
     }
 
     this.updatePatternState({ playMode: mode });
-    console.log(`[GlobalState] Play mode: ${PlayMode[mode]}`);
   }
 
   setGlobalDefaultDuration(duration: NoteDuration): void {
     this.updatePatternState({ defaultDuration: duration });
-    console.log(`[GlobalState] Global default duration: ${duration}`);
   }
 
   // ============= CONVENIENCE GETTERS =============
@@ -315,15 +302,6 @@ export class GlobalStateService {
 
   logCurrentState(): void {
     const state = this.getFullState();
-    console.log('[GlobalState] Current State:', {
-      isPlaying: state.playback.isPlaying,
-      currentSong: state.playback.currentSong?.name,
-      currentPart: state.playback.currentPart?.name,
-      repetition: `${state.repetition.currentRepetition + 1}/${state.repetition.songRepetitions}`,
-      patternLength: state.pattern.globalPattern.length,
-      playMode: PlayMode[state.pattern.playMode],
-      defaultDuration: state.pattern.defaultDuration
-    });
   }
 
   resetToInitialState(): void {
@@ -346,6 +324,5 @@ export class GlobalStateService {
       defaultDuration: '4n'
     });
 
-    console.log('[GlobalState] Reset to initial state');
   }
 } 

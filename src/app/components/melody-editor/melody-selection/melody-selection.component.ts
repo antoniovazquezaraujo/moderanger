@@ -113,7 +113,6 @@ export class MelodySelectionComponent implements OnChanges {
     }
 
     if (newSelectedId && newSelectedId !== this.selectedElementId) {
-      console.log(`[MelodySelection] Moving focus ${direction > 0 ? 'right' : 'left'} to: ${newSelectedId}`);
       this.selectElement(newSelectedId);
     }
   }
@@ -180,7 +179,6 @@ export class MelodySelectionComponent implements OnChanges {
    */
   scrollToElement(elementId: string): void {
     const attemptScroll = (attempt = 1) => {
-      console.log(`[MelodySelection] scrollToElement attempt ${attempt} for ID: ${elementId}`);
       
       const visualEl = this.visualElements.find(ve => ve.id === elementId);
       const componentId = visualEl?.originalElement.id;
@@ -192,13 +190,11 @@ export class MelodySelectionComponent implements OnChanges {
         // Find the DOM element to focus
         if (visualType === 'group-start' || visualType === 'group-end') {
           targetElement = this.elementRef.nativeElement.querySelector(`[data-element-id="${elementId}"]`);
-          console.log(`[MelodySelection] Found group marker element:`, !!targetElement);
         } else {
           const allComponents = [...this.noteComponents.toArray(), ...this.groupComponents.toArray()];
           const targetComponent = allComponents.find(comp => comp.note?.id === componentId);
           if (targetComponent) {
             targetElement = targetComponent.elementRef.nativeElement;
-            console.log(`[MelodySelection] Found component element:`, !!targetElement);
           }
         }
 
@@ -212,10 +208,8 @@ export class MelodySelectionComponent implements OnChanges {
           try {
             targetElement.focus();
           } catch (e) {
-            console.log(`[MelodySelection] Could not focus element (this is normal for some elements)`);
           }
           
-          console.log(`[MelodySelection] Scrolled to element ${elementId} successfully`);
         } else if (attempt < 3) {
           // Retry with delay if element not found (might not be rendered yet)
           setTimeout(() => attemptScroll(attempt + 1), 50);

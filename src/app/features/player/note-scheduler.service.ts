@@ -63,7 +63,6 @@ export class NoteSchedulerService {
       return;
     }
 
-    console.log(`[NoteScheduler] Scheduling playback for ${partSoundInfo.length} parts`);
     this.isScheduling = true;
 
     try {
@@ -74,7 +73,6 @@ export class NoteSchedulerService {
         this.processScheduledNotes(time, partSoundInfo);
       }, '32n'); // 32nd note resolution
       
-      console.log('[NoteScheduler] Playback scheduled successfully');
     } catch (error) {
       console.error('[NoteScheduler] Error scheduling playback:', error);
       throw error;
@@ -87,7 +85,6 @@ export class NoteSchedulerService {
    * Stop all scheduled playback
    */
   stopScheduledPlayback(): void {
-    console.log('[NoteScheduler] Stopping scheduled playback');
     
     this.transport.stop();
     this.clearScheduledNotes();
@@ -100,7 +97,6 @@ export class NoteSchedulerService {
    * Build execution states for all parts in a song
    */
   buildPartExecutionStates(parts: Part[]): PartExecutionState[] {
-    console.log(`[NoteScheduler] Building execution states for ${parts.length} parts`);
     
     const partStates: PartExecutionState[] = [];
 
@@ -149,7 +145,6 @@ export class NoteSchedulerService {
       }
     }
 
-    console.log(`[NoteScheduler] Built ${partStates.length} execution states`);
     return partStates;
   }
 
@@ -157,7 +152,6 @@ export class NoteSchedulerService {
    * Extract notes from execution states
    */
   extractNotesFromStates(partStates: PartExecutionState[]): PartSoundInfo[] {
-    console.log('[NoteScheduler] Extracting notes from execution states');
     
     const partSoundInfos: PartSoundInfo[] = [];
 
@@ -170,7 +164,6 @@ export class NoteSchedulerService {
       }
     }
 
-    console.log(`[NoteScheduler] Extracted ${partSoundInfos.length} part sound infos`);
     return partSoundInfos;
   }
 

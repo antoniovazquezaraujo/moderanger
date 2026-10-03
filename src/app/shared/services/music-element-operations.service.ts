@@ -83,7 +83,6 @@ export class MusicElementOperationsService {
    * Universal element finder - replaces all findElementAndParent implementations
    */
   findElement(elementId: string, elements: MusicElement[], options: SearchOptions = {}): SearchResult {
-    console.log(`[MusicElementOps] Finding element: ${elementId}`);
     
     const defaultOptions: SearchOptions = {
       includeGroups: true,
@@ -131,7 +130,6 @@ export class MusicElementOperationsService {
    * Universal note creation - replaces all addNote implementations
    */
   addNote(elements: MusicElement[], noteData: Partial<SingleNote>, duration: NoteDuration): OperationResult<{ elements: MusicElement[]; noteId: string }> {
-    console.log(`[MusicElementOps] Adding note with duration: ${duration} - USING UNIFIED GENERATION`);
 
     try {
       // Use unified note generation service
@@ -154,8 +152,6 @@ export class MusicElementOperationsService {
       const newNote = noteResult.data;
       const updatedElements = [...elements, newNote];
 
-      console.log(`[MusicElementOps] Note created successfully with unified service: ${newNote.id}`);
-
       return {
         success: true,
         data: { elements: updatedElements, noteId: newNote.id },
@@ -173,7 +169,6 @@ export class MusicElementOperationsService {
    * Add note after specific element
    */
   addNoteAfter(elements: MusicElement[], targetId: string, noteData: Partial<SingleNote>, duration: NoteDuration): OperationResult<{ elements: MusicElement[]; noteId: string }> {
-    console.log(`[MusicElementOps] Adding note after: ${targetId} - USING UNIFIED GENERATION`);
 
     const searchResult = this.findElement(targetId, elements);
     if (!searchResult.element) {
@@ -203,8 +198,6 @@ export class MusicElementOperationsService {
       const newNote = noteResult.data;
       const updatedElements = this.insertElementAfter(elements, targetId, newNote);
 
-      console.log(`[MusicElementOps] Note created after ${targetId} with unified service: ${newNote.id}`);
-
       return {
         success: true,
         data: { elements: updatedElements, noteId: newNote.id },
@@ -222,7 +215,6 @@ export class MusicElementOperationsService {
    * Add note to group
    */
   addNoteToGroup(elements: MusicElement[], groupId: string, noteData: Partial<SingleNote>, duration: NoteDuration): OperationResult<{ elements: MusicElement[]; noteId: string }> {
-    console.log(`[MusicElementOps] Adding note to group: ${groupId} - USING UNIFIED GENERATION`);
 
     const searchResult = this.findElement(groupId, elements);
     if (!searchResult.element || !isGenericGroup(searchResult.element)) {
@@ -255,8 +247,6 @@ export class MusicElementOperationsService {
       const updatedGroup = withUpdatedChildren(group, [...currentChildren, newNote]);
       const updatedElements = this.updateElementInList(elements, groupId, updatedGroup);
 
-      console.log(`[MusicElementOps] Note created in group ${groupId} with unified service: ${newNote.id}`);
-
       return {
         success: true,
         data: { elements: updatedElements, noteId: newNote.id },
@@ -276,7 +266,6 @@ export class MusicElementOperationsService {
    * Universal element update - replaces all updateNote implementations
    */
   updateElement(elements: MusicElement[], elementId: string, changes: Partial<MusicElement>): OperationResult<MusicElement[]> {
-    console.log(`[MusicElementOps] Updating element: ${elementId}`);
 
     const searchResult = this.findElement(elementId, elements);
     if (!searchResult.element) {
@@ -317,7 +306,6 @@ export class MusicElementOperationsService {
    * Bulk update multiple elements
    */
   updateElements(elements: MusicElement[], updates: Array<{ id: string; changes: Partial<MusicElement> }>): BulkOperationResult {
-    console.log(`[MusicElementOps] Bulk updating ${updates.length} elements`);
 
     const results: OperationResult[] = [];
     let currentElements = [...elements];
@@ -349,7 +337,6 @@ export class MusicElementOperationsService {
    * Universal element removal - replaces all removeNote implementations
    */
   removeElement(elements: MusicElement[], elementId: string): OperationResult<MusicElement[]> {
-    console.log(`[MusicElementOps] Removing element: ${elementId}`);
 
     const searchResult = this.findElement(elementId, elements);
     if (!searchResult.element) {
@@ -379,7 +366,6 @@ export class MusicElementOperationsService {
    * Remove multiple elements
    */
   removeElements(elements: MusicElement[], elementIds: string[]): BulkOperationResult {
-    console.log(`[MusicElementOps] Bulk removing ${elementIds.length} elements`);
 
     const results: OperationResult[] = [];
     let currentElements = [...elements];

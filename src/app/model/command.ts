@@ -121,7 +121,6 @@ export class Command {
             const patternString = String(value);
             try {
                 player.currentPattern = parseBlockNotes(patternString);
-                console.log(`[Command PATTERN] Parsed and set pattern for player:`, player.currentPattern);
             } catch (e) {
                 console.error(`[Command PATTERN] Failed to parse pattern string "${patternString}":`, e);
                 player.currentPattern = null;
@@ -159,7 +158,6 @@ export class Command {
                     if (value !== PlayMode.PATTERN) {
                          player.currentPattern = null;
                     } else {
-                        console.log(`[Command PLAYMODE] Switched to PATTERN. Player pattern is:`, player.currentPattern);
                     }
                 } else {
                      console.warn(`[Command PLAYMODE] Invalid final value for PLAYMODE: ${value}. Defaulting player to CHORD.`);
@@ -184,7 +182,4 @@ export class Command {
         return null;
     }
 }
-
-
-
 

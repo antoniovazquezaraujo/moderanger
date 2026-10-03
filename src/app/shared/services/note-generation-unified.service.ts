@@ -84,7 +84,6 @@ export class NoteGenerationUnifiedService {
    * Universal SingleNote creation - replaces all scattered note creation
    */
   createSingleNote(options: NoteCreationOptions = {}): NoteCreationResult<SingleNote> {
-    console.log('[NoteGenUnified] Creating SingleNote with options:', options);
     
     try {
       // Apply defaults
@@ -129,7 +128,6 @@ export class NoteGenerationUnifiedService {
         validationPassed: shouldValidate
       } : undefined;
       
-      console.log('[NoteGenUnified] SingleNote created successfully:', note.id);
       
       return {
         success: true,
@@ -149,7 +147,6 @@ export class NoteGenerationUnifiedService {
    * Universal CompositeNote creation (chord/arpeggio)
    */
   createCompositeNote(type: 'chord' | 'arpeggio', notes: SingleNote[], duration?: NoteDuration): NoteCreationResult<CompositeNote> {
-    console.log(`[NoteGenUnified] Creating ${type} with ${notes.length} notes`);
     
     try {
       // Validate inputs
@@ -189,7 +186,6 @@ export class NoteGenerationUnifiedService {
         notes: [...notes] // Create copy
       };
       
-      console.log(`[NoteGenUnified] ${type} created successfully:`, composite.id);
       
       return {
         success: true,
@@ -208,7 +204,6 @@ export class NoteGenerationUnifiedService {
    * Universal GenericGroup creation
    */
   createGenericGroup(options: GroupCreationOptions): NoteCreationResult<GenericGroup> {
-    console.log('[NoteGenUnified] Creating GenericGroup with options:', options);
     
     try {
       // Validate duration
@@ -253,7 +248,6 @@ export class NoteGenerationUnifiedService {
         children: [...children] // Create copy
       };
       
-      console.log('[NoteGenUnified] GenericGroup created successfully:', group.id);
       
       return {
         success: true,
@@ -274,7 +268,6 @@ export class NoteGenerationUnifiedService {
    * Universal NoteData creation - replaces 10+ scattered patterns
    */
   createNoteData(options: NoteDataCreationOptions = {}): NoteCreationResult<NoteData> {
-    console.log('[NoteGenUnified] Creating NoteData with options:', options);
     
     try {
       // Apply defaults
@@ -326,7 +319,6 @@ export class NoteGenerationUnifiedService {
         }
       }
       
-      console.log('[NoteGenUnified] NoteData created successfully');
       
       return {
         success: true,
@@ -370,7 +362,6 @@ export class NoteGenerationUnifiedService {
    * Create multiple notes at once
    */
   createMultipleNotes(count: number, baseOptions: NoteCreationOptions = {}): NoteCreationResult<SingleNote[]> {
-    console.log(`[NoteGenUnified] Creating ${count} notes with base options`);
     
     try {
       const notes: SingleNote[] = [];

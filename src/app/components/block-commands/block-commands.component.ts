@@ -125,14 +125,12 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     addElement(type: 'command' | 'operation'): void {
-        console.log(`[BlockCommands] addElement called with type: ${type}`);
         if (type === 'command') {
             if (!this.block.commands) {
                 this.block.commands = [];
             }
             const newCommand = new Command({ type: CommandType.OCT, value: 0 });
             this.block.commands.push(newCommand);
-            console.log(`[BlockCommands] Added command. New count: ${this.block.commands.length}`);
         } else if (type === 'operation') {
             if (!this.operations) {
                 this.operations = [];
@@ -141,7 +139,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
 
             if (!this.selectedVariable && this.availableVariables.length > 0) {
                 this.selectedVariable = this.availableVariables[0].value;
-                console.log(`[BlockCommands] Defaulted selectedVariable to: ${this.selectedVariable}`);
             }
             if (!this.selectedVariable) {
                  console.warn("[BlockCommands] Cannot add operation: No variable selected or available.");
@@ -158,37 +155,30 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             } else if (defaultOpType === OperationType.VARY) {
                  initialValue = 1;
             }
-            console.log(`[BlockCommands] Determined initialValue: ${initialValue} for variable ${this.selectedVariable}`);
 
             const newOperation = { 
                 type: defaultOpType,
                 variableName: this.selectedVariable, 
                 value: initialValue
             };
-            console.log("[BlockCommands] Created new operation object:", newOperation);
             
             const oldLength = this.operations.length;
             this.operations = [...this.operations, newOperation];
-            console.log(`[BlockCommands] Updated local operations array. Old length: ${oldLength}, New length: ${this.operations.length}`, this.operations);
             
             this.updateBlockOperations();
         }
-        console.log("[BlockCommands] Triggering change detection after addElement.");
         this.cdr.detectChanges();
     }
 
     private updateBlockOperations(): void {
-        console.log("[BlockCommands] updateBlockOperations started. Input local operations:", this.operations);
         if (!this.operations) {
             this.block.operations = [];
-            console.log("[BlockCommands] updateBlockOperations: No local operations, block.operations set to empty.");
             return;
         }
         try {
             this.block.operations = this.operations.map(op => {
                 const variableName = op.variableName || '';
                 let value = op.value;
-                console.log(`[BlockCommands] Mapping operation: type=${op.type}, varName=${variableName}, value=${value}`);
 
                 switch (op.type) {
                     case OperationType.VARY:
@@ -208,7 +198,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                         return new AssignOperation(variableName, 0); 
                 }
             });
-            console.log("[BlockCommands] updateBlockOperations finished. Result block.operations:", this.block.operations);
         } catch (error) {
              console.error("[BlockCommands] Error during updateBlockOperations mapping:", error);
              this.block.operations = []; 
@@ -262,7 +251,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             // If already a variable, convert back to direct value
             command.isVariable = false;
             command.setValue(this.getDefaultValueForCommandType(command.type));
-            console.log(`[BlockCommands] Converted command ${command.type} from variable to direct value`);
         } else {
             // Convert to variable mode and pre-select the first compatible variable
             this.updateAvailableVariables();
@@ -271,7 +259,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             if (compatibleVars.length > 0) {
                 command.isVariable = true;
                 command.setVariable(compatibleVars[0].value); // Pre-select first compatible variable
-                console.log(`[BlockCommands] Converted command ${command.type} to variable mode. Pre-selected: ${compatibleVars[0].value}`);
             } else {
                 console.warn(`[BlockCommands] No compatible variables found for command type ${command.type}`);
                 alert('No compatible variables available for this command type. Please create variables first.');
@@ -328,13 +315,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     onVariableSelected(value: string): void {
-        console.log('Operation variable selected for potential new op:', value);
         this.selectedVariable = value;
         this.cdr.detectChanges(); 
     }
 
     onCommandTypeChange(command: Command): void {
-        console.log(`Command type changed to: ${command.type}`);
         if (command.type === CommandType.PATTERN) {
              command.isVariable = false;
         }
@@ -353,7 +338,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     onOperationTypeChange(): void {
-        console.log('Operation type changed in list');
         this.operations.forEach(op => {
              if (op.type === OperationType.ASSIGN) {
                  if (this.isVariableOfType(op.variableName, 'scale')) {
