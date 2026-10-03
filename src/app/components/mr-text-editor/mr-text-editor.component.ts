@@ -85,7 +85,13 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
     if (changes['visible']?.currentValue === true) {
       this.reloadIfClean();
     }
-    if (changes['repeats'] !== undefined && !changes['repeats'].firstChange) {
+    // El tick del padre puede entregar `repeats` y `song` en pasadas distintas
+    // (p. ej. justo después de Aplicar): reaccionar solo a `repeats` recargaba
+    // el texto con el modelo todavía viejo. Cualquiera de los dos cambios debe
+    // regenerar el texto cuando no hay ediciones pendientes.
+    const repeatsChanged = changes['repeats'] !== undefined && !changes['repeats'].firstChange;
+    const songChanged = changes['song'] !== undefined && !changes['song'].firstChange;
+    if (repeatsChanged || songChanged) {
       this.reloadIfClean();
     }
   }
