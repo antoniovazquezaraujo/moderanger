@@ -1,4 +1,15 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Input, OnDestroy, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  ElementRef,
+  Input,
+  OnDestroy,
+  Output,
+  EventEmitter,
+  ViewChild
+} from '@angular/core';
 import { Song } from 'src/app/model/song';
 import { Part } from 'src/app/model/part';
 import { SongPlayer } from 'src/app/model/song.player';
@@ -6,6 +17,19 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { NoteDuration } from 'src/app/model/melody';
 import { MrTextAppliedEvent } from '../mr-text-editor/mr-text-editor.component';
+import {
+  applyDocumentVariables,
+  buildMrFileName,
+  createDocumentFromContext,
+  mrMetaToSessionMeta,
+  MrMeta,
+  MrSerializeError,
+  prepareSongText,
+  serializeSong,
+  sessionMetaToMrMeta,
+  SongDocument
+} from 'src/app/model/mr';
+import { downloadTextFile, readFileAsText } from 'src/app/model/mr/mr.file.browser';
 
 @Component({
     selector: 'app-song-editor',
@@ -19,10 +43,22 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     @Output() songChange = new EventEmitter<Song>();
     
     repetitions: number = 1;
+    /**
+     * BPM de la sesión (meta del `.mr`, no vive en `Song`): se pasa a la vista
+     * de texto, viaja al guardar y se recibe al cargar/aplicar.
+     */
+    bpm: number | undefined;
     public metronome$: Observable<number>;
     variablesSidebarVisible: boolean = false;
     mrTextVisible: boolean = false;
     isPlaying: boolean = false;
+
+    /** Diálogo de errores de guardar/cargar `.mr`. */
+    mrErrorVisible = false;
+    mrErrorTitle = '';
+    mrErrorLines: string[] = [];
+
+    @ViewChild('mrFileInput') mrFileInputRef?: ElementRef<HTMLInputElement>;
 
     selectedDefaultDuration: NoteDuration = '4n';
     readonly availableDurations: NoteDuration[] = ['1n', '2n', '4n', '8n', '16n', '4t', '8t'];
@@ -63,18 +99,96 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * La vista de texto `.mr` ha reemplazado el modelo: se detiene la
-     * reproducción (para no mezclar la canción antigua) y se reemite la nueva
-     * canción hacia arriba (AppComponent es el dueño del modelo).
+     * La vista de texto `.mr` ha reemplazado el modelo (sus variables ya están
+     * aplicadas): se detiene la reproducción, se sincroniza la meta de sesión
+     * y se reemite la nueva canción hacia arriba (AppComponent es el dueño).
      */
     onMrTextApplied(event: MrTextAppliedEvent): void {
+        this.stopIfPlaying();
+        this.syncSessionMetaAndEmit(event.song, event.meta);
+    }
+
+    /** Serializa el modelo actual y descarga `<nombre-saneado>.mr`. */
+    saveMrFile(): void {
+        try {
+            const document = createDocumentFromContext(this.song, this.currentMeta());
+            downloadTextFile(buildMrFileName(this.song.name), serializeSong(document));
+        } catch (error) {
+            const detail = error instanceof MrSerializeError ? error.message : String(error);
+            this.showMrErrors('No se pudo guardar el fichero .mr', [detail]);
+        }
+    }
+
+    /** Abre el selector de fichero `.mr` (input oculto de la plantilla). */
+    openMrFilePicker(): void {
+        this.mrFileInputRef?.nativeElement.click();
+    }
+
+    /**
+     * Lee el `.mr` elegido (UTF-8), lo valida y, solo si es válido, reemplaza
+     * la canción; si hay errores los muestra con `fichero:línea:columna` y no
+     * toca el modelo actual.
+     */
+    async onMrFileSelected(event: Event): Promise<void> {
+        const input = event.target as HTMLInputElement;
+        const file = input.files && input.files.length > 0 ? input.files[0] : undefined;
+        // Permite volver a elegir el mismo fichero (un input con el mismo value
+        // no dispara `change`).
+        input.value = '';
+        if (file === undefined) {
+            return;
+        }
+        try {
+            const result = prepareSongText(await readFileAsText(file));
+            if (result.document === undefined) {
+                const lines = result.errors.map(error => error.format(file.name));
+                if (result.serializeError !== undefined) {
+                    lines.push(`${file.name}  error: ${result.serializeError}`);
+                }
+                this.showMrErrors(`No se pudo cargar '${file.name}'`, lines);
+                return;
+            }
+            this.applyLoadedDocument(result.document);
+        } catch (error) {
+            this.showMrErrors(`No se pudo leer '${file.name}'`, [String(error)]);
+        }
+    }
+
+    /**
+     * Adopta un documento `.mr` ya validado: para el player ANTES de aplicar
+     * variables (`stop()` reinicia `VariableContext`), las sincroniza y emite
+     * la canción por el mismo camino que la vista de texto.
+     */
+    applyLoadedDocument(document: SongDocument): void {
+        this.stopIfPlaying();
+        applyDocumentVariables(document);
+        this.syncSessionMetaAndEmit(document.song, document.meta);
+    }
+
+    private currentMeta(): MrMeta {
+        return sessionMetaToMrMeta({ repeats: this.repetitions, bpm: this.bpm });
+    }
+
+    private stopIfPlaying(): void {
         if (this.songPlayer.isPlaying) {
             this.songPlayer.stop();
         }
-        this.repetitions = event.meta.repeats ?? 1;
+    }
+
+    private syncSessionMetaAndEmit(song: Song, meta: MrMeta): void {
+        const session = mrMetaToSessionMeta(meta);
+        this.repetitions = session.repeats;
+        this.bpm = session.bpm;
         // No forzar CD aquí: el tick global posterior al evento propaga la
         // canción nueva al input `song` del editor `.mr` en la misma pasada.
-        this.songChange.emit(event.song);
+        this.songChange.emit(song);
+    }
+
+    private showMrErrors(title: string, lines: string[]): void {
+        this.mrErrorTitle = title;
+        this.mrErrorLines = lines;
+        this.mrErrorVisible = true;
+        this.cdr.markForCheck();
     }
 
     addPart() {
