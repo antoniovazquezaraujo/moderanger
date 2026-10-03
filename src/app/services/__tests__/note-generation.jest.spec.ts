@@ -5,6 +5,8 @@ import { Block } from '../../model/block';
 import { NoteData } from '../../model/note';
 import { Player } from '../../model/player';
 import { PlayMode } from '../../model/play.mode';
+import { VariableContext } from '../../model/variable.context';
+import { parseBlockNotes } from '../../model/mr/notes.parser';
 
 const audioEngineStub = {
   onTransportStop: jest.fn().mockReturnValue('listener-1'),
@@ -24,6 +26,10 @@ const blockWith = (notes: string): Block => {
 };
 
 describe('NoteGenerationService.generateNotesForBlock', () => {
+  beforeEach(() => {
+    VariableContext.context.clear();
+  });
+
   it('devuelve un silencio 16n cuando el bloque no tiene notas', () => {
     const result = createService().generateNotesForBlock(blockWith(''), createPlayer());
 
@@ -204,5 +210,57 @@ describe('NoteGenerationService.generateNotesForBlock', () => {
     expect(result).toEqual([]);
     expect(error).toHaveBeenCalled();
     error.mockRestore();
+  });
+});
+
+describe('NoteGenerationService · variables string en playback (#19)', () => {
+  beforeEach(() => {
+    VariableContext.context.clear();
+  });
+
+  it('omite la referencia string sin ruido y deja sonar el resto del bloque', () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    VariableContext.setValue('motif', '4t:0'); // string: no es reproducible todavía
+
+    const result = createService().generateNotesForBlock(blockWith('4t:0 8t:$motif 4t:2'), createPlayer());
+
+    // La referencia se convierte en un silencio con su duración: ni suena ni
+    // rompe la posición del resto de eventos.
+    expect(result.map(n => n.type)).toEqual(['chord', 'rest', 'chord']);
+    expect(result.map(n => n.duration)).toEqual(['4t', '8t', '4t']);
+    expect(result[1]).toMatchObject({ type: 'rest', duration: '8t' });
+    expect(result[0].noteDatas![0].note).toBe(60);
+    expect(result[2].noteDatas![0].note).toBe(63);
+    expect(error).not.toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it('omite también referencias string dentro de un grupo', () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    VariableContext.setValue('motif', '4t:0');
+
+    const result = createService().generateNotesForBlock(blockWith('4n:( 0 8t:$motif 2 )'), createPlayer());
+
+    expect(result.map(n => n.type)).toEqual(['chord', 'rest', 'chord']);
+    expect(result.map(n => n.duration)).toEqual(['4n', '8t', '4n']);
+    expect(error).not.toHaveBeenCalled();
+    error.mockRestore();
+  });
+
+  it('sigue registrando el error de una variable no definida', () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const result = createService().generateNotesForBlock(blockWith('8t:$noExiste'), createPlayer());
+
+    expect(result).toEqual([]);
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(String(error.mock.calls[0][0])).toContain('[NoteGenSvc] Error parsing block notes');
+    error.mockRestore();
+  });
+
+  it('la semántica de `parseBlockNotes` sigue resolviendo solo números', () => {
+    VariableContext.setValue('motif', '4t:0');
+
+    expect(() => parseBlockNotes('8t:$motif')).toThrow('no contiene un número');
   });
 });
