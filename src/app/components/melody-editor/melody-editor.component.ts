@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter, HostListener, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges, QueryList, ViewChildren } from '@angular/core';
 import { NoteData } from '../../model/note';
-import { parseBlockNotes } from '../../model/mr/notes.parser';
+import { parseBlockNotesForEditor } from '../../model/mr/notes.parser';
 import { MelodyEditorService } from '../../services/melody-editor.service';
 import { MusicElement, NoteDuration, SingleNote, CompositeNote, GenericGroup } from '../../model/melody';
 import { Subscription } from 'rxjs';
@@ -125,15 +125,20 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   }
 
   private loadNotesFromString(notesString: string): void {
+    if (!notesString) {
+      this.melodyEditorService.loadFromNoteData([]); 
+      return;
+    }
     try {
-      if (notesString) {
-        const noteData = parseBlockNotes(notesString);
-        this.melodyEditorService.loadFromNoteData(noteData);
-      } else {
-        this.melodyEditorService.loadFromNoteData([]); 
-      }
+      // Las variables sin número (`8t:$motif` con `$motif = "4t:0"`) se
+      // conservan como token de referencia; no son un error de render.
+      const { noteData } = parseBlockNotesForEditor(notesString);
+      this.melodyEditorService.loadFromNoteData(noteData);
     } catch (e) {
+      // Un fallo de sintaxis real (no debería llegar desde el parser `.mr`)
+      // deja el editor vacío y se registra para poder diagnosticarlo.
       console.error('[MelodyEditor] Error parsing notes in loadNotesFromString:', notesString, e);
+      this.melodyEditorService.loadFromNoteData([]); 
     }
   }
 
@@ -547,6 +552,9 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
 
   private updateNoteValue(note: MusicElement, newValue: number | null): void {
     if (note.type !== 'note' && note.type !== 'rest') return;
+    // Un token `$variable` no tiene valor editable: se conserva tal cual
+    // (para cambiar el patrón se edita la variable o el texto `.mr`).
+    if ((note as SingleNote).variableName !== undefined) return;
     let updatePayload: Partial<SingleNote>;
     if (newValue === null) {
         updatePayload = { type: 'rest', value: null }; 

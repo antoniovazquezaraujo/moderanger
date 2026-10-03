@@ -17,6 +17,11 @@ export interface BaseElement {
 export interface SingleNote extends BaseElement {
     type: 'note' | 'rest';
     value: number | null;    // null para silencios
+    /**
+     * Referencia a una variable de notas no resuelta (`$motif`). El editor la
+     * muestra como token y la conserva al emitir; no es editable por valor.
+     */
+    variableName?: string;
 }
 
 // Grupo compuesto (Arpegio o Acorde)
@@ -91,6 +96,13 @@ export class NoteFactory {
 export class NoteConverter {
     static toNoteData(element: MusicElement, defaultDuration: NoteDuration = '4n'): NoteData {
         if (element.type === 'note' || element.type === 'rest') {
+            if (element.variableName !== undefined) {
+                return new NoteData({
+                    type: 'note',
+                    duration: element.duration ?? defaultDuration,
+                    variable: element.variableName
+                });
+            }
             return new NoteData({
                 type: element.type,
                 duration: element.duration ?? defaultDuration,
@@ -115,10 +127,17 @@ export class NoteConverter {
     
     static fromNoteData(noteData: NoteData): MusicElement {
         if (noteData.type === 'note' || noteData.type === 'rest') {
-            return NoteFactory.createSingleNote(
+            const note = NoteFactory.createSingleNote(
                 noteData.note ?? null,
                 noteData.duration as NoteDuration
             );
+            if (noteData.variable !== undefined) {
+                // El token es un evento de nota (`$var`), no un silencio.
+                note.type = 'note';
+                note.variableName = noteData.variable;
+                note.value = null;
+            }
+            return note;
         } else if (noteData.type === 'group') { // Manejar nuestro tipo 'group'
             return NoteFactory.createGenericGroup(
                 noteData.children?.map(child => this.fromNoteData(child)) ?? [],

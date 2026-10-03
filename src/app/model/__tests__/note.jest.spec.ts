@@ -19,6 +19,14 @@ describe('NoteData.toString', () => {
     expect(rest.toString()).toBe('4n:s');
   });
 
+  it('serializa una referencia a variable como $nombre (#17)', () => {
+    const withDuration = new NoteData({ type: 'note', duration: '8t', variable: 'motif' });
+    const withoutDuration = new NoteData({ type: 'rest', variable: 'ghost' });
+
+    expect(withDuration.toString()).toBe('8t:$motif');
+    expect(withoutDuration.toString()).toBe('$ghost');
+  });
+
   it('serializa un acorde con sus noteDatas', () => {
     const chord = new NoteData({
       type: 'chord',

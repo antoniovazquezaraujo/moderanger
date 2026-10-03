@@ -6,8 +6,11 @@ import { SingleNote, NoteDuration } from '../../model/melody';
     template: `
         <div class="note-item" [class.selected]="isSelected" (click)="onClick()">
             <div class="note-visual" (wheel)="onWheelValue($event)">
-                <span class="note-value" [class.silence]="note.value === null">
-                    {{ note.value === null ? 'x' : note.value }}
+                <span class="note-value"
+                      [class.silence]="!note.variableName && note.value === null"
+                      [class.variable-reference]="!!note.variableName"
+                      [title]="note.variableName ? 'Referencia a la variable $' + note.variableName : ''">
+                    {{ note.variableName ? '$' + note.variableName : (note.value === null ? 'x' : note.value) }}
                 </span>
             </div>
             <div class="note-duration" (wheel)="onWheelDuration($event)">
@@ -52,6 +55,11 @@ import { SingleNote, NoteDuration } from '../../model/melody';
         
         .note-visual .silence {
             color: #666;
+        }
+
+        .note-visual .variable-reference {
+            color: #7b1fa2;
+            font-size: 0.9em;
         }
         
         .note-duration {

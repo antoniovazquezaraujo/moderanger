@@ -329,6 +329,60 @@ export function parseBlockNotes(input: string): NoteData[] {
   return noteEventsToNoteData(parseNoteEvents(input));
 }
 
+/** Resultado de parsear notas para el editor visual. */
+export interface EditorNoteParseResult {
+  /** Eventos convertidos a `NoteData`; las referencias sin número se conservan. */
+  noteData: NoteData[];
+  /** Nombres de variables que no contenían un número (se pintan como `$nombre`). */
+  variableReferences: string[];
+}
+
+/**
+ * Variante de `parseBlockNotes` para el editor visual: una `$variable` que no
+ * resuelve a número (p. ej. `$motif = "4t:0"` o una variable no definida) no
+ * lanza; se conserva como `NoteData.variable` para que el editor la muestre
+ * como token y no la pierda al emitir cambios.
+ *
+ * No cambia la semántica de reproducción: `parseBlockNotes` sigue resolviendo
+ * solo variables numéricas y lanzando `MrParseError` si no puede.
+ */
+export function parseBlockNotesForEditor(
+  input: string,
+  resolve: VariableResolver = resolveFromContext
+): EditorNoteParseResult {
+  const variableReferences: string[] = [];
+  const noteData = parseNoteEvents(input).map((event) =>
+    eventToEditorNoteData(event, resolve, variableReferences)
+  );
+  return { noteData, variableReferences };
+}
+
+function eventToEditorNoteData(
+  event: NoteEvent,
+  resolve: VariableResolver,
+  variableReferences: string[]
+): NoteData {
+  if (event.kind === 'group') {
+    return new NoteData({
+      type: 'group',
+      duration: event.duration,
+      children: event.children.map((child) => eventToEditorNoteData(child, resolve, variableReferences))
+    });
+  }
+  if (event.rest) {
+    return new NoteData({ type: 'rest', duration: event.duration });
+  }
+  if (event.variable !== undefined) {
+    const value = resolve(event.variable);
+    if (typeof value === 'number') {
+      return new NoteData({ type: 'note', duration: event.duration, note: value });
+    }
+    variableReferences.push(event.variable);
+    return new NoteData({ type: 'note', duration: event.duration, variable: event.variable });
+  }
+  return new NoteData({ type: 'note', duration: event.duration, note: event.grade });
+}
+
 /** Imprime un evento en su forma canónica (sin salto de línea). */
 export function printNoteEvent(event: NoteEvent): string {
   const prefix = event.duration ? `${event.duration}:` : '';

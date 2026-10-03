@@ -5,6 +5,7 @@ import {
   canonicalNoteLine,
   canonicalNoteLines,
   parseBlockNotes,
+  parseBlockNotesForEditor,
   parseNoteEvents,
   printNoteEvent
 } from '../notes.parser';
@@ -111,6 +112,56 @@ describe('notes.parser: resolución de variables (brecha §3.2 #2)', () => {
 
     expect(error.message).toContain('no contiene un número');
     expect(error.position).toEqual({ line: 1, column: 4 });
+  });
+});
+
+describe('parseBlockNotesForEditor: referencias sin número (#17)', () => {
+  beforeEach(() => {
+    VariableContext.context.clear();
+  });
+
+  it('conserva $motif string como referencia en vez de lanzar', () => {
+    VariableContext.setValue('motif', '4t:0');
+
+    const { noteData, variableReferences } = parseBlockNotesForEditor('8t:$motif s');
+
+    expect(variableReferences).toEqual(['motif']);
+    expect(noteData[0]).toMatchObject({ type: 'note', duration: '8t', variable: 'motif' });
+    expect(noteData[0].note).toBeUndefined();
+    expect(noteData[0].toString()).toBe('8t:$motif');
+    expect(noteData[1]).toMatchObject({ type: 'rest', duration: undefined });
+  });
+
+  it('conserva también variables no definidas (no resuelven a número)', () => {
+    const { noteData, variableReferences } = parseBlockNotesForEditor('4n:$ghost');
+
+    expect(variableReferences).toEqual(['ghost']);
+    expect(noteData[0].variable).toBe('ghost');
+    expect(noteData[0].toString()).toBe('4n:$ghost');
+  });
+
+  it('sigue resolviendo las variables numéricas como notas', () => {
+    VariableContext.setValue('grado', -5);
+
+    const { noteData, variableReferences } = parseBlockNotesForEditor('4n:2 4t:$grado');
+
+    expect(variableReferences).toEqual([]);
+    expect(noteData.map((note) => note.note)).toEqual([2, -5]);
+  });
+
+  it('preserva el orden y las referencias dentro de grupos', () => {
+    VariableContext.setValue('motif', '4t:0');
+
+    const [group] = parseBlockNotesForEditor('4n:( 0 8t:$motif )').noteData;
+
+    expect(group.type).toBe('group');
+    expect(group.toString()).toBe('4n:(0 8t:$motif)');
+  });
+
+  it('no cambia la semántica de reproducción de parseBlockNotes', () => {
+    VariableContext.setValue('motif', '4t:0');
+
+    expect(() => parseBlockNotes('8t:$motif')).toThrow(MrParseError);
   });
 });
 
