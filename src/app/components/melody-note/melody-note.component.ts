@@ -9,8 +9,8 @@ import { SingleNote, NoteDuration } from '../../model/melody';
                 <span class="note-value"
                       [class.silence]="!note.variableName && note.value === null"
                       [class.variable-reference]="!!note.variableName"
-                      [title]="note.variableName ? 'Referencia a la variable $' + note.variableName : ''">
-                    {{ note.variableName ? '$' + note.variableName : (note.value === null ? 'x' : note.value) }}
+                      [title]="valueTitle">
+                    {{ valueText }}
                 </span>
             </div>
             <div class="note-duration" (wheel)="onWheelDuration($event)">
@@ -81,6 +81,26 @@ export class MelodyNoteComponent {
     @Output() changeValue = new EventEmitter<number>();
     
     constructor(public elementRef: ElementRef) {}
+
+    /**
+     * Texto del valor de la nota en el editor: `$var` para referencias,
+     * `s` para silencios (mismo token que el DSL `.mr`) y el grado en el
+     * resto de casos.
+     */
+    get valueText(): string {
+        if (this.note.variableName) {
+            return '$' + this.note.variableName;
+        }
+        return this.note.value === null ? 's' : String(this.note.value);
+    }
+
+    /** Tooltip del valor: referencia a variable, silencio o vacío. */
+    get valueTitle(): string {
+        if (this.note.variableName) {
+            return 'Referencia a la variable $' + this.note.variableName;
+        }
+        return this.note.value === null ? 'Silencio' : '';
+    }
     
     onClick(): void {
         this.select.emit();

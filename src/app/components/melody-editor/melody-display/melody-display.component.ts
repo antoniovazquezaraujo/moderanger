@@ -40,7 +40,7 @@ export interface VisualElement {
                (click)="onElementClick(element.id)">
             <div class="note-visual">
               <span class="note-value" [class.silence]="element.value === null">
-                {{ element.value === null ? 'x' : element.value }}
+                {{ element.value === null ? 's' : element.value }}
               </span>
             </div>
             <div class="note-duration">
