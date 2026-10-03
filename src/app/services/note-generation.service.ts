@@ -63,6 +63,9 @@ export class NoteGenerationService {
     
     let rootNoteDatas: NoteData[] = [];
     const notesToParse = block.blockContent?.notes || '';
+    // Q6(a): la duración por defecto del bloque (`notes default <dur>` en `.mr`)
+    // sustituye al fallback 16n para las notas raíz sin duración.
+    const fallbackDuration = block.blockContent?.defaultDuration ?? '16n';
     console.log(`[NoteGenSvc] Notes string to parse: "${notesToParse}"`);
 
     // 1. Parse the string into NoteData[]
@@ -76,7 +79,7 @@ export class NoteGenerationService {
       }
     } else {
       // --- If notes string is empty, create a default silence/rest --- 
-      const restResult = this.noteGenUnified.createRestNoteData('16n');
+      const restResult = this.noteGenUnified.createRestNoteData(fallbackDuration);
       if (restResult.success && restResult.data) {
         rootNoteDatas = [restResult.data];
       } else {
@@ -100,7 +103,7 @@ export class NoteGenerationService {
     console.log(`[NoteGenSvc] Processing individual notes/groups...`);
     const finalPlayableNotes: NoteData[] = [];
     for (const noteData of rootNoteDatas) {
-        finalPlayableNotes.push(...this.processSingleNoteData(noteData, player));
+        finalPlayableNotes.push(...this.processSingleNoteData(noteData, player, fallbackDuration));
     }
     
     // <<< Add log before final return >>>
@@ -110,9 +113,9 @@ export class NoteGenerationService {
   }
 
   // <<< New method similar to old SongPlayer.processIndividualNoteData >>>
-  private processSingleNoteData(noteData: NoteData, player: Player): NoteData[] {
+  private processSingleNoteData(noteData: NoteData, player: Player, fallbackDuration: string = '16n'): NoteData[] {
       const results: NoteData[] = [];
-      const duration: string = noteData.duration ?? '16n'; 
+      const duration: string = noteData.duration ?? fallbackDuration; 
 
       switch (noteData.type) {
           case 'note':
@@ -254,7 +257,7 @@ export class NoteGenerationService {
                if (noteData.children) {
                    const processedChildren: NoteData[] = [];
                    noteData.children.forEach(child => {
-                      processedChildren.push(...this.processSingleNoteData(child, player));
+                      processedChildren.push(...this.processSingleNoteData(child, player, fallbackDuration));
                    });
                    results.push(...processedChildren);
                }
