@@ -40,6 +40,12 @@ texto canónico `.mr`** (ADR-001 §2.3).
 
 ### 3.1 Dónde vive el bpm (decisión)
 
+> **Actualizado en la ronda de pulido (2026-10-03, rama `fix/pulido-mr`):** el
+> bpm pasó a vivir en `Song.bpm` (default 120), lo aplica `SongPlayer` y se edita
+> en la cabecera. `MrMeta.bpm` queda como reflejo en el fichero. Detalle en
+> `docs/analisis/pulido-bpm-variables.md` §2. El texto que sigue refleja la
+> decisión original de la Fase 3 y se conserva como histórico.
+
 `Song` no tiene bpm y `SongPlayer._initializePlayback` fija 120 (pendiente heredado
 de Fase 2). El bpm es **meta de sesión**, no modelo. En Fase 2 vivía en un campo
 privado de `MrTextEditorComponent`; Eso impedía que el botón Guardar (hermano, en la
@@ -196,13 +202,21 @@ Nota: en consola aparece `[MelodyEditor] Error parsing notes… la variable $mot
 contiene un número` con el ejemplo de Fase 2 (`$motif = "4t:0"`, un patrón de notas,
 no un número). Es comportamiento **preexistente** (el preview del melody-editor usa
 `parseBlockNotes`, que solo resuelve variables numéricas); no afecta a cargar,
-guardar ni al player y no se toca en esta fase.
+guardar ni al player y no se toca en esta fase. **Resuelto en la ronda de pulido
+(#17):** el editor pinta el token `$motif` y ya no registra ese error; ver
+`docs/analisis/pulido-bpm-variables.md` §3.
 
 ## 7. Pendientes y limitaciones
 
-1. **El bpm sigue sin aplicarse al player** (`SongPlayer._initializePlayback` fija
+> **Actualización (ronda de pulido, rama `fix/pulido-mr`):** los puntos 1 (bpm al
+> player) y 7 (doble renderizado de partes) quedaron **resueltos**; el detalle
+> está en `docs/analisis/pulido-bpm-variables.md`. Se conservan aquí como
+> histórico de la fase.
+
+1. ~~**El bpm sigue sin aplicarse al player** (`SongPlayer._initializePlayback` fija
    120): el `.mr` lo conserva y la sesión lo respeta, pero al pulsar Play suena a
-   120. Primera tarea recomendada para cerrar el ciclo de la meta.
+   120. Primera tarea recomendada para cerrar el ciclo de la meta.~~ **Resuelto
+   (#16):** `Song.bpm` es canónico y el player lo aplica al Transport.
 2. **Sin persistencia automática** (localStorage/autosave): decisión de esta fase.
 3. **Cargar no abre el diálogo `.mr`**: la canción se reemplaza y el texto se
    regenera al abrirlo. Si el diálogo estaba abierto y limpio, se refresca solo.
@@ -211,6 +225,7 @@ guardar ni al player y no se toca en esta fase.
    ya está preparado para pintar varios.
 6. **No hay "Guardar como"** (nombre elegido por el usuario): el nombre sale de
    `song.name` saneado. Decidir si hace falta en producto.
-7. **Doble renderizado de partes** (backlog #12): el E2E ve `parts: 2` y
+7. ~~**Doble renderizado de partes** (backlog #12): el E2E ve `parts: 2` y
    `["Origen","Origen"]` en el DOM para una sola parte; es el contenedor legado, no
-   un efecto de la carga.
+   un efecto de la carga.~~ **Resuelto (#12):** retirado el acordeón legado;
+   `app-song`→`app-parts` es el único camino.
