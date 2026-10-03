@@ -1,0 +1,23 @@
+song Laboratorio
+version 1
+
+vars
+  $grado = -5
+
+part Piano
+  block Grupos
+    notes
+      4n:( 0 2 )
+      4n:( 8n:0 2 )
+      4n:( 4t:0 2 )
+      4n:( 2 8n:( 0 2 ) )
+      8n:s
+      4t:-7
+      4t:$grado
+      2n:12
+    commands
+      SHIFTSTART 0
+      SHIFTSIZE 3
+      SHIFTVALUE 1
+      KEY 0
+      INV 1

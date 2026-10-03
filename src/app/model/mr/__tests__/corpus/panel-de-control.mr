@@ -1,0 +1,20 @@
+song "Panel de control"
+version 1
+
+part Piano
+  block Chequeo
+    notes
+      4n:0
+    commands
+      OCT 2
+      SCALE WHITE
+      GAP 2
+      PLAYMODE ASCENDING
+      WIDTH 3
+      INV 1
+      KEY 0
+      SHIFTSTART 0
+      SHIFTSIZE 3
+      SHIFTVALUE 1
+      PATTERN_GAP 1
+      PATTERN 4t:0 4t:-1 4t:3

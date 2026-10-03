@@ -132,6 +132,35 @@ describe('NoteGenerationService.generateNotesForBlock', () => {
     expect(result[0].duration).toBe('16n');
   });
 
+  it('aplica la duración por defecto del bloque a las notas raíz (Q6a, `notes default`)', () => {
+    const block = blockWith('0');
+    block.blockContent.defaultDuration = '4n';
+
+    const result = createService().generateNotesForBlock(block, createPlayer());
+
+    expect(result).toHaveLength(1);
+    expect(result[0].duration).toBe('4n');
+  });
+
+  it('la duración del grupo sigue ganando a la del bloque', () => {
+    const block = blockWith('4t:( 0 2 )');
+    block.blockContent.defaultDuration = '4n';
+
+    const result = createService().generateNotesForBlock(block, createPlayer());
+
+    expect(result.map(n => n.duration)).toEqual(['4t', '4t']);
+  });
+
+  it('usa la duración por defecto del bloque para el silencio de un bloque sin notas', () => {
+    const block = blockWith('');
+    block.blockContent.defaultDuration = '2n';
+
+    const result = createService().generateNotesForBlock(block, createPlayer());
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ type: 'rest', duration: '2n' });
+  });
+
   it('en PATTERN transpone los grados y escala las duraciones', () => {
     const player = createPlayer();
     player.playMode = PlayMode.PATTERN;
