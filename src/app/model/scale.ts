@@ -1,6 +1,5 @@
 import { NoteData } from "./note";
 import { OctavedGrade } from "./octaved-grade";
-import { parseSong } from "./ohm.parser";
 
 export enum ScaleTypes {
     'WHITE', 'BLUE', 'RED', 'BLACK', 'PENTA', 'TONES', 'FULL'
