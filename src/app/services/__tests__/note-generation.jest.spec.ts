@@ -82,14 +82,54 @@ describe('NoteGenerationService.generateNotesForBlock', () => {
     expect(result.map(n => n.noteDatas![0].note)).toEqual([60, 63]);
   });
 
-  it('documenta regresión: los hijos sin duración no heredan la del grupo sino el default 4t', () => {
-    // `propagateGroupDurations` sólo actúa si el hijo NO tiene duración, pero
-    // NoteGenerationUnifiedService ya le asigna '4t' durante el parseo.
-    // TODO(núcleo): al corregirlo, este test debe esperar '4n' (duración del grupo).
+  it('propaga la duración del grupo a los hijos sin duración', () => {
+    // Causa raíz corregida: los hijos parseados sin duración propia ya no reciben
+    // '4t' del factory, por lo que `propagateGroupDurations` puede heredar la del grupo.
     const result = createService().generateNotesForBlock(blockWith('4n:( 0 2 )'), createPlayer());
 
     expect(result).toHaveLength(2);
-    expect(result.map(n => n.duration)).toEqual(['4t', '4t']);
+    expect(result.map(n => n.duration)).toEqual(['4n', '4n']);
+    expect(result.every(n => n.type === 'chord')).toBe(true);
+    expect(result.map(n => n.noteDatas![0].note)).toEqual([60, 63]);
+  });
+
+  it('conserva la duración explícita del hijo y propaga la del grupo al resto', () => {
+    const result = createService().generateNotesForBlock(blockWith('4n:( 8n:0 2 )'), createPlayer());
+
+    expect(result.map(n => n.duration)).toEqual(['8n', '4n']);
+    expect(result.map(n => n.noteDatas![0].note)).toEqual([60, 63]);
+  });
+
+  it('propaga grupos con duración 4t y 8n', () => {
+    const service = createService();
+
+    expect(service.generateNotesForBlock(blockWith('4t:( 0 2 )'), createPlayer()).map(n => n.duration)).toEqual(['4t', '4t']);
+    expect(service.generateNotesForBlock(blockWith('8n:( 0 2 )'), createPlayer()).map(n => n.duration)).toEqual(['8n', '8n']);
+  });
+
+  it('propaga la duración del subgrupo más cercano en grupos anidados', () => {
+    const result = createService().generateNotesForBlock(blockWith('4n:( 2 8n:( 0 2 ) )'), createPlayer());
+
+    expect(result.map(n => n.duration)).toEqual(['4n', '8n', '8n']);
+    expect(result.map(n => n.noteDatas![0].note)).toEqual([63, 60, 63]);
+  });
+
+  it('propaga la duración del grupo a los silencios hijos sin duración', () => {
+    const result = createService().generateNotesForBlock(blockWith('4n:( s 2 )'), createPlayer());
+
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({ type: 'rest', duration: '4n' });
+    expect(result[1]).toMatchObject({ type: 'chord', duration: '4n' });
+  });
+
+  it('documenta comportamiento: una nota raíz sin duración usa el fallback 16n', () => {
+    // Consecuencia del arreglo: al no existir ya el placeholder '4t' durante el
+    // parseo, una nota fuera de grupo llega sin duración y processSingleNoteData
+    // aplica su fallback existente ('16n'). Antes sonaba como 4t por el placeholder.
+    const result = createService().generateNotesForBlock(blockWith('0'), createPlayer());
+
+    expect(result).toHaveLength(1);
+    expect(result[0].duration).toBe('16n');
   });
 
   it('en PATTERN transpone los grados y escala las duraciones', () => {
@@ -104,6 +144,20 @@ describe('NoteGenerationService.generateNotesForBlock', () => {
 
     expect(result.map(n => n.note)).toEqual([62, 63]);
     expect(result.map(n => n.duration)).toEqual(['0.25s', '0.25s']);
+  });
+
+  it('en PATTERN escala la duración heredada de cada hijo del grupo', () => {
+    const player = createPlayer();
+    player.playMode = PlayMode.PATTERN;
+    player.currentPattern = [
+      new NoteData({ type: 'note', note: 1, duration: '4n' }),
+      new NoteData({ type: 'note', note: 2, duration: '4n' })
+    ];
+
+    const result = createService().generateNotesForBlock(blockWith('4n:( 0 2 )'), player);
+
+    expect(result.map(n => n.note)).toEqual([62, 63, 65, 67]);
+    expect(result.map(n => n.duration)).toEqual(['0.25s', '0.25s', '0.25s', '0.25s']);
   });
 
   it('deja pasar los silencios explícitos de la gramática', () => {

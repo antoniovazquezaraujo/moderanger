@@ -130,6 +130,19 @@ describe('Command.execute', () => {
     error.mockRestore();
   });
 
+  it('documenta comportamiento: en PATTERN las notas sin prefijo no fabrican duración 4t', () => {
+    // Consecuencia del arreglo de duración de grupos: el placeholder '4t' ya no
+    // se aplica en el parseo; el processor usa su fallback ('16n') al escalar.
+    const player = createFakePlayer();
+
+    new Command({ type: CommandType.PATTERN, value: '1 8n:2' }).execute(player);
+
+    const pattern = player.currentPattern as Array<{ note?: number; duration?: string }>;
+    expect(pattern).toHaveLength(2);
+    expect(pattern[0].duration).toBeUndefined();
+    expect(pattern[1].duration).toBe('8n');
+  });
+
   it('aplica variables numéricas a los parámetros del player', () => {
     const player = createFakePlayer();
     VariableContext.setValue('widthVar', 3);

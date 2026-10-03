@@ -83,6 +83,7 @@ export const ModeRangerSemantics = {
       type: note.type,
       note: note.note,
       duration: noteDuration,
+      useDefaultDuration: false, // Sin duración explícita queda undefined para heredar la del grupo
       validateOutput: false // Skip validation in grammar parsing for performance
     });
     
