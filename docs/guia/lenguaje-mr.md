@@ -225,6 +225,8 @@ Un grupo da una **duración común** a varios eventos: `duración:( … )`. Los 
 
 Reglas: el grupo se abre y se cierra **en la misma línea**; un grupo sin cerrar es error de sintaxis. El formateador escribe un espacio tras `(` y otro antes de `)`, y uno entre eventos.
 
+En el editor visual, una nota sin duración propia **no la muestra** (la hereda del grupo). Al pasar el ratón por la nota aparece un `=` gris: con la rueda sobre él la cambias; a partir de ahí queda como duración explícita y se muestra siempre. El `=` es solo una pista visual: el texto sigue escribiendo el hijo sin duración mientras no la cambies.
+
 ### 4.5. Variables de nota
 
 Una nota individual puede venir de una variable numérica: `4t:$grado` (con `$grado = -5`, suena `-5`). Si la variable existe pero no es un número, el evento se toca como **silencio de su duración** y el resto del bloque suena igual, sin ruido en consola; si la variable no está definida, el bloque registra el error en consola (y el evento queda en silencio). La expansión real de patrones variables es una mejora futura (véase [limitaciones](#10-limitaciones-conocidas-de-la-v1)).

@@ -459,7 +459,13 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       const currentElement = findElementRecursive(targetId, this.elements);
       if (!currentElement) return;
 
-      const currentDuration = currentElement.duration ?? this.durations[0]; // Default to first duration if undefined
+      // Si la nota no tiene duración explícita (heredada), el ciclo parte de
+      // la duración del grupo padre (o de la del editor): girar la rueda una
+      // vez no debería saltar a `1n`/`8t`.
+      const currentDuration =
+          currentElement.duration ??
+          this.findParentGroup(targetId, this.elements)?.duration ??
+          this.defaultDuration;
       let newDuration: NoteDuration;
 
       // Simplified logic: Always cycle through defined durations
@@ -495,7 +501,13 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       const currentElement = findElementRecursive(targetId, this.elements);
       if (!currentElement) return;
 
-      const currentDuration = currentElement.duration ?? this.durations[0]; // Default to first duration if undefined
+      // Si la nota no tiene duración explícita (heredada), el ciclo parte de
+      // la duración del grupo padre (o de la del editor): girar la rueda una
+      // vez no debería saltar a `1n`/`8t`.
+      const currentDuration =
+          currentElement.duration ??
+          this.findParentGroup(targetId, this.elements)?.duration ??
+          this.defaultDuration;
       let newDuration: NoteDuration;
 
        // Simplified logic: Always cycle through defined durations
