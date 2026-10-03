@@ -45,7 +45,7 @@
 - [ ] **2.2.** Cambia `version 1` por `version 9`: a los ~200 ms aparece un error con su botón `línea 2, columna 9`; **Aplicar** queda deshabilitado; al pulsar la posición, el cursor del textarea salta allí.
 - [ ] **2.3.** Corrige a `version 1`: el estado pasa a **Cambios sin aplicar** y **Aplicar** se habilita.
 - [ ] **2.4.** Pulsa **Revertir**: el texto vuelve al canónico y el estado a **Sin cambios**.
-- [ ] **2.5.** Pega el contenido de `validacion-v1.mr` y pulsa **Aplicar**: la GUI se reconstruye (nombre, 2 partes, *Repeat* 2, *BPM* 90), el sidebar `$` muestra las variables numéricas/playmode y el texto queda normalizado.
+- [ ] **2.5.** Pega el contenido de `validacion-v1.mr` y pulsa **Aplicar**: la GUI se reconstruye (nombre, 2 partes, *Repeat* 2, *BPM* 90), el sidebar `$` muestra las 3 variables (`$oct`, `$mode` y `$motif`) y el texto queda normalizado.
 - [ ] **2.6.** Añade una línea `# prueba` y aplica; vuelve a abrir `.mr`: el comentario no se conserva (limitación documentada).
 
 ## 3. Caso 3 — Guardar
@@ -57,7 +57,7 @@
 
 ## 4. Caso 4 — Cargar (válido e inválido)
 
-- [ ] **4.1.** Pulsa ⬆ (**Cargar .mr**) y elige `validacion-v1.mr`: la GUI se reconstruye (nombre, 2 partes, *Repeat* 2, *BPM* 90), el sidebar `$` muestra `$oct` y `$mode` (la variable string `$motif` no se lista; es una limitación conocida) y en el editor de melodía se ve el token `$motif`.
+- [ ] **4.1.** Pulsa ⬆ (**Cargar .mr**) y elige `validacion-v1.mr`: la GUI se reconstruye (nombre, 2 partes, *Repeat* 2, *BPM* 90), el sidebar `$` muestra `$oct`, `$mode` y `$motif` (esta última como texto editable) y en el editor de melodía se ve el token `$motif`.
 - [ ] **4.2.** Pulsa ⬆ y elige `carga-invalida.mr`: aparece el diálogo con `carga-invalida.mr:3:5  error: 'bpm' debe estar entre 30 y 240 (recibido 20)`, el aviso **La canción actual no se ha modificado** y la canción sigue intacta.
 - [ ] **4.3.** Carga `src/app/model/mr/__tests__/corpus/semilla.mr` (sin `vars`): el sidebar `$` queda vacío (las variables que ya no están se eliminan).
 - [ ] **4.4.** Carga de nuevo `validacion-v1.mr`, pulsa Play (para que el player mute variables), para, y vuelve a cargar `semilla.mr`: no queda ninguna variable de la canción anterior.
@@ -87,7 +87,7 @@
 
 ## 7. Caso 7 — Variables y operaciones
 
-- [ ] **7.1.** Carga `validacion-v1.mr`: el sidebar `$` muestra `$oct = 2` y `$mode = ASCENDING` (la variable string `$motif` no se lista en el sidebar, pero sí está en el contexto).
+- [ ] **7.1.** Carga `validacion-v1.mr`: el sidebar `$` muestra `$oct = 2`, `$mode = ASCENDING` y `$motif` con su texto.
 - [ ] **7.2.** En el editor de melodía del bloque `Origen`, el evento `8t:$motif` se pinta como token `$motif` (sin error de consola).
 - [ ] **7.3.** Play: el bloque `Origen` suena con un silencio en el evento `$motif` (sin mensajes `[NoteGenSvc]` en consola) y el bloque `Eco` (`notes $motif`) suena con el patrón completo.
 - [ ] **7.4.** Durante el Play (antes de parar), comprueba en el sidebar `$` que las operaciones del bloque `Origen` se ejecutan en cada repetición: `$oct` aumenta (2 → 3 tras la primera vuelta → 4 al terminar) y `$mode` cambia a RANDOM.

@@ -7,7 +7,8 @@ import { Subscription } from 'rxjs';
 interface VariableDeclaration {
     name: string;
     value: string | number;
-    type: 'number' | 'playmode' | 'scale';
+    /** Tipos editables en el sidebar; `string` cubre melodías/patrones. */
+    type: 'number' | 'playmode' | 'scale' | 'string';
 }
 
 @Component({
@@ -53,6 +54,8 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
                 value = this.newVariable.value || this.playModeNames[0];
             } else if (this.newVariable.type === 'scale') {
                 value = this.newVariable.value || this.scaleNames[0];
+            } else if (this.newVariable.type === 'string') {
+                value = String(this.newVariable.value ?? '');
             } else {
                 value = this.newVariable.value === '' ? 0 : Number(this.newVariable.value);
             }
@@ -72,6 +75,9 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
                 value = variable.value;
             } else if (variable.type === 'scale') {
                 value = variable.value;
+            } else if (variable.type === 'string') {
+                // Melodías/patrones: el texto se conserva tal cual.
+                value = String(variable.value ?? '');
             } else {
                 const numValue = Number(variable.value);
                 value = isNaN(numValue) ? 0 : numValue;
@@ -99,7 +105,9 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
                     } else if (this.scaleNames.includes(value)) {
                         return { name, value, type: 'scale' as const };
                     } else {
-                        return null;
+                        // Melodías/patrones: antes se filtraban y no se veían
+                        // en el sidebar (limitación retirada).
+                        return { name, value, type: 'string' as const };
                     }
                 } else if (typeof value === 'number') {
                     return { name, value, type: 'number' as const };
@@ -108,4 +116,4 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
             }).filter(v => v !== null) as VariableDeclaration[];
         }
     }
-} 
+}
