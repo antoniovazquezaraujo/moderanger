@@ -6,7 +6,6 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "grammar": "tspeg src/app/model/grammar.peg src/app/model/parser.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage"
@@ -23,7 +22,6 @@
     "@angular/platform-browser-dynamic": "~13.1.0",
     "@angular/router": "~13.1.0",
     "flatted": "^3.2.5",
-    "ohm-js": "^17.1.0",
     "primeflex": "^3.1.3",
     "primeicons": "^5.0.0",
     "primeng": "^13.3.3",
@@ -47,7 +45,6 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^29.2.5",
     "ts-prune": "^0.10.3",
-    "tspeg": "^3.3.2",
     "typescript": "^4.5.5"
   }
 }
