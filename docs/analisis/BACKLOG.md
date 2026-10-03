@@ -1,7 +1,7 @@
 # 📋 Backlog de Mode Ranger
 
 - **Actualizado:** 2026-10-03
-- **Contexto:** tras la consolidación del repositorio (merge de `testing-things`, limpieza, Jest con 142 tests, fix de duraciones de grupo y archivado de ramas históricas).
+- **Contexto:** tras la consolidación del repositorio (merge de `testing-things`, limpieza, Jest con 142 tests, fix de duraciones de grupo y archivado de ramas históricas). Actualizado tras la Fase 1 de la sintaxis `.mr` (rama `feat/mr-fase1`).
 
 > Estado del repo: una sola rama (`main`), 5 ramas históricas archivadas como tags `archive/*` y auditorías en `docs/audits/`.
 
@@ -9,9 +9,9 @@
 
 | # | Tema | Detalle | Esf. | Riesgo | Referencia |
 |---|---|---|---|---|---|
-| 1 | **Parser texto → canción a medias** | `parseSong` sin callers; la semántica no construye un `Song` (devuelve `NoteData[]`); import muerto en `scale.ts`; sin tests. Decidir si es objetivo de producto. | M | Medio | `docs/audits/ramas-pendientes-vs-main.md` |
+| 1 | ✅ **Parser texto → canción (Fase 1)** | **Resuelto (2026-10-03, rama `feat/mr-fase1`):** `parseSong` construye `SongDocument` (Song + partes + bloques + comandos + operaciones + variables), serializador canónico, round-trip con corpus, errores `línea:columna` y servicio de fichero `.mr`. Import muerto de `scale.ts` retirado. | M | Medio | `docs/analisis/sintaxis-mr-implementada.md` |
 | 2 | **Código v2 sin cablear (~5.500 LOC)** | Decidir cablear / conservar / eliminar. Sugerido: spike de viabilidad del editor v2. | M | Medio | `docs/analisis/codigo-v2-sin-cablear.md` |
-| 3 | **Nota raíz sin duración** | Hoy cae al fallback `16n`; decidir si debe ser `4n` (coherente con `NoteConverter`) u otro. | S | Bajo | `docs/analisis/duracion-de-grupos.md` |
+| 3 | ✅ **Nota raíz sin duración** | **Resuelto (2026-10-03, Q6a):** `notes default <duración>` por bloque sustituye al fallback `16n` cuando se declara; sin declaración se mantiene `16n`. Runtime en `NoteGenerationService`. | S | Bajo | `docs/analisis/duracion-de-grupos.md` §4, `sintaxis-mr-implementada.md` §7 |
 | 4 | **`tspeg` sin uso** | Sigue en devDependencies; retirar junto a configs huérfanas. | S | Bajo | `docs/audits/ramas-pendientes-vs-main.md` |
 | 5 | **Restos de mocks/Karma** | `tone.mock.ts`, `piano.mock.ts` (importa `instrument` inexistente) y `babel.config.cjs` sin uso. | S | Bajo | baseline Jest |
 | 6 | **Budgets CSS** | `angular.json` con budgets ampliados; revertir tras optimizar SCSS. | S | Bajo | `docs/analisis/limpieza-post-merge.md` |

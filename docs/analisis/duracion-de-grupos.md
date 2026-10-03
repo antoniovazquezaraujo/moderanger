@@ -68,6 +68,15 @@ Al eliminar el placeholder `'4t'` durante el parseo, una **nota raíz sin duraci
   - `command.jest.spec.ts` → PATTERN `1 8n:2`: la nota sin prefijo queda sin duración (el processor aplica su propio `16n`).
 - **Pendiente de decisión de producto:** ¿la raíz sin duración debería sonar `4t` (duración de gramática), `4n` (default del servicio) u otra? No se cambia en este fix.
 
+### Actualización 2026-10-03 — resuelto con Q6(a) de la sintaxis `.mr`
+
+La decisión aprobada Q6(a) resuelve este pendiente sin cambiar el fallback global:
+`BlockContent.defaultDuration` + sintaxis `.mr` `notes default <duración>` por bloque.
+`NoteGenerationService.generateNotesForBlock` usa `defaultDuration ?? '16n'` para las
+notas raíz sin duración y para el silencio por defecto; los grupos siguen heredando su
+duración con prioridad. Sin `notes default`, el comportamiento documentado (`16n`) se
+mantiene. Detalle: `docs/analisis/sintaxis-mr-implementada.md` §7; backlog #3 marcado ✅.
+
 ## 5. Tests de referencia
 
 | Spec | Qué fija |
