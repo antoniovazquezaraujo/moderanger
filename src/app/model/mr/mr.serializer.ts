@@ -13,7 +13,7 @@ import { AssignOperation, BaseOperation, VaryOperation } from '../operation';
 import { Part } from '../part';
 import { getPlayModeNames, PlayMode } from '../play.mode';
 import { Scale } from '../scale';
-import { DEFAULT_BPM, MAX_BPM, MIN_BPM } from '../song';
+import { DEFAULT_BPM, DEFAULT_REPEATS, MAX_BPM, MIN_BPM, MIN_REPEATS } from '../song';
 import { MrParseError, MrSerializeError } from './mr.errors';
 import { DURATION_PATTERN, escapeMrString, formatName, IDENTIFIER_PATTERN } from './mr.text';
 import { MR_FORMAT_VERSION, SongDocument } from './mr.types';
@@ -33,11 +33,14 @@ export function serializeSong(document: SongDocument): string {
   const lines: string[] = [];
   lines.push(`song ${formatName(document.song.name)}`);
   lines.push(`version ${MR_FORMAT_VERSION}`);
-  if (meta.repeats !== undefined && meta.repeats !== 1) {
-    if (!Number.isInteger(meta.repeats) || meta.repeats < 1) {
-      throw new MrSerializeError(`'repeats' debe ser un entero >= 1 (recibido ${String(meta.repeats)})`);
+  // Las repeticiones son canónicas en `Song.repeats` (#20); `meta.repeats`
+  // solo refleja la cabecera parseada y no decide el texto de salida.
+  const repeats = document.song.repeats;
+  if (repeats !== DEFAULT_REPEATS) {
+    if (!Number.isInteger(repeats) || repeats < MIN_REPEATS) {
+      throw new MrSerializeError(`'repeats' debe ser un entero >= ${MIN_REPEATS} (recibido ${String(repeats)})`);
     }
-    lines.push(`repeats ${meta.repeats}`);
+    lines.push(`repeats ${repeats}`);
   }
   if (meta.bpm !== undefined && meta.bpm !== DEFAULT_BPM) {
     if (!Number.isInteger(meta.bpm) || meta.bpm < MIN_BPM || meta.bpm > MAX_BPM) {

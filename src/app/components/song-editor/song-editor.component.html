@@ -11,8 +11,10 @@
                     <!-- Use methods from this component (SongEditorComponent) -->
                     <button pButton type="button" icon="pi pi-plus" (click)="addPart()" class="p-mr-2" pTooltip="Add Part" tooltipPosition="top"></button>
                     <span>Repeat:</span>
-                    <!-- Bind to repetitions property of this component -->
-                    <input type="number" id="repetitions" class="number-input" style="width:45px !important; max-width:45px !important;" [(ngModel)]="repetitions" min="1" max="99" step="1">
+                    <!-- Repeticiones canónicas en Song.repeats (1-99 en la UI) -->
+                    <input type="number" id="repetitions" class="number-input" style="width:45px !important; max-width:45px !important;"
+                           [ngModel]="song.repeats" (change)="onRepeatsChange($event)" min="1" max="99" step="1"
+                           pTooltip="Repeticiones de la canción" tooltipPosition="top" aria-label="Repeat">
                     <span class="p-ml-2">BPM:</span>
                     <!-- BPM canónico en Song.bpm (30-240, rango del formato .mr) -->
                     <input type="number" id="bpm" class="number-input" style="width:52px !important; max-width:52px !important;"
@@ -66,7 +68,6 @@
     <!-- Vista avanzada de texto canónico .mr -->
     <app-mr-text-editor
         [song]="song"
-        [repeats]="repetitions"
         [(visible)]="mrTextVisible"
         (applied)="onMrTextApplied($event)">
     </app-mr-text-editor>

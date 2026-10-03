@@ -9,7 +9,8 @@ import { PlayMode, arpeggiate } from '../model/play.mode';
 // VariableContext might be needed if substituting variables here, keep for now
 import { VariableContext } from '../model/variable.context';
 // Import the NoteData parser directly
-import { parseBlockNotes } from '../model/mr/notes.parser';
+import { parseBlockNotes, parseBlockNotesForEditor } from '../model/mr/notes.parser';
+import { MrParseError } from '../model/mr/mr.errors';
 import * as Tone from 'tone'; // Import Tone
 // Import unified note generation service
 import { 
@@ -18,6 +19,16 @@ import {
 } from '../shared/services/note-generation-unified.service';
 
 // SemanticNoteInfo removed
+
+/**
+ * Detecta el caso conocido #19: una `$variable` que existe pero no contiene un
+ * número (p. ej. `$motif = "4t:0"`), que `parseBlockNotes` no puede resolver.
+ * El mensaje es el único discriminante que expone el parser hoy; los errores
+ * de sintaxis reales y las variables sin definir siguen registrándose.
+ */
+function isStringVariableNoteError(error: unknown): boolean {
+  return error instanceof MrParseError && error.message.includes('no contiene un número');
+}
 
 @Injectable({
   providedIn: 'root'
@@ -74,8 +85,17 @@ export class NoteGenerationService {
         rootNoteDatas = parseBlockNotes(notesToParse);
         console.log(`[NoteGenSvc] Parsed NoteData (before propagation):`, JSON.stringify(rootNoteDatas));
       } catch (e) {
-        console.error(`[NoteGenSvc] Error parsing block notes:`, notesToParse, e);
-        rootNoteDatas = []; // Keep empty on error
+        if (isStringVariableNoteError(e)) {
+          // #19: una `$variable` string (p. ej. `$motif = "4t:0"`) todavía no
+          // es reproducible (feature futura: expansión de melodías variables).
+          // Se omite sin ruido: el parser tolerante del editor conserva la
+          // referencia y `processSingleNoteData` la convierte en un silencio
+          // con su duración, así el resto del bloque suena igual.
+          rootNoteDatas = parseBlockNotesForEditor(notesToParse).noteData;
+        } else {
+          console.error(`[NoteGenSvc] Error parsing block notes:`, notesToParse, e);
+          rootNoteDatas = []; // Keep empty on error
+        }
       }
     } else {
       // --- If notes string is empty, create a default silence/rest --- 
