@@ -11,3 +11,4 @@ export * from './mr.serializer';
 export * from './mr.source-map';
 export * from './mr.file';
 export * from './mr.integration';
+export * from './mr.session';

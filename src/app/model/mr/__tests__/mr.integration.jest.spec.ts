@@ -6,9 +6,11 @@ import {
   createDocumentFromContext,
   createSongDocument,
   positionToOffset,
+  prepareSongText,
   validateSongText
 } from '../mr.integration';
 import { parseSong } from '../mr.parser';
+import * as serializer from '../mr.serializer';
 import { serializeSong } from '../mr.serializer';
 
 beforeEach(() => {
@@ -46,6 +48,45 @@ describe('validateSongText', () => {
 
   it('no lanza: el texto inválido se comunica por la lista de errores', () => {
     expect(() => validateSongText('clave rara\n')).not.toThrow();
+  });
+});
+
+describe('prepareSongText', () => {
+  it('devuelve documento y texto canónico cuando el texto es válido', () => {
+    const result = prepareSongText('# comentario\nsong "X"\r\nversion 1\n');
+
+    expect(result.errors).toEqual([]);
+    expect(result.serializeError).toBeUndefined();
+    expect(result.document?.song.name).toBe('X');
+    expect(result.canonical).toBe('song X\nversion 1\n');
+    expect(result.canonical).not.toContain('#');
+  });
+
+  it('no devuelve documento si hay error de sintaxis (con línea/columna)', () => {
+    const result = prepareSongText('song "X"\nversion 2\n');
+
+    expect(result.document).toBeUndefined();
+    expect(result.canonical).toBeUndefined();
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].line).toBe(2);
+    expect(result.errors[0].column).toBe(9);
+  });
+
+  it('no devuelve documento si el documento parseado no se puede serializar', () => {
+    const serializeSpy = jest.spyOn(serializer, 'serializeSong').mockImplementation(() => {
+      throw new Error('modelo no serializable');
+    });
+
+    try {
+      const result = prepareSongText('song "X"\nversion 1\n');
+
+      expect(result.document).toBeUndefined();
+      expect(result.canonical).toBeUndefined();
+      expect(result.errors).toEqual([]);
+      expect(result.serializeError).toBe('modelo no serializable');
+    } finally {
+      serializeSpy.mockRestore();
+    }
   });
 });
 

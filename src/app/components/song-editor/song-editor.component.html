@@ -31,6 +31,13 @@
                     <p-button (click)="toggleVariablesSidebar()" label="$" pTooltip="Show/Hide Variables" tooltipPosition="top" class="p-ml-2"></p-button>
                     <!-- Vista avanzada de texto .mr (divulgación progresiva) -->
                     <p-button (click)="toggleMrTextEditor()" label=".mr" icon="pi pi-code" pTooltip="Texto (.mr)" tooltipPosition="top" class="p-ml-2"></p-button>
+                    <!-- Guardar/cargar el texto canónico como fichero .mr -->
+                    <button pButton type="button" icon="pi pi-download" (click)="saveMrFile()" class="p-ml-2"
+                            pTooltip="Guardar .mr (texto canónico)" tooltipPosition="top" aria-label="Guardar .mr"></button>
+                    <button pButton type="button" icon="pi pi-upload" (click)="openMrFilePicker()" class="p-ml-2"
+                            pTooltip="Cargar .mr" tooltipPosition="top" aria-label="Cargar .mr"></button>
+                    <input #mrFileInput id="mrFileInput" class="mr-file-input" type="file"
+                           accept=".mr,text/plain" (change)="onMrFileSelected($event)" aria-hidden="true" tabindex="-1" />
                 </div>
             </div>
         </div>
@@ -55,9 +62,25 @@
     <app-mr-text-editor
         [song]="song"
         [repeats]="repetitions"
+        [bpm]="bpm"
         [(visible)]="mrTextVisible"
         (applied)="onMrTextApplied($event)">
     </app-mr-text-editor>
+
+    <!-- Errores de guardar/cargar .mr: el modelo actual no se modifica -->
+    <p-dialog
+        [header]="mrErrorTitle"
+        [(visible)]="mrErrorVisible"
+        [modal]="true"
+        [draggable]="false"
+        [resizable]="false"
+        [style]="{ width: '40rem', maxWidth: '95vw' }"
+        styleClass="mr-error-dialog">
+        <div class="mr-error-lines">
+            <p class="mr-error-line" *ngFor="let line of mrErrorLines">{{ line }}</p>
+        </div>
+        <p class="mr-error-hint">La canción actual no se ha modificado.</p>
+    </p-dialog>
 </div>
 
 <div class="song-editor">

@@ -7,6 +7,8 @@
  *
  * - `createSongDocument` / `createDocumentFromContext`: modelo actual → documento.
  * - `validateSongText`: texto del editor → documento válido o error con posición.
+ * - `prepareSongText`: además de validar, garantiza serializabilidad y
+ *   devuelve el texto canónico (lo usan Aplicar y Cargar `.mr`).
  * - `applyDocumentVariables`: sincroniza `VariableContext` con lo declarado en
  *   el documento (mecanismo que ya usa la app para las variables).
  * - `positionToOffset`: posición 1-based del parser → índice en el string
@@ -17,6 +19,7 @@ import { VariableContext, VariableValue } from '../variable.context';
 import { MrParseError, MrSourcePosition } from './mr.errors';
 import { normalizeMrText } from './mr.file';
 import { parseSong } from './mr.parser';
+import { serializeSong } from './mr.serializer';
 import { MrMeta, SongDocument } from './mr.types';
 
 /** Resultado de validar el texto de la vista: documento y/o errores. */
@@ -53,6 +56,39 @@ export function validateSongText(text: string): MrTextValidation {
       return { errors: [error] };
     }
     throw error;
+  }
+}
+
+/**
+ * Resultado de preparar texto `.mr` para aplicarlo/cargarlo. A diferencia de
+ * `validateSongText`, aquí el documento solo está presente si además se puede
+ * serializar (misma garantía que exige el round-trip del ADR-001).
+ */
+export interface MrPreparedSongText {
+  /** Documento parseado y serializable; `undefined` si no se puede aplicar. */
+  document?: SongDocument;
+  /** Texto canónico del documento (normalizado a LF y sin comentarios). */
+  canonical?: string;
+  /** Errores de parseo (vacío si el texto es válido). */
+  errors: MrParseError[];
+  /** Mensaje si el documento parseado no se puede serializar. */
+  serializeError?: string;
+}
+
+/**
+ * Prepara texto `.mr` para reemplazar el modelo: valida, comprueba que el
+ * documento resultante es serializable y devuelve también su forma canónica.
+ * No lanza por errores de sintaxis ni de serialización; no toca estado.
+ */
+export function prepareSongText(text: string): MrPreparedSongText {
+  const validation = validateSongText(text);
+  if (validation.document === undefined) {
+    return { errors: validation.errors };
+  }
+  try {
+    return { document: validation.document, canonical: serializeSong(validation.document), errors: [] };
+  } catch (error) {
+    return { errors: [], serializeError: error instanceof Error ? error.message : String(error) };
   }
 }
 

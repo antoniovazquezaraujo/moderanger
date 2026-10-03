@@ -16,12 +16,13 @@ import { debounceTime } from 'rxjs/operators';
 import {
   applyDocumentVariables,
   createDocumentFromContext,
-  MR_FORMAT_VERSION,
   MrMeta,
   MrParseError,
   MrSerializeError,
   positionToOffset,
+  prepareSongText,
   serializeSong,
+  sessionMetaToMrMeta,
   validateSongText
 } from 'src/app/model/mr';
 import { Song } from 'src/app/model/song';
@@ -54,6 +55,11 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
   @Input() visible = false;
   /** Repeticiones actuales del editor (campo "Repeat"); se escriben como `repeats`. */
   @Input() repeats = 1;
+  /**
+   * BPM de la sesión; lo posee `SongEditorComponent` (meta, no va en `Song`).
+   * Se recibe por input y el `applied` devuelve el del documento aplicado.
+   */
+  @Input() bpm?: number;
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() applied = new EventEmitter<MrTextAppliedEvent>();
 
@@ -67,8 +73,6 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
   /** Error de serialización del modelo (la GUI puede tener notas inválidas). */
   serializeError: string | null = null;
 
-  /** BPM aplicado en esta sesión de vista (el modelo no guarda bpm todavía). */
-  private bpm: number | undefined;
   private readonly validateInput$ = new Subject<void>();
   private readonly subscriptions = new Subscription();
 
@@ -85,13 +89,14 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
     if (changes['visible']?.currentValue === true) {
       this.reloadIfClean();
     }
-    // El tick del padre puede entregar `repeats` y `song` en pasadas distintas
-    // (p. ej. justo después de Aplicar): reaccionar solo a `repeats` recargaba
-    // el texto con el modelo todavía viejo. Cualquiera de los dos cambios debe
-    // regenerar el texto cuando no hay ediciones pendientes.
+    // El tick del padre puede entregar `repeats`, `bpm` y `song` en pasadas
+    // distintas (p. ej. justo después de Aplicar): reaccionar solo a `repeats`
+    // recargaba el texto con el modelo todavía viejo. Cualquiera de los tres
+    // cambios debe regenerar el texto cuando no hay ediciones pendientes.
     const repeatsChanged = changes['repeats'] !== undefined && !changes['repeats'].firstChange;
+    const bpmChanged = changes['bpm'] !== undefined && !changes['bpm'].firstChange;
     const songChanged = changes['song'] !== undefined && !changes['song'].firstChange;
-    if (repeatsChanged || songChanged) {
+    if (repeatsChanged || bpmChanged || songChanged) {
       this.reloadIfClean();
     }
   }
@@ -148,21 +153,21 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
 
   /** Parseo + reemplazo del modelo y de las variables declaradas. */
   apply(): void {
-    const result = validateSongText(this.text);
+    const result = prepareSongText(this.text);
     this.errors = result.errors;
+    this.serializeError = result.serializeError ?? null;
     const document = result.document;
-    if (document === undefined) {
+    const canonical = result.canonical;
+    if (document === undefined || canonical === undefined) {
       return;
     }
-    // Serializar antes de tocar nada: si el documento no fuese serializable,
-    // no se habría aplicado ni el modelo ni las variables.
-    const canonical = serializeSong(document);
-    applyDocumentVariables(document);
-    this.bpm = document.meta.bpm;
     this.text = canonical;
     this.baseline = canonical;
-    this.serializeError = null;
+    // Emitir antes de tocar `VariableContext`: si el padre para el player al
+    // recibir `applied`, `SongPlayer.stop()` reinicia variables y borraría lo
+    // recién aplicado (p. ej. `$mode = RANDOM` volvería a CHORD).
     this.applied.emit({ song: document.song, meta: document.meta });
+    applyDocumentVariables(document);
   }
 
   /** Recarga el texto desde el modelo actual de la app. */
@@ -209,10 +214,6 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
   }
 
   private currentMeta(): MrMeta {
-    return {
-      version: MR_FORMAT_VERSION,
-      repeats: this.repeats > 1 ? this.repeats : undefined,
-      bpm: this.bpm
-    };
+    return sessionMetaToMrMeta({ repeats: this.repeats, bpm: this.bpm });
   }
 }

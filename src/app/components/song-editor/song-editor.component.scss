@@ -98,3 +98,27 @@
   -ms-overflow-style: none;  
   scrollbar-width: none;  
 } 
+
+/* Input de fichero oculto: se dispara desde el botón "Cargar .mr" */
+.mr-file-input {
+  display: none;
+}
+
+/* Errores de guardar/cargar .mr en el diálogo */
+:host ::ng-deep .mr-error-dialog .mr-error-lines {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+:host ::ng-deep .mr-error-dialog .mr-error-line {
+  margin: 0 0 0.5rem 0;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+:host ::ng-deep .mr-error-dialog .mr-error-hint {
+  margin: 0.5rem 0 0 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
