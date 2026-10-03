@@ -66,3 +66,28 @@ describe('MelodyNoteComponent · valor mostrado', () => {
     expect(component.valueTitle).toBe('Referencia a la variable $motif');
   });
 });
+
+const wheelEvent = (deltaY: number): WheelEvent =>
+  ({ deltaY, preventDefault: () => undefined, stopPropagation: () => undefined } as unknown as WheelEvent);
+
+describe('MelodyNoteComponent · rueda del ratón', () => {
+  it('rueda sobre el valor emite cambio de valor', () => {
+    const component = componentFor(4);
+    const values: number[] = [];
+    component.changeValue.subscribe(value => values.push(value));
+
+    component.onWheelValue(wheelEvent(1));
+
+    expect(values).toEqual([-1]);
+  });
+
+  it('rueda sobre la duración emite cambio de duración', () => {
+    const component = componentFor(4);
+    const durations: number[] = [];
+    component.changeDuration.subscribe(delta => durations.push(delta));
+
+    component.onWheelDuration(wheelEvent(1));
+
+    expect(durations).toEqual([1]);
+  });
+});

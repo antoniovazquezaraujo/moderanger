@@ -5,6 +5,14 @@ import { SingleNote, NoteDuration } from '../../model/melody';
     selector: 'app-melody-note',
     template: `
         <div class="note-item" [class.selected]="isSelected" (click)="onClick()">
+            <!-- Duración a la izquierda del valor; oculta si es heredada.
+                 Con hover se muestra como "=" y se puede cambiar con la rueda. -->
+            <div class="note-duration"
+                 [class.duration-explicit]="!!note.duration"
+                 (wheel)="onWheelDuration($event)"
+                 title="Rueda: cambia la duración (heredada del grupo si no tiene)">
+                <span class="duration-value" [class.duration-empty]="!note.duration">{{ note.duration ?? '=' }}</span>
+            </div>
             <div class="note-visual" (wheel)="onWheelValue($event)">
                 <span class="note-value"
                       [class.silence]="!note.variableName && note.value === null"
@@ -13,9 +21,6 @@ import { SingleNote, NoteDuration } from '../../model/melody';
                     {{ valueText }}
                 </span>
             </div>
-            <div class="note-duration" (wheel)="onWheelDuration($event)">
-                <span class="duration-value">{{ note.duration  }}</span>
-            </div>
         </div>
     `,
     styles: [`
@@ -23,7 +28,9 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             display: flex;
             flex-direction: row;
             align-items: center;
-            justify-content: space-between;
+            /* El valor queda a la derecha; la duración aparece a su izquierda. */
+            justify-content: flex-end;
+            gap: 4px;
             margin: 0 2px;
             padding: 2px 4px;
             border: 1px solid #ccc;
@@ -48,6 +55,27 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             margin-right: 4px;
         }
         
+        .note-duration {
+            font-size: 0.8em;
+            color: #666;
+            cursor: ns-resize;
+            padding: 0 2px;
+            text-align: right;
+            /* Oculta si la duración es heredada; aparece al hacer hover. */
+            visibility: hidden;
+            min-width: 20px;
+            min-height: 18px;
+        }
+
+        .note-duration.duration-explicit,
+        .note-item:hover .note-duration {
+            visibility: visible;
+        }
+
+        .duration-value.duration-empty {
+            color: #999;
+        }
+
         .note-visual .note-value {
            font-size: 1.2em; 
            font-weight: bold;
