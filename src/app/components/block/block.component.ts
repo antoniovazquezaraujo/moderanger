@@ -13,6 +13,12 @@ import { NoteData } from '../../model/note';
 import { Subscription } from 'rxjs';
 import { TreeNode } from 'primeng/api';
 
+/**
+ * Nodo de `p-tree`: el propio `Block` más el estado de expansión que gestiona
+ * PrimeNG. Es estado de UI: no forma parte de `Block` ni se serializa.
+ */
+type BlockTreeNode = Block & { expanded?: boolean };
+
 @Component({
   selector: 'app-block',
   templateUrl: './block.component.html',
@@ -25,6 +31,7 @@ export class BlockComponent implements OnInit, OnDestroy {
   set block(value: Block) {
     this._block = value;
     this.initializeBlockContent();
+    this.expandRootWithChildren();
   }
   get block(): Block {
     return this._block;
@@ -67,6 +74,19 @@ export class BlockComponent implements OnInit, OnDestroy {
          this._block.blockContent.isVariable = false;
          this._block.blockContent.variableName = "";
      }
+  }
+
+  /**
+   * #13 · Un bloque raíz con contenido propio y descendencia arranca expandido
+   * al aplicar un `.mr`, para que sus hijos sean visibles. Solo se inicializa
+   * cuando nadie ha fijado `expanded` (primer binding): el colapso manual del
+   * usuario se conserva en re-renders con la misma referencia.
+   */
+  private expandRootWithChildren(): void {
+    const node = this._block as BlockTreeNode | undefined;
+    if (node && node.hasOwnContent() && (node.children?.length ?? 0) > 0 && node.expanded === undefined) {
+      node.expanded = true;
+    }
   }
 
   duplicateBlock(block: Block) {
@@ -121,8 +141,8 @@ export class BlockComponent implements OnInit, OnDestroy {
    * si no, sus hijos (contenedor clásico de la GUI). PrimeNG anida los
    * descendientes a partir de `children`, así que no se duplica nada.
    */
-  get treeValue(): Block[] {
-    return this.hasOwnContent ? [this._block] : (this._block?.children ?? []);
+  get treeValue(): BlockTreeNode[] {
+    return this.hasOwnContent ? [this._block as BlockTreeNode] : (this._block?.children ?? []);
   }
   
   dragStart(block: Block) {
