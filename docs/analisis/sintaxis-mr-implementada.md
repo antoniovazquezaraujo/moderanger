@@ -22,7 +22,6 @@
 | `src/app/model/mr/mr.file.ts` | `MrFileService` + puerto `MrFileSystem` (UTF-8/LF, sin Node ni Angular). |
 | `src/app/model/mr/mr.file.node.ts` | Adaptador Node del puerto (`fs.promises`); **no** se exporta en el barrel. |
 | `src/app/model/mr/index.ts` | Barrel público (sin el adaptador Node). |
-| `src/app/model/ohm.parser.ts` | Fachada de compatibilidad que re-exporta `parseBlockNotes` desde `mr/notes.parser.ts` (gramática ohm retirada). |
 | `src/app/model/mr/__tests__/corpus/*.mr` | Corpus canónico (8 ficheros). |
 
 ## 2. Gramática implementada
@@ -137,7 +136,7 @@ Resultados: **19 suites / 254 tests** en verde (142 de baseline intactos + 112 n
 | Documento vacío / secciones vacías | Aceptadas al parsear (tolerancia para round-trip total); nunca emitidas. |
 | `notes $var` + `defaultDuration` simultáneos | Imposible de origen por sintaxis; si un modelo a mano tiene ambos, el serializador prioriza la variable. |
 | `parseBlockNotes` con `$var` irresoluble | Ahora lanza error (antes producía una nota ficticia `0`/`4t`); `NoteGenerationService` ya captura errores de parseo y devuelve silencio. |
-| Gramática ohm-js | Retirada del camino crítico. `ohm.parser.ts` es fachada de compatibilidad; `grammar.semantics.ts` queda huérfano (limpieza pendiente, junto a `ohm-js` en `package.json`). |
+| Gramática ohm-js | Retirada por completo (2026-10-03, rama `chore/mr-cleanup`): fachada `ohm.parser.ts`, `grammar.semantics.ts`, `ohm-js`, `tspeg` y el script `grammar` eliminados; los consumidores importan `mr/notes.parser.ts` directamente. |
 | Comentarios e ids | No sobreviven al round-trip (documentado en el ADR). `pulse` y `beatsPerBar` no se serializan. |
 | `*=` | Rechazado con error explícito (no existe operación en el modelo). |
 
@@ -146,5 +145,5 @@ Resultados: **19 suites / 254 tests** en verde (142 de baseline intactos + 112 n
 - Source map `línea → nodo` para la vista de texto (Fase 2).
 - Conservación de comentarios (side-channel anclado a nodos; fuera de v1).
 - Grupos multilínea, literales de acorde/arpegio y directivas `@` (fuera de v1 por Q7/Q11).
-- Renombrar `ohm.parser.ts` / retirar `grammar.semantics.ts` y `ohm-js` cuando no queden consumidores (tarea de limpieza).
-- Decidir si la propuesta actualiza sus ejemplos a comillas mínimas y al espaciado de grupo adoptado (documentación, no código).
+- ✅ Limpieza de restos del parser antiguo completada (2026-10-03, rama `chore/mr-cleanup`): retirados `ohm.parser.ts`, `grammar.semantics.ts`, `ohm-js`, `tspeg` y el script `grammar`.
+- ✅ Ejemplos de `docs/diseno/propuesta-sintaxis-mr.md` alineados a la forma canónica (comillas mínimas, grupos `4n:( 0 2 )` y líneas en blanco).

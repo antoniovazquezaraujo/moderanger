@@ -8,7 +8,7 @@ import { VariableContext } from 'src/app/model/variable.context';
 import { BlockCommandsComponent } from '../block-commands/block-commands.component';
 // Fix: Remove unused MelodyEditorService import
 // import { MelodyEditorService } from '../../services/melody-editor.service'; 
-import { parseBlockNotes } from '../../model/ohm.parser';
+import { parseBlockNotes } from '../../model/mr/notes.parser';
 import { NoteData } from '../../model/note';
 import { Subscription } from 'rxjs';
 import { TreeNode } from 'primeng/api';

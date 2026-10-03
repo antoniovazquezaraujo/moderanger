@@ -1,11 +1,13 @@
 # Propuesta de sintaxis canónica `.mr`
 
-- **Estado:** Aprobada (2026-10-03); pendiente de implementación (Fase 1)
+- **Estado:** Aprobada (2026-10-03) e implementada en `main` (Fase 1, 2026-10-03). Los ejemplos de este documento siguen la forma canónica implementada.
 - **Fecha:** 2026-10-03
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Decisión asociada:** `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
 - **Alcance:** definir la sintaxis de una canción completa en texto, su round-trip con el modelo actual y los criterios de canonización. **No se toca código en esta fase.**
 - **Preguntas para el revisor:** sección 18 (numeradas, con opciones y recomendación).
+
+> **Nota (2026-10-03):** las lecturas canónicas de esta propuesta —comillas mínimas, grupos `4n:( 0 2 )` y regla de líneas en blanco— fueron **ratificadas por el usuario** el 2026-10-03 y están implementadas; la referencia normativa es `docs/analisis/sintaxis-mr-implementada.md`.
 
 ---
 
@@ -23,11 +25,11 @@ Se propone un formato de texto `.mr`, línea a línea e indentado (estilo YAML),
 Ejemplo mínimo (fichero completo):
 
 ```
-song "Semilla"
+song Semilla
 version 1
 
-part "Piano"
-  block "Origen"
+part Piano
+  block Origen
     notes
       4n:0
       4n:2
@@ -53,7 +55,7 @@ part "Piano"
 
 | Área | Modelo actual | ¿Cubierto por la propuesta? |
 |---|---|---|
-| Canción | `Song.name`, `Song.parts[]` | Sí: `song "..."`, secciones `part` |
+| Canción | `Song.name`, `Song.parts[]` | Sí: `song <nombre>`, secciones `part` |
 | Parte | `Part.name`, `Part.instrumentType` | Sí: `part <nombre> instrument <tipo>` |
 | Bloque | `Block.label`, `pulse`, `repeatingTimes`, `children[]` | Sí: `block <nombre> repeats N`, anidación por indentación. `pulse` queda fuera (campo legado sin uso; ver 15.2) |
 | Notas | `BlockContent.notes: string` | Sí: sección `notes` con el DSL actual |
@@ -87,7 +89,7 @@ Estas brechas **no cambian la sintaxis**, pero condicionan la implementación:
 | Fin de línea | LF (`\n`) |
 | Indentación | 2 espacios por nivel; **tabuladores prohibidos**; la indentación es significativa para la estructura |
 | Comentarios | `#` hasta fin de línea (enteros o al final de una línea) |
-| Líneas en blanco | Se ignoran; el serializador emite una entre `part`/`block` hermanos y antes de `vars` |
+| Líneas en blanco | Se ignoran; el serializador emite una antes de `vars`, una antes de **cada** `part` y una antes de cada `block` anidado que no sea el primer ítem del cuerpo de su padre |
 | Palabras estructurales | minúsculas: `song`, `version`, `repeats`, `bpm`, `vars`, `part`, `block`, `instrument`, `notes`, `commands`, `operations`; las operaciones usan las palabras del modelo en mayúsculas: `VARY`, `ASSIGN` |
 | Vocabulario musical | mayúsculas como hoy: `SCALE`, `PLAYMODE`, `WHITE`, `ASCENDING`, `PIANO` |
 | Número | `-?[0-9]+`, sin ceros a la izquierda ni `+` |
@@ -128,7 +130,7 @@ repeats 2                              # [ext] repeticiones de canción (GlobalS
 bpm 108                                # [ext] tempo (Player.setBpm / Transport)
 ```
 
-- `song "..."`: siempre emitida. Si `Song.name` está vacío, se emite `song ""`.
+- `song <nombre>`: siempre emitida. Si `Song.name` está vacío, se emite `song ""`.
 - `version 1`: versión del formato `.mr`. El parser rechaza versiones mayores desconocidas con error explícito. Es la válvula de escape para evolucionar sin romper ficheros.
 - `repeats N`: `[ext]` mapea a `songRepetitions` de la UI; `N >= 1`.
 - `bpm N`: `[ext]` mapea al BPM; rango 30–240 como `Player.setBpm`. Omitido si es 120 (valor actual fijo).
@@ -136,15 +138,16 @@ bpm 108                                # [ext] tempo (Player.setBpm / Transport)
 ## 6. Partes y bloques
 
 ```
-part "Piano" instrument PIANO
-  block "Tema" repeats 2
+part Piano instrument PIANO
+  block Tema repeats 2
     notes
       ...
     commands
       ...
     operations
       ...
-    block "Respuesta"
+
+    block Respuesta
       notes
         ...
 ```
@@ -187,7 +190,7 @@ duración    := [0-9]+ (n|t|m) ":"
      8n:s
      4n:( 2 8n:( 0 2 ) )
    ```
-2. **Un solo espacio** entre tokens; sin espacio tras `(` ni antes de `)`.
+2. **Un solo espacio** entre tokens. Dentro de un grupo se escribe un espacio tras `(` y antes de `)` (`4n:( 0 2 )`; grupo vacío `2n:()`), sin espacios de más.
 3. La duración se escribe **pegada al evento** (`4n:0`, `2n:( … )`).
 4. **Los saltos de línea dentro de una sección `notes` son separadores** (equivalen a un espacio). El parser une todas las líneas en orden; el serializador vuelve a partir en eventos de nivel superior. Así, reformatear una melodía no cambia su semántica.
 5. **Paréntesis equilibrados por línea.** En v1, un grupo debe abrirse y cerrarse en la misma línea. (Los grupos multilínea quedan como extensión futura; ver 15.)
@@ -313,11 +316,11 @@ operations
 ### 11.1 Canción mínima
 
 ```
-song "Semilla"
+song Semilla
 version 1
 
-part "Piano"
-  block "Origen"
+part Piano
+  block Origen
     notes
       4n:0
       4n:2
@@ -332,8 +335,8 @@ song "Canon de partículas"
 version 1
 repeats 2
 
-part "Piano"
-  block "Tema" repeats 2
+part Piano
+  block Tema repeats 2
     notes
       4n:0
       4n:2
@@ -345,7 +348,8 @@ part "Piano"
       GAP 2
       WIDTH 2
       PLAYMODE ASCENDING
-    block "Respuesta"
+
+    block Respuesta
       notes
         4n:4
         4n:2
@@ -355,8 +359,8 @@ part "Piano"
         OCT 1
         PLAYMODE DESCENDING
 
-part "Piano"
-  block "Bajo"
+part Piano
+  block Bajo
     notes
       2n:-7
       2n:-5
@@ -382,7 +386,7 @@ vars
   $scale = WHITE
   $motif = "4t:0 4t:2 4t:-1"
 
-part "Piano"
+part Piano
   block "Hélice" repeats 4
     notes
       4n:0
@@ -397,7 +401,7 @@ part "Piano"
     operations
       VARY $oct 1
 
-    block "Eco"
+    block Eco
       notes $motif
       commands
         OCT 1
@@ -409,14 +413,14 @@ part "Piano"
 ### 11.4 Grupos, silencios, negativos y variables de nota (cobertura del DSL)
 
 ```
-song "Laboratorio"
+song Laboratorio
 version 1
 
 vars
   $grado = -5
 
-part "Piano"
-  block "Grupos"
+part Piano
+  block Grupos
     notes
       4n:( 0 2 )
       4n:( 8n:0 2 )
@@ -441,8 +445,8 @@ song "Panel de control"
 version 1
 
 # instrument PIANO es el valor por defecto: el serializador lo omite.
-part "Piano"
-  block "Chequeo"
+part Piano
+  block Chequeo
     notes
       4n:0
     commands
@@ -463,8 +467,8 @@ part "Piano"
 ### 11.6 Fichero inválido y errores esperados
 
 ```
-part "Piano"
-  block "Roto"
+part Piano
+  block Roto
     notes
       4n:( 0 2
     commands
@@ -489,7 +493,7 @@ roto.mr:6:7  error: PLAYMODE requiere un valor (CHORD, ASCENDING, …) o una var
 ### 12.2 Reglas de serialización
 
 1. Cabecera: `song` (siempre), `version` (siempre), `repeats` (si ≠ 1), `bpm` (si ≠ 120).
-2. Línea en blanco antes de `vars` (si existe) y entre hermanos `part`/`block`.
+2. Línea en blanco antes de `vars` (si existe), antes de **cada** `part` y antes de cada `block` anidado que no sea el primer ítem del cuerpo de su padre.
 3. `part`: nombre si no está vacío; `instrument` si el enum no es el default (`PIANO`). **Al parsear**, `instrument` ausente → `PIANO`.
 4. `block`: nombre si no está vacío; `repeats` si ≠ 1.
 5. Secciones en orden `notes` → `commands` → `operations` → hijos.
@@ -510,7 +514,7 @@ roto.mr:6:7  error: PLAYMODE requiere un valor (CHORD, ASCENDING, …) o una var
 
 | Concepto de la app | Modelo / servicio | Sintaxis `.mr` |
 |---|---|---|
-| Nombre de canción | `Song.name` | `song "…"` |
+| Nombre de canción | `Song.name` | `song <nombre>` |
 | Partes | `Song.parts[]` | secciones `part` |
 | Nombre de parte | `Part.name` | nombre tras `part` |
 | Instrumento | `Part.instrumentType` | `instrument PIANO` |
@@ -607,7 +611,7 @@ Criterios de aceptación: los de la sección 6 del ADR-001.
 > **Resolución (2026-10-03):** el usuario aprobó todas las opciones recomendadas (a). La sintaxis queda aprobada para implementación (Fase 1).
 
 **Q1. ¿Qué estilo estructural usamos?**
-- (a) **Indentación tipo YAML, sin llaves** (recomendada). Ejemplo: `part "Piano"` / `  block "Tema"`. Coincide con la visión de `ideas.adoc`, diffs más limpios, menos ruido.
+- (a) **Indentación tipo YAML, sin llaves** (recomendada). Ejemplo: `part Piano` / `  block Tema`. Coincide con la visión de `ideas.adoc`, diffs más limpios, menos ruido.
 - (b) Llaves como la gramática actual en varias líneas: `part "Piano" {` … `}`. Menos cambios de parser, pero más ceremonia.
 - (c) Híbrido: llaves solo para `part`/`block`, indentación dentro.
 - **Recomendación:** (a). Es el objetivo declarado de la fase y la opción más legible; el coste de parser es asumible.
