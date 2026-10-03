@@ -26,6 +26,9 @@
 | 15 | ✅ **Guardar/cargar `.mr` desde la UI (Fase 3)** | **Resuelto (2026-10-03, rama `feat/mr-fase3`):** botones Guardar (`serializeSong` → descarga `<nombre-saneado>.mr`, fallback `cancion.mr`) y Cargar (`prepareSongText`, errores `fichero:línea:columna` sin tocar la canción, stop del player antes de aplicar variables); bpm de sesión centralizado en `SongEditorComponent` (sigue sin aplicarse al player); sin persistencia automática. | M | Medio | `docs/analisis/mr-fase3-guardar-cargar.md` |
 | 16 | ✅ **BPM no llega al player** | **Resuelto (2026-10-03, rama `fix/pulido-mr`):** `Song.bpm` (default 120) es canónico; `parseSong` copia `meta.bpm`, la cabecera lo edita (30-240) y `SongPlayer._initializePlayback` lo aplica al Transport. E2E: `.mr` con `bpm 90` ⇒ `getTransportBpm()` = 90. | S | Bajo | `docs/analisis/pulido-bpm-variables.md` §2 |
 | 17 | ✅ **`$var` de nota/patrón en el editor de melodía** | **Resuelto (2026-10-03, rama `fix/pulido-mr`):** `parseBlockNotesForEditor` conserva las variables no numéricas como token `$nombre`; el editor lo pinta y lo conserva sin error de consola. La reproducción no cambia (el playback de `8t:$motif` sigue sin resolver, pendiente de producto). | S | Bajo | `docs/analisis/pulido-bpm-variables.md` §3 |
+| 18 | **Live-tempo** | Cambiar BPM con una canción sonando no reajusta el Transport hasta el siguiente Play. | S | Bajo | `docs/analisis/pulido-bpm-variables.md` §7 |
+| 19 | **`$var` string en playback** | `8t:$motif` (variable string) sigue registrando error en `NoteGenSvc` al reproducir; decidir si se resuelve en playback o se degrada el log. Solo el editor lo representa. | S/M | Bajo | `docs/analisis/pulido-bpm-variables.md` §3 |
+| 20 | **`Repeat` en sesión, no en `Song`** | A diferencia del bpm, las repeticiones de canción siguen viviendo en la sesión del editor; decidir si pasan al modelo/`.mr` de forma explícita. | S | Bajo | `docs/analisis/mr-fase3-guardar-cargar.md` |
 
 ## Ramas archivadas (tags)
 
