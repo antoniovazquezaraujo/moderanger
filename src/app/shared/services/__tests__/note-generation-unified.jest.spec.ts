@@ -86,6 +86,15 @@ describe('NoteGenerationUnifiedService.createNoteData', () => {
     expect(result.data).toMatchObject({ type: 'note', note: 0, duration: '4t' });
   });
 
+  it('permite desactivar la duración por defecto de gramática (useDefaultDuration: false)', () => {
+    const bare = service.createNoteData({ type: 'note', note: 0, useDefaultDuration: false });
+    const explicit = service.createNoteData({ type: 'note', note: 0, duration: '8n', useDefaultDuration: false });
+
+    expect(bare.success).toBe(true);
+    expect(bare.data!.duration).toBeUndefined();
+    expect(explicit.data!.duration).toBe('8n');
+  });
+
   it('crea un Rest sin valor de nota', () => {
     const result = service.createNoteData({ type: 'rest' });
 
