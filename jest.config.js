@@ -23,6 +23,9 @@ module.exports = {
     ]
   },
   moduleNameMapper: {
+    // Resuelve los imports absolutos `src/...` (baseUrl de tsconfig.json),
+    // que Jest no conoce por sí solo. Necesario para specs de componentes.
+    '^src/(.*)$': '<rootDir>/src/$1',
     '^tone$': '<rootDir>/src/__mocks__/tone.ts',
     '^@angular/core$': '<rootDir>/src/__mocks__/angular-core.ts'
   },
