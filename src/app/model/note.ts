@@ -3,6 +3,13 @@ export interface NoteData {
     type?: 'note' | 'rest' | 'arpeggio' | 'chord' | 'silence' | 'group';
     duration?: string;
     note?: number | undefined;
+    /**
+     * Referencia sin resolver a una variable de notas (p. ej. `motif` para
+     * `$motif`). La usa el editor visual para no perder los tokens que no
+     * resuelven a un número; la reproducción sigue resolviendo variables
+     * numéricas en `parseBlockNotes`.
+     */
+    variable?: string;
     children?: NoteData[];
     noteDatas?: NoteData[]; // Para Arpeggios y Acordes
 }
@@ -12,6 +19,7 @@ export class NoteData implements NoteData {
     type?: 'note' | 'rest' | 'arpeggio' | 'chord' | 'silence' | 'group';
     duration?: string;
     note?: number | undefined;
+    variable?: string;
     children?: NoteData[];
     noteDatas?: NoteData[]; // Para Arpeggios y Acordes
 
@@ -30,6 +38,11 @@ export class NoteData implements NoteData {
             case 'note':
             case 'rest':
             case 'silence':
+                // Una referencia a variable se imprime tal cual (`$nombre`),
+                // con o sin duración, para conservarla en el editor.
+                if (this.variable !== undefined) {
+                    return `${durationPrefix}$${this.variable}`;
+                }
                 // Usar el prefijo (puede ser vacío si no había duración)
                 return `${durationPrefix}${this.note ?? 's'}`;
             
@@ -58,4 +71,3 @@ export class NoteData implements NoteData {
         return notes.map(note => note.toString()).join(' ');
     }
 }
-  

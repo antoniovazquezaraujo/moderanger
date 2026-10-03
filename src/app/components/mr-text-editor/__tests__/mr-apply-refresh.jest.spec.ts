@@ -23,7 +23,13 @@ import { VariableContext } from 'src/app/model/variable.context';
 import { parseSong } from 'src/app/model/mr';
 import { Subject } from 'rxjs';
 import { SongEditorComponent } from 'src/app/components/song-editor/song-editor.component';
+import { downloadTextFile } from 'src/app/model/mr/mr.file.browser';
 import { MrTextAppliedEvent, MrTextEditorComponent } from '../mr-text-editor.component';
+
+jest.mock('src/app/model/mr/mr.file.browser', () => ({
+  downloadTextFile: jest.fn(),
+  readFileAsText: jest.fn()
+}));
 
 jest.mock('@angular/core', () => {
   // Se parte del mock compartido (Injectable/Inject/Optional), que usan las
@@ -137,20 +143,20 @@ describe('MrTextEditorComponent · aplicar .mr y refrescar tras la carrera de in
     expect(component.serializeError).toBeNull();
     expect(component.dirty).toBe(false);
 
-    // Tick intermedio: SongEditor asigna `repetitions` y `bpm` desde la meta
-    // del evento `applied` y (antes del fix) forzaba detectChanges(). El
-    // textarea se recarga con el modelo viejo: este es exactamente el texto
-    // obsoleto que reportaba el usuario.
+    // Tick intermedio: SongEditor asigna `repetitions` desde la meta del
+    // evento `applied` y (antes del fix) forzaba detectChanges(). El textarea
+    // se recarga con el modelo viejo: este es exactamente el texto obsoleto
+    // que reportaba el usuario. El bpm ya no es un input suelto: viaja en
+    // `Song`, así que el modelo viejo (bpm 120 por defecto) no emite `bpm`.
     component.repeats = 2;
-    component.bpm = 108;
-    component.ngOnChanges({ repeats: change(1, 2, false), bpm: change(undefined, 108, false) });
+    component.ngOnChanges({ repeats: change(1, 2, false) });
     expect(component.text.startsWith('song "Untitled Song"')).toBe(true);
     expect(component.text).toContain('repeats 2');
-    expect(component.text).toContain('bpm 108');
+    expect(component.text).not.toContain('bpm');
 
-    // Tick global: el input `song` ya trae la canción aplicada. Aunque solo
-    // cambie `song`, el componente debe regenerar el texto desde el modelo
-    // nuevo y conservar el bpm y las variables de la sesión.
+    // Tick global: el input `song` ya trae la canción aplicada (bpm 108). El
+    // componente debe regenerar el texto desde el modelo nuevo y conservar el
+    // bpm y las variables de la sesión.
     component.song = appliedEvent.song;
     component.ngOnChanges({ song: change(oldSong, appliedEvent.song, false) });
 
@@ -186,7 +192,7 @@ describe('MrTextEditorComponent · aplicar .mr y refrescar tras la carrera de in
     expect(component.dirty).toBe(true);
   });
 
-  it('regenera el texto cuando el padre entrega un bpm nuevo (carga de .mr)', () => {
+  it('regenera el texto cuando la canción llega con otro bpm (carga de .mr)', () => {
     const { component } = createEditor();
     const song = new Song();
     song.name = 'Sesión';
@@ -195,8 +201,13 @@ describe('MrTextEditorComponent · aplicar .mr y refrescar tras la carrera de in
     component.ngOnChanges({ song: change(undefined, song, true) });
     expect(component.text).not.toContain('bpm');
 
-    component.bpm = 90;
-    component.ngOnChanges({ bpm: change(undefined, 90, false) });
+    // La canción nueva (p. ej. cargada de un .mr con `bpm 90`) trae el bpm y
+    // el texto se regenera aunque `repeats` no cambie.
+    const loaded = new Song();
+    loaded.name = 'Sesión';
+    loaded.bpm = 90;
+    component.song = loaded;
+    component.ngOnChanges({ song: change(song, loaded, false) });
 
     expect(component.text).toContain('bpm 90');
     expect(component.dirty).toBe(false);
@@ -225,7 +236,7 @@ describe('SongEditorComponent · onMrTextApplied', () => {
 
     expect(songPlayer.stop).toHaveBeenCalledTimes(1);
     expect(component.repetitions).toBe(2);
-    expect(component.bpm).toBe(108);
+    expect(song.bpm).toBe(108);
     expect(emitted).toEqual([song]);
     expect(cdr.detectChanges).not.toHaveBeenCalled();
   });
@@ -262,7 +273,7 @@ describe('SongEditorComponent · applyLoadedDocument (.mr)', () => {
 
     expect(songPlayer.stop).toHaveBeenCalledTimes(1);
     expect(component.repetitions).toBe(3);
-    expect(component.bpm).toBe(90);
+    expect(document.song.bpm).toBe(90);
     expect(emitted).toEqual([document.song]);
     expect(VariableContext.getValue('mode')).toBe('RANDOM');
   });
@@ -275,7 +286,46 @@ describe('SongEditorComponent · applyLoadedDocument (.mr)', () => {
 
     expect(songPlayer.stop).not.toHaveBeenCalled();
     expect(component.repetitions).toBe(1);
-    expect(component.bpm).toBeUndefined();
+    expect(document.song.bpm).toBe(120);
     expect(emitted).toEqual([document.song]);
+  });
+});
+
+describe('SongEditorComponent · guardar .mr', () => {
+  const createSongEditor = () => {
+    const cdr = { markForCheck: jest.fn(), detectChanges: jest.fn() };
+    const songPlayer = {
+      metronome$: new Subject<number>(),
+      isPlaying: false,
+      stop: jest.fn(),
+      songRepetitions: 1
+    };
+    return new SongEditorComponent(songPlayer as unknown as SongPlayer, cdr as unknown as ChangeDetectorRef);
+  };
+
+  it('serializa el bpm de Song.bpm (y omite 120 por defecto)', () => {
+    const component = createSongEditor();
+    component.song = new Song();
+    component.song.name = 'Tempo';
+    component.song.bpm = 90;
+    component.repetitions = 2;
+
+    component.saveMrFile();
+
+    expect(downloadTextFile).toHaveBeenCalledWith(
+      'Tempo.mr',
+      expect.stringContaining('repeats 2\nbpm 90\n')
+    );
+  });
+
+  it('omite bpm cuando la canción mantiene el valor por defecto', () => {
+    const component = createSongEditor();
+    component.song = new Song();
+    component.song.name = 'Default';
+
+    component.saveMrFile();
+
+    const text = (downloadTextFile as jest.Mock).mock.calls[0][1] as string;
+    expect(text).not.toContain('bpm');
   });
 });

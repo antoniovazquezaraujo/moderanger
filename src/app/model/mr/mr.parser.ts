@@ -16,7 +16,7 @@ import { AssignOperation, BaseOperation, VaryOperation } from '../operation';
 import { Part } from '../part';
 import { getPlayModeNames } from '../play.mode';
 import { Scale } from '../scale';
-import { Song } from '../song';
+import { DEFAULT_BPM, MAX_BPM, MIN_BPM, Song } from '../song';
 import { VariableValue } from '../variable.context';
 import { MrParseError } from './mr.errors';
 import {
@@ -210,6 +210,9 @@ class MrDocumentParser {
         `clave desconocida '${word}' en el nivel raíz; se esperaba 'song', 'version', 'repeats', 'bpm', 'vars' o 'part'`
       );
     }
+    // El bpm canónico vive en `Song`; la meta (`meta.bpm`) es solo su reflejo
+    // en el fichero. Sin `bpm` en la cabecera se aplica el valor por defecto.
+    this.document.song.bpm = this.document.meta.bpm ?? DEFAULT_BPM;
     return this.document;
   }
 
@@ -268,8 +271,8 @@ class MrDocumentParser {
         }
         this.advance();
         const { value, word: raw } = this.parseIntegerArgument(line, 'bpm');
-        if (value < 30 || value > 240) {
-          throw errorAt(line, raw.column, `'bpm' debe estar entre 30 y 240 (recibido ${value})`);
+        if (value < MIN_BPM || value > MAX_BPM) {
+          throw errorAt(line, raw.column, `'bpm' debe estar entre ${MIN_BPM} y ${MAX_BPM} (recibido ${value})`);
         }
         this.document.meta.bpm = value;
         seenBpm = true;

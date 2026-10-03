@@ -117,4 +117,29 @@ describe('NoteConverter', () => {
     expect(element.type).toBe('group');
     expect((element as GenericGroup).children).toHaveLength(1);
   });
+
+  it('conserva una referencia a variable sin número (#17)', () => {
+    const original = new NoteData({ type: 'note', duration: '8t', variable: 'motif' });
+
+    const element = NoteConverter.fromNoteData(original) as SingleNote;
+
+    expect(element.type).toBe('note');
+    expect(element.value).toBeNull();
+    expect(element.variableName).toBe('motif');
+    expect(element.variableName).toBeDefined();
+    // Y vuelve a NoteData sin perder el token.
+    const back = NoteConverter.toNoteData(element);
+    expect(back.variable).toBe('motif');
+    expect(back.note).toBeUndefined();
+    expect(back.toString()).toBe('8t:$motif');
+  });
+
+  it('toNoteData de una nota normal no emite variable', () => {
+    const element: MusicElement = { id: 'n1', type: 'note', value: 60, duration: '4n' };
+
+    const noteData = NoteConverter.toNoteData(element);
+
+    expect(noteData.variable).toBeUndefined();
+    expect(noteData.toString()).toBe('4n:60');
+  });
 });
