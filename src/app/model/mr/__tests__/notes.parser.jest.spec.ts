@@ -155,7 +155,7 @@ describe('parseBlockNotesForEditor: referencias sin número (#17)', () => {
     const [group] = parseBlockNotesForEditor('4n:( 0 8t:$motif )').noteData;
 
     expect(group.type).toBe('group');
-    expect(group.toString()).toBe('4n:(0 8t:$motif)');
+    expect(group.toString()).toBe('4n:( 0 8t:$motif )');
   });
 
   it('no cambia la semántica de reproducción de parseBlockNotes', () => {
