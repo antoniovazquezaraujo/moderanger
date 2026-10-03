@@ -3,7 +3,7 @@
 - **Fecha:** 2026-10-03
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Rama:** `feat/mr-fase1` (Fase 1 del ADR-001)
-- **Estado:** implementada y validada; pendiente de revisión/merge
+- **Estado:** implementada, validada y aprobada por el usuario (2026-10-03); integrada en `main`
 - **Referencias:** `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`, `docs/diseno/propuesta-sintaxis-mr.md` (aprobada), `docs/analisis/BACKLOG.md` (#1 y #3), `docs/analisis/duracion-de-grupos.md`
 - **Alcance:** gramática, parser, serializador, round-trip, corpus y servicio de fichero. Sin cambios de UI.
 
@@ -65,6 +65,8 @@ COMANDO       := OCT | SCALE | GAP | PLAYMODE | WIDTH | INV | KEY
 ## 3. Forma canónica (desambiguaciones de la propuesta)
 
 Las reglas de §12.2 se implementan tal cual, con estas lecturas donde la propuesta admitía más de una interpretación:
+>
+> **Ratificado por el usuario (2026-10-03):** las tres lecturas siguientes se aprueban tal cual; los ejemplos de la propuesta se alinearán en la tarea de limpieza posterior.
 
 1. **Comillas mínimas (Q2(a), aprobada).** `formatName` omite las comillas cuando el nombre es `[A-Za-z0-9_.\-]+` y no es palabra reservada: `song Semilla`, `part Piano`, `block Origen`. Solo se comilla cuando hace falta (`"Piano de cola"`, `"repeats"`, `""` para nombre vacío). Los ejemplos de la propuesta escriben `song "Semilla"`, pero Q2(a) dice explícitamente "comillas solo cuando hagan falta"; ambas formas se aceptan al parsear y la canónica es la mínima.
 2. **Grupos con `( … )`.** Los ejemplos normativos de §7.2/§7.3 y todo el corpus usan `4n:( 0 2 )` con espacio tras `(` y antes de `)`. La frase "sin espacio tras `(` ni antes de `)`" de §7.2.2 se interpreta como "sin espacios de más"; se adopta la forma de los ejemplos. Grupo vacío: `2n:()`.
