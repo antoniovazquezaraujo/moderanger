@@ -11,6 +11,13 @@ jobs:
     name: tests + build (Node 16)
     runs-on: ubuntu-latest
 
+    env:
+      # Angular 13 está EOL: sus dependencias transitivas emiten decenas de
+      # deprecations conocidas (ver BACKLOG #11). Silenciamos ese ruido en CI;
+      # en local se mantienen visibles.
+      NPM_CONFIG_LOGLEVEL: error
+      NODE_OPTIONS: --no-deprecation
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,7 +29,7 @@ jobs:
           cache: npm
 
       - name: Instalar dependencias
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Tests unitarios
         run: npm test
