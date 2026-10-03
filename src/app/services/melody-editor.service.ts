@@ -119,34 +119,20 @@ export class MelodyEditorService {
                         updatedElement = { ...element, ...valueChange, ...durationChange } as SingleNote;
                         break;
                     case 'group':
-                        const originalGroup = element as GenericGroup; // Cast original element
-                        const oldGroupDuration = originalGroup.duration;
                         const wasDurationChanged = changes.hasOwnProperty('duration');
                         const newGroupDuration = wasDurationChanged ? changes.duration : undefined;
                         const updatedChildrenFromChanges = (changes as Partial<GenericGroup>).children;
-                        
-                        // Apply direct changes to the group first
-                        let initialUpdatedGroup = { 
-                            ...element, 
-                            ...(wasDurationChanged && { duration: newGroupDuration }), 
-                            ...(updatedChildrenFromChanges !== undefined && { children: updatedChildrenFromChanges }) 
-                        } as GenericGroup;
 
-                        // If the group's duration was changed, update children based on the new rule
-                        if (wasDurationChanged && initialUpdatedGroup.children) {
-                            console.log(`[MelodyEditorService] Propagating group duration change (${oldGroupDuration} -> ${newGroupDuration}) to children of ${element.id}`);
-                            initialUpdatedGroup.children = initialUpdatedGroup.children.map(child => {
-                                // Apply if child duration is undefined OR matches the OLD group duration
-                                if (child.duration === undefined || child.duration === oldGroupDuration) {
-                                    console.log(` - Applying duration ${newGroupDuration} to child ${child.id} (was ${child.duration})`);
-                                    return { ...child, duration: newGroupDuration }; // Apply the NEW duration
-                                } else {
-                                    console.log(` - Child ${child.id} keeps its own duration ${child.duration}`);
-                                    return child;
-                                }
-                            });
-                        }
-                        updatedElement = initialUpdatedGroup; // Assign the potentially modified group
+                        // La duración del grupo NO se materializa en los hijos:
+                        // los hijos sin duración propia la heredan al generar el
+                        // bloque (y siguen sin duración explícita al serializar).
+                        // Solo se respetan las duraciones explícitas de cada hijo.
+                        const initialUpdatedGroup = {
+                            ...element,
+                            ...(wasDurationChanged && { duration: newGroupDuration }),
+                            ...(updatedChildrenFromChanges !== undefined && { children: updatedChildrenFromChanges })
+                        } as GenericGroup;
+                        updatedElement = initialUpdatedGroup;
                         break;
                     case 'arpeggio':
                     case 'chord':

@@ -719,6 +719,27 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     }
   }
 
+  /**
+   * Rueda sobre la duración de un grupo genérico `(...)`: cambia la duración
+   * del grupo (sin Shift), con la misma convención que la rueda sobre la
+   * duración de una nota. Los hijos sin duración propia no se tocan: la
+   * heredan al generar el bloque.
+   */
+  onGroupDurationWheel(event: WheelEvent, visualElement: VisualElement): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const group = visualElement.originalElement;
+    if (group.type !== 'group') {
+      return;
+    }
+    const delta = event.deltaY > 0 ? 1 : -1;
+    if (delta > 0) {
+      this.increaseDuration(group.id);
+    } else {
+      this.decreaseDuration(group.id);
+    }
+  }
+
   insertNote(): void {
     const baseNoteValue = 1; 
     const noteData = { value: baseNoteValue, type: 'note' as 'note' }; 

@@ -1,5 +1,6 @@
 import { CompositeNote, GenericGroup, MusicElement, NoteConverter, NoteFactory, NoteIdGenerator, SingleNote } from '../melody';
 import { NoteData } from '../note';
+import { parseBlockNotesForEditor } from '../mr/notes.parser';
 
 describe('NoteFactory', () => {
   it('crea una nota simple con duración por defecto e id único', () => {
@@ -51,14 +52,16 @@ describe('NoteIdGenerator', () => {
 });
 
 describe('NoteConverter', () => {
-  it('toNoteData convierte una nota simple aplicando duración por defecto', () => {
+  it('toNoteData conserva sin duración una nota que no la tenía', () => {
     const element: MusicElement = { id: 'n1', type: 'note', value: 60 };
 
     const noteData = NoteConverter.toNoteData(element);
 
     expect(noteData.type).toBe('note');
     expect(noteData.note).toBe(60);
-    expect(noteData.duration).toBe('4n');
+    // Sin duración explícita: se hereda del grupo (o del default del bloque)
+    // al generar; no se materializa aquí.
+    expect(noteData.duration).toBeUndefined();
   });
 
   it('toNoteData convierte un grupo de forma recursiva', () => {
@@ -141,5 +144,34 @@ describe('NoteConverter', () => {
 
     expect(noteData.variable).toBeUndefined();
     expect(noteData.toString()).toBe('4n:60');
+  });
+});
+
+describe('NoteConverter · duraciones heredadas de grupo', () => {
+  it('un hijo de grupo sin duración propia queda sin duración (no materializa 4n)', () => {
+    const [group] = parseBlockNotesForEditor('8n:( 0 2 4t:5 )').noteData;
+
+    const element = NoteConverter.fromNoteData(group) as GenericGroup;
+    const children = element.children as SingleNote[];
+
+    expect(children[0].duration).toBeUndefined();
+    expect(children[1].duration).toBeUndefined();
+    expect(children[2].duration).toBe('4t');
+  });
+
+  it('una nota raíz sin duración tampoco materializa duración', () => {
+    const [note] = parseBlockNotesForEditor('0').noteData;
+
+    const element = NoteConverter.fromNoteData(note) as SingleNote;
+
+    expect(element.duration).toBeUndefined();
+  });
+
+  it('la ida y vuelta por el editor conserva el texto canónico del grupo', () => {
+    const noteData = parseBlockNotesForEditor('8n:( 0 2 4t:5 )').noteData;
+    const elements = noteData.map(note => NoteConverter.fromNoteData(note));
+    const back = elements.map(element => NoteConverter.toNoteData(element));
+
+    expect(NoteData.toStringArray(back)).toBe('8n:( 0 2 4t:5 )');
   });
 });

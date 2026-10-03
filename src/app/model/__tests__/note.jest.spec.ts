@@ -64,7 +64,7 @@ describe('NoteData.toString', () => {
       ]
     });
 
-    expect(group.toString()).toBe('2n:(60 s)');
+    expect(group.toString()).toBe('2n:( 60 s )');
   });
 
   it('toStringArray une los elementos con espacios', () => {
