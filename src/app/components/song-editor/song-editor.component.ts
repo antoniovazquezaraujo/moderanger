@@ -167,20 +167,18 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Recorta y aplica el BPM del input de cabecera al modelo. El rango es el
-     * del formato `.mr` (30-240) para que el modelo siempre sea serializable;
-     * un valor vacío o no numérico vuelve al valor por defecto. Live-tempo
-     * (#18): si la canción está sonando, el Transport se reajusta ya.
+     * Recorta y aplica el BPM del input de cabecera al modelo. Se invoca en
+     * `ngModelChange`, es decir, **mientras se escribe** (no al salir del
+     * campo): así guardar o aplicar nunca serializan un valor viejo. El rango
+     * es el del formato `.mr` (30-240) para que el modelo siempre sea
+     * serializable; un valor vacío o no numérico vuelve al valor por defecto.
+     * Live-tempo (#18): si la canción está sonando, el Transport se reajusta ya.
      */
-    onBpmChange(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        const parsed = Number.parseInt(input.value, 10);
+    onBpmChange(value: unknown): void {
+        const parsed = typeof value === 'number' ? value : Number.parseInt(String(value ?? ''), 10);
         this.song.bpm = Number.isFinite(parsed)
             ? Math.min(MAX_BPM, Math.max(MIN_BPM, parsed))
             : DEFAULT_BPM;
-        // Refleja el valor recortado aunque coincida con el anterior (p. ej.
-        // "999" -> 240): `[ngModel]` no reescribe el DOM si no cambia el modelo.
-        input.value = String(this.song.bpm);
         if (this.songPlayer.isPlaying) {
             this.songPlayer.setTransportBpm(this.song.bpm);
         }
@@ -188,20 +186,18 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Recorta y aplica el Repeat del input de cabecera al modelo. Rango de la
-     * UI (1-99) para que `Song.repeats` siempre sea serializable; un valor
-     * vacío o no numérico vuelve a 1. Con reproducción en curso el valor se
-     * aplica al siguiente Play (la secuencia ya está programada).
+     * Recorta y aplica el Repeat del input de cabecera al modelo. Se invoca en
+     * `ngModelChange` (**mientras se escribe**), por el mismo motivo que el
+     * BPM. Rango de la UI (1-99) para que `Song.repeats` siempre sea
+     * serializable; un valor vacío o no numérico vuelve a 1. Con reproducción
+     * en curso el valor se aplica al siguiente Play (la secuencia ya está
+     * programada).
      */
-    onRepeatsChange(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        const parsed = Number.parseInt(input.value, 10);
+    onRepeatsChange(value: unknown): void {
+        const parsed = typeof value === 'number' ? value : Number.parseInt(String(value ?? ''), 10);
         this.song.repeats = Number.isFinite(parsed)
             ? Math.min(MAX_REPEATS, Math.max(MIN_REPEATS, parsed))
             : DEFAULT_REPEATS;
-        // Refleja el valor recortado aunque coincida con el anterior (p. ej.
-        // "999" -> 99): `[ngModel]` no reescribe el DOM si no cambia el modelo.
-        input.value = String(this.song.repeats);
         this.cdr.markForCheck();
     }
 

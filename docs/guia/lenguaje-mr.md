@@ -391,7 +391,7 @@ Se declaran en `vars` y se usan en cualquier bloque (comandos, notas y operacion
 
 - Los strings con espacios o comillas van siempre entre comillas dobles; dentro se escapan `\"` y `\\`.
 - Los valores de escala y playmode se reconocen sin distinguir mayúsculas y se canonizan a MAYÚSCULAS: `$scale = black` se guarda como `$scale = BLACK`.
-- En la app, el sidebar `$` lista y edita las variables numéricas, de escala y de playmode. Las variables string (melodías) se conservan, suenan y se guardan, pero no aparecen en el sidebar (limitación de la vista, no del formato).
+- En la app, el sidebar `$` lista y edita los cuatro tipos: número, escala, playmode y string (melodías/patrones, editados como texto).
 - Al pulsar Aplicar o cargar un `.mr`, las variables declaradas en el texto se sincronizan con la app (se dan de alta y de baja).
 - Las variables están vivas durante la reproducción: `VARY`/`ASSIGN` las modifican. Al guardar se escribe el **valor vigente** en ese momento, que normalmente coincide con el declarado si no has reproducido con operaciones.
 
@@ -495,7 +495,7 @@ En la vista `.mr`, los errores aparecen bajo el texto con su `línea, columna`; 
 4. **PATTERN.** En una sola línea y sin `$variable` como valor.
 5. **Grupos multilínea.** No se admiten en v1; el grupo debe abrirse y cerrarse en su línea.
 6. **Acordes y arpegios literales.** No se escriben en el texto; los genera `PLAYMODE` a partir de grados, escala y comandos.
-7. **Sidebar de variables.** Solo lista variables numéricas, de escala y de playmode; las de tipo string (melodías) siguen funcionando en notas, reproducción y guardado, pero no se editan desde el sidebar.
+7. **Sidebar de variables.** Lista y edita los cuatro tipos (número, escala, playmode y string). Las variables string se editan como texto plano.
 8. **Comandos heredados sin efecto audible.** `SHIFTSTART`, `SHIFTSIZE`, `SHIFTVALUE` y `PATTERN_GAP` se leen y se guardan, pero el motor actual no aplica desplazamiento ni decoración; hoy no cambian el sonido.
 9. **Instrumentos.** Solo `PIANO` en v1.
 10. **`pulse` y `beatsPerBar`.** No se serializan.
