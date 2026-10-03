@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NoteDuration, MusicElement, SingleNote, CompositeNote, GenericGroup } from '../../model/melody';
 import { NoteData } from '../../model/note';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * 🎼 Note Generation Unified Service - ELIMINATES ALL DUPLICATION
