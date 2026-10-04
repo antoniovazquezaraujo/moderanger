@@ -1,0 +1,51 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # v1.0.0, v1.0.0-beta.1, ...
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: build + release web
+    runs-on: ubuntu-latest
+
+    env:
+      NPM_CONFIG_LOGLEVEL: error
+      NODE_OPTIONS: --no-deprecation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Node 16
+        uses: actions/setup-node@v5
+        with:
+          node-version: '16'
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci --no-audit --no-fund
+
+      - name: Tests
+        run: npm test
+
+      # `--base-href ./` deja la app servible desde cualquier carpeta estática.
+      - name: Build de producción
+        run: npm run build -- --base-href ./
+
+      - name: Empaquetar la web
+        run: |
+          cd dist/moderanger
+          zip -r ../../moderanger-web.zip .
+
+      - name: Publicar release (con changelog automático)
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: moderanger-web.zip
+          generate_release_notes: true

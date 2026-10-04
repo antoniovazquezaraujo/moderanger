@@ -6,8 +6,8 @@
  * - Sin efectos sobre `VariableContext`: las variables declaradas se guardan
  *   en `SongDocument.variables`.
  *
- * Reglas de estructura y canonización: `docs/diseno/propuesta-sintaxis-mr.md`
- * (§4–§11) y `docs/analisis/sintaxis-mr-implementada.md`.
+ * Reglas de estructura y canonización: `docs/developer/design/propuesta-sintaxis-mr.md`
+ * (§4–§11) y `docs/developer/analysis/sintaxis-mr-implementada.md`.
  */
 import { InstrumentType } from '../../services/audio-engine.service';
 import { Block } from '../block';

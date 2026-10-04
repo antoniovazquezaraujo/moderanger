@@ -4,7 +4,7 @@
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Rama:** `fix/pulido-mr` (desde `origin/main` = `d728037`); cabos sueltos #18-#20 cerrados en `chore/consolidacion-a` (§8)
 - **Estado:** implementada; pendiente de revisión de DANI
-- **Referencias:** `docs/analisis/mr-fase3-guardar-cargar.md` (§7), `docs/analisis/BACKLOG.md` (#12, #16, #17), `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
+- **Referencias:** `docs/developer/analysis/mr-fase3-guardar-cargar.md` (§7), `docs/developer/analysis/BACKLOG.md` (#12, #16, #17), `docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
 - **Alcance:** cerrar los tres pendientes pequeños de la ronda: #16 (bpm al player), #17 (variables string en el editor de melodía) y #12 (doble renderizado de partes). No se toca la semántica de reproducción ni el formato `.mr`.
 
 ---

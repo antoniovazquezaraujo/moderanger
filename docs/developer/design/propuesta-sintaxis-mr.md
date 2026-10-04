@@ -3,11 +3,11 @@
 - **Estado:** Aprobada (2026-10-03) e implementada en `main` (Fase 1, 2026-10-03). Los ejemplos de este documento siguen la forma canónica implementada.
 - **Fecha:** 2026-10-03
 - **Autor:** ROBER (full-stack TS/Angular)
-- **Decisión asociada:** `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
+- **Decisión asociada:** `docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
 - **Alcance:** definir la sintaxis de una canción completa en texto, su round-trip con el modelo actual y los criterios de canonización. **No se toca código en esta fase.**
 - **Preguntas para el revisor:** sección 18 (numeradas, con opciones y recomendación).
 
-> **Nota (2026-10-03):** las lecturas canónicas de esta propuesta —comillas mínimas, grupos `4n:( 0 2 )` y regla de líneas en blanco— fueron **ratificadas por el usuario** el 2026-10-03 y están implementadas; la referencia normativa es `docs/analisis/sintaxis-mr-implementada.md`.
+> **Nota (2026-10-03):** las lecturas canónicas de esta propuesta —comillas mínimas, grupos `4n:( 0 2 )` y regla de líneas en blanco— fueron **ratificadas por el usuario** el 2026-10-03 y están implementadas; la referencia normativa es `docs/developer/analysis/sintaxis-mr-implementada.md`.
 
 ---
 
@@ -590,7 +590,7 @@ roto.mr:6:7  error: PLAYMODE requiere un valor (CHORD, ASCENDING, …) o una var
 4. **Fichero `.mr`**: servicio de lectura/escritura; detección de extensión; UTF-8/LF.
 5. **Arreglos del sublenguaje** (sección 3.2): `s`, `VarRef`, comandos como `Command`, `INV`/`INVERSION`, PATTERN con DSL completo.
 6. **Tests**: unitarios de parser/serializer, corpus `.mr`, idempotencia, errores, y regresión de los 142 tests actuales.
-7. **Documentación**: actualizar `docs/analisis/` con la gramática y el contrato de round-trip.
+7. **Documentación**: actualizar `docs/developer/analysis/` con la gramática y el contrato de round-trip.
 
 Criterios de aceptación: los de la sección 6 del ADR-001.
 

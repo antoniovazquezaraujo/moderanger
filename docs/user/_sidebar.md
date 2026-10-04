@@ -1,0 +1,3 @@
+- [Inicio](index.md)
+- [Manual del lenguaje `.mr`](manual.md)
+- [Chuleta de sintaxis](cheatsheet.md)

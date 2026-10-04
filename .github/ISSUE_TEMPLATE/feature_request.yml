@@ -1,0 +1,35 @@
+name: Feature request
+description: Propón una idea o mejora
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Gracias por la propuesta! Cuéntanos qué problema resuelve.
+  - type: textarea
+    id: problem
+    attributes:
+      label: ¿Qué problema resuelve?
+      description: La necesidad o frustración detrás de la petición.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solución propuesta
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas (opcional)
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto extra (opcional)
+      description: Capturas, bocetos, issues relacionadas...
+    validations:
+      required: false

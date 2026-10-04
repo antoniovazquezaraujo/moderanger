@@ -26,10 +26,10 @@
 
 12 ficheros `.md` que estaban en la raíz, movidos con `git mv` (nombres conservados):
 
-- `docs/analisis/`: `COMPREHENSIVE-PROJECT-ANALYSIS-2025.md`, `MODERANGER-ARCHITECTURE-GUIDE.md`, `IMPROVEMENTS.md`, `NEXT-PRIORITIES.md`.
-- `docs/refactors/`: `COMPONENT-REFACTORING-SUMMARY.md`, `CRUD-OPERATIONS-CONSOLIDATION.md`, `CSS-OPTIMIZATION-SUMMARY.md`, `MELODY-REFACTORING-COMPARISON.md`, `NOTE-GENERATION-UNIFICATION.md`, `NOTE-GENERATION-UNIFICATION-PHASE2.md`, `REFACTORING-COMPARISON.md`, `REFACTORING-SUMMARY.md`.
+- `docs/developer/analysis/`: `COMPREHENSIVE-PROJECT-ANALYSIS-2025.md`, `MODERANGER-ARCHITECTURE-GUIDE.md`, `IMPROVEMENTS.md`, `NEXT-PRIORITIES.md`.
+- `docs/developer/refactors/`: `COMPONENT-REFACTORING-SUMMARY.md`, `CRUD-OPERATIONS-CONSOLIDATION.md`, `CSS-OPTIMIZATION-SUMMARY.md`, `MELODY-REFACTORING-COMPARISON.md`, `NOTE-GENERATION-UNIFICATION.md`, `NOTE-GENERATION-UNIFICATION-PHASE2.md`, `REFACTORING-COMPARISON.md`, `REFACTORING-SUMMARY.md`.
 
-No había enlaces relativos entre ellos (solo code-spans con rutas desde la raíz del repo, que siguen siendo válidas como texto). `README.md`, `LICENSE` y `docs/audits/` no se han tocado. Criterio: `analisis/` = visión de proyecto/arquitectura/prioridades; `refactors/` = informes de refactorización y consolidación.
+No había enlaces relativos entre ellos (solo code-spans con rutas desde la raíz del repo, que siguen siendo válidas como texto). `README.md`, `LICENSE` y `docs/developer/audits/` no se han tocado. Criterio: `analisis/` = visión de proyecto/arquitectura/prioridades; `refactors/` = informes de refactorización y consolidación.
 
 ## 4. Eliminación de `console.log` de depuración
 
@@ -40,7 +40,7 @@ No había enlaces relativos entre ellos (solo code-spans con rutas desde la raí
 
 ## 5. Código v2 sin cablear
 
-No se ha borrado nada. Inventario completo (fichero, LOC, importadores reales y recomendación) en `docs/analisis/codigo-v2-sin-cablear.md`. Resumen: ~5.538 LOC sin cablear; `global-state.service.ts` y `note-generation-unified.service.ts` sí están en uso real y no deben tocarse.
+No se ha borrado nada. Inventario completo (fichero, LOC, importadores reales y recomendación) en `docs/developer/analysis/codigo-v2-sin-cablear.md`. Resumen: ~5.538 LOC sin cablear; `global-state.service.ts` y `note-generation-unified.service.ts` sí están en uso real y no deben tocarse.
 
 ## 6. Budgets de `angular.json` (documentado, NO revertido)
 
@@ -71,7 +71,7 @@ Warnings de build (no bloqueantes, preexistentes): `Unable to locate stylesheet:
 
 ## 8. Decisiones pendientes del usuario
 
-1. **Código v2:** cablear o eliminar (~5.500 LOC; inventario en `docs/analisis/codigo-v2-sin-cablear.md`).
+1. **Código v2:** cablear o eliminar (~5.500 LOC; inventario en `docs/developer/analysis/codigo-v2-sin-cablear.md`).
 2. **Budgets CSS:** mantener `8/10 KB` o volver a `2/4 KB` tras optimizar estilos.
 3. **`uuid`:** aceptar `^8.3.2` (deprecado por el registro) o migrar a `uuid@11` / generación local.
 4. **Servicios sin importadores no v2:** `config.service.ts`, `keyboard.service.ts`, `unsaved-changes.guard.ts` (y `error-handler.service.ts`, conservado de momento).

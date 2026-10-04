@@ -1,0 +1,32 @@
+name: Publicar documentación de usuario
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'docs/user/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-docs
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: docs/user -> gh-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Publicar en la rama gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/user
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: "docs: despliegue automático de la documentación de usuario"

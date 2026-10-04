@@ -1,0 +1,54 @@
+name: Bug report
+description: Algo no funciona como debería
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por tomarte el tiempo de reportarlo. Rellena todo lo que puedas.
+  - type: input
+    id: version
+    attributes:
+      label: Versión
+      description: Tag de release (ver la página de Releases) o commit.
+      placeholder: "v0.1.0 / abc1234"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Entorno
+      description: Navegador y sistema operativo.
+      placeholder: "Firefox 130 / CachyOS"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamiento esperado
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportamiento observado
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs, capturas o fichero .mr (opcional)
+      description: Pega logs o arrastra capturas. Si es de una canción, adjunta el `.mr`.
+    validations:
+      required: false
