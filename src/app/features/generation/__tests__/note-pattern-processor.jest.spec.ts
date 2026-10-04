@@ -19,22 +19,22 @@ const patternNote = (note: number, duration = '4n'): NoteData =>
 const createService = (): NotePatternProcessorService => new NotePatternProcessorService();
 
 describe('NotePatternProcessorService.shouldApplyPattern', () => {
-  it('es false fuera de PATTERN o sin patrón', () => {
+  it('es false sin patrón o con patrón vacío', () => {
     const player = createPlayer();
     const service = createService();
 
     expect(service.shouldApplyPattern(player)).toBe(false);
 
-    player.playMode = PlayMode.PATTERN;
+    player.playMode = PlayMode.SINGLE;
     expect(service.shouldApplyPattern(player)).toBe(false);
 
     player.currentPattern = [];
     expect(service.shouldApplyPattern(player)).toBe(false);
   });
 
-  it('es true en PATTERN con patrón no vacío', () => {
+  it('es true con patrón no vacío (independiente del playmode)', () => {
     const player = createPlayer();
-    player.playMode = PlayMode.PATTERN;
+    player.playMode = PlayMode.SINGLE;
     player.currentPattern = [patternNote(1)];
 
     expect(createService().shouldApplyPattern(player)).toBe(true);
@@ -50,7 +50,7 @@ describe('NotePatternProcessorService.applyPattern', () => {
 
   it('transpone los grados del patrón sobre la escala y tonalidad del player', () => {
     const player = createPlayer();
-    player.playMode = PlayMode.PATTERN;
+    player.playMode = PlayMode.SINGLE;
     player.scale = ScaleTypes.WHITE;
     player.octave = 2;
     player.tonality = Tonality.D;
@@ -64,7 +64,7 @@ describe('NotePatternProcessorService.applyPattern', () => {
 
   it('escala las duraciones al tamaño total del patrón', () => {
     const player = createPlayer();
-    player.playMode = PlayMode.PATTERN;
+    player.playMode = PlayMode.SINGLE;
     player.currentPattern = [patternNote(1), patternNote(2)];
 
     const result = createService().applyPattern(0, '4n', player);
@@ -77,7 +77,7 @@ describe('NotePatternProcessorService.applyPattern', () => {
 
   it('aplica la tonalidad del player al MIDI resultante', () => {
     const player = createPlayer();
-    player.playMode = PlayMode.PATTERN;
+    player.playMode = PlayMode.SINGLE;
     player.tonality = Tonality.e;
     player.currentPattern = [patternNote(2)];
 
@@ -88,7 +88,7 @@ describe('NotePatternProcessorService.applyPattern', () => {
 
   it('no muta el patrón original del player', () => {
     const player = createPlayer();
-    player.playMode = PlayMode.PATTERN;
+    player.playMode = PlayMode.SINGLE;
     player.currentPattern = [patternNote(2), patternNote(4)];
 
     createService().applyPattern(0, '4n', player);

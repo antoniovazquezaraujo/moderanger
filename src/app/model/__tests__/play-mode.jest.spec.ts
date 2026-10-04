@@ -4,7 +4,7 @@ describe('getPlayModeFromString', () => {
   it('mapea nombres conocidos a su enum', () => {
     expect(getPlayModeFromString('CHORD')).toBe(PlayMode.CHORD);
     expect(getPlayModeFromString('DESCENDING')).toBe(PlayMode.DESCENDING);
-    expect(getPlayModeFromString('PATTERN')).toBe(PlayMode.PATTERN);
+    expect(getPlayModeFromString('SINGLE')).toBe(PlayMode.SINGLE);
   });
 
   it('cae a CHORD cuando el nombre no se reconoce', () => {
@@ -13,13 +13,13 @@ describe('getPlayModeFromString', () => {
 });
 
 describe('getPlayModeNames', () => {
-  it('devuelve los nombres de todos los modos, incluidos PATTERN y RANDOM', () => {
+  it('devuelve los nombres de todos los modos, incluidos SINGLE y RANDOM', () => {
     const names = getPlayModeNames();
 
     expect(names).toHaveLength(15);
     expect(names).toContain('CHORD');
     expect(names).toContain('RANDOM');
-    expect(names).toContain('PATTERN');
+    expect(names).toContain('SINGLE');
   });
 });
 

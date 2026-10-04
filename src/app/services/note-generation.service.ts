@@ -132,6 +132,121 @@ export class NoteGenerationService {
     return finalPlayableNotes;
   }
 
+
+  /**
+   * Etapa 1: si hay patrón activo, expande un grado base en los grados del
+   * patrón (transpuestos) con sus duraciones escaladas al tiempo original.
+   * Sin patrón devuelve el propio grado. Los eventos no-note del patrón
+   * (silencios, grupos, compuestos) pasan tal cual.
+   */
+  private expandNoteWithPattern(baseGrade: number, duration: string, player: Player): NoteData[] {
+      const pattern = player.currentPattern;
+      if (!pattern || pattern.length === 0) {
+          return [new NoteData({ type: 'note', note: baseGrade, duration })];
+      }
+      const scaleName = ScaleTypes[player.scale];
+      const currentScale = Scale.getScaleByName(scaleName);
+      if (!currentScale) {
+          console.error(`[NoteGenSvc] PATTERN Error: Invalid scale ${scaleName}. Skipping pattern application.`);
+          return [new NoteData({ type: 'rest', duration })];
+      }
+
+      const originalSeconds = duration ? Tone.Time(duration).toSeconds() : Tone.Time('16n').toSeconds();
+      let patternSeconds = 0;
+      pattern.forEach(patternNote => {
+          patternSeconds += Tone.Time(patternNote.duration ?? '16n').toSeconds();
+      });
+      const scaleFactor = patternSeconds > 0 ? originalSeconds / patternSeconds : 1;
+
+      return pattern.map(patternNoteData => {
+          const expanded = JSON.parse(JSON.stringify(patternNoteData)) as NoteData;
+          if (expanded.type === 'note' && expanded.note !== undefined) {
+              // Grado destino; el MIDI se calcula en la etapa 2.
+              expanded.note = baseGrade + expanded.note;
+          }
+          const currentDuration = expanded.duration ?? '16n';
+          try {
+              expanded.duration = `${Tone.Time(currentDuration).toSeconds() * scaleFactor}s`;
+          } catch (e) {
+              console.warn(`[NoteGenSvc] Could not scale duration ${currentDuration}. Using original.`);
+              expanded.duration = currentDuration;
+          }
+          return expanded;
+      });
+  }
+
+  /**
+   * Etapa 2: convierte un evento expandido en NoteData reproducible según el
+   * playmode (SINGLE = nota suelta, CHORD = acorde, resto = arpegios).
+   */
+  private generatePlayableData(item: NoteData, player: Player, fallbackDuration: string): NoteData[] {
+      if (item.type !== 'note' || item.note === undefined) {
+          return [item];
+      }
+      const grade = item.note;
+      const duration = item.duration ?? fallbackDuration;
+      player.selectedNote = grade;
+
+      if (player.playMode === PlayMode.SINGLE) {
+          return [this.gradeToSingleNote(grade, duration, player)];
+      }
+
+      const derivedNoteDatas = player.getSelectedNotes();
+      const midiNotes = this.noteDatasToNotes(derivedNoteDatas);
+      if (midiNotes.length === 0) {
+          return [this.createRestData(duration)];
+      }
+
+      if (player.playMode === PlayMode.CHORD) {
+          derivedNoteDatas.forEach(nd => nd.duration = duration);
+          const chordResult = this.noteGenUnified.createNoteData({
+              type: 'chord',
+              duration,
+              noteDatas: derivedNoteDatas
+          });
+          if (chordResult.success && chordResult.data) {
+              return [chordResult.data];
+          }
+          return [this.createRestData(duration)];
+      }
+
+      const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
+      const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
+      if (arpeggioNoteDatas.length === 0) {
+          return [this.createRestData(duration)];
+      }
+      const arpeggioResult = this.noteGenUnified.createNoteData({
+          type: 'arpeggio',
+          duration,
+          noteDatas: arpeggioNoteDatas
+      });
+      if (arpeggioResult.success && arpeggioResult.data) {
+          return [arpeggioResult.data];
+      }
+      return [this.createRestData(duration)];
+  }
+
+  /** Nota suelta (playmode SINGLE): grado → MIDI con escala/octava/tonalidad. */
+  private gradeToSingleNote(grade: number, duration: string, player: Player): NoteData {
+      try {
+          const currentScale = Scale.getScaleByName(ScaleTypes[player.scale]);
+          const octavedGrade = new OctavedGrade(currentScale, grade, player.octave);
+          const midiNote = octavedGrade.toNote() + player.tonality;
+          return new NoteData({ type: 'note', duration, note: midiNote });
+      } catch (e) {
+          console.error(`[NoteGenSvc] Error calculating OctavedGrade for grade ${grade}:`, e);
+          return this.createRestData(duration);
+      }
+  }
+
+  private createRestData(duration: string): NoteData {
+      const restResult = this.noteGenUnified.createRestNoteData(duration);
+      if (restResult.success && restResult.data) {
+          return restResult.data;
+      }
+      return new NoteData({ type: 'rest', duration });
+  }
+
   // <<< New method similar to old SongPlayer.processIndividualNoteData >>>
   private processSingleNoteData(noteData: NoteData, player: Player, fallbackDuration: string = '16n'): NoteData[] {
       const results: NoteData[] = [];
@@ -141,109 +256,14 @@ export class NoteGenerationService {
           case 'note':
               const baseGrade = noteData.note; // This is the scale degree from the parser
               if (baseGrade !== undefined) {
-                  // Set the base grade on the player for getSelectedNotes to use
-                  player.selectedNote = baseGrade;
-                  
-                  // --- PATTERN MODE LOGIC ---
-                  if (player.playMode === PlayMode.PATTERN && player.currentPattern && player.currentPattern.length > 0) {
-                      const patternMelody = player.currentPattern;
-                      const scaleName = ScaleTypes[player.scale];
-                      const currentScale = Scale.getScaleByName(scaleName);
-                      if (!currentScale) {
-                          console.error(`[NoteGenSvc] PATTERN Error: Invalid scale ${scaleName}. Skipping pattern application.`);
-                          const errorRestResult = this.noteGenUnified.createRestNoteData(duration);
-                          if (errorRestResult.success && errorRestResult.data) {
-                            results.push(errorRestResult.data);
-                          }
-                          break; // Exit case 'note'
-                      }
-
-                      // Calculate total duration of the original note (if specified)
-                      const originalNoteDurationSeconds = duration ? Tone.Time(duration).toSeconds() : Tone.Time('16n').toSeconds();
-                      
-                      // Calculate total duration of the pattern
-                      let patternDurationSeconds = 0;
-                      patternMelody.forEach(nd => {
-                          const patternNoteDuration = nd.duration ?? '16n'; // Default if pattern note has no duration
-                          patternDurationSeconds += Tone.Time(patternNoteDuration).toSeconds();
-                      });
-
-                      // Calculate time scaling factor
-                      const scaleFactor = patternDurationSeconds > 0 ? originalNoteDurationSeconds / patternDurationSeconds : 1;
-
-                      patternMelody.forEach(patternNoteData => {
-                          const transposedNoteData = JSON.parse(JSON.stringify(patternNoteData)) as NoteData;
-
-                          // Transpose note using scale degrees
-                          if (transposedNoteData.type === 'note' && transposedNoteData.note !== undefined) {
-                              const patternGrade = transposedNoteData.note; // Assuming pattern notes are scale degrees
-                              const targetGrade = baseGrade + patternGrade;
-                              
-                              try {
-                                  const octavedGrade = new OctavedGrade(currentScale, targetGrade, player.octave);
-                                  const targetMidiNote = octavedGrade.toNote() + player.tonality;
-                                  transposedNoteData.note = targetMidiNote;
-                              } catch (e) {
-                                  console.error(`[NoteGenSvc] Error calculating OctavedGrade for targetGrade ${targetGrade}:`, e);
-                                  // What to do on error? Skip note? Make it a rest?
-                                  transposedNoteData.type = 'rest'; // Make it a rest for safety
-                                  delete transposedNoteData.note;
-                              }
-                          }
-                          
-                          // Scale duration (existing logic)
-                          const currentDuration = transposedNoteData.duration ?? '16n';
-                          try {
-                               const scaledDurationSeconds = Tone.Time(currentDuration).toSeconds() * scaleFactor;
-                               transposedNoteData.duration = `${scaledDurationSeconds}s`; 
-                          } catch(e) {
-                              console.warn(`[NoteGenSvc] Could not scale duration ${currentDuration}. Using original.`);
-                              transposedNoteData.duration = currentDuration; // Keep original on error
-                          }
-
-                          results.push(transposedNoteData);
-                      });
-                  
-                  // --- CHORD / OTHER ARPEGGIATE MODES LOGIC ---
-                  } else { 
-                      // Get the actual MIDI notes based on player state (scale, octave, tonality, gap, density, inversion)
-                      const derivedNoteDatas = player.getSelectedNotes(); // Call the Player method
-                      const midiNotes = this.noteDatasToNotes(derivedNoteDatas); // Extract MIDI numbers
-
-                      if (midiNotes.length > 0) { 
-                          if (player.playMode === PlayMode.CHORD) {
-                              // Use the derived NoteData directly if playing chords
-                              // Ensure they have the correct final duration
-                              derivedNoteDatas.forEach(nd => nd.duration = duration);
-                              const chordResult = this.noteGenUnified.createNoteData({ 
-                                type: 'chord', 
-                                duration, 
-                                noteDatas: derivedNoteDatas 
-                              });
-                              if (chordResult.success && chordResult.data) {
-                                results.push(chordResult.data);
-                              }
-                          } else { // Other Arpeggiate modes
-                              const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
-                              const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
-                              if (arpeggioNoteDatas.length > 0) {
-                                  const arpeggioResult = this.noteGenUnified.createNoteData({ 
-                                    type: 'arpeggio', 
-                                    duration, 
-                                    noteDatas: arpeggioNoteDatas 
-                                  });
-                                  if (arpeggioResult.success && arpeggioResult.data) {
-                                    results.push(arpeggioResult.data);
-                                  }
-                              }
-                          }
-                      } else {
-                         // If getSelectedNotes returns empty even with a baseGrade
-                         const emptyRestResult = this.noteGenUnified.createRestNoteData(duration);
-                         if (emptyRestResult.success && emptyRestResult.data) {
-                           results.push(emptyRestResult.data);
-                         }
-                      }
+                  // Pipeline de generación:
+                  //   1) Si hay patrón activo, expande el grado en la melodía del
+                  //      patrón (independiente del playmode).
+                  //   2) Genera lo que toque (nota suelta, acorde, arpegio) para
+                  //      cada nota resultante.
+                  const expanded = this.expandNoteWithPattern(baseGrade, duration, player);
+                  for (const expandedNote of expanded) {
+                      results.push(...this.generatePlayableData(expandedNote, player, duration));
                   }
               } else {
                   // If baseGrade is undefined (e.g., explicit rest in input)

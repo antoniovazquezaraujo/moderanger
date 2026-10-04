@@ -13,7 +13,8 @@ export enum PlayMode {
     ODD_DESC_EVEN_DESC = 11,
     ODD_DESC_EVEN_ASC = 12,
     RANDOM = 13,
-    PATTERN = 14
+    /** Nota suelta: sin acorde ni arpegio (el patrón, si existe, se aplica antes). */
+    SINGLE = 14
 };
 export function getPlayModeFromString(mode:string): PlayMode{
     switch(mode){
@@ -31,7 +32,7 @@ export function getPlayModeFromString(mode:string): PlayMode{
         case 'ODD_DESC_EVEN_DESC': return PlayMode.ODD_DESC_EVEN_DESC;
         case 'ODD_DESC_EVEN_ASC': return PlayMode.ODD_DESC_EVEN_ASC;
         case 'RANDOM': return PlayMode.RANDOM;
-        case 'PATTERN': return PlayMode.PATTERN;
+        case 'SINGLE': return PlayMode.SINGLE;
     }
     return PlayMode.CHORD;
 }
@@ -116,7 +117,7 @@ export function getArpeggios(notes: number[], mode: PlayMode): number[][] {
             ];
         case PlayMode.RANDOM:
             return [shuffle(notes.slice())];
-        case PlayMode.PATTERN:
+        case PlayMode.SINGLE:
             return [notes];
         default:
             return [notes];

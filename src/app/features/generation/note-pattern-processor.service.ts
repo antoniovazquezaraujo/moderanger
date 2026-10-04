@@ -31,9 +31,8 @@ export class NotePatternProcessorService {
    * Check if pattern mode should be applied
    */
   shouldApplyPattern(player: Player): boolean {
-    return player.playMode === PlayMode.PATTERN &&
-           !!player.currentPattern &&
-           player.currentPattern.length > 0;
+    // El patrón es independiente del playmode: se aplica siempre que exista.
+    return !!player.currentPattern && player.currentPattern.length > 0;
   }
 
   /**

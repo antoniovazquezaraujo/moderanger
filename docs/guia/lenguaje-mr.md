@@ -305,7 +305,7 @@ La sección `commands` lleva **un comando por línea**; el orden de las líneas 
 | `OCT` | Octava base de las notas | entero o `$variable` | `OCT 2` |
 | `SCALE` | Escala activa | `WHITE`, `BLUE`, `RED`, `BLACK`, `PENTA`, `TONES`, `FULL` o `$variable` | `SCALE BLACK` |
 | `GAP` | Salto (en grados de la escala) entre las notas del acorde | entero o `$variable` | `GAP 2` |
-| `PLAYMODE` | Cómo se tocan los grados: acorde, arpegios, aleatorio, patrón… | `CHORD`, `ASCENDING`, `DESCENDING`, `ASC_DESC`, `DESC_ASC`, `EVEN_ASC_ODD_ASC`, `EVEN_ASC_ODD_DESC`, `EVEN_DESC_ODD_DESC`, `EVEN_DESC_ODD_ASC`, `ODD_ASC_EVEN_ASC`, `ODD_ASC_EVEN_DESC`, `ODD_DESC_EVEN_DESC`, `ODD_DESC_EVEN_ASC`, `RANDOM`, `PATTERN` o `$variable` | `PLAYMODE ASCENDING` |
+| `PLAYMODE` | Cómo se tocan los grados: acorde, arpegios, aleatorio, nota suelta… | `CHORD`, `ASCENDING`, `DESCENDING`, `ASC_DESC`, `DESC_ASC`, `EVEN_ASC_ODD_ASC`, `EVEN_ASC_ODD_DESC`, `EVEN_DESC_ODD_DESC`, `EVEN_DESC_ODD_ASC`, `ODD_ASC_EVEN_ASC`, `ODD_ASC_EVEN_DESC`, `ODD_DESC_EVEN_DESC`, `ODD_DESC_EVEN_ASC`, `RANDOM`, `SINGLE` o `$variable` | `PLAYMODE ASCENDING` |
 | `WIDTH` | Notas añadidas al acorde a partir de la raíz (además de ella) | entero o `$variable` | `WIDTH 3` |
 | `INV` | Número de notas del acorde que suben una octava (inversión) | entero o `$variable` | `INV 1` |
 | `KEY` | Transposición en semitonos | entero o `$variable` | `KEY 0` |
@@ -313,12 +313,13 @@ La sección `commands` lleva **un comando por línea**; el orden de las líneas 
 | `SHIFTSIZE` | Número de notas afectadas por el desplazamiento | entero o `$variable` | `SHIFTSIZE 3` |
 | `SHIFTVALUE` | Octavas que se suman a las notas desplazadas | entero o `$variable` | `SHIFTVALUE 1` |
 | `PATTERN_GAP` | Separación de la decoración del patrón | entero o `$variable` | `PATTERN_GAP 1` |
-| `PATTERN` | Melodía del patrón (sublenguaje de notas completo, en una sola línea) o una variable string con la melodía | melodía o `$variable` | `PATTERN 4t:0 4t:-1 4t:3` |
+| `PATTERN` | Melodía del patrón (sublenguaje completo, una línea); se aplica **antes** del playmode, así se combina con acordes/arpegios; o una variable string | melodía o `$variable` | `PATTERN 4t:0 4t:-1 4t:3` |
 
 Notas:
 
 - `INVERSION` se acepta al leer como alias de `INV`, pero la forma canónica (la que se guarda) es siempre `INV`.
-- `PATTERN` se usa con `PLAYMODE PATTERN` y su melodía se escribe en una línea (duraciones, silencios y grupos admitidos).
+- `PLAYMODE SINGLE` toca cada nota suelta, sin acorde ni arpegio (útil con `PATTERN`).
+- `PATTERN` es **independiente del playmode**: si existe, expande cada nota antes de que el playmode genere su sonido (acorde, arpegio, aleatorio…). Si no hay `PATTERN`, nada cambia. Su melodía se escribe en una línea (duraciones, silencios y grupos admitidos).
 - En un comando numérico, la `$variable` se resuelve al reproducir; debe contener un número.
 - `SHIFTSTART`, `SHIFTSIZE`, `SHIFTVALUE` y `PATTERN_GAP` forman parte del formato (se leen y se guardan), pero el motor de generación actual no aplica el desplazamiento ni la decoración: hoy no cambian el sonido. Se mantienen como campos heredados ([limitaciones](#10-limitaciones-conocidas-de-la-v1)).
 
@@ -591,7 +592,7 @@ part Piano
     commands
       OCT $oct
       SCALE $scale
-      PLAYMODE PATTERN
+      PLAYMODE SINGLE
       PATTERN 4t:0 4t:2 4t:-1
       PATTERN_GAP 1
     operations
@@ -648,7 +649,7 @@ part Ritmos
     notes
       4n:0
     commands
-      PLAYMODE PATTERN
+      PLAYMODE SINGLE
       PATTERN 4n:( 0 2 ) 8n:s 4t:-1 4t:$grado
 ```
 

@@ -9,5 +9,5 @@ part Ritmos
     notes
       4n:0
     commands
-      PLAYMODE PATTERN
+      PLAYMODE SINGLE
       PATTERN 4n:( 0 2 ) 8n:s 4t:-1 4t:$grado
