@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, OnDestroy } from '@angular/core';
 import { SingleNote, NoteDuration } from '../../model/melody';
 
 @Component({
@@ -6,9 +6,10 @@ import { SingleNote, NoteDuration } from '../../model/melody';
     template: `
         <div class="note-item" [class.selected]="isSelected" (click)="onClick()">
             <!-- Duración a la izquierda del valor; oculta si es heredada.
-                 Con hover se muestra como "=" y se puede cambiar con la rueda. -->
+                 Al hacer hover, la zona queda activa para cambiarla con la rueda. -->
             <div class="note-duration"
                  [class.duration-explicit]="!!note.duration"
+                 [class.wheeling]="isWheelingDuration"
                  (wheel)="onWheelDuration($event)"
                  title="Rueda: cambia la duración (heredada del grupo si no tiene)">
                 <span class="duration-value">{{ note.duration }}</span>
@@ -72,6 +73,11 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             visibility: visible;
         }
 
+        /* Mientras se rueda, el cursor no tapa el número que está cambiando. */
+        .note-duration.wheeling {
+            cursor: none;
+        }
+
         .note-visual .note-value {
            font-size: 1.2em; 
            font-weight: bold;
@@ -85,17 +91,9 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             color: #7b1fa2;
             font-size: 0.9em;
         }
-        
-        .note-duration {
-            font-size: 0.8em;
-            color: #666;
-            cursor: ns-resize;
-            padding: 0 2px;
-            text-align: right;
-        }
     `]
 })
-export class MelodyNoteComponent {
+export class MelodyNoteComponent implements OnDestroy {
     @Input() note!: SingleNote;
     @Input() isSelected = false;
     
@@ -103,8 +101,20 @@ export class MelodyNoteComponent {
     @Output() toggleSilence = new EventEmitter<void>();
     @Output() changeDuration = new EventEmitter<number>();
     @Output() changeValue = new EventEmitter<number>();
+
+    /** True durante ~700 ms tras girar la rueda sobre la duración. */
+    isWheelingDuration = false;
+
+    private wheelCursorTimer: ReturnType<typeof setTimeout> | null = null;
     
     constructor(public elementRef: ElementRef) {}
+
+    ngOnDestroy(): void {
+        if (this.wheelCursorTimer !== null) {
+            clearTimeout(this.wheelCursorTimer);
+            this.wheelCursorTimer = null;
+        }
+    }
 
     /**
      * Texto del valor de la nota en el editor: `$var` para referencias,
@@ -137,6 +147,7 @@ export class MelodyNoteComponent {
     
     onWheelDuration(event: WheelEvent): void {
         event.preventDefault();
+        this.hideCursorWhileWheeling();
         this.changeDuration.emit(event.deltaY > 0 ? 1 : -1);
     }
 
@@ -144,4 +155,16 @@ export class MelodyNoteComponent {
         event.preventDefault();
         this.changeValue.emit(event.deltaY > 0 ? -1 : 1);
     }
-} 
+
+    /** Oculta el cursor un instante para que se vea el número mientras se rueda. */
+    private hideCursorWhileWheeling(): void {
+        this.isWheelingDuration = true;
+        if (this.wheelCursorTimer !== null) {
+            clearTimeout(this.wheelCursorTimer);
+        }
+        this.wheelCursorTimer = setTimeout(() => {
+            this.isWheelingDuration = false;
+            this.wheelCursorTimer = null;
+        }, 700);
+    }
+}
