@@ -1,8 +1,8 @@
 # Validación manual de la v1 (`.mr` + app)
 
 - **Estado:** checklist de aceptación de la v1 congelada (2026-10-03).
-- **Objetivo:** comprobar a mano, sobre la app real, que el lenguaje `.mr`, la GUI, el guardado/carga, el tempo y las variables funcionan como describe la [guía del lenguaje](./lenguaje-mr.md).
-- **Basada en:** los E2E de las fases 2 y 3 y de las rondas de pulido/consolidación (`docs/analisis/mr-fase2-vista-texto.md`, `mr-fase3-guardar-cargar.md`, `pulido-bpm-variables.md`, `saneo-bloque-b.md`).
+- **Objetivo:** comprobar a mano, sobre la app real, que el lenguaje `.mr`, la GUI, el guardado/carga, el tempo y las variables funcionan como describe la [guía del lenguaje](../../user/manual.md).
+- **Basada en:** los E2E de las fases 2 y 3 y de las rondas de pulido/consolidación (`docs/developer/analysis/mr-fase2-vista-texto.md`, `mr-fase3-guardar-cargar.md`, `pulido-bpm-variables.md`, `saneo-bloque-b.md`).
 - **Duración estimada:** 30–40 minutos.
 - **Criterio de aprobación:** todos los casos marcados, o incidencia anotada en el registro final con su reproducción.
 
@@ -233,4 +233,4 @@ carga-invalida.mr:3:5  error: 'bpm' debe estar entre 30 y 240 (recibido 20)
 ### Otros ejemplos reutilizables
 
 - Corpus canónico: `src/app/model/mr/__tests__/corpus/` (`semilla.mr`, `canon-de-particulas.mr`, `orbita.mr`, `laboratorio.mr`, `panel-de-control.mr`, `patrones.mr`, `estructura.mr`, `vacio.mr`).
-- Ejemplos de la guía: [`lenguaje-mr.md`](./lenguaje-mr.md) (§11).
+- Ejemplos de la guía: [`lenguaje-mr.md`](../../user/manual.md) (§11).

@@ -1,0 +1,54 @@
+name: Bug report
+description: Something is not working as expected
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in as much as you can.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Release tag (see the Releases page) or commit.
+      placeholder: "v0.1.0 / abc1234"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and operating system.
+      placeholder: "Firefox 130 / CachyOS"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs, screenshots or `.mr` file (optional)
+      description: Paste logs or drag screenshots here. If it is song-related, attach the `.mr` file.
+    validations:
+      required: false

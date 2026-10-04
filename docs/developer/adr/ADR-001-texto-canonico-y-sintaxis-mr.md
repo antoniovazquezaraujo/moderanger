@@ -6,9 +6,9 @@
 - **Decisores:** DANI (producto) + ROBER (implementación)
 - **Relacionado:**
   - `ideas.adoc`, tramo 1300–1825 (visión de lenguaje tipo YAML, "Carmen", decoración, operaciones)
-  - `docs/analisis/BACKLOG.md` (tarea #1: parser texto → canción a medias)
-  - `docs/audits/ramas-pendientes-vs-main.md` (estado de `parseSong`)
-  - `docs/diseno/propuesta-sintaxis-mr.md` (propuesta detallada, la estrella de la revisión)
+  - `docs/developer/analysis/BACKLOG.md` (tarea #1: parser texto → canción a medias)
+  - `docs/developer/audits/ramas-pendientes-vs-main.md` (estado de `parseSong`)
+  - `docs/developer/design/propuesta-sintaxis-mr.md` (propuesta detallada, la estrella de la revisión)
 
 ---
 
@@ -43,7 +43,7 @@ Se decide (aprobado por el usuario el 2026-10-03):
    - **Fase 1:** gramática completa, `parseSong`, serializador, round-trip, fichero `.mr` (lectura/escritura).
    - **Fase 2:** vista de texto en la app (editar/aplicar), conviviendo con la GUI.
    - **Fase 3:** texto canónico (guardar = serializar; cargar = parsear; sin formatos propietarios intermedios).
-4. **La representación detallada de la sintaxis se documenta en `docs/diseno/propuesta-sintaxis-mr.md`** y se somete a revisión antes de tocar código.
+4. **La representación detallada de la sintaxis se documenta en `docs/developer/design/propuesta-sintaxis-mr.md`** y se somete a revisión antes de tocar código.
 5. **Nada de lo aquí decidido se implementa hasta que el usuario apruebe la sintaxis** (preguntas abiertas al final de la propuesta).
 
 ## 3. Alternativas consideradas
@@ -102,8 +102,8 @@ Se decide (aprobado por el usuario el 2026-10-03):
 
 ## 7. Referencias
 
-- `docs/diseno/propuesta-sintaxis-mr.md` — propuesta detallada y preguntas abiertas.
+- `docs/developer/design/propuesta-sintaxis-mr.md` — propuesta detallada y preguntas abiertas.
 - `ideas.adoc` 1300–1825 — visión de lenguaje, decoración, operaciones y variables.
-- `docs/analisis/BACKLOG.md` #1 — parser a medias.
-- `docs/audits/ramas-pendientes-vs-main.md` — estado de `parseSong` y ramas descartadas.
+- `docs/developer/analysis/BACKLOG.md` #1 — parser a medias.
+- `docs/developer/audits/ramas-pendientes-vs-main.md` — estado de `parseSong` y ramas descartadas.
 - Código de partida: `src/app/model/ohm.parser.ts`, `grammar.semantics.ts`, `command.ts`, `operation.ts`, `variable.context.ts`, `block.ts`, `part.ts`, `song.ts`.

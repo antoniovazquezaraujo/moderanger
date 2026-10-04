@@ -4,7 +4,7 @@
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Rama:** `feat/mr-fase3` (Fase 3 del ADR-001)
 - **Estado:** implementada; pendiente de revisión de DANI
-- **Referencias:** `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md` (§5, Fase 3), `docs/analisis/mr-fase2-vista-texto.md`, `docs/analisis/sintaxis-mr-implementada.md`
+- **Referencias:** `docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md` (§5, Fase 3), `docs/developer/analysis/mr-fase2-vista-texto.md`, `docs/developer/analysis/sintaxis-mr-implementada.md`
 - **Alcance:** guardar = serializar el estado actual y descargar un `.mr`; cargar = elegir fichero, parsear/validar y reemplazar la canción. **No** incluye persistencia automática (localStorage) ni diálogo "Guardar como" del navegador.
 
 ---
@@ -43,7 +43,7 @@ texto canónico `.mr`** (ADR-001 §2.3).
 > **Actualizado en la ronda de pulido (2026-10-03, rama `fix/pulido-mr`):** el
 > bpm pasó a vivir en `Song.bpm` (default 120), lo aplica `SongPlayer` y se edita
 > en la cabecera. `MrMeta.bpm` queda como reflejo en el fichero. Detalle en
-> `docs/analisis/pulido-bpm-variables.md` §2. El texto que sigue refleja la
+> `docs/developer/analysis/pulido-bpm-variables.md` §2. El texto que sigue refleja la
 > decisión original de la Fase 3 y se conserva como histórico.
 
 `Song` no tiene bpm y `SongPlayer._initializePlayback` fija 120 (pendiente heredado
@@ -204,13 +204,13 @@ no un número). Es comportamiento **preexistente** (el preview del melody-editor
 `parseBlockNotes`, que solo resuelve variables numéricas); no afecta a cargar,
 guardar ni al player y no se toca en esta fase. **Resuelto en la ronda de pulido
 (#17):** el editor pinta el token `$motif` y ya no registra ese error; ver
-`docs/analisis/pulido-bpm-variables.md` §3.
+`docs/developer/analysis/pulido-bpm-variables.md` §3.
 
 ## 7. Pendientes y limitaciones
 
 > **Actualización (ronda de pulido, rama `fix/pulido-mr`):** los puntos 1 (bpm al
 > player) y 7 (doble renderizado de partes) quedaron **resueltos**; el detalle
-> está en `docs/analisis/pulido-bpm-variables.md`. Se conservan aquí como
+> está en `docs/developer/analysis/pulido-bpm-variables.md`. Se conservan aquí como
 > histórico de la fase.
 
 1. ~~**El bpm sigue sin aplicarse al player** (`SongPlayer._initializePlayback` fija

@@ -2,9 +2,16 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [develop, main]
   pull_request:
-    branches: [main]
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-and-build:
@@ -12,9 +19,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Angular 13 está EOL: sus dependencias transitivas emiten decenas de
-      # deprecations conocidas (ver BACKLOG #11). Silenciamos ese ruido en CI;
-      # en local se mantienen visibles.
+      # Angular 13 is EOL: its transitive dependencies emit dozens of known
+      # deprecations (see BACKLOG #11). Silenced in CI; kept visible locally.
       NPM_CONFIG_LOGLEVEL: error
       NODE_OPTIONS: --no-deprecation
 
@@ -28,16 +34,16 @@ jobs:
           node-version: '16'
           cache: npm
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Tests unitarios
+      - name: Unit tests
         run: npm test
 
-      # `npm test` no recolecta cobertura; este paso aplica el
-      # `coverageThreshold` de jest.config.js.
-      - name: Cobertura (umbral)
+      # `npm test` does not collect coverage; this step enforces the
+      # `coverageThreshold` from jest.config.js.
+      - name: Coverage (thresholds)
         run: npm run test:cov
 
-      - name: Build de producción
+      - name: Production build
         run: npm run build

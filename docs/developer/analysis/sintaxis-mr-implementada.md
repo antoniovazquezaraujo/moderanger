@@ -4,7 +4,7 @@
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Rama:** `feat/mr-fase1` (Fase 1 del ADR-001)
 - **Estado:** implementada, validada y aprobada por el usuario (2026-10-03); integrada en `main`
-- **Referencias:** `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`, `docs/diseno/propuesta-sintaxis-mr.md` (aprobada), `docs/analisis/BACKLOG.md` (#1 y #3), `docs/analisis/duracion-de-grupos.md`
+- **Referencias:** `docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`, `docs/developer/design/propuesta-sintaxis-mr.md` (aprobada), `docs/developer/analysis/BACKLOG.md` (#1 y #3), `docs/developer/analysis/duracion-de-grupos.md`
 - **Alcance:** gramática, parser, serializador, round-trip, corpus y servicio de fichero. Sin cambios de UI.
 
 ---
@@ -146,4 +146,4 @@ Resultados: **19 suites / 254 tests** en verde (142 de baseline intactos + 112 n
 - Conservación de comentarios (side-channel anclado a nodos; fuera de v1).
 - Grupos multilínea, literales de acorde/arpegio y directivas `@` (fuera de v1 por Q7/Q11).
 - ✅ Limpieza de restos del parser antiguo completada (2026-10-03, rama `chore/mr-cleanup`): retirados `ohm.parser.ts`, `grammar.semantics.ts`, `ohm-js`, `tspeg` y el script `grammar`.
-- ✅ Ejemplos de `docs/diseno/propuesta-sintaxis-mr.md` alineados a la forma canónica (comillas mínimas, grupos `4n:( 0 2 )` y líneas en blanco).
+- ✅ Ejemplos de `docs/developer/design/propuesta-sintaxis-mr.md` alineados a la forma canónica (comillas mínimas, grupos `4n:( 0 2 )` y líneas en blanco).

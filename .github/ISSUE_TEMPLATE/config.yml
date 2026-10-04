@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: User documentation
+    url: https://antoniovazquezaraujo.github.io/moderanger/
+    about: Manual of the .mr language, syntax cheatsheet and usage guide.
+  - name: How to contribute
+    url: https://github.com/antoniovazquezaraujo/moderanger/blob/develop/CONTRIBUTING.md
+    about: Build, tests and pull-request workflow.

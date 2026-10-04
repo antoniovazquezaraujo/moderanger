@@ -1,25 +1,28 @@
 # Mode Ranger
 
-Editor de armonía con GUI de componentes (partes, bloques, editor de melodía) y un formato de texto canónico, **`.mr`**, para guardar y cargar canciones. El texto es la representación canónica de la canción; la GUI es su vista guiada.
+Harmony studio with a component-based GUI (parts, blocks, melody editor) and a canonical text format, **`.mr`**, to save and load songs. The text is the canonical representation of a song; the GUI is its guided view.
 
-Estado: **lenguaje `.mr` v1 congelado** (2026-10-03, `version 1`).
+[![CI](https://github.com/antoniovazquezaraujo/moderanger/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/antoniovazquezaraujo/moderanger/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-0078D4)](https://antoniovazquezaraujo.github.io/moderanger/)
+
+Status: **`.mr` language v1** (2026-10-04, `version 1`).
 
 ## Quickstart
 
-Requiere **Node 16** (por ejemplo con nvm) y npm 8.
+Requires **Node 16** (for example via nvm) and npm 8.
 
 ```sh
-export PATH="$HOME/.nvm/versions/node/v16.20.2/bin:$PATH"   # Node 16 vía nvm
+export PATH="$HOME/.nvm/versions/node/v16.20.2/bin:$PATH"   # Node 16 via nvm
 
-npm ci        # instala dependencias
-npm start     # arranca la app en http://localhost:4200
-npm test      # suite Jest (núcleo, sin navegador)
-npm run build # build de producción
+npm ci        # install dependencies
+npm start     # run the app on http://localhost:4200
+npm test      # Jest suite (core, no browser)
+npm run build # production build
 ```
 
-## El lenguaje `.mr`
+## The `.mr` language
 
-Una canción mínima:
+A minimal song:
 
 ```mr
 song Semilla
@@ -34,25 +37,36 @@ part Piano
       4n:2
 ```
 
-Se edita en la GUI, en la vista avanzada de texto (botón `.mr`) o con cualquier editor; se guarda y se carga como fichero `.mr` (UTF-8/LF, sin ids volátiles, apto para diffs de git). Los ejemplos completos de la guía se validan en cada `npm test`.
+Edit it in the GUI, in the advanced text view (`.mr` button) or with any editor; songs are saved and loaded as `.mr` files (UTF-8/LF, no volatile ids, git-diff friendly). Every complete example in the manual is validated on each `npm test`.
 
-## Documentación
+## Documentation
 
-- **[Guía del lenguaje `.mr` v1](docs/guia/lenguaje-mr.md)** — referencia de usuario: estructura, notas, comandos, operaciones, variables, reproducción, guardar/cargar y limitaciones.
-- **[Validación manual v1](docs/guia/validacion-manual-v1.md)** — checklist paso a paso (GUI, vista `.mr`, fichero, BPM live, repeats, variables, anidados, NeoVim).
-- **[ADR-001: texto canónico y sintaxis `.mr`](docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md)** — decisión y consecuencias.
-- **[Propuesta de sintaxis](docs/diseno/propuesta-sintaxis-mr.md)** — especificación detallada aprobada.
-- **[Sintaxis implementada y round-trip](docs/analisis/sintaxis-mr-implementada.md)** — contrato del parser/serializador y corpus.
-- **[Backlog](docs/analisis/BACKLOG.md)** — prioridades abiertas y estado del proyecto.
-- **[Soporte (Neo)Vim](editors/nvim/README.md)** — `ftdetect`, `syntax` y `ftplugin` para `.mr`.
-- **[Guía de arquitectura](docs/analisis/MODERANGER-ARCHITECTURE-GUIDE.md)** — visión técnica del proyecto.
+- 🌐 **[User documentation](https://antoniovazquezaraujo.github.io/moderanger/)** — language manual, syntax cheatsheet and usage guide.
+- 📘 **[`.mr` language manual](docs/user/manual.md)** — full reference (also on the published site).
+- 🧑‍💻 **[Developer wiki](docs/developer/README.md)** — architecture, ADRs, analysis, audits, design and release process (in Spanish).
+- ✅ **[Manual validation v1](docs/developer/testing/validacion-manual-v1.md)** — step-by-step checklist.
+- 🗒️ **[Changelog](CHANGELOG.md)** — changes per version.
+- 🤝 **[Contributing](CONTRIBUTING.md)** — branch workflow, PRs and conventions.
+- 💚 **(Neo)Vim support](editors/nvim/README.md)** — `ftdetect`, `syntax` and `ftplugin` for `.mr`.
 
-## Estructura rápida
+## Workflow (summary)
 
-| Ruta | Contenido |
+- `develop` is the integration branch (protected): work happens in `feature/...` or `fix/...` branches and **PRs**.
+- `main` reflects released versions; deployments are triggered with a `v*` tag (see [`docs/developer/release/Release_Process.md`](docs/developer/release/Release_Process.md)).
+- CI (`tests + build`) is required on every PR and coverage has its own threshold.
+- User documentation is published automatically on every push to `develop`.
+
+## Project layout
+
+| Path | Content |
 |---|---|
-| `src/app/model/mr/` | Parser, serializador, errores, fichero y contrato del `.mr`. |
-| `src/app/model/mr/__tests__/corpus/` | Canciones `.mr` canónicas usadas por los tests. |
-| `src/app/components/` | GUI (song-editor, parts, blocks, melody-editor, vista `.mr`). |
-| `docs/` | Guías, ADR, análisis, diseño y auditorías. |
-| `editors/nvim/` | Plugin opt-in de resaltado/indentación para `.mr`. |
+| `src/app/model/mr/` | Parser, serializer, errors, file service and the `.mr` contract. |
+| `src/app/model/mr/__tests__/corpus/` | Canonical `.mr` songs used by the tests. |
+| `src/app/components/` | GUI (song editor, parts, blocks, melody editor, `.mr` view). |
+| `docs/user/` | Public documentation (published to GitHub Pages). |
+| `docs/developer/` | Internal wiki: ADR, analysis, audits, design, release (Spanish). |
+| `editors/nvim/` | Opt-in syntax/indent plugin for `.mr`. |
+
+## License
+
+[Apache-2.0](LICENSE).

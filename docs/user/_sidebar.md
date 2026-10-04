@@ -1,0 +1,3 @@
+- [Home](index.md)
+- [`.mr` manual](manual.md)
+- [Syntax cheatsheet](cheatsheet.md)
