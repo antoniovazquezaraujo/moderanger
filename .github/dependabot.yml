@@ -24,3 +24,16 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "primeflex"
         update-types: ["version-update:semver-major"]
+      # Toolchain majors are pinned to the Angular 13 / Node 16 stack.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "ts-jest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tone"
+        update-types: ["version-update:semver-major"]
