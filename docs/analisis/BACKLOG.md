@@ -32,6 +32,7 @@
 | 21 | **Expansión de melodías variables** | Feature futura: una `$variable` string (`$motif = "4t:0"`) podrá expandirse en reproducción como secuencia de eventos (hoy se omite con un silencio de su duración, #19). Implica definir la semántica de duración/reemplazo y el caso de grupos. | M | Medio | `docs/analisis/pulido-bpm-variables.md` §8.3 |
 | 22 | ✅ **Guía del lenguaje `.mr` v1** | **Resuelto (2026-10-03, rama `chore/consolidacion-c`):** guía de usuario de la v1 congelada (`docs/guia/lenguaje-mr.md`), checklist de validación manual (`docs/guia/validacion-manual-v1.md`) y README raíz con quickstart; los 16 ejemplos ` ```mr ` de ambos documentos se validan con Jest (`mr.docs-guia.jest.spec.ts`: parseo + idempotencia). | S | Bajo | `docs/guia/lenguaje-mr.md`, `docs/guia/validacion-manual-v1.md` |
 | 23 | ✅ **Variables string en el sidebar** | **Resuelto (2026-10-04):** el sidebar lista y edita variables de tipo string (melodías) además de número/escala/playmode; limitación retirada de guía y checklist. | S | Bajo | `docs/guia/lenguaje-mr.md` |
+| 24 | **Duración `m` (compás): inconsistencia aparcada** | La gramática acepta `m` (`1m`, `120m`…) pero el motor no lo valida (lista sin `m`): con `SINGLE` suena, con `CHORD`/arpegios acaba en silencio. Decisión pendiente: habilitarlo de verdad o rechazarlo con error claro. Idea relacionada descartada por ahora (con solo piano, notas ultra largas no interesan): token “hasta el final”/tie para pedales. | S | Bajo | `docs/guia/lenguaje-mr.md` |
 
 ## Ramas archivadas (tags)
 
