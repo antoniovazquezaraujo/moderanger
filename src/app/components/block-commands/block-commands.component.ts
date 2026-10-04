@@ -319,6 +319,16 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         this.cdr.detectChanges(); 
     }
 
+    /**
+     * `trackBy` por nombre de variable: al ejecutarse operaciones durante la
+     * reproducción, `availableVariables` se reconstruye; sin `trackBy` el
+     * navegador recreaba las `<option>` y el select perdía la selección
+     * (mostraba otra variable aunque el modelo no hubiera cambiado).
+     */
+    trackByVariable(_index: number, variable: VariableOption): string {
+        return variable.value;
+    }
+
     onCommandTypeChange(command: Command): void {
         if (command.type === CommandType.PATTERN) {
              command.isVariable = false;

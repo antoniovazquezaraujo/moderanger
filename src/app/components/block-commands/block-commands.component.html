@@ -119,7 +119,7 @@
                     (ngModelChange)="onVariableSelected($event)"
                     [attr.data-operation-variable]="operation.variableName">
                     <option value="" disabled>Select variable</option>
-                    <option *ngFor="let variable of availableVariables" 
+                    <option *ngFor="let variable of availableVariables; trackBy: trackByVariable" 
                             [value]="variable.value">
                         {{variable.label}}
                     </option>
