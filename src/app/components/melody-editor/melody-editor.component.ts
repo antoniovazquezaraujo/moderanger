@@ -459,25 +459,16 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       const currentElement = findElementRecursive(targetId, this.elements);
       if (!currentElement) return;
 
-      // Si la nota no tiene duración explícita (heredada), el ciclo parte de
-      // la duración del grupo padre (o de la del editor): girar la rueda una
-      // vez no debería saltar a `1n`/`8t`.
+      // Ciclo con el estado "en blanco" incluido: seguir girando más allá de
+      // `1n` vuelve a dejar la nota sin duración (heredada del grupo).
+      const cycle: Array<NoteDuration | undefined> = [undefined, ...this.durations];
       const currentDuration =
           currentElement.duration ??
           this.findParentGroup(targetId, this.elements)?.duration ??
           this.defaultDuration;
-      let newDuration: NoteDuration;
+      const currentIndex = Math.max(cycle.indexOf(currentDuration), 0);
+      const newDuration = cycle[(currentIndex - 1 + cycle.length) % cycle.length];
 
-      // Simplified logic: Always cycle through defined durations
-      const currentIndex = this.durations.indexOf(currentDuration); 
-      if (currentIndex === -1) { // If current duration isn't in the list, start from first
-           newDuration = this.durations[this.durations.length -1]; // Cycle up wraps to last
-      } else if (currentIndex === 0) {
-          newDuration = this.durations[this.durations.length - 1]; // Wrap around
-      } else {
-          newDuration = this.durations[currentIndex - 1]; // Cycle up
-      }
-      
       this.melodyEditorService.updateNote(targetId, { duration: newDuration });
       this.emitNotesChange();
   }
@@ -501,24 +492,15 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       const currentElement = findElementRecursive(targetId, this.elements);
       if (!currentElement) return;
 
-      // Si la nota no tiene duración explícita (heredada), el ciclo parte de
-      // la duración del grupo padre (o de la del editor): girar la rueda una
-      // vez no debería saltar a `1n`/`8t`.
+      // Ciclo con el estado "en blanco" incluido: seguir girando más allá de
+      // `8t` vuelve a dejar la nota sin duración (heredada del grupo).
+      const cycle: Array<NoteDuration | undefined> = [undefined, ...this.durations];
       const currentDuration =
           currentElement.duration ??
           this.findParentGroup(targetId, this.elements)?.duration ??
           this.defaultDuration;
-      let newDuration: NoteDuration;
-
-       // Simplified logic: Always cycle through defined durations
-       const currentIndex = this.durations.indexOf(currentDuration);
-       if (currentIndex === -1) { // If current duration isn't in the list, start from first
-            newDuration = this.durations[0];
-       } else if (currentIndex === this.durations.length - 1) {
-           newDuration = this.durations[0]; // Wrap around
-       } else {
-           newDuration = this.durations[currentIndex + 1]; // Cycle down
-       }
+      const currentIndex = Math.max(cycle.indexOf(currentDuration), 0);
+      const newDuration = cycle[(currentIndex + 1) % cycle.length];
 
       this.melodyEditorService.updateNote(targetId, { duration: newDuration });
       this.emitNotesChange();

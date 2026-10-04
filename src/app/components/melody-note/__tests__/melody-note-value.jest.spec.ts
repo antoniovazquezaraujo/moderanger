@@ -90,4 +90,16 @@ describe('MelodyNoteComponent · rueda del ratón', () => {
 
     expect(durations).toEqual([1]);
   });
+
+  it('oculta el cursor temporalmente al rodar la duración', () => {
+    jest.useFakeTimers();
+    const component = componentFor(4);
+
+    component.onWheelDuration(wheelEvent(1));
+    expect(component.isWheelingDuration).toBe(true);
+
+    jest.advanceTimersByTime(700);
+    expect(component.isWheelingDuration).toBe(false);
+    jest.useRealTimers();
+  });
 });
