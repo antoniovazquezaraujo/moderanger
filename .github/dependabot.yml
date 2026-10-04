@@ -7,3 +7,18 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
+    # Angular 13 is EOL: only patches are welcome until the upgrade project
+    # (tracked in the backlog) is tackled.
+    ignore:
+      - dependency-name: "@angular/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "zone.js"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@angular/cdk"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "primeng"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "primeicons"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "primeflex"
+        update-types: ["version-update:semver-major"]
