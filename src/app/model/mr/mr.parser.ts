@@ -598,6 +598,12 @@ class MrDocumentParser {
       }
       throw errorAt(line, line.indent + 1, `${keyword} requiere un valor`);
     }
+    // Cualquier comando (incluido PATTERN) admite una variable como valor.
+    if (/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(rest)) {
+      const variableCommand = new Command({ type });
+      variableCommand.setVariable(rest.slice(1));
+      return variableCommand;
+    }
     if (type === CommandType.PATTERN) {
       const events = parseNoteEvents(rest, { line: line.number, column: restColumn });
       const melody = events.map(printNoteEvent).join(' ');

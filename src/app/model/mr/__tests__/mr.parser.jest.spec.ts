@@ -5,6 +5,7 @@ import { PlayMode } from '../../play.mode';
 import { VariableContext } from '../../variable.context';
 import { MrParseError } from '../mr.errors';
 import { parseSong } from '../mr.parser';
+import { serializeSong } from '../mr.serializer';
 import { SongDocument } from '../mr.types';
 
 function expectParseError(text: string): MrParseError {
@@ -474,5 +475,30 @@ describe('parseSong: ejemplo inválido §11.6', () => {
     expect(error.format('roto.mr')).toBe(
       `roto.mr:6:7  error: PLAYMODE requiere un valor (CHORD, ASCENDING, …) o una variable $válida`
     );
+  });
+});
+
+describe('PATTERN con variable', () => {
+  it('acepta PATTERN $variable y lo serializa como variable', () => {
+    const text = [
+      'song P',
+      'version 1',
+      '',
+      'part Piano',
+      '  block B',
+      '    notes',
+      '      4n:0',
+      '    commands',
+      '      PATTERN $motif',
+      ''
+    ].join('\n');
+
+    const doc = parseSong(text);
+    const command = doc.song.parts[0].blocks[0].commands[0];
+
+    expect(command.type).toBe(CommandType.PATTERN);
+    expect(command.isVariable).toBe(true);
+    expect(command.getVariableName()).toBe('motif');
+    expect(serializeSong(doc)).toContain('PATTERN $motif');
   });
 });

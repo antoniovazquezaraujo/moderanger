@@ -313,7 +313,7 @@ La sección `commands` lleva **un comando por línea**; el orden de las líneas 
 | `SHIFTSIZE` | Número de notas afectadas por el desplazamiento | entero o `$variable` | `SHIFTSIZE 3` |
 | `SHIFTVALUE` | Octavas que se suman a las notas desplazadas | entero o `$variable` | `SHIFTVALUE 1` |
 | `PATTERN_GAP` | Separación de la decoración del patrón | entero o `$variable` | `PATTERN_GAP 1` |
-| `PATTERN` | Melodía literal (sublenguaje de notas completo, en una sola línea; **no** admite `$variable`) | melodía | `PATTERN 4t:0 4t:-1 4t:3` |
+| `PATTERN` | Melodía del patrón (sublenguaje de notas completo, en una sola línea) o una variable string con la melodía | melodía o `$variable` | `PATTERN 4t:0 4t:-1 4t:3` |
 
 Notas:
 
@@ -494,15 +494,14 @@ En la vista `.mr`, los errores aparecen bajo el texto con su `línea, columna`; 
 1. **Variables string como nota individual.** `8t:$motif` (con `$motif` string) suena como silencio de `8t`; no se expande el patrón. `notes $motif` en un bloque completo sí se sustituye al reproducir. La expansión de patrones variables está en el backlog (_Expansión de melodías variables_).
 2. **Repeat en caliente.** Cambiar las repeticiones con la reproducción en curso se aplica en el siguiente Play.
 3. **Comentarios.** No sobreviven al aplicar/guardar desde la app (sí en el fichero si lo editas a mano y no lo reescribes).
-4. **PATTERN.** En una sola línea y sin `$variable` como valor.
-5. **Grupos multilínea.** No se admiten en v1; el grupo debe abrirse y cerrarse en su línea.
-6. **Acordes y arpegios literales.** No se escriben en el texto; los genera `PLAYMODE` a partir de grados, escala y comandos.
-7. **Sidebar de variables.** Lista y edita los cuatro tipos (número, escala, playmode y string). Las variables string se editan como texto plano.
-8. **Comandos heredados sin efecto audible.** `SHIFTSTART`, `SHIFTSIZE`, `SHIFTVALUE` y `PATTERN_GAP` se leen y se guardan, pero el motor actual no aplica desplazamiento ni decoración; hoy no cambian el sonido.
-9. **Instrumentos.** Solo `PIANO` en v1.
-10. **`pulse` y `beatsPerBar`.** No se serializan.
-11. **Un error de parseo por vez.** El parser se detiene en el primer error; el diálogo está preparado para pintar más.
-12. **Sin autoguardado ni "Guardar como".** El `.mr` es el único formato y el nombre del fichero se deriva del nombre de la canción.
+4. **Grupos multilínea.** No se admiten en v1; el grupo debe abrirse y cerrarse en su línea.
+5. **Acordes y arpegios literales.** No se escriben en el texto; los genera `PLAYMODE` a partir de grados, escala y comandos.
+6. **Sidebar de variables.** Lista y edita los cuatro tipos (número, escala, playmode y string). Las variables string se editan como texto plano.
+7. **Comandos heredados sin efecto audible.** `SHIFTSTART`, `SHIFTSIZE`, `SHIFTVALUE` y `PATTERN_GAP` se leen y se guardan, pero el motor actual no aplica desplazamiento ni decoración; hoy no cambian el sonido.
+8. **Instrumentos.** Solo `PIANO` en v1.
+9. **`pulse` y `beatsPerBar`.** No se serializan.
+10. **Un error de parseo por vez.** El parser se detiene en el primer error; el diálogo está preparado para pintar más.
+11. **Sin autoguardado ni "Guardar como".** El `.mr` es el único formato y el nombre del fichero se deriva del nombre de la canción.
 
 ---
 

@@ -151,4 +151,31 @@ describe('Command.execute', () => {
 
     expect(player.density).toBe(3);
   });
+
+  it('PATTERN variable resuelve la melodía desde VariableContext', () => {
+    const player = createFakePlayer();
+    VariableContext.setValue('motif', '4t:0 4t:2');
+    const command = new Command({ type: CommandType.PATTERN });
+    command.setVariable('motif');
+
+    command.execute(player);
+
+    const pattern = player.currentPattern as Array<{ type: string; note?: number; duration?: string }>;
+    expect(pattern).toHaveLength(2);
+    expect(pattern[0]).toMatchObject({ type: 'note', note: 0, duration: '4t' });
+    expect(pattern[1]).toMatchObject({ type: 'note', note: 2, duration: '4t' });
+  });
+
+  it('PATTERN variable sin definir deja currentPattern a null sin ruido', () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const player = createFakePlayer();
+    const command = new Command({ type: CommandType.PATTERN });
+    command.setVariable('noExiste');
+
+    command.execute(player);
+
+    expect(player.currentPattern).toBeNull();
+    expect(error).not.toHaveBeenCalled();
+    error.mockRestore();
+  });
 });

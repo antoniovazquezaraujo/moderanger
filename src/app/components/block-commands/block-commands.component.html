@@ -19,7 +19,7 @@
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
                                 <option value="" disabled>Select PlayMode variable</option>
-                                <option *ngFor="let variable of getFilteredVariables(command)" 
+                                <option *ngFor="let variable of getFilteredVariables(command); trackBy: trackByVariable" 
                                         [value]="variable.value">
                                     {{variable.label}}
                                 </option>
@@ -38,7 +38,7 @@
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
                                 <option value="" disabled>Select Scale variable</option>
-                                <option *ngFor="let variable of getFilteredVariables(command)" 
+                                <option *ngFor="let variable of getFilteredVariables(command); trackBy: trackByVariable" 
                                         [value]="variable.value">
                                     {{variable.label}}
                                 </option>
@@ -52,11 +52,24 @@
                     </ng-container>
 
                     <ng-container *ngSwitchCase="commandTypes.PATTERN">
-                        <app-melody-editor 
-                            [notes]="getPatternValueAsString(command)" 
-                            [defaultDuration]="currentDefaultDuration"
-                            (notesChange)="command.value = $event">
-                        </app-melody-editor>
+                        <ng-container *ngIf="command.isVariable; else patternLiteral">
+                            <select class="command-type"
+                                [ngModel]="getSelectedValue(command)"
+                                (ngModelChange)="handleValueInput($event, command)">
+                                <option value="" disabled>Select Pattern variable</option>
+                                <option *ngFor="let variable of getFilteredVariables(command); trackBy: trackByVariable"
+                                        [value]="variable.value">
+                                    {{variable.label}}
+                                </option>
+                            </select>
+                        </ng-container>
+                        <ng-template #patternLiteral>
+                            <app-melody-editor 
+                                [notes]="getPatternValueAsString(command)" 
+                                [defaultDuration]="currentDefaultDuration"
+                                (notesChange)="command.value = $event">
+                            </app-melody-editor>
+                        </ng-template>
                     </ng-container>
 
                     <ng-container *ngSwitchDefault>
@@ -65,7 +78,7 @@
                                 [ngModel]="getSelectedValue(command)"
                                 (ngModelChange)="handleValueInput($event, command)">
                                 <option value="" disabled>Select number variable</option>
-                                <option *ngFor="let variable of getFilteredVariables(command)" 
+                                <option *ngFor="let variable of getFilteredVariables(command); trackBy: trackByVariable" 
                                         [value]="variable.value">
                                     {{variable.label}}
                                 </option>
@@ -85,8 +98,7 @@
                 
                 <!-- Command Action Icons - Positioned at the end -->
                 <div class="command-actions">
-                    <p-button *ngIf="command.type !== commandTypes.PATTERN" 
-                              icon="pi pi-dollar"
+                    <p-button icon="pi pi-dollar"
                               (click)="showVariableSelector(command, $event)"
                               [pTooltip]="command.isVariable ? 'Convert to direct value (Currently using: ' + (command.getVariableName() || 'none') + ')' : 'Convert to variable'"
                               tooltipPosition="top">
