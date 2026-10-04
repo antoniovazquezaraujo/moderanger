@@ -225,7 +225,7 @@ Un grupo da una **duración común** a varios eventos: `duración:( … )`. Los 
 
 Reglas: el grupo se abre y se cierra **en la misma línea**; un grupo sin cerrar es error de sintaxis. El formateador escribe un espacio tras `(` y otro antes de `)`, y uno entre eventos.
 
-En el editor visual, una nota sin duración propia **no la muestra** (la hereda del grupo). Al pasar el ratón por la nota aparece un `=` gris: con la rueda sobre él la cambias; a partir de ahí queda como duración explícita y se muestra siempre. El `=` es solo una pista visual: el texto sigue escribiendo el hijo sin duración mientras no la cambies.
+En el editor visual, una nota sin duración propia **no la muestra** (la hereda del grupo). Al pasar el ratón por la nota, la zona de duración queda activa (sin símbolo): con la rueda sobre ella la cambias y, a partir de ahí, queda como duración explícita y visible. Mientras no la cambies, el texto sigue escribiendo el hijo sin duración.
 
 ### 4.5. Variables de nota
 
