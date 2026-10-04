@@ -34,6 +34,8 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     operationTypes = OperationType;
     operationTypeNames: string[] = Object.values(OperationType);
     selectedVariable: string | null = null;
+    /** Variables string (melodías/patrones) para comandos PATTERN. */
+    stringVariables: VariableOption[] = [];
     
     operations: { type: OperationType, variableName: string, value: string | number }[] = [];
 
@@ -107,6 +109,12 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                 label: `${name} (${value})`,
                 value: name
             }));
+
+        // Variables string libres (no playmode/escala): patrones/melodías.
+        this.stringVariables = Array.from(variables.entries())
+            .filter(([, value]) => typeof value === 'string' &&
+                !this.playModeNames.includes(value) && !this.scaleNames.includes(value))
+            .map(([name, value]) => ({ label: `${name} (${value})`, value: name }));
 
         if (!this.selectedVariable && this.availableVariables.length > 0) {
              if (!this.availableVariables.some(v => v.value === this.selectedVariable)) {
@@ -214,10 +222,6 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         event.preventDefault();
         event.stopPropagation();
         
-        if (command.type === CommandType.PATTERN) {
-            return;
-        }
-        
         const wasVariable = command.isVariable;
         command.isVariable = !wasVariable;
         
@@ -243,14 +247,13 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         event.preventDefault();
         event.stopPropagation();
         
-        if (command.type === CommandType.PATTERN) {
-            return;
-        }
-        
         if (command.isVariable) {
-            // If already a variable, convert back to direct value
+            // Al volver a valor directo, PATTERN conserva la melodía resuelta.
+            const resolvedPattern = command.type === CommandType.PATTERN ? String(command.value ?? '') : '';
             command.isVariable = false;
-            command.setValue(this.getDefaultValueForCommandType(command.type));
+            command.setValue(command.type === CommandType.PATTERN
+                ? resolvedPattern
+                : this.getDefaultValueForCommandType(command.type));
         } else {
             // Convert to variable mode and pre-select the first compatible variable
             this.updateAvailableVariables();
@@ -303,6 +306,10 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getFilteredVariables(command: Command): VariableOption[] {
+        if (command.type === CommandType.PATTERN) {
+            // El patrón puede ser una variable string (melodía/patrón).
+            return this.stringVariables;
+        }
         return this.availableVariables.filter(v => {
             if (command.type === CommandType.PLAYMODE) {
                 return this.isVariableOfType(v.value, 'playmode');

@@ -119,6 +119,11 @@ export class Command {
 
         if (this.type === CommandType.PATTERN) {
             const patternString = String(value);
+            if (patternString.trim() === '') {
+                // Variable no definida o patrón vacío: sin patrón y sin ruido.
+                player.currentPattern = null;
+                return;
+            }
             try {
                 player.currentPattern = parseBlockNotes(patternString);
             } catch (e) {
