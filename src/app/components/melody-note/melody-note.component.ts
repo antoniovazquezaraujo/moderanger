@@ -11,7 +11,7 @@ import { SingleNote, NoteDuration } from '../../model/melody';
                  [class.duration-explicit]="!!note.duration"
                  (wheel)="onWheelDuration($event)"
                  title="Rueda: cambia la duración (heredada del grupo si no tiene)">
-                <span class="duration-value" [class.duration-empty]="!note.duration">{{ note.duration ?? '=' }}</span>
+                <span class="duration-value">{{ note.duration }}</span>
             </div>
             <div class="note-visual" (wheel)="onWheelValue($event)">
                 <span class="note-value"
@@ -70,10 +70,6 @@ import { SingleNote, NoteDuration } from '../../model/melody';
         .note-duration.duration-explicit,
         .note-item:hover .note-duration {
             visibility: visible;
-        }
-
-        .duration-value.duration-empty {
-            color: #999;
         }
 
         .note-visual .note-value {
