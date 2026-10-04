@@ -1,8 +1,8 @@
 # Soporte mínimo de `.mr` para (Neo)Vim
 
 Resaltado de sintaxis y ajustes de edición para el formato canónico `.mr`
-descrito en [`docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`](../../docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md)
-y [`docs/diseno/propuesta-sintaxis-mr.md`](../../docs/diseno/propuesta-sintaxis-mr.md).
+descrito en [`docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`](../../docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md)
+y [`docs/developer/design/propuesta-sintaxis-mr.md`](../../docs/developer/design/propuesta-sintaxis-mr.md).
 
 Es un plugin **opt-in**: no toca la configuración del usuario, solo aporta
 `ftdetect/`, `syntax/` y `ftplugin/` para el filetype `mr`.

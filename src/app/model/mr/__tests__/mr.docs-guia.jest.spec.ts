@@ -3,8 +3,9 @@
  * son documentos válidos y canónicos.
  *
  * Documentos cubiertos:
- * - `docs/guia/lenguaje-mr.md` (guía del lenguaje: 14 ejemplos completos).
- * - `docs/guia/validacion-manual-v1.md` (fixtures del checklist manual).
+ * - `docs/user/manual.md` (English manual: 14 complete examples).
+ * - `docs/user/manual_es.md` (manual en español: los mismos ejemplos).
+ * - `docs/developer/testing/validacion-manual-v1.md` (fixtures del checklist manual).
  *
  * Convención de la guía: los bloques ```mr son ficheros completos; los
  * fragmentos y ejemplos inválidos usan ```text. Este test convierte esa
@@ -16,7 +17,7 @@ import * as path from 'path';
 import { parseSong } from '../mr.parser';
 import { serializeSong } from '../mr.serializer';
 
-const DOCS_DIR = path.resolve(__dirname, '../../../../..', 'docs/guia');
+const DOCS_DIR = path.resolve(__dirname, '../../../../..');
 
 interface GuardedDoc {
   file: string;
@@ -25,8 +26,9 @@ interface GuardedDoc {
 }
 
 const DOCS: GuardedDoc[] = [
-  { file: 'lenguaje-mr.md', title: '# Guía del lenguaje `.mr` (v1)', minBlocks: 10 },
-  { file: 'validacion-manual-v1.md', title: '# Validación manual de la v1', minBlocks: 2 }
+  { file: 'docs/user/manual.md', title: '# The `.mr` language manual (v1)', minBlocks: 10 },
+  { file: 'docs/user/manual_es.md', title: '# Guía del lenguaje `.mr` (v1)', minBlocks: 10 },
+  { file: 'docs/developer/testing/validacion-manual-v1.md', title: '# Validación manual de la v1', minBlocks: 2 }
 ];
 
 /** Extrae el contenido de los bloques cercados con ```mr (uno por ejemplo). */

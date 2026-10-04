@@ -4,7 +4,7 @@
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Rama:** `feat/mr-fase2` (Fase 2 del ADR-001)
 - **Estado:** implementada; pendiente de revisión de DANI
-- **Referencias:** `docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md` (§5, Fase 2), `docs/diseno/propuesta-sintaxis-mr.md` (§14), `docs/analisis/sintaxis-mr-implementada.md` (Fase 1), `docs/analisis/mr-fase2-vista-texto.md` (este documento)
+- **Referencias:** `docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md` (§5, Fase 2), `docs/developer/design/propuesta-sintaxis-mr.md` (§14), `docs/developer/analysis/sintaxis-mr-implementada.md` (Fase 1), `docs/developer/analysis/mr-fase2-vista-texto.md` (este documento)
 - **Alcance:** vista de texto editable en la app, validación con errores en línea, botones Aplicar/Revertir, source map del parser y soporte mínimo en (Neo)Vim. **No** incluye guardar/cargar ficheros `.mr` desde la UI (Fase 3).
 
 ---

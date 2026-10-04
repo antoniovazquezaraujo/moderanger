@@ -75,7 +75,7 @@ La decisión aprobada Q6(a) resuelve este pendiente sin cambiar el fallback glob
 `NoteGenerationService.generateNotesForBlock` usa `defaultDuration ?? '16n'` para las
 notas raíz sin duración y para el silencio por defecto; los grupos siguen heredando su
 duración con prioridad. Sin `notes default`, el comportamiento documentado (`16n`) se
-mantiene. Detalle: `docs/analisis/sintaxis-mr-implementada.md` §7; backlog #3 marcado ✅.
+mantiene. Detalle: `docs/developer/analysis/sintaxis-mr-implementada.md` §7; backlog #3 marcado ✅.
 
 ## 5. Tests de referencia
 

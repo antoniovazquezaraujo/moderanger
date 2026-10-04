@@ -3,7 +3,7 @@
 - **Estado:** v1 congelada el 2026-10-03 (formato `version 1`).
 - **Dirigida a:** Antonio (usar y editar canciones), no a implementadores.
 - **Qué cubre:** la sintaxis completa del fichero `.mr`, cómo suena, cómo se guarda/carga y los límites de la v1.
-- **Referencias técnicas:** [ADR-001](../adr/ADR-001-texto-canonico-y-sintaxis-mr.md) · [propuesta de sintaxis](../diseno/propuesta-sintaxis-mr.md) · [sintaxis implementada](../analisis/sintaxis-mr-implementada.md) · [validación manual v1](./validacion-manual-v1.md).
+- **Referencias técnicas:** [ADR-001](../developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md) · [propuesta de sintaxis](../developer/design/propuesta-sintaxis-mr.md) · [sintaxis implementada](../developer/analysis/sintaxis-mr-implementada.md) · [validación manual v1](../developer/testing/validacion-manual-v1.md).
 
 > **Convención de esta guía.** Los bloques marcados como `mr` son **canciones completas y válidas**: se extraen y se pasan por el parser en cada `npm test` (`src/app/model/mr/__tests__/mr.docs-guia.jest.spec.ts`). Los fragmentos y los ejemplos incorrectos van en bloques `text`.
 
@@ -711,13 +711,13 @@ part
 
 ## 12. Referencias
 
-- **Guía de validación manual de la v1:** [`docs/guia/validacion-manual-v1.md`](./validacion-manual-v1.md).
-- **Decisión y contexto:** [`docs/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`](../adr/ADR-001-texto-canonico-y-sintaxis-mr.md).
-- **Propuesta aprobada (todas las preguntas resueltas):** [`docs/diseno/propuesta-sintaxis-mr.md`](../diseno/propuesta-sintaxis-mr.md).
-- **Sintaxis implementada y contrato de round-trip:** [`docs/analisis/sintaxis-mr-implementada.md`](../analisis/sintaxis-mr-implementada.md).
-- **Vista de texto (Fase 2):** [`docs/analisis/mr-fase2-vista-texto.md`](../analisis/mr-fase2-vista-texto.md).
-- **Guardar/cargar (Fase 3):** [`docs/analisis/mr-fase3-guardar-cargar.md`](../analisis/mr-fase3-guardar-cargar.md).
-- **BPM, variables y repeticiones:** [`docs/analisis/pulido-bpm-variables.md`](../analisis/pulido-bpm-variables.md).
+- **Guía de validación manual de la v1:** [`docs/developer/testing/validacion-manual-v1.md`](../developer/testing/validacion-manual-v1.md).
+- **Decisión y contexto:** [`docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`](../developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md).
+- **Propuesta aprobada (todas las preguntas resueltas):** [`docs/developer/design/propuesta-sintaxis-mr.md`](../developer/design/propuesta-sintaxis-mr.md).
+- **Sintaxis implementada y contrato de round-trip:** [`docs/developer/analysis/sintaxis-mr-implementada.md`](../developer/analysis/sintaxis-mr-implementada.md).
+- **Vista de texto (Fase 2):** [`docs/developer/analysis/mr-fase2-vista-texto.md`](../developer/analysis/mr-fase2-vista-texto.md).
+- **Guardar/cargar (Fase 3):** [`docs/developer/analysis/mr-fase3-guardar-cargar.md`](../developer/analysis/mr-fase3-guardar-cargar.md).
+- **BPM, variables y repeticiones:** [`docs/developer/analysis/pulido-bpm-variables.md`](../developer/analysis/pulido-bpm-variables.md).
 - **Corpus canónico:** [`src/app/model/mr/__tests__/corpus/`](../../src/app/model/mr/__tests__/corpus/).
 - **Soporte (Neo)Vim:** [`editors/nvim/README.md`](../../editors/nvim/README.md).
-- **Backlog del proyecto:** [`docs/analisis/BACKLOG.md`](../analisis/BACKLOG.md).
+- **Backlog del proyecto:** [`docs/developer/analysis/BACKLOG.md`](../developer/analysis/BACKLOG.md).
