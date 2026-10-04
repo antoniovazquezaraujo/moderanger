@@ -279,3 +279,44 @@ describe('NoteGenerationService · variables string en playback (#19)', () => {
     expect(() => parseBlockNotes('8t:$motif')).toThrow('no contiene un número');
   });
 });
+
+describe('PATTERN con grupos (subdivisión)', () => {
+  const patternPlayer = (pattern: string): Player => {
+    const player = createPlayer();
+    player.playMode = PlayMode.SINGLE;
+    player.currentPattern = parseBlockNotes(pattern);
+    return player;
+  };
+
+  it('subdivide el grupo entre las notas sin duración', () => {
+    const result = createService().generateNotesForBlock(blockWith('2n:0'), patternPlayer('4n:( 0 2 )'));
+
+    expect(result.map(n => n.note)).toEqual([60, 63]);
+    expect(result.map(n => n.duration)).toEqual(['0.5s', '0.5s']);
+  });
+
+  it('los hijos explícitos conservan su duración y el resto se reparte', () => {
+    const result = createService().generateNotesForBlock(blockWith('4n:0'), patternPlayer('4n:( 0 8n:2 )'));
+
+    expect(result.map(n => n.note)).toEqual([60, 63]);
+    expect(result.map(n => n.duration)).toEqual(['0.25s', '0.25s']);
+  });
+
+  it('rellena con silencio el tiempo restante sin hijos implícitos', () => {
+    const result = createService().generateNotesForBlock(blockWith('4n:0'), patternPlayer('4n:( 8n:0 )'));
+
+    expect(result.map(n => n.type)).toEqual(['note', 'rest']);
+    expect(result.map(n => n.duration)).toEqual(['0.25s', '0.25s']);
+  });
+
+  it('un grupo que no cabe se rechaza y suena silencio', () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const result = createService().generateNotesForBlock(blockWith('4n:0'), patternPlayer('4n:( 1n:2 )'));
+
+    expect(error).toHaveBeenCalled();
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe('rest');
+    error.mockRestore();
+  });
+});

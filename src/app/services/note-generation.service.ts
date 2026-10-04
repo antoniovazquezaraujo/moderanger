@@ -134,10 +134,10 @@ export class NoteGenerationService {
 
 
   /**
-   * Etapa 1: si hay patrón activo, expande un grado base en los grados del
-   * patrón (transpuestos) con sus duraciones escaladas al tiempo original.
-   * Sin patrón devuelve el propio grado. Los eventos no-note del patrón
-   * (silencios, grupos, compuestos) pasan tal cual.
+   * Etapa 1: si hay patrón activo, lo aplana a eventos sueltos aplicando la
+   * subdivisión de grupos (los hijos sin duración se reparten el tiempo
+   * restante) y escala sus duraciones al tiempo de la nota original.
+   * Sin patrón devuelve el propio grado.
    */
   private expandNoteWithPattern(baseGrade: number, duration: string, player: Player): NoteData[] {
       const pattern = player.currentPattern;
@@ -154,25 +154,101 @@ export class NoteGenerationService {
       const originalSeconds = duration ? Tone.Time(duration).toSeconds() : Tone.Time('16n').toSeconds();
       let patternSeconds = 0;
       pattern.forEach(patternNote => {
-          patternSeconds += Tone.Time(patternNote.duration ?? '16n').toSeconds();
+          patternSeconds += this.patternItemSeconds(patternNote);
       });
       const scaleFactor = patternSeconds > 0 ? originalSeconds / patternSeconds : 1;
 
-      return pattern.map(patternNoteData => {
-          const expanded = JSON.parse(JSON.stringify(patternNoteData)) as NoteData;
-          if (expanded.type === 'note' && expanded.note !== undefined) {
-              // Grado destino; el MIDI se calcula en la etapa 2.
-              expanded.note = baseGrade + expanded.note;
-          }
-          const currentDuration = expanded.duration ?? '16n';
-          try {
-              expanded.duration = `${Tone.Time(currentDuration).toSeconds() * scaleFactor}s`;
-          } catch (e) {
-              console.warn(`[NoteGenSvc] Could not scale duration ${currentDuration}. Using original.`);
-              expanded.duration = currentDuration;
-          }
-          return expanded;
+      return this.flattenPatternItems(pattern, baseGrade).map(item => {
+          const scaled = JSON.parse(JSON.stringify(item)) as NoteData;
+          const itemSeconds = Tone.Time(item.duration ?? '16n').toSeconds();
+          scaled.duration = `${itemSeconds * scaleFactor}s`;
+          return scaled;
       });
+  }
+
+  /** Segundos de un item de nivel superior del patrón (un grupo dura lo declarado). */
+  private patternItemSeconds(item: NoteData): number {
+      const itemDuration = item.type === 'group' ? item.duration : (item.duration ?? '16n');
+      return Tone.Time(itemDuration ?? '16n').toSeconds();
+  }
+
+  /**
+   * Aplana el patrón a eventos sueltos (sin grupos) con la regla de
+   * subdivisión: los hijos con duración explícita la conservan; los que no la
+   * tienen se reparten a partes iguales el tiempo restante del grupo. Si el
+   * contenido no cabe se lanza error (grupos inválidos no permitidos).
+   */
+  private flattenPatternItems(items: NoteData[], baseGrade: number): NoteData[] {
+      const result: NoteData[] = [];
+      for (const item of items) {
+          if (item.type === 'group') {
+              result.push(...this.flattenPatternGroup(item, baseGrade));
+          } else {
+              const clone = JSON.parse(JSON.stringify(item)) as NoteData;
+              if (clone.type === 'note' && clone.note !== undefined) {
+                  clone.note = baseGrade + clone.note; // grado destino
+              }
+              result.push(clone);
+          }
+      }
+      return result;
+  }
+
+  private flattenPatternGroup(group: NoteData, baseGrade: number): NoteData[] {
+      const groupSeconds = Tone.Time(group.duration ?? '16n').toSeconds();
+      const children = group.children ?? [];
+      const explicitChildren = children.filter(child => this.hasExplicitDuration(child));
+      const implicitChildren = children.filter(child => !this.hasExplicitDuration(child));
+      const explicitSeconds = explicitChildren.reduce(
+          (total, child) => total + this.itemDurationSeconds(child),
+          0
+      );
+
+      if (explicitSeconds > groupSeconds + 1e-9) {
+          throw new Error(
+              `el contenido del grupo '${group.duration}:( … )' no cabe (${explicitSeconds.toFixed(3)}s > ${groupSeconds.toFixed(3)}s)`
+          );
+      }
+      if (implicitChildren.length > 0 && groupSeconds - explicitSeconds <= 1e-9) {
+          throw new Error(`no queda tiempo para las notas sin duración del grupo '${group.duration}:( … )'`);
+      }
+
+      const shareSeconds = implicitChildren.length > 0
+          ? (groupSeconds - explicitSeconds) / implicitChildren.length
+          : 0;
+
+      const result: NoteData[] = [];
+      for (const child of children) {
+          if (child.type === 'group') {
+              result.push(...this.flattenPatternGroup(child, baseGrade));
+          } else if (this.hasExplicitDuration(child)) {
+              result.push(this.clonePatternLeaf(child, baseGrade, this.itemDurationSeconds(child)));
+          } else {
+              result.push(this.clonePatternLeaf(child, baseGrade, shareSeconds));
+          }
+      }
+      if (implicitChildren.length === 0 && groupSeconds - explicitSeconds > 1e-9) {
+          // El tiempo restante del grupo es silencio explícito.
+          result.push(new NoteData({ type: 'rest', duration: `${groupSeconds - explicitSeconds}s` }));
+      }
+      return result;
+  }
+
+  private clonePatternLeaf(child: NoteData, baseGrade: number, seconds: number): NoteData {
+      const clone = JSON.parse(JSON.stringify(child)) as NoteData;
+      if (clone.type === 'note' && clone.note !== undefined) {
+          clone.note = baseGrade + clone.note;
+      }
+      clone.duration = `${seconds}s`;
+      return clone;
+  }
+
+  private hasExplicitDuration(item: NoteData): boolean {
+      return item.duration !== undefined && item.duration !== null;
+  }
+
+  private itemDurationSeconds(item: NoteData): number {
+      return Tone.Time(item.duration ?? '16n').toSeconds();
   }
 
   /**
@@ -261,7 +337,13 @@ export class NoteGenerationService {
                   //      patrón (independiente del playmode).
                   //   2) Genera lo que toque (nota suelta, acorde, arpegio) para
                   //      cada nota resultante.
-                  const expanded = this.expandNoteWithPattern(baseGrade, duration, player);
+                  let expanded: NoteData[];
+                  try {
+                      expanded = this.expandNoteWithPattern(baseGrade, duration, player);
+                  } catch (e) {
+                      console.error(`[NoteGenSvc] Patrón inválido: ${e instanceof Error ? e.message : String(e)}`);
+                      expanded = [this.createRestData(duration)];
+                  }
                   for (const expandedNote of expanded) {
                       results.push(...this.generatePlayableData(expandedNote, player, duration));
                   }
