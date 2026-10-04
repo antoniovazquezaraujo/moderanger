@@ -30,6 +30,7 @@ import {
 import { MrParsedSong, MrSourceMapEntry, MrSourceNode, MrSourceNodeKind } from './mr.source-map';
 import { MR_FORMAT_VERSION, SongDocument } from './mr.types';
 import { NoteEvent, parseNoteEvents, printNoteEvent } from './notes.parser';
+import * as Tone from 'tone';
 
 // ---------------------------------------------------------------------------
 // Léxico estructural
@@ -610,6 +611,8 @@ class MrDocumentParser {
       if (melody === '') {
         throw errorAt(line, restColumn, `PATTERN requiere una melodía (p. ej. PATTERN 4t:0 4t:2)`);
       }
+      // En un PATTERN los grupos subdividen: se valida que el contenido quepa.
+      this.validatePatternGroups(events);
       return new Command({ type, value: melody });
     }
     const words = splitLineWords(rest, line.number, restColumn - 1);
@@ -650,6 +653,52 @@ class MrDocumentParser {
     return new Command({ type, value });
   }
 
+  /**
+   * Valida los grupos de un PATTERN con la regla de subdivisión: los hijos
+   * con duración explícita deben caber en el grupo y, si hay hijos sin
+   * duración, debe quedarles tiempo. Errores con posición `línea:columna`.
+   */
+  private validatePatternGroups(events: readonly NoteEvent[]): void {
+    for (const event of events) {
+      if (event.kind !== 'group') {
+        continue;
+      }
+      const groupSeconds = Tone.Time(event.duration).toSeconds();
+      let explicitSeconds = 0;
+      let implicitCount = 0;
+      for (const child of event.children) {
+        if (this.eventHasExplicitDuration(child)) {
+          explicitSeconds += this.eventDurationSeconds(child);
+        } else {
+          implicitCount++;
+        }
+      }
+      if (explicitSeconds > groupSeconds + 1e-9) {
+        const offender = event.children.find(child => this.eventHasExplicitDuration(child))!;
+        throw new MrParseError(
+          `'${printNoteEvent(offender)}' no cabe en el grupo '${event.duration}:( … )'`,
+          offender.position
+        );
+      }
+      if (implicitCount > 0 && groupSeconds - explicitSeconds <= 1e-9) {
+        const offender = event.children.find(child => !this.eventHasExplicitDuration(child))!;
+        throw new MrParseError(
+          `no queda tiempo para '${printNoteEvent(offender)}' en el grupo '${event.duration}:( … )'`,
+          offender.position
+        );
+      }
+      this.validatePatternGroups(event.children);
+    }
+  }
+
+  private eventHasExplicitDuration(event: NoteEvent): boolean {
+    return event.kind === 'group' || event.duration !== undefined;
+  }
+
+  private eventDurationSeconds(event: NoteEvent): number {
+    const duration = event.kind === 'group' ? event.duration : (event.duration ?? '16n');
+    return Tone.Time(duration).toSeconds();
+  }
   private parseOperationsSection(block: Block, header: SourceLine): void {
     const contentIndent = header.indent + 2;
     for (;;) {
@@ -781,12 +830,6 @@ class MrDocumentParser {
   }
 }
 
-/**
- * Parsea un documento `.mr` completo.
- *
- * No toca `VariableContext`; las variables declaradas quedan en
- * `SongDocument.variables`.
- */
 export function parseSong(text: string): SongDocument {
   return new MrDocumentParser(prepareLines(text)).parse();
 }

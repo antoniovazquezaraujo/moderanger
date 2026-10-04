@@ -225,6 +225,8 @@ Un grupo da una **duración común** a varios eventos: `duración:( … )`. Los 
 
 Reglas: el grupo se abre y se cierra **en la misma línea**; un grupo sin cerrar es error de sintaxis. El formateador escribe un espacio tras `(` y otro antes de `)`, y uno entre eventos.
 
+En un `PATTERN`, los grupos **subdividen**: los hijos con duración explícita la conservan y los hijos sin duración se reparten el tiempo restante; el contenido debe caber en el grupo (si no, es un error de medida con `línea:columna`). En una sección `notes`, en cambio, los grupos heredan la duración del grupo.
+
 En el editor visual, una nota sin duración propia **no la muestra** (la hereda del grupo). Al pasar el ratón por la nota, la zona de duración queda activa (sin símbolo): con la rueda sobre ella la cambias y, a partir de ahí, queda como duración explícita y visible. El ciclo incluye el **vacío**: si sigues girando más allá de `1n`/`8t`, la nota vuelve a quedarse sin duración (heredada). Mientras no la cambies, el texto sigue escribiendo el hijo sin duración.
 
 ### 4.5. Variables de nota

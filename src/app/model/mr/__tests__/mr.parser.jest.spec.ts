@@ -502,3 +502,26 @@ describe('PATTERN con variable', () => {
     expect(serializeSong(doc)).toContain('PATTERN $motif');
   });
 });
+
+describe('PATTERN: grupos con subdivisión', () => {
+  const songWithPattern = (pattern: string): string =>
+    ['song P', 'version 1', '', 'part Piano', '  block B', '    notes', '      4n:0', '    commands', `      PATTERN ${pattern}`, ''].join('\n');
+
+  it('acepta un grupo cuyo contenido cabe', () => {
+    const doc = parseSong(songWithPattern('4n:( 0 8n:2 )'));
+
+    expect(doc.song.parts[0].blocks[0].commands[0].value).toBe('4n:( 0 8n:2 )');
+  });
+
+  it('rechaza un grupo cuyo contenido no cabe', () => {
+    const error = expectParseError(songWithPattern('4n:( 1n:2 )'));
+
+    expect(error.message).toContain('no cabe');
+  });
+
+  it('rechaza un grupo sin tiempo para los hijos sin duración', () => {
+    const error = expectParseError(songWithPattern('4n:( 4n:1 0 )'));
+
+    expect(error.message).toContain('no queda tiempo');
+  });
+});
