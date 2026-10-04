@@ -9,12 +9,12 @@ import { SingleNote, NoteDuration } from '../../model/melody';
                  Al hacer hover, la zona queda activa para cambiarla con la rueda. -->
             <div class="note-duration"
                  [class.duration-explicit]="!!note.duration"
-                 [class.wheeling]="isWheelingDuration"
+                 [class.wheeling]="isWheeling"
                  (wheel)="onWheelDuration($event)"
                  title="Rueda: cambia la duración (heredada del grupo si no tiene)">
                 <span class="duration-value">{{ note.duration }}</span>
             </div>
-            <div class="note-visual" (wheel)="onWheelValue($event)">
+            <div class="note-visual" [class.wheeling]="isWheeling" (wheel)="onWheelValue($event)">
                 <span class="note-value"
                       [class.silence]="!note.variableName && note.value === null"
                       [class.variable-reference]="!!note.variableName"
@@ -73,7 +73,8 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             visibility: visible;
         }
 
-        /* Mientras se rueda, el cursor no tapa el número que está cambiando. */
+        /* Mientras se rueda (valor o duración), el cursor no tapa el número. */
+        .note-visual.wheeling,
         .note-duration.wheeling {
             cursor: none;
         }
@@ -102,8 +103,8 @@ export class MelodyNoteComponent implements OnDestroy {
     @Output() changeDuration = new EventEmitter<number>();
     @Output() changeValue = new EventEmitter<number>();
 
-    /** True durante ~700 ms tras girar la rueda sobre la duración. */
-    isWheelingDuration = false;
+    /** True durante ~700 ms tras girar la rueda (valor o duración). */
+    isWheeling = false;
 
     private wheelCursorTimer: ReturnType<typeof setTimeout> | null = null;
     
@@ -153,17 +154,18 @@ export class MelodyNoteComponent implements OnDestroy {
 
     onWheelValue(event: WheelEvent): void {
         event.preventDefault();
+        this.hideCursorWhileWheeling();
         this.changeValue.emit(event.deltaY > 0 ? -1 : 1);
     }
 
     /** Oculta el cursor un instante para que se vea el número mientras se rueda. */
     private hideCursorWhileWheeling(): void {
-        this.isWheelingDuration = true;
+        this.isWheeling = true;
         if (this.wheelCursorTimer !== null) {
             clearTimeout(this.wheelCursorTimer);
         }
         this.wheelCursorTimer = setTimeout(() => {
-            this.isWheelingDuration = false;
+            this.isWheeling = false;
             this.wheelCursorTimer = null;
         }, 700);
     }
