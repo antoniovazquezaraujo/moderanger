@@ -159,15 +159,11 @@ export class Command {
             case CommandType.SCALE: player.scale = value; break;
             case CommandType.PLAYMODE: 
                 if (typeof value === 'number' && PlayMode[value] !== undefined) {
-                    player.playMode = value; 
-                    if (value !== PlayMode.PATTERN) {
-                         player.currentPattern = null;
-                    } else {
-                    }
+                    // El patrón es independiente del playmode: no se toca aquí.
+                    player.playMode = value;
                 } else {
                      console.warn(`[Command PLAYMODE] Invalid final value for PLAYMODE: ${value}. Defaulting player to CHORD.`);
                      player.playMode = PlayMode.CHORD;
-                     player.currentPattern = null;
                 }
                 break; 
             case CommandType.WIDTH: player.density = value; break;

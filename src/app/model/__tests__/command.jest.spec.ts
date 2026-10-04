@@ -98,14 +98,14 @@ describe('Command.execute', () => {
     warn.mockRestore();
   });
 
-  it('aplica PLAYMODE y limpia currentPattern si no es PATTERN', () => {
+  it('aplica PLAYMODE sin tocar el patrón activo (son independientes)', () => {
     const player = createFakePlayer();
     player.currentPattern = [{ type: 'note', note: 1 }];
 
     new Command({ type: CommandType.PLAYMODE, value: 'RANDOM' }).execute(player);
 
     expect(player.playMode).toBe(PlayMode.RANDOM);
-    expect(player.currentPattern).toBeNull();
+    expect(player.currentPattern).not.toBeNull();
   });
 
   it('en PATTERN parsea la cadena de patrón a NoteData[]', () => {

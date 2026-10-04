@@ -169,7 +169,7 @@ describe('NoteGenerationService.generateNotesForBlock', () => {
 
   it('en PATTERN transpone los grados y escala las duraciones', () => {
     const player = createPlayer();
-    player.playMode = PlayMode.PATTERN;
+    player.playMode = PlayMode.SINGLE;
     player.currentPattern = [
       new NoteData({ type: 'note', note: 1, duration: '4n' }),
       new NoteData({ type: 'note', note: 2, duration: '4n' })
@@ -183,7 +183,7 @@ describe('NoteGenerationService.generateNotesForBlock', () => {
 
   it('en PATTERN escala la duración heredada de cada hijo del grupo', () => {
     const player = createPlayer();
-    player.playMode = PlayMode.PATTERN;
+    player.playMode = PlayMode.SINGLE;
     player.currentPattern = [
       new NoteData({ type: 'note', note: 1, duration: '4n' }),
       new NoteData({ type: 'note', note: 2, duration: '4n' })
@@ -193,6 +193,21 @@ describe('NoteGenerationService.generateNotesForBlock', () => {
 
     expect(result.map(n => n.note)).toEqual([62, 63, 65, 67]);
     expect(result.map(n => n.duration)).toEqual(['0.25s', '0.25s', '0.25s', '0.25s']);
+  });
+
+  it('con CHORD, el patrón se aplica antes y cada nota del patrón suena como acorde', () => {
+    const player = createPlayer();
+    player.playMode = PlayMode.CHORD;
+    player.currentPattern = [
+      new NoteData({ type: 'note', note: 0, duration: '4n' }),
+      new NoteData({ type: 'note', note: 2, duration: '4n' })
+    ];
+
+    const result = createService().generateNotesForBlock(blockWith('4n:0'), player);
+
+    expect(result).toHaveLength(2);
+    expect(result.every(n => n.type === 'chord')).toBe(true);
+    expect(result[0].noteDatas!.length).toBeGreaterThan(0);
   });
 
   it('deja pasar los silencios explícitos de la gramática', () => {
