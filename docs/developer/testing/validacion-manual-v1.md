@@ -146,11 +146,20 @@
 - [ ] **12.5.** El ramal no genera *layout shift*: asas, nombres, controles y editores conservan su posición, y el conector horizontal del bloque superior sigue presente.
 - [ ] **12.6.** Repite los drags del caso 10 (reordenar y soltar entre árboles): siguen funcionando y no aparecen errores nuevos en consola.
 
-## 13. Cierre: suite, build y registro
+## 13. Caso 13 — Recortes de anchura de la GUI (style/trim-gui-widths, 2026-10-05)
 
-- [ ] **13.1.** `npm test` en verde: **33 suites / 430 tests** (cifra a 2026-10-05).
-- [ ] **13.2.** `npm run build` termina con exit 0.
-- [ ] **13.3.** Registro de resultados:
+- [ ] **13.1.** Metrónomo del toolbar: muestra **16 puntos** (2 compases de 8, ~168px), el punto activo avanza al reproducir y se mantiene el downbeat cada 8.
+- [ ] **13.2.** Header de bloque más compacto: repeticiones 48px, controles 70px (3 botones) y 6px entre items, sin solapes entre asa, toggler, nombre, botones, `×1` y notas.
+- [ ] **13.3.** Toolbar de canción: nombre 120px, *Repeat* 32px, *BPM* 45px y 10px entre título y controles; a **1024×768** los botones `$`, `.mr`, guardar y cargar siguen visibles y no aparece scroll horizontal.
+- [ ] **13.4.** `.part-info` a 88px: el nombre de la parte se sigue viendo y editando con comodidad.
+- [ ] **13.5.** Las guías del árbol siguen alineadas (la guía sube hasta el asa y el conector empalma con ella) y el DnD (#79) y el tooltip del asa (#83) funcionan igual.
+- [ ] **13.6.** No aparecen errores nuevos en la consola del navegador.
+
+## 14. Cierre: suite, build y registro
+
+- [ ] **14.1.** `npm test` en verde: **33 suites / 436 tests** (cifra a 2026-10-05).
+- [ ] **14.2.** `npm run build` termina con exit 0.
+- [ ] **14.3.** Registro de resultados:
 
 | Caso | Resultado | Notas |
 |---|---|---|
@@ -166,9 +175,10 @@
 | 10. Drag & drop de bloques | ☐ OK ☐ Falla | |
 | 11. Guías de jerarquía | ☐ OK ☐ Falla | |
 | 12. Ramal de la guía | ☐ OK ☐ Falla | |
-| 13. Suite + build | ☐ OK ☐ Falla | |
+| 13. Recortes de anchura | ☐ OK ☐ Falla | |
+| 14. Suite + build | ☐ OK ☐ Falla | |
 
-- [ ] **13.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
+- [ ] **14.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
 
 ```text
 - …

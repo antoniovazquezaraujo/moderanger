@@ -67,9 +67,9 @@
 .header-item {
   display: table-cell;
   vertical-align: middle;
-  padding: 0 4px 0 0;
+  padding: 0 2px 0 0;
   white-space: nowrap;
-  margin-right: 8px;
+  margin-right: 4px;
 }
 
 /* Drag handle: único punto de agarre para mover un bloque */
@@ -101,11 +101,11 @@
 }
 
 .block-controls {
-  width: 90px;
+  width: 70px;
 }
 
 .repetitions-container {
-  width: 80px;
+  width: 48px;
 }
 
 /* Block name input - ESPACIO REDUCIDO */
