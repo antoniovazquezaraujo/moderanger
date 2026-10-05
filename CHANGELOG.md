@@ -21,6 +21,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- Free-text follow-up (compactness): melody notes in every editor (block header, PATTERN) share the rest/hover/selected treatment — transparent reserved border, no background, uniform 20px height, no scale/shadow on selection — with commas between notes and tighter spacing. Commands/Operations rows are more compact: 3px gaps, tighter padding/actions, `$`/`✕` without extra margins, and number inputs auto-fit their content (24–64px) instead of the global 45/80px.
 - Commands/Operations now read as free text: capitalized type labels with colon (`Inv: 0`), no borders/backgrounds or native select arrow at rest, commas between commands and between PATTERN notes. The editable chrome (box border, control borders, own chevron, `$`/`✕` buttons) appears on hover or focus. Model and `.mr` are untouched (display-only labels).
 - Selects now auto-fit their selected option (`field-sizing: content`, progressive) with per-component clamps: command selects 44–140px, toolbar duration 40–80px, variable selects 60–160px. Browsers without support keep the previous intrinsic width.
 - GUI width trim (low-risk items from the width audit): metronome reduced from 32 to 16 dots; tighter block header (repetitions 48px, controls 70px, 6px between items); narrower song toolbar (name 120px, Repeat 32px, BPM 45px, 10px gap); part name box 88px.
