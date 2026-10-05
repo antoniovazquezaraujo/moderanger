@@ -16,6 +16,7 @@ All notable changes to **Mode Ranger**. Format based on
 - String variables (melodies) are listed and editable in the sidebar.
 - English translation of the `.mr` manual (Spanish version kept as `docs/user/manual_es.md`).
 - Inherited note duration is visible/editable with the mouse wheel (hover); cycle includes returning to "empty".
+- Block tree hierarchy guides: a subtle vertical line per nesting level and a short horizontal connector toward each block (file-explorer style, neutral and with no active-branch highlight).
 - Project infrastructure: CI (tests + coverage + build), `develop`/`main` PR workflow, releases with a web artifact and automatic user-docs publishing.
 
 ### Changed

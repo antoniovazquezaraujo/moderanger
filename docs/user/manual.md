@@ -155,6 +155,7 @@ part Piano
 - `repeats` is how many times the block runs. Omitted when 1.
 - `repeats 0` is valid: the block stays silent (useful to mute without deleting).
 - Nested blocks go **one level (2 spaces) deeper** than their parent and sound after the parent content. Line order is execution order.
+- In the visual tree, each nesting level is marked with a **subtle vertical guide** and a **short connector** to every block, so the hierarchy is readable at a glance.
 
 ```mr
 song Estructura

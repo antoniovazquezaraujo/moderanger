@@ -155,6 +155,7 @@ part Piano
 - `repeats` indica cuántas veces se ejecuta el bloque. Se omite si vale 1.
 - `repeats 0` es válido: el bloque no suena (útil para silenciar sin borrar).
 - Los bloques anidados van **un nivel (2 espacios) más adentro** que su padre y suenan después del contenido del padre. El orden de las líneas es el orden de ejecución.
+- En el árbol visual, cada nivel de anidación se marca con una **guía vertical tenue** y un **conector corto** hacia cada bloque, para leer la jerarquía de un vistazo.
 
 ```mr
 song Estructura

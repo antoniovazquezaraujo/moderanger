@@ -189,6 +189,43 @@ h1 { /* Add some style for the header */
   margin: 0!important;
 }
 
+/* Guías visuales del árbol de bloques (estilo explorador de ficheros):
+   una línea vertical tenue por cada nivel de anidación y un conector
+   horizontal corto hacia cada bloque. No alteran el layout (la indentación
+   de 1rem por nivel la sigue aportando el padding de `.p-treenode-children`)
+   ni interfieren con el drag & drop (`pointer-events: none`, asa y
+   droppoints intactos). */
+.p-tree .p-treenode-children {
+  position: relative;
+}
+
+.p-tree .p-treenode-children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  width: 1px;
+  background-color: #d9d9d9;
+  pointer-events: none;
+}
+
+/* Conector horizontal corto desde la guía hasta el bloque. Se pinta como
+   fondo del propio `.block-header` en la franja de padding izquierda: el
+   header tiene `overflow-x: auto` y recortaría un pseudo-elemento que
+   sobresalga. `margin-left` negativo + `padding-left` y `width` compensados
+   extienden su caja de pintado sin mover el contenido (misma x). */
+.p-tree .p-treenode-children .block-header {
+  box-sizing: border-box !important;
+  width: calc(100% + 14px) !important;
+  margin-left: -14px !important;
+  padding-left: 14px !important;
+  background-image: linear-gradient(to right, #d9d9d9, #d9d9d9);
+  background-repeat: no-repeat;
+  background-size: 12px 1px;
+  background-position: 1px center;
+}
+
 /* Drag & drop de bloques: zonas de inserción amplias y visibles.
    El `.p-treenode-droppoint` por defecto mide 4px de alto; se amplía a 12px
    con una línea de acento al pasar por encima o durante el arrastre para que
