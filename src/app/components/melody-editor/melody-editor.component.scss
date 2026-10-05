@@ -28,8 +28,8 @@ $z-index-base: 10;
       flex-direction: row;
       align-items: center;
       flex-wrap: wrap;
-      gap: 4px;
-      padding: 4px;
+      gap: 2px;
+      padding: 2px;
     }
   }
 }
@@ -53,9 +53,9 @@ $z-index-base: 10;
 .notes-container {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  padding: 10px 0;
-  min-height: 40px;
+  align-items: center;
+  padding: 2px 0;
+  min-height: 24px;
   position: relative;
 }
 
@@ -88,29 +88,33 @@ $z-index-base: 10;
   }
 }
 
-// Contenedor de nota individual
+// Contenedor de nota individual (legacy: sin margen de 30px)
 .note-container {
   position: relative;
   display: flex;
   align-items: center;
-  margin: 0 30px;
-  padding: 5px 0;
+  margin: 0;
+  padding: 2px 0;
 }
 
-// Elemento de nota
+// Elemento de nota (el chrome real vive en melody-note; esto aplica al
+// botón de añadir y sirve de base). Sin `transform`/`box-shadow`: la
+// selección no debe cambiar el tamaño ni la altura.
 .note-item {
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid transparent;
   border-radius: 2px;
-  margin: 0 2px;
-  padding: 2px 4px;
-  min-width: 40px;
+  margin: 0;
+  padding: 0 2px;
+  min-width: 28px;
+  height: 20px;
+  box-sizing: border-box;
   display: inline-flex;
   flex-direction: row !important;
   align-items: center;
   justify-content: space-between;
   background-color: transparent;
   cursor: pointer;
-  transition: all $transition-time ease;
+  transition: border-color $transition-time ease, background-color $transition-time ease;
   
   &:hover {
     border-color: $primary-color;
@@ -120,15 +124,15 @@ $z-index-base: 10;
   &.selected {
     border-color: $primary-color;
     background-color: rgba(0, 119, 204, 0.1);
-    box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.3);
-    transform: scale(1.05);
     z-index: $z-index-base + 1;
   }
   
   &.add-note {
     opacity: 0.7;
     background-color: transparent;
+    /* Pista visual del botón de añadir (como el + de añadir comando). */
     border-style: dashed;
+    border-color: rgba(0, 0, 0, 0.1);
     
     &:hover {
       opacity: 1;

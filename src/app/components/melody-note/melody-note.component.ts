@@ -25,23 +25,30 @@ import { SingleNote, NoteDuration } from '../../model/melody';
         </div>
     `,
     styles: [`
+        /* Notas en texto libre: borde transparente reservado (misma caja) y
+           sin fondo en reposo; al hover o al seleccionar aparece el chrome
+           sin cambiar tamaño ni altura (20px, como el resto de controles). */
         .note-item {
             display: flex;
             flex-direction: row;
             align-items: center;
             /* El valor queda a la derecha; la duración aparece a su izquierda. */
             justify-content: flex-end;
-            gap: 4px;
-            margin: 0 2px;
-            padding: 2px 4px;
-            border: 1px solid #ccc;
+            gap: 2px;
+            margin: 0;
+            padding: 0 2px;
+            border: 1px solid transparent;
             border-radius: 2px;
             cursor: pointer;
-            background-color: white;
-            min-width: 40px;
+            background-color: transparent;
+            min-width: 28px;
+            height: 20px;
+            box-sizing: border-box;
+            line-height: 1;
         }
         
         .note-item:hover {
+            border-color: #ccc;
             background-color: #f0f0f0;
         }
         
@@ -53,19 +60,19 @@ import { SingleNote, NoteDuration } from '../../model/melody';
         .note-visual {
             cursor: ns-resize;
             padding: 0;
-            margin-right: 4px;
+            margin-right: 0;
         }
         
         .note-duration {
             font-size: 0.8em;
             color: #666;
             cursor: ns-resize;
-            padding: 0 2px;
+            padding: 0 1px;
             text-align: right;
+            line-height: 1;
             /* Oculta si la duración es heredada; aparece al hacer hover. */
             visibility: hidden;
-            min-width: 20px;
-            min-height: 18px;
+            min-width: 14px;
         }
 
         .note-duration.duration-explicit,

@@ -165,10 +165,13 @@
 - [ ] **14.5.** Con teclado, `:focus-visible` marca el control enfocado; el foco dentro de un comando muestra su chrome editable.
 - [ ] **14.6.** Los tooltips de `$`, `✕` y del asa siguen funcionando; no queda ningún `.p-tooltip` tras un drag.
 - [ ] **14.7.** Sin scroll horizontal nuevo ni errores en consola; las guías y el DnD siguen igual.
+- [ ] **14.8.** Notas compactas y uniformes: en el header de un bloque con 4 notas (`4n 1, 4n -2, 4n 1, 4n -5`) todas miden **20px** de alto, sin borde/fondo en reposo y con coma entre ellas; al seleccionar o pasar el ratón solo cambian borde/fondo (sin `scale` ni sombra, misma altura). El `+` de añadir nota conserva su borde discontinuo.
+- [ ] **14.9.** Commands/Operations compactos: los huecos entre tipo→valor→`$`→`✕` son ~3px, la caja queda con padding 1×2px y los inputs numéricos se ajustan al contenido (`1` ≈ 27px, max 64) sin tocar `#repetitions` (32px), `#bpm` (45px) ni los inputs de variables.
+- [ ] **14.10.** Alturas uniformes: selects, inputs, botones y notas de estas filas comparten un único alto de **20px**, y enfocar no cambia la caja.
 
 ## 15. Cierre: suite, build y registro
 
-- [ ] **15.1.** `npm test` en verde: **37 suites / 450 tests** (cifra a 2026-10-06).
+- [ ] **15.1.** `npm test` en verde: **38 suites / 454 tests** (cifra a 2026-10-06).
 - [ ] **15.2.** `npm run build` termina con exit 0.
 - [ ] **15.3.** Registro de resultados:
 
