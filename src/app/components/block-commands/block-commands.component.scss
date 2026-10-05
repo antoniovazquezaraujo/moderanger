@@ -61,7 +61,9 @@
   align-items: flex-start;
 }
 
-/* Interactive items */
+/* Interactive items.
+   En reposo se leen como texto (borde transparente, mismo box); el chrome
+   editable aparece al hover o al editar (focus-within). */
 .command,
 .operation-item {
   display: inline-flex;
@@ -69,11 +71,14 @@
   background-color: transparent;
   padding: 0 2px;
   border-radius: 3px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid transparent;
   margin: 1px;
   min-height: 24px;
   box-sizing: border-box;
 }
+
+/* El chrome editable (borde al hover/focus, comas, botones y editor PATTERN)
+   vive en styles.css para no engordar los estilos del componente. */
 
 /* Form controls - MÁS PEQUEÑOS POSIBLE */
 .command-type,
@@ -137,6 +142,9 @@
     font-size: 0.65rem !important;
   }
 
+  /* El chrome de los botones `$`/`✕` y el foco visible viven en styles.css
+     (reglas globales con `!important`), junto al resto del texto libre. */
+
   .p-inputnumber {
     width: 50px;
     height: 18px;
@@ -155,7 +163,7 @@
     height: 100%;
   }
 
-  /* Embedded melody editor styles */
+  /* Embedded melody editor styles (PATTERN en texto libre). */
   app-melody-editor {
     .melody-editor {
       min-height: auto;
@@ -175,6 +183,7 @@
       gap: 2px;
     }
     
+    /* El texto libre del PATTERN (comas y bordes) vive en styles.css. */
     .note-item {
       padding: 1px;
     }

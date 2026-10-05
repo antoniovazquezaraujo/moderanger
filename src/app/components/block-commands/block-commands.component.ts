@@ -10,6 +10,7 @@ import { SongPlayer } from 'src/app/model/song.player';
 import { NoteDuration, NoteConverter, MusicElement } from 'src/app/model/melody';
 import { NoteData } from 'src/app/model/note';
 import { MelodyEditorComponent } from '../melody-editor/melody-editor.component';
+import { commandTypeLabel } from './command-type-label';
 
 interface VariableOption {
     label: string;
@@ -123,6 +124,11 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         } else if (this.availableVariables.length === 0) {
              this.selectedVariable = null;
         }
+    }
+
+    /** Etiqueta de tipo para la vista (`INV` → `Inv`); el modelo no cambia. */
+    typeLabel(type: string): string {
+        return commandTypeLabel(type);
     }
 
     removeCommand(command: Command): void {

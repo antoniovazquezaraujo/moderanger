@@ -724,11 +724,13 @@ p-dropdown.command-value .p-dropdown .p-dropdown-clear-icon,
   font-size: 14px !important; /* Tamaño de fuente igual al de los selects */
 }
 
-/* Unificar apariencia de los contenedores */
+/* Unificar apariencia de los contenedores.
+   Borde transparente en reposo: mantiene el box y deja que el texto libre
+   muestre el chrome solo al hover/focus (regla más abajo). */
 .command,
 .operation-item {
   background-color: transparent !important; /* Quitar fondos diferentes */
-  border: none !important; /* Quitar bordes diferentes */
+  border: 1px solid transparent !important;
   border-radius: 0 !important; /* Quitar bordes redondeados */
   padding: 0.25rem !important; /* Padding uniforme */
 }
@@ -737,7 +739,7 @@ p-dropdown.command-value .p-dropdown .p-dropdown-clear-icon,
 .operation-item {
   background-color: transparent !important;
   border-radius: 0 !important;
-  border: none !important;
+  border: 1px solid transparent !important;
 }
 
 /* RESET COMPLETO Y UNIFICADO PARA P-DROPDOWN */
@@ -1281,7 +1283,6 @@ input[type="number"]:focus::-webkit-outer-spin-button,
   flex-flow: row nowrap !important;
   align-items: center !important;
   background-color: transparent !important;
-  border: none !important;
   border-radius: 0 !important;
   padding: 1px 4px !important;
   margin-bottom: 1px !important;
@@ -1428,22 +1429,59 @@ input[type="number"]:focus::-webkit-outer-spin-button,
 
 /* ====== RESTABLECER SELECTORES NATIVOS ====== */
 /* Sin `width`: el ancho lo decide `field-sizing: content` + clamp de
-   `.command-type` (min/max), para que el combo siga a la opción elegida. */
+   `.command-type` (min/max), para que el combo siga a la opción elegida.
+   En reposo el combo se lee como texto: sin borde, sin fondo y sin flecha
+   nativa; el padding derecho reserva el hueco del chevron (que aparece al
+   hover/focus) para que el ancho no salte. */
 select.command-type,
 .command .command-type,
 .operation-item select.command-type {
   height: 30px !important;
-  padding: 0 0.5rem !important;
-  border: 1px solid #ced4da !important;
+  /* Hueco compacto para el chevron de hover (no visible en reposo). */
+  padding: 0 10px 0 2px !important;
+  border: 1px solid transparent !important;
   border-radius: 4px !important;
   margin: 0 4px !important;
-  background-color: white !important;
+  background-color: transparent !important;
   font-size: 14px !important;
   font-family: inherit !important;
   line-height: 30px !important;
   vertical-align: middle !important;
-  appearance: auto !important;
+  appearance: none !important;
   box-sizing: border-box !important;
+}
+
+/* Commands/Operations como texto libre: la caja y los controles muestran su
+   chrome editable al pasar el ratón o al editar (focus-within). */
+.command .command-value,
+.command .number-input,
+.operation-item .command-value,
+.operation-item .number-input {
+  border-color: transparent !important;
+  background-color: transparent !important;
+}
+
+.command:hover select.command-type,
+.command:focus-within select.command-type,
+.operation-item:hover select.command-type,
+.operation-item:focus-within select.command-type {
+  border-color: #ced4da !important;
+  background-color: white !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23666' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1px center;
+}
+
+.command:hover .command-value,
+.command:hover .number-input,
+.command:focus-within .command-value,
+.command:focus-within .number-input,
+.operation-item:hover .command-value,
+.operation-item:hover .number-input,
+.operation-item:focus-within .command-value,
+.operation-item:focus-within .number-input {
+  border-color: #ced4da !important;
+  background-color: white !important;
 }
 
 /* ====== INPUTS NUMÉRICOS ====== */
@@ -1494,11 +1532,28 @@ input[type="number"],
   flex-flow: row nowrap !important;
   align-items: center !important;
   background-color: transparent !important;
-  border: none !important;
   border-radius: 0 !important;
   padding: 4px 8px !important;
   margin-bottom: 4px !important;
   gap: 4px !important;
+}
+
+/* Commands/Operations como texto libre: en reposo no se ve caja; al pasar
+   el ratón o al editar (focus-within) aparece el borde de la caja. */
+.command,
+.operation-item {
+  border: 1px solid transparent !important;
+}
+
+.command:hover,
+.command:focus-within,
+.operation-item:hover,
+.operation-item:focus-within {
+  border-color: #e8e8e8 !important;
+}
+
+.notes-input {
+  border: none !important;
 }
 
 /* ====== BOTONES ====== */
@@ -2015,4 +2070,71 @@ p-inputnumber .p-inputnumber-button-group > * {
 .p-inputnumber-button-group > * + *,
 p-inputnumber .p-inputnumber-button-group > * + * {
   margin-top: -1px !important;
+}
+
+/* ====== COMMANDS/OPERATIONS COMO TEXTO LIBRE ====== */
+/* Comas entre comandos/operaciones dentro de su propia caja, para que el
+   wrap de la fila no las separe del elemento anterior. */
+.command:has(+ .command)::after,
+.operation-item:has(+ .operation-item)::after {
+  content: ',';
+  margin: 0 2px 0 1px;
+  color: #777;
+  pointer-events: none;
+}
+
+/* `$` y `✕`: siempre visibles, sin chrome en reposo; al hover del comando
+   (o al editar) recuperan el aspecto de botón. Conservan sus tooltips. */
+.command-actions .p-button,
+.command-controls .p-button {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  color: #666 !important;
+  transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+}
+
+.command:hover .command-actions .p-button,
+.command:focus-within .command-actions .p-button,
+.operation-item:hover .command-controls .p-button,
+.operation-item:focus-within .command-controls .p-button {
+  border-color: #ccc !important;
+  background-color: white !important;
+  color: #333 !important;
+}
+
+/* Foco de teclado claro (accesibilidad) sin ensuciar el clic con ratón. */
+.command select:focus-visible,
+.command input:focus-visible,
+.operation-item select:focus-visible,
+.operation-item input:focus-visible,
+.command-actions .p-button:focus-visible,
+.command-controls .p-button:focus-visible {
+  outline: 2px solid rgba(0, 119, 204, 0.55) !important;
+  outline-offset: 1px;
+}
+
+/* PATTERN embebido: notas como texto, con comas entre elementos (incluidos
+   grupos) y sin bordes en reposo; el `+` de añadir nota queda excluido y los
+   hosts son inline-flex para que la coma quede centrada en la línea. */
+.commands-row app-melody-editor .notes-container > app-melody-note,
+.commands-row app-melody-editor .notes-container > app-melody-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.commands-row app-melody-editor .notes-container > * + *:not(.add-note)::before {
+  content: ',';
+  margin-right: 2px;
+  color: #777;
+  pointer-events: none;
+}
+
+.commands-row app-melody-editor .note-item {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.commands-row .command:hover app-melody-editor .note-item,
+.commands-row .command:focus-within app-melody-editor .note-item {
+  border-color: rgba(0, 0, 0, 0.1);
 }

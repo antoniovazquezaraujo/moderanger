@@ -8,7 +8,8 @@
             <div *ngFor="let command of block.commands" class="command">
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
                     <optgroup label="">
-                        <option *ngFor="let type of commandTypeNames" [value]="type">{{type}}</option>
+                        <!-- El `:` es solo presentación; el valor del modelo no cambia. -->
+                        <option *ngFor="let type of commandTypeNames" [value]="type">{{typeLabel(type)}}:</option>
                     </optgroup>
                 </select>
 
@@ -124,7 +125,7 @@
         <div class="container-wrapper operations-container">
             <div *ngFor="let operation of operations; let i = index" class="operation-item">
                 <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">
-                    <option *ngFor="let type of operationTypeNames" [value]="type">{{type}}</option>
+                    <option *ngFor="let type of operationTypeNames" [value]="type">{{typeLabel(type)}}:</option>
                 </select>
                 <select class="command-type" 
                     [(ngModel)]="operation.variableName" 
