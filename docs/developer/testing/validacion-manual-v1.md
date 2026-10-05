@@ -115,11 +115,22 @@
 - [ ] **9.3.** `:syntax list mrCommand` (y `mrSection`, `mrVariable`, `mrDuration`, `mrEnum`) listan grupos de resaltado.
 - [ ] **9.4.** Los ficheros `*.mr` siguen detectándose como `mr` aunque el contenido empiece por un comentario (fuerza el filetype en `ftdetect`).
 
-## 10. Cierre: suite, build y registro
+## 10. Caso 10 — Drag & drop de bloques (fix/block-dnd, 2026-10-05)
 
-- [ ] **10.1.** `npm test` en verde: **28 suites / 367 tests** (cifra de la v1, 2026-10-03).
-- [ ] **10.2.** `npm run build` termina con exit 0.
-- [ ] **10.3.** Registro de resultados:
+- [ ] **10.1.** Partiendo de `anidado.mr` (o de bloques con hijos), comprueba que **solo los bloques hijos** muestran el asa `⋮⋮` a la izquierda del desplegable; el bloque raíz del árbol no la muestra.
+- [ ] **10.2.** Arrastra un bloque **desde el asa** y suéltalo entre dos líneas del mismo padre: se reordena y, al guardar el `.mr`, el nuevo orden persiste.
+- [ ] **10.3.** Arrástralo y suéltalo **sobre la cabecera de otro bloque**: se anida en él y el destino se expande para mostrar el bloque movido.
+- [ ] **10.4.** Suéltalo en la línea **superior/inferior** del árbol de un bloque con contenido: pasa a ser el primer/último hijo (no desaparece) y persiste al guardar.
+- [ ] **10.5.** Durante el arrastre, las líneas de inserción se ven gruesas y verdes al apuntarlas, y el bloque bajo el cursor se resalta con fondo y borde verdes.
+- [ ] **10.6.** Intenta arrastrar seleccionando texto del nombre, las repeticiones o las notas del editor de melodía: no debe iniciarse ningún drag ni moverse ningún bloque.
+- [ ] **10.7.** Arrastra un bloque y **suéltalo sobre sí mismo**: no ocurre nada (el drop se ignora).
+- [ ] **10.8.** No aparecen errores nuevos en la consola del navegador durante las pruebas.
+
+## 11. Cierre: suite, build y registro
+
+- [ ] **11.1.** `npm test` en verde: **28 suites / 367 tests** (cifra de la v1, 2026-10-03).
+- [ ] **11.2.** `npm run build` termina con exit 0.
+- [ ] **11.3.** Registro de resultados:
 
 | Caso | Resultado | Notas |
 |---|---|---|
@@ -132,9 +143,10 @@
 | 7. Variables | ☐ OK ☐ Falla | |
 | 8. Anidados | ☐ OK ☐ Falla | |
 | 9. NeoVim | ☐ OK ☐ Falla | |
-| 10. Suite + build | ☐ OK ☐ Falla | |
+| 10. Drag & drop de bloques | ☐ OK ☐ Falla | |
+| 11. Suite + build | ☐ OK ☐ Falla | |
 
-- [ ] **10.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
+- [ ] **11.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
 
 ```text
 - …

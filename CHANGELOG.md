@@ -26,6 +26,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Fixed
 
+- Block drag & drop: the tree keeps a stable value reference while dragging, drag starts only from the new visible handle, insertion drop points are larger and highlighted, and dropping a block onto another one expands the target so the moved block stays visible.
 - Group duration inheritance (`4n:( 0 2 )` → children inherit the group duration).
 - The `.mr` editor reloaded stale model text after Apply.
 - The operation variable select lost its selection during playback (VARY).
