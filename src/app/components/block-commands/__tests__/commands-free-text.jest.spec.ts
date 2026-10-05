@@ -53,11 +53,33 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     expect(declaration(ruleBody(styles, '.operation-item:focus-within'), 'border-color')).toBe('#e8e8e8 !important');
   });
 
-  it('las comas viven dentro de la caja del comando y entre notas del PATTERN', () => {
+  it('las comas viven dentro de la caja del comando y entre notas de cualquier editor', () => {
     expect(styles).toMatch(/\.command:has\(\+ \.command\)::after/);
-    expect(styles).toMatch(/\.commands-row app-melody-editor \.notes-container > \* \+ \*:not\(\.add-note\)::before/);
+    expect(styles).toMatch(/app-melody-editor \.notes-container > \* \+ \*:not\(\.add-note\)::before/);
     // Hosts de nota en línea para que la coma quede centrada.
-    expect(styles).toMatch(/\.commands-row app-melody-editor \.notes-container > app-melody-note[\s\S]*?display:\s*inline-flex/);
+    expect(styles).toMatch(/app-melody-editor \.notes-container > app-melody-note[\s\S]*?display:\s*inline-flex/);
+  });
+
+  it('compacta commands: gaps, padding, acciones e inputs numéricos al contenido', () => {
+    // Caja pegada.
+    const box = ruleBody(styles, '.operations-container > .operation-item');
+    expect(declaration(box, 'gap')).toBe('1px !important');
+    expect(declaration(box, 'padding')).toBe('1px 2px !important');
+
+    // Acciones y botones sin aire extra.
+    const actions = ruleBody(styles, '.operation-item > .command-controls');
+    expect(declaration(actions, 'margin-left')).toBe('0 !important');
+    expect(declaration(actions, 'gap')).toBe('1px !important');
+    const buttons = ruleBody(styles, '.command-controls .p-button');
+    expect(declaration(buttons, 'margin')).toBe('0 !important');
+
+    // Inputs numéricos liberados del 45px global y con field-sizing.
+    const input = ruleBody(styles, '.operation-item input.number-input');
+    expect(declaration(input, 'width')).toBe('auto !important');
+    expect(declaration(input, 'min-width')).toBe('24px !important');
+    expect(declaration(input, 'max-width')).toBe('64px !important');
+    expect(declaration(input, 'height')).toBe('20px !important');
+    expect(declaration(input, 'field-sizing')).toBe('content');
   });
 
   it('los iconos $/✕ no tienen chrome en reposo y lo recuperan al hover', () => {
