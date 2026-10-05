@@ -2,10 +2,10 @@
 
 - **Fecha:** 2026-10-05
 - **Autor:** JORGE (UI/UX)
-- **Rama:** `feat/block-tree-guides` (base `develop`)
-- **Entorno:** Node v16.20.2 / npm 8.19.4 / Chrome 153 headless (CDP, puerto 4303)
-- **Alcance:** la indentación del árbol no dejaba clara la relación padre→hijo. Se añaden **guías visuales tipo explorador de ficheros** (VS Code): una línea vertical tenue por nivel y un conector horizontal corto hacia cada bloque, en estilo neutro y sin resaltado de rama activa.
-- **Estado:** 33 suites / 425 tests en verde, `npm run build` exit 0, verificación funcional con captura headless y drags sintéticos sin errores de consola.
+- **Rama:** `feat/block-tree-guides` + `fix/tree-guides-contrast` (refuerzo de contraste), base `develop`
+- **Entorno:** Node v16.20.2 / npm 8.19.4 / Chrome 153 headless (CDP, puertos 4302/4304)
+- **Alcance:** la indentación del árbol no dejaba clara la relación padre→hijo. Se añaden **guías visuales tipo explorador de ficheros** (VS Code): una línea vertical por nivel y un conector horizontal corto hacia cada bloque, en estilo neutro y sin resaltado de rama activa. El trazo se reforzó después (2px, `#a3a3a3`) tras el feedback «las líneas más gruesas se ven poco».
+- **Estado:** 33 suites / 426 tests en verde, `npm run build` exit 0, verificación funcional con captura headless, medición de píxeles y drags sintéticos sin errores de consola.
 
 ## 1. DOM real de PrimeNG 13.3.3
 
@@ -50,11 +50,12 @@ Todo vive en la sección `.p-tree` de `src/styles.css`:
 
 .p-tree .p-treenode-children::before {
   content: ''; position: absolute; top: 0; bottom: 0;
-  left: 8px; width: 1px; background-color: #d9d9d9; pointer-events: none;
+  left: 7px; width: 2px; background-color: #a3a3a3; pointer-events: none;
 }
 ```
 
-- Una sola regla recursiva: cada `ul` anidado pinta su propia guía a 8px de su borde (el punto medio visual de la franja de indentación).
+- Una sola regla recursiva: cada `ul` anidado pinta su propia guía centrada en la franja de indentación.
+- Con 2px de ancho, `left: 7px` deja el trazo en `[7,9)` respecto al borde del `ul`: centro exacto a 8px (mitad de la franja de 16px) y borde derecho a 9px, justo donde arranca el conector horizontal. Así no hay ni hueco ni solape y el eje visual es el mismo que con 1px (`left: 8px` crecía hacia la derecha y descentraba el trazo).
 - La lista raíz (`.p-tree-container`) **no** lleva guía: solo las listas de hijos.
 - `pointer-events: none`: el droppoint y el drag & drop no se ven afectados.
 
@@ -66,9 +67,9 @@ Todo vive en la sección `.p-tree` de `src/styles.css`:
   width: calc(100% + 14px) !important;
   margin-left: -14px !important;
   padding-left: 14px !important;
-  background-image: linear-gradient(to right, #d9d9d9, #d9d9d9);
+  background-image: linear-gradient(to right, #a3a3a3, #a3a3a3);
   background-repeat: no-repeat;
-  background-size: 12px 1px;
+  background-size: 12px 2px;
   background-position: 1px center;
 }
 ```
@@ -80,9 +81,9 @@ Todo vive en la sección `.p-tree` de `src/styles.css`:
 
 ### Decisiones UX
 
-- **Trazo neutro `#d9d9d9`**, coherente con los bordes `#ddd` de los bloques; sin resaltado de rama activa (opción elegida por el usuario).
-- **Sin layout shift:** el contenido mantiene sus coordenadas (verificado: `contentLeft` 52/68 y asa en 58/74 antes y después); solo cambia la caja de pintado.
-- La guía se alinea a 8px del inicio del nivel (no al centro del chevron del padre): en este layout el centro del control del padre coincide con la x del contenido del hijo y el conector cruzaría el asa de arrastre.
+- **Trazo neutro `#a3a3a3` de 2px** (antes 1px `#d9d9d9`): gris medio coherente con el tema que se ve sin resultar agresivo; sin resaltado de rama activa (opción elegida por el usuario). El refuerzo responde al feedback de que el trazo fino se percibía poco.
+- **Sin layout shift:** el contenido mantiene sus coordenadas (verificado: `contentLeft` 52/68 y asa en 58/74 antes y después); solo cambia la caja de pintado y el grosor/posición de la línea.
+- La guía se ancla a 8px del inicio del nivel (no al centro del chevron del padre): en este layout el centro del control del padre coincide con la x del contenido del hijo y el conector cruzaría el asa de arrastre.
 - Los bloques raíz (árbol `[block]` con contenido y raíces del contenedor clásico) no reciben conector: no hay guía de la que colgar.
 
 ## 3. Verificación
@@ -93,33 +94,34 @@ Canción `.mr` aplicada desde el diálogo: `Piano > Nivel1 > Nivel2 > Nivel3` (b
 
 | Comprobación | Resultado |
 |---|---|
-| Líneas verticales (2 en el árbol 1, 1 en el contenedor) | `::before` absoluto, `left: 8px`, `1px`, `rgb(217,217,217)`, `pointer-events: none` ✅ |
-| Conectores en Nivel2, Nivel3 y NietoA | fondo `12px 1px`, `position: 1px center`, gradient `#d9d9d9` ✅ |
+| Líneas verticales (2 en el árbol 1, 1 en el contenedor) | `::before` absoluto, `left: 7px`, `2px`, `rgb(163,163,163)`, `pointer-events: none` ✅ |
+| Conectores en Nivel2, Nivel3 y NietoA | fondo `12px 2px`, `position: 1px center`, gradient `#a3a3a3` ✅ |
 | Raíces Nivel1 / SueltoA / SueltoB sin conector | `background-image: none` ✅ |
-| Render real (píxeles de la captura) | conector continuo de x=44 a 57 y línea de x=44 a 45; gap de 1px antes del asa ✅ |
-| Sin layout shift | `contentLeft` 52/68, asa 58/74 y ancho de contenido intactos ✅ |
+| Render real (píxeles de la captura, scale 8) | línea de x=43 a 45 (2px) y conector continuo hasta x=57, todo `rgb(163,163,163)`; gap de 1px antes del asa (x=57→58) ✅ |
+| Grosor vertical del conector (píxeles) | 2px exactos ✅ |
+| Sin layout shift | `contentLeft` 52/68, caja del header 44/60, asa 58/74 y ancho de contenido intactos ✅ |
 | Droppoint del fix #79 | 12px de alto, línea al 4px ✅ |
 | Asa del fix #79 | `pi pi-bars`, `cursor: grab`, 18px, solo en nodos hijos ✅ |
 | DnD reordenar (`SueltoB` antes de `SueltoA`) | modelo `[SueltoB, SueltoA]` ✅ |
 | DnD cross-tree (`NietoA` sobre `Nivel2`) | `Nivel2.children = [Nivel3, NietoA]`, destino expandido y visible ✅ |
 | `dragstart` sin asa / del raíz | cancelado (`preventDefault`) y modelo intacto ✅ |
 | Consola del navegador | 0 errores, 0 warnings ✅ |
-| `npm test` / `npm run build` | 33 suites / 425 tests ✅ / exit 0 ✅ |
+| `npm test` / `npm run build` | 33 suites / 426 tests ✅ / exit 0 ✅ |
 
-Captura de referencia: `/tmp/opencode/tree-guides.png` (árbol con 3 niveles + contenedor).
+Captura de referencia: `/tmp/opencode/tree-guides-v2.png` (árbol con 3 niveles + contenedor) y zoom a escala 8 en `/tmp/opencode/tree-guides-v2-zoom.png`.
 
 ### Manual (repetible)
 
 1. `npm start` y abre `http://localhost:4200`.
 2. Aplica un `.mr` anidado (p. ej. el fixture de la nueva validación manual, caso 11) y expande hasta el tercer nivel.
-3. Comprueba que cada nivel tiene su línea vertical tenue y que cada bloque anidado recibe un conector horizontal corto hacia el asa.
+3. Comprueba que cada nivel tiene su línea vertical de 2px en gris medio y que cada bloque anidado recibe un conector horizontal corto hacia el asa.
 4. Comprueba que las raíces no tienen conector y que no se solapa con droppoints (12px) ni asas.
 5. Pasa el ratón por las líneas: no deben capturar clics ni bloquear el drag & drop.
 
 ## 4. Limitaciones
 
 - El conector y las líneas **no son interactivos** (no se puede colapsar pulsando la guía): no se introdujo JavaScript.
-- Color fijo claro (`#d9d9d9`); no hay variante para tema oscuro.
+- Color fijo (`#a3a3a3`); no hay variante para tema oscuro.
 - La caja del header en filas anidadas se extiende 14px a la izquierda (hacia la guía). Es una franja sin contenido; el asa y los controles mantienen su posición.
 
 ## 5. Referencias
@@ -128,4 +130,4 @@ Captura de referencia: `/tmp/opencode/tree-guides.png` (árbol con 3 niveles + c
 - `src/app/components/block/block.component.html` / `.ts` (árbol, asa y DnD).
 - `src/app/components/block/__tests__/block-tree-guides.jest.spec.ts` (contrato CSS).
 - `docs/developer/analysis/drag-drop-bloques.md` (fix #79 que se preserva).
-- PR: `feat/block-tree-guides` → `develop`.
+- PRs: `feat/block-tree-guides` → `develop` (#80) y `fix/tree-guides-contrast` → `develop` (#81).
