@@ -89,8 +89,12 @@
   text-align: center;
 }
 
+/* Auto-fit al contenido (styles.css: `select { field-sizing: content }`) con
+   clamp: títulos de comando cortos ya no ocupan 120px y los largos
+   (PLAYMODE, etiquetas de variable) no desbordan la fila. */
 .command-type {
-  min-width: 80px;
+  min-width: 44px;
+  max-width: 140px;
   text-align: left;
 }
 
@@ -188,10 +192,6 @@
   .commands-container,
   .operations-container {
     gap: 2px;
-  }
-  
-  .command-type {
-    min-width: 80px;
   }
   
   .command-value,
