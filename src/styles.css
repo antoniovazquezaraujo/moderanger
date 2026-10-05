@@ -190,23 +190,28 @@ h1 { /* Add some style for the header */
 }
 
 /* Guías visuales del árbol de bloques (estilo explorador de ficheros):
-   una línea vertical tenue por cada nivel de anidación y un conector
-   horizontal corto hacia cada bloque. No alteran el layout (la indentación
-   de 1rem por nivel la sigue aportando el padding de `.p-treenode-children`)
-   ni interfieren con el drag & drop (`pointer-events: none`, asa y
-   droppoints intactos). */
+   una línea vertical por cada nivel de anidación y un conector horizontal
+   corto hacia cada bloque. Trazo neutro de 2px en gris medio (contraste
+   reportado como insuficiente con 1px/#d9d9d9). No alteran el layout (la
+   indentación de 1rem por nivel la sigue aportando el padding de
+   `.p-treenode-children`) ni interfieren con el drag & drop
+   (`pointer-events: none`, asa y droppoints intactos). */
 .p-tree .p-treenode-children {
   position: relative;
 }
 
+/* `left: 7px` con `width: 2px` deja la línea centrada en la mitad exacta de
+   la franja de indentación (8px desde el borde del `ul`) y su borde derecho
+   (x+9) empalma con el inicio del conector, que arranca a `1px` de la caja
+   extendida del header. */
 .p-tree .p-treenode-children::before {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 8px;
-  width: 1px;
-  background-color: #d9d9d9;
+  left: 7px;
+  width: 2px;
+  background-color: #a3a3a3;
   pointer-events: none;
 }
 
@@ -220,9 +225,9 @@ h1 { /* Add some style for the header */
   width: calc(100% + 14px) !important;
   margin-left: -14px !important;
   padding-left: 14px !important;
-  background-image: linear-gradient(to right, #d9d9d9, #d9d9d9);
+  background-image: linear-gradient(to right, #a3a3a3, #a3a3a3);
   background-repeat: no-repeat;
-  background-size: 12px 1px;
+  background-size: 12px 2px;
   background-position: 1px center;
 }
 

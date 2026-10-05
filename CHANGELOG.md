@@ -21,6 +21,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- Block tree hierarchy guides are thicker (2px) and use a darker neutral grey (`#a3a3a3`) so the parent/child lines are easier to see (user feedback after the initial 1px `#d9d9d9` release).
 - `Repeat` and `BPM` live in `Song` (canonical) and are applied by the player; live-tempo while playing.
 - Editor silences are rendered as `s` (previously `x`).
 - Documentation reorganized into `docs/user/` (public) and `docs/developer/` (internal).
