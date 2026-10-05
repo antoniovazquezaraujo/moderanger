@@ -21,6 +21,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- Commands/Operations now read as free text: capitalized type labels with colon (`Inv: 0`), no borders/backgrounds or native select arrow at rest, commas between commands and between PATTERN notes. The editable chrome (box border, control borders, own chevron, `$`/`✕` buttons) appears on hover or focus. Model and `.mr` are untouched (display-only labels).
 - Selects now auto-fit their selected option (`field-sizing: content`, progressive) with per-component clamps: command selects 44–140px, toolbar duration 40–80px, variable selects 60–160px. Browsers without support keep the previous intrinsic width.
 - GUI width trim (low-risk items from the width audit): metronome reduced from 32 to 16 dots; tighter block header (repetitions 48px, controls 70px, 6px between items); narrower song toolbar (name 120px, Repeat 32px, BPM 45px, 10px gap); part name box 88px.
 - Block tree hierarchy guides are thicker (2px) and use a darker neutral grey (`#a3a3a3`) so the parent/child lines are easier to see (user feedback after the initial 1px `#d9d9d9` release).

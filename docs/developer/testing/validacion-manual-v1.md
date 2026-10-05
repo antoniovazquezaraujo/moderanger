@@ -156,11 +156,21 @@
 - [ ] **13.6.** No aparecen errores nuevos en la consola del navegador.
 - [ ] **13.7.** Combos auto-fit (`field-sizing`): el select de tipo de comando mide ~59px con `OCT` y crece con opciones largas (`PLAYMODE` ~95px, `PATTERN_GAP` ~111px) sin pasar de 140px; el combo de duración por defecto se mueve entre 40 y 80px; los selects de variables quedan entre 60 y 160px. La flecha nativa y el texto se ven en los casos normales; por encima del máximo el texto se recorta sin elipsis (limitación aceptada).
 
-## 14. Cierre: suite, build y registro
+## 14. Caso 14 — Commands/Operations en texto libre (style/commands-free-text, 2026-10-06)
 
-- [ ] **14.1.** `npm test` en verde: **35 suites / 440 tests** (cifra a 2026-10-05).
-- [ ] **14.2.** `npm run build` termina con exit 0.
-- [ ] **14.3.** Registro de resultados:
+- [ ] **14.1.** En reposo, cada comando se lee como texto con la etiqueta capitalizada y `:` (`Oct: oct (2) $ ✕, Scale: WHITE $ ✕, Pattern: 4n 1, 2n 3, 2n 6 + $ ✕`); sin bordes, fondos ni flecha nativa. El `.mr` no cambia: al guardar sigue `OCT`, `VARY`, etc.
+- [ ] **14.2.** Los iconos `$` y `✕` están siempre visibles sin chrome de botón; al pasar el ratón por el comando (o al editar) aparecen el borde de la caja, los bordes/fondos de los controles y un chevron propio en el combo; al salir vuelven al reposo.
+- [ ] **14.3.** PATTERN con melodía literal: las notas llevan comas entre ellas (`4n 1, 2n 3`) y el botón `+` de añadir nota sigue funcionando; en reposo no tiene borde.
+- [ ] **14.4.** Operaciones con el mismo tratamiento (`Vary: …`, `Assign: …`), comas entre items y sin caja en reposo.
+- [ ] **14.5.** Con teclado, `:focus-visible` marca el control enfocado; el foco dentro de un comando muestra su chrome editable.
+- [ ] **14.6.** Los tooltips de `$`, `✕` y del asa siguen funcionando; no queda ningún `.p-tooltip` tras un drag.
+- [ ] **14.7.** Sin scroll horizontal nuevo ni errores en consola; las guías y el DnD siguen igual.
+
+## 15. Cierre: suite, build y registro
+
+- [ ] **15.1.** `npm test` en verde: **37 suites / 450 tests** (cifra a 2026-10-06).
+- [ ] **15.2.** `npm run build` termina con exit 0.
+- [ ] **15.3.** Registro de resultados:
 
 | Caso | Resultado | Notas |
 |---|---|---|
@@ -177,9 +187,10 @@
 | 11. Guías de jerarquía | ☐ OK ☐ Falla | |
 | 12. Ramal de la guía | ☐ OK ☐ Falla | |
 | 13. Recortes de anchura | ☐ OK ☐ Falla | |
-| 14. Suite + build | ☐ OK ☐ Falla | |
+| 14. Commands/Operations en texto libre | ☐ OK ☐ Falla | |
+| 15. Suite + build | ☐ OK ☐ Falla | |
 
-- [ ] **14.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
+- [ ] **15.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
 
 ```text
 - …
