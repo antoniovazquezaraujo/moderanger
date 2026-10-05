@@ -2078,7 +2078,7 @@ p-inputnumber .p-inputnumber-button-group > * + * {
 .command:has(+ .command)::after,
 .operation-item:has(+ .operation-item)::after {
   content: ',';
-  margin: 0 2px 0 1px;
+  margin: 0 1px;
   color: #777;
   pointer-events: none;
 }
@@ -2090,6 +2090,7 @@ p-inputnumber .p-inputnumber-button-group > * + * {
   border-color: transparent !important;
   background-color: transparent !important;
   color: #666 !important;
+  margin: 0 !important;
   transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease;
 }
 
@@ -2113,28 +2114,59 @@ p-inputnumber .p-inputnumber-button-group > * + * {
   outline-offset: 1px;
 }
 
-/* PATTERN embebido: notas como texto, con comas entre elementos (incluidos
-   grupos) y sin bordes en reposo; el `+` de añadir nota queda excluido y los
-   hosts son inline-flex para que la coma quede centrada en la línea. */
-.commands-row app-melody-editor .notes-container > app-melody-note,
-.commands-row app-melody-editor .notes-container > app-melody-group {
+/* Notas en cualquier melody editor (header del bloque y PATTERN): comas
+   entre elementos (incluidos grupos), `+` de añadir excluido y hosts
+   inline-flex para que la coma quede centrada en la línea. El chrome de la
+   nota (borde/fondo al hover o al seleccionar) vive en melody-note. */
+app-melody-editor .notes-container > app-melody-note,
+app-melody-editor .notes-container > app-melody-group {
   display: inline-flex;
   align-items: center;
 }
 
-.commands-row app-melody-editor .notes-container > * + *:not(.add-note)::before {
+app-melody-editor .notes-container > * + *:not(.add-note)::before {
   content: ',';
   margin-right: 2px;
   color: #777;
   pointer-events: none;
 }
 
-.commands-row app-melody-editor .note-item {
-  border-color: transparent;
-  background-color: transparent;
+/* ====== COMMANDS/OPERATIONS COMPACTOS ====== */
+/* Menos aire entre controles y en los bordes de la caja; la coma y los
+   botones comparten el gap mínimo. */
+.commands-container > .command,
+.operations-container > .operation-item {
+  gap: 1px !important;
+  padding: 1px 2px !important;
 }
 
-.commands-row .command:hover app-melody-editor .note-item,
-.commands-row .command:focus-within app-melody-editor .note-item {
-  border-color: rgba(0, 0, 0, 0.1);
+.command select.command-type,
+.operation-item select.command-type {
+  margin: 0 1px !important;
+}
+
+.command > .command-actions,
+.operation-item > .command-controls {
+  margin-left: 0 !important;
+  gap: 1px !important;
+}
+
+/* Inputs numéricos de estas filas: al contenido (field-sizing) con clamp,
+   liberados del ancho global de 80/45px y a 20px de alto. Se incluyen las
+   variantes con `input.` para batir la especificidad del reset global. */
+.command .command-value,
+.operation-item .command-value,
+.command .number-input,
+.operation-item .number-input,
+.command input.command-value.number-input,
+.operation-item input.command-value.number-input,
+.command input.number-input,
+.operation-item input.number-input {
+  width: auto !important;
+  min-width: 24px !important;
+  max-width: 64px !important;
+  height: 20px !important;
+  margin: 0 1px !important;
+  padding: 0 2px !important;
+  field-sizing: content;
 }
