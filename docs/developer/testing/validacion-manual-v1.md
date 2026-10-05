@@ -154,10 +154,11 @@
 - [ ] **13.4.** `.part-info` a 88px: el nombre de la parte se sigue viendo y editando con comodidad.
 - [ ] **13.5.** Las guías del árbol siguen alineadas (la guía sube hasta el asa y el conector empalma con ella) y el DnD (#79) y el tooltip del asa (#83) funcionan igual.
 - [ ] **13.6.** No aparecen errores nuevos en la consola del navegador.
+- [ ] **13.7.** Combos auto-fit (`field-sizing`): el select de tipo de comando mide ~59px con `OCT` y crece con opciones largas (`PLAYMODE` ~95px, `PATTERN_GAP` ~111px) sin pasar de 140px; el combo de duración por defecto se mueve entre 40 y 80px; los selects de variables quedan entre 60 y 160px. La flecha nativa y el texto se ven en los casos normales; por encima del máximo el texto se recorta sin elipsis (limitación aceptada).
 
 ## 14. Cierre: suite, build y registro
 
-- [ ] **14.1.** `npm test` en verde: **33 suites / 436 tests** (cifra a 2026-10-05).
+- [ ] **14.1.** `npm test` en verde: **35 suites / 440 tests** (cifra a 2026-10-05).
 - [ ] **14.2.** `npm run build` termina con exit 0.
 - [ ] **14.3.** Registro de resultados:
 

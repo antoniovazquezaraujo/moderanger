@@ -25,12 +25,24 @@
     height: 24px;
 }
 
-input[type="text"], select {
+input[type="text"] {
     @extend .variable-input;
     min-width: 120px;
     
     @media (max-width: 768px) {
         min-width: 80px;
+        font-size: 12px;
+    }
+}
+
+/* Combos con auto-fit (field-sizing global) y clamp: los tipos y valores
+   cortos no ocupan 120px fijos y los nombres largos tienen tope. */
+select {
+    @extend .variable-input;
+    min-width: 60px;
+    max-width: 160px;
+    
+    @media (max-width: 768px) {
         font-size: 12px;
     }
 }
@@ -75,10 +87,10 @@ input[type="text"], select {
     }
 
     select {
-        min-width: 100px;
+        min-width: 60px;
+        max-width: 160px;
         
         @media (max-width: 768px) {
-            min-width: 80px;
             font-size: 12px;
         }
     }

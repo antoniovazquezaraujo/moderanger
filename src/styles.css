@@ -526,14 +526,15 @@ body .p-dropdown .p-dropdown-trigger {
   justify-content: center !important;
 }
 
-/* Estilos para los elementos select y input estándar */
+/* Estilos para los elementos select y input estándar.
+   Sin `width` en los selects: se ajustan al contenido con `field-sizing`
+   y el clamp de `.command-type`; los inputs numéricos mantienen su regla. */
 select.command-type,
 .command .command-type,
 .operation-item select.command-type,
 .operation-item input.command-value,
 .command input.command-value,
 .operation-item .number-input {
-  width: 120px;
   height: 30px;
   box-sizing: border-box;
   padding: 0 0.5rem;
@@ -1287,9 +1288,10 @@ input[type="number"]:focus::-webkit-outer-spin-button,
   gap: 2px !important;
 }
 
-/* Reset for select nativo */
+/* Reset for select nativo.
+   Sin `width`: el combo se ajusta a la opción seleccionada (field-sizing);
+   el clamp del componente (`.command-type`, min 44 / max 140) lo acota. */
 .command-type {
-  width: 120px !important;
   height: 30px !important;
   padding: 0 0.5rem !important;
   border: 1px solid #ced4da !important;
@@ -1425,10 +1427,11 @@ input[type="number"]:focus::-webkit-outer-spin-button,
 }
 
 /* ====== RESTABLECER SELECTORES NATIVOS ====== */
+/* Sin `width`: el ancho lo decide `field-sizing: content` + clamp de
+   `.command-type` (min/max), para que el combo siga a la opción elegida. */
 select.command-type,
 .command .command-type,
 .operation-item select.command-type {
-  width: 120px !important;
   height: 30px !important;
   padding: 0 0.5rem !important;
   border: 1px solid #ced4da !important;
@@ -1744,6 +1747,15 @@ select,
   background-color: white;
   font-size: 11px !important;
   font-family: inherit;
+}
+
+/* Los combos se ajustan a su contenido (CSS Form Control Styling, Baseline
+   2026): el ancho sigue a la opción seleccionada y los clamps por componente
+   (min/max) evitan saltos. Progresiva: sin soporte conservan el ancho
+   intrínseco actual. Solo `select`; los inputs numéricos compactos (32/45px)
+   no se tocan. Un `width` explícito sigue mandando (p. ej. duración de nota). */
+select {
+  field-sizing: content;
 }
 
 /* Estilos para botones en todos los componentes - PEQUEÑOS */
