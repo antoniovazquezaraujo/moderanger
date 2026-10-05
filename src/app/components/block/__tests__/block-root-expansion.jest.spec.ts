@@ -7,6 +7,7 @@
  * igual que el resto de specs de componente del proyecto.
  */
 import { Block } from 'src/app/model/block';
+import type { ChangeDetectorRef } from '@angular/core';
 
 jest.mock('@angular/core', () => {
   const sharedMock = jest.requireActual<Record<string, unknown>>('src/__mocks__/angular-core');
@@ -48,6 +49,12 @@ import { BlockComponent } from '../block.component';
 
 type BlockNode = Block & { expanded?: boolean };
 
+const cdr = { detectChanges: jest.fn() } as unknown as ChangeDetectorRef;
+
+function createComponent(): BlockComponent {
+  return new BlockComponent(cdr);
+}
+
 function rootWithChild(): Block {
   const root = new Block();
   root.label = 'Origen';
@@ -61,7 +68,7 @@ function rootWithChild(): Block {
 describe('BlockComponent · bloques raíz expandidos (#13)', () => {
   it('expande el raíz con contenido y hijos y lo pinta como nodo propio', () => {
     const root = rootWithChild();
-    const component = new BlockComponent();
+    const component = createComponent();
 
     component.block = root;
 
@@ -74,7 +81,7 @@ describe('BlockComponent · bloques raíz expandidos (#13)', () => {
     const child = new Block();
     child.label = 'Hijo';
     container.children = [child];
-    const component = new BlockComponent();
+    const component = createComponent();
 
     component.block = container;
 
@@ -85,7 +92,7 @@ describe('BlockComponent · bloques raíz expandidos (#13)', () => {
   it('no expande un raíz con contenido pero sin hijos', () => {
     const root = new Block();
     root.label = 'Solo';
-    const component = new BlockComponent();
+    const component = createComponent();
 
     component.block = root;
 
@@ -94,7 +101,7 @@ describe('BlockComponent · bloques raíz expandidos (#13)', () => {
 
   it('respeta el colapso manual del usuario en re-bindings', () => {
     const root = rootWithChild();
-    const component = new BlockComponent();
+    const component = createComponent();
     component.block = root;
 
     (root as BlockNode).expanded = false;

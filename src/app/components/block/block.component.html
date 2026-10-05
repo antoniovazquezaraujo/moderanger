@@ -20,15 +20,26 @@
     [value]="treeValue" 
     [draggableNodes]="true" 
     [droppableNodes]="true" 
-    draggableScope="self" 
-    droppableScope="self"  
-    (onDragStart)="dragStart(block)" 
-    (onDragEnd)="dragEnd()"
+    draggableScope="blocks" 
+    droppableScope="blocks"  
+    (mousedown)="onTreeMouseDown($event)"
+    (dragstart)="onTreeDragStart($event)" 
+    (dragend)="onTreeDragEnd()"
+    (onNodeDrop)="onNodeDrop($event)"
     [style]="{'height': 'auto', 'overflow-y': 'auto'}">
     <ng-template let-node pTemplate="default">
     <div class="block-content">
-      <!-- Header: Contains toggler, label, controls, repetitions, melody editor -->
+      <!-- Header: Contains drag handle, toggler, label, controls, repetitions, melody editor -->
       <div class="block-header">
+          <!-- Drag handle: the only point that starts a block drag -->
+          <span 
+              class="header-item block-drag-handle" 
+              *ngIf="canDrag(node)"
+              pTooltip="Drag to move block" 
+              tooltipPosition="top"
+              aria-hidden="true">
+              <i class="pi pi-bars"></i>
+          </span>
           <!-- Remove p-treeToggler -->
           
           <!-- Add Toggle Button/Icon - Always visible -->
