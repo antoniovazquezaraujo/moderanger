@@ -126,11 +126,20 @@
 - [ ] **10.7.** Arrastra un bloque y **suéltalo sobre sí mismo**: no ocurre nada (el drop se ignora).
 - [ ] **10.8.** No aparecen errores nuevos en la consola del navegador durante las pruebas.
 
-## 11. Cierre: suite, build y registro
+## 11. Caso 11 — Guías de jerarquía del árbol (feat/block-tree-guides, 2026-10-05)
 
-- [ ] **11.1.** `npm test` en verde: **28 suites / 367 tests** (cifra de la v1, 2026-10-03).
-- [ ] **11.2.** `npm run build` termina con exit 0.
-- [ ] **11.3.** Registro de resultados:
+- [ ] **11.1.** Carga un `.mr` con al menos **tres niveles** de anidación (p. ej. `Piano > Nivel1 > Nivel2 > Nivel3`) y expande hasta el último nivel.
+- [ ] **11.2.** Cada nivel muestra una **línea vertical gris tenue** (continúa por toda la lista de hijos, sin invadir cabeceras) y cada bloque anidado recibe un **conector horizontal corto** desde esa línea hacia su asa de arrastre, con ~1px de separación.
+- [ ] **11.3.** Los bloques **raíz** (tanto de un bloque con contenido propio como de un contenedor clásico) **no** tienen conector: la guía solo cuelga de los padres anidados.
+- [ ] **11.4.** Las guías no generan *layout shift*: las asas, nombres y editores de melodía conservan su posición; el droppoint de 12px y el asa `⋮⋮` del fix #79 siguen igual (ver caso 10).
+- [ ] **11.5.** Pasa el ratón y haz clic sobre las líneas: no seleccionan ni bloquean nada; el drag & drop sigue funcionando (reordenar, anidar y soltar de nuevo con los casos 10.2–10.4).
+- [ ] **11.6.** No aparecen errores nuevos en la consola del navegador.
+
+## 12. Cierre: suite, build y registro
+
+- [ ] **12.1.** `npm test` en verde: **28 suites / 367 tests** (cifra de la v1, 2026-10-03).
+- [ ] **12.2.** `npm run build` termina con exit 0.
+- [ ] **12.3.** Registro de resultados:
 
 | Caso | Resultado | Notas |
 |---|---|---|
@@ -144,9 +153,10 @@
 | 8. Anidados | ☐ OK ☐ Falla | |
 | 9. NeoVim | ☐ OK ☐ Falla | |
 | 10. Drag & drop de bloques | ☐ OK ☐ Falla | |
-| 11. Suite + build | ☐ OK ☐ Falla | |
+| 11. Guías de jerarquía | ☐ OK ☐ Falla | |
+| 12. Suite + build | ☐ OK ☐ Falla | |
 
-- [ ] **11.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
+- [ ] **12.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
 
 ```text
 - …
