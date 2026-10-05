@@ -43,11 +43,15 @@ jest.mock('@angular/core', () => {
   };
 });
 
+import * as fs from 'fs';
+import * as path from 'path';
 import type { ChangeDetectorRef } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { BlockComponent } from '../block.component';
 
 type BlockNode = Block & { expanded?: boolean; parent?: BlockNode };
+
+const TEMPLATE = fs.readFileSync(path.resolve(__dirname, '../block.component.html'), 'utf8');
 
 const cdr = { detectChanges: jest.fn() } as unknown as ChangeDetectorRef;
 
@@ -147,6 +151,48 @@ describe('BlockComponent · drag & drop de bloques', () => {
     component.onTreeDragStart(event);
 
     expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('desactiva el tooltip del asa durante el drag y lo reactiva al terminar', () => {
+    const component = createComponent();
+    component.block = rootWithChild();
+
+    expect(component.dragging).toBe(false);
+
+    component.onTreeMouseDown(mouseDownOnHandle());
+    component.onTreeDragStart(dragStartEvent());
+    expect(component.dragging).toBe(true);
+
+    component.onTreeDragEnd();
+    expect(component.dragging).toBe(false);
+  });
+
+  it('reactiva el tooltip cuando el dragstart se cancela (sin asa)', () => {
+    const component = createComponent();
+    component.block = rootWithChild();
+    component.dragging = true;
+
+    component.onTreeMouseDown(mouseDownOutsideHandle());
+    component.onTreeDragStart(dragStartEvent());
+
+    expect(component.dragging).toBe(false);
+  });
+
+  it('reactiva el tooltip en onNodeDrop aunque no llegue dragend', () => {
+    const root = rootWithChild();
+    const component = createComponent();
+    component.block = root;
+    component.dragging = true;
+
+    component.onNodeDrop({ dragNode: root.children[0] as BlockNode, dropNode: root as BlockNode });
+
+    expect(component.dragging).toBe(false);
+  });
+
+  it('el asa enlaza el tooltip con el estado de drag (contrato de template)', () => {
+    expect(TEMPLATE).toContain('pTooltip="Drag to move block"');
+    expect(TEMPLATE).toContain('[tooltipDisabled]="dragging"');
+    expect(TEMPLATE).toContain('*ngIf="canDrag(node)"');
   });
 
   it('notifica el cambio y refresca la vista en onNodeDrop', () => {

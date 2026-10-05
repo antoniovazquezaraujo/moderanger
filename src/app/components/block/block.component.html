@@ -36,6 +36,7 @@
               class="header-item block-drag-handle" 
               *ngIf="canDrag(node)"
               pTooltip="Drag to move block" 
+              [tooltipDisabled]="dragging"
               tooltipPosition="top"
               aria-hidden="true">
               <i class="pi pi-bars"></i>

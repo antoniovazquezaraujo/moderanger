@@ -124,7 +124,9 @@
 - [ ] **10.5.** Durante el arrastre, las líneas de inserción se ven gruesas y verdes al apuntarlas, y el bloque bajo el cursor se resalta con fondo y borde verdes.
 - [ ] **10.6.** Intenta arrastrar seleccionando texto del nombre, las repeticiones o las notas del editor de melodía: no debe iniciarse ningún drag ni moverse ningún bloque.
 - [ ] **10.7.** Arrastra un bloque y **suéltalo sobre sí mismo**: no ocurre nada (el drop se ignora).
-- [ ] **10.8.** No aparecen errores nuevos en la consola del navegador durante las pruebas.
+- [ ] **10.8.** Deja el ratón sobre el asa `⋮⋮` hasta que aparezca el tooltip **Drag to move block**. Inicia el drag desde el asa, suéltalo (reordena o cambia de árbol) y aleja el ratón **sin volver a pasar por el asa**: el tooltip **no** debe quedar visible. Repite con un drag cancelado (soltar fuera de una zona válida o pulsar `Esc`).
+- [ ] **10.9.** Comprueba que el tooltip vuelve a aparecer al hacer hover normal en el asa y desaparece al salir; los tooltips de los botones (`Add Block`, `Remove Block`, `Duplicate Block`) siguen funcionando.
+- [ ] **10.10.** No aparecen errores nuevos en la consola del navegador durante las pruebas.
 
 ## 11. Caso 11 — Guías de jerarquía del árbol (feat/block-tree-guides, 2026-10-05)
 
