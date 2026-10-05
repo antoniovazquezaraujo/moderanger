@@ -215,6 +215,61 @@ h1 { /* Add some style for the header */
   pointer-events: none;
 }
 
+/* Ramal del bloque padre: cuando un bloque con asa tiene hijos, la guía de
+   su lista de hijos sube desde el asa (centro del header) por delante de
+   Commands/Operations hasta empalmar con la `ul`. `:has()` lo limita a
+   bloques con hijos (`+ .p-treenode-children`) y con asa (los raíces
+   visibles no tienen): sin hijos no se pinta ninguna línea. En navegadores
+   sin `:has()` el árbol conserva el aspecto anterior (mejora progresiva). */
+.p-tree .p-treenode-content:has(+ .p-treenode-children):has(.block-drag-handle) .block-header {
+  position: relative;
+}
+
+.p-tree .p-treenode-content:has(+ .p-treenode-children):has(.block-drag-handle) .block-body {
+  position: relative;
+}
+
+/* Nodos anidados: la caja del header se extiende 14px a la izquierda
+   (margen negativo del conector) y su padding de 14px devuelve el asa a
+   content+6; la guía vive en content+7 → 14 + 1 = 15px desde la caja. */
+.p-tree .p-treenode-children .p-treenode-content:has(+ .p-treenode-children):has(.block-drag-handle) .block-header::after {
+  left: 15px;
+}
+
+/* Raíces de contenedor: su header no lleva extensión; la guía queda a 1px
+   del borde de la caja (que arranca en content+6, como el asa). */
+.p-tree .p-tree-container > p-treenode > li.p-treenode > .p-treenode-content:has(+ .p-treenode-children):has(.block-drag-handle) .block-header::after {
+  left: 1px;
+}
+
+/* Tramo de cabecera: de la altura del asa (centro del header) al borde
+   inferior; así el ramal "arranca en el icono" como los conectores. */
+.p-tree .p-treenode-content:has(+ .p-treenode-children):has(.block-drag-handle) .block-header::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  bottom: 0;
+  width: 2px;
+  background-color: #a3a3a3;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Tramo del cuerpo: el body arranca en content+6 → 1px; `top: -1px` salva
+   su `margin-top` y `bottom: -4px` el hueco hasta la `ul` de hijos para que
+   la línea no se corte entre header, Commands/Operations y lista. */
+.p-tree .p-treenode-content:has(+ .p-treenode-children):has(.block-drag-handle) .block-body::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: -1px;
+  bottom: -4px;
+  width: 2px;
+  background-color: #a3a3a3;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Conector horizontal corto desde la guía hasta el bloque. Se pinta como
    fondo del propio `.block-header` en la franja de padding izquierda: el
    header tiene `overflow-x: auto` y recortaría un pseudo-elemento que
