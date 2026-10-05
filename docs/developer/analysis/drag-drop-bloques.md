@@ -87,9 +87,34 @@ Chrome 153 headless con `--remote-debugging-port`, app servida en `http://localh
 - **Droppoints invisibles en reposo:** se evita llenar el árbol de líneas; el área de 12px sigue siendo cómoda y la línea aparece al apuntar o durante el drag.
 - **Limitación conocida:** PrimeNG 13 no ofrece drag & drop por teclado; este fix no añade una alternativa de teclado (fuera de alcance). Queda como posible mejora futura.
 
-## 5. Referencias
+## 5. Fix del tooltip del asa (fix/block-handle-tooltip, 2026-10-05)
+
+**Bug:** «a veces el tooltip de "Drag to move block" se queda bloqueado y no desaparece».
+
+**Causa:** el tooltip es el `pTooltip` de PrimeNG sobre el asa. Al iniciar el drag el nodo se reordena/re-renderiza y el `mouseleave` no llega al elemento original (durante el drag los eventos de ratón se suprimen), así que el tooltip —que se añade a `body`— se quedaba visible. Reproducido con CDP: hover → dragstart → drop → dragend → alejar el ratón sin `mouseleave` sobre el asa original dejaba `.p-tooltip` visible.
+
+**Solución:** estado `dragging` en `BlockComponent` y `[tooltipDisabled]="dragging"` en el asa. Al activarse, PrimeNG ejecuta `deactivate()` → `hide()` (elimina el contenedor inmediatamente), y mientras dura el drag `show()` sale sin pintar; se libera en `dragend` y en `onNodeDrop` (por si el re-render se adelanta al `dragend`).
+
+- `tip.hide()` con `#tip="pTooltip"` **no es viable**: el `Tooltip` de PrimeNG 13.2.6 no declara `exportAs`.
+- No se cambia a `title` nativo: se mantiene la coherencia visual con el resto de tooltips.
+- No afecta al DnD (asa `pi pi-bars` + `grab`, droppoint 12px, scopes `blocks`).
+
+**Verificación (Chrome 153 headless + CDP 4305):**
+
+| Caso | Resultado |
+|---|---|
+| Hover normal en el asa | tooltip visible ✅; `mouseleave` normal lo oculta ✅ |
+| Hover → drag → reordenar → dragend → alejar el ratón | 0 `.p-tooltip` en todos los pasos tras `dragstart` ✅ |
+| Drag cancelado (`dragend` sin drop) | 0 tooltips ✅ |
+| Cross-tree con expansión del destino | 0 tooltips ✅ |
+| Tooltip del botón `Add Block` (y demás) | hover muestra «Add Block», `mouseleave` oculta ✅ |
+| Consola | 0 errores / 0 warnings ✅ |
+| DnD #79/#82 | droppoint 12px, reorder y cross-tree OK ✅ |
+| `npm test` / `npm run build` | 33 suites / 434 tests ✅ / exit 0 ✅ |
+
+## 6. Referencias
 
 - `src/app/components/block/block.component.ts` / `.html` / `.scss`
 - `src/styles.css` (§ `.p-tree`)
 - `src/app/components/block/__tests__/block-dnd.jest.spec.ts`
-- PR: `fix/block-dnd` → `develop`.
+- PRs: `fix/block-dnd` → `develop` (#79) y `fix/block-handle-tooltip` → `develop` (#83).
