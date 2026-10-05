@@ -53,6 +53,14 @@ export class BlockComponent implements OnInit, OnDestroy {
   /** `true` cuando el mousedown actual empezó en el asa de arrastre. */
   private dragArmed = false;
 
+  /**
+   * `true` mientras dura un arrastre. Desactiva el tooltip del asa (PrimeNG)
+   * para que no se quede pegado: al reordenar, el nodo se re-renderiza y el
+   * `mouseleave` no llega al elemento original. Se libera en `dragend` y en
+   * `onNodeDrop` (por si el re-render se adelanta al `dragend`).
+   */
+  dragging = false;
+
   @Input() 
   set block(value: Block) {
     this._block = value;
@@ -195,15 +203,18 @@ export class BlockComponent implements OnInit, OnDestroy {
   onTreeDragStart(event: DragEvent): void {
     if (!this.dragArmed) {
       event.preventDefault();
+      this.dragging = false;
       return;
     }
     this.dragArmed = false;
+    this.dragging = true;
     this.dragTreeValue = this.currentTreeValue;
   }
 
   /** Libera la lista congelada al terminar el arrastre (drop o cancelación). */
   onTreeDragEnd(): void {
     this.dragArmed = false;
+    this.dragging = false;
     this.dragTreeValue = undefined;
   }
 
@@ -213,6 +224,9 @@ export class BlockComponent implements OnInit, OnDestroy {
    * sintética, se expande el destino y se refresca la vista / se notifica.
    */
   onNodeDrop(event: BlockTreeDropEvent): void {
+    // El drop re-renderiza el árbol antes de que llegue `dragend`: reactiva
+    // el tooltip aquí para que no quede deshabilitado tras soltar.
+    this.dragging = false;
     this.reconcileRootDrop(event);
     this.expandDropTarget(event);
     this.blockChange.emit(this._block);
