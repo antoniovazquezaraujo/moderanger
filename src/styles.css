@@ -189,6 +189,48 @@ h1 { /* Add some style for the header */
   margin: 0!important;
 }
 
+/* Drag & drop de bloques: zonas de inserción amplias y visibles.
+   El `.p-treenode-droppoint` por defecto mide 4px de alto; se amplía a 12px
+   con una línea de acento al pasar por encima o durante el arrastre para que
+   sea fácil apuntar sin ensuciar el árbol en reposo. */
+.p-tree .p-treenode-droppoint {
+  position: relative;
+  height: 12px !important;
+  list-style-type: none;
+}
+
+.p-tree .p-treenode-droppoint::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 1px;
+  background-color: transparent;
+  transition: background-color 0.12s ease, height 0.12s ease;
+}
+
+.p-tree .p-treenode-droppoint:hover::after {
+  background-color: #c8e6c9;
+}
+
+.p-tree .p-treenode-droppoint.p-treenode-droppoint-active {
+  background-color: transparent !important;
+}
+
+.p-tree .p-treenode-droppoint.p-treenode-droppoint-active::after {
+  height: 4px;
+  background-color: #2e7d32;
+}
+
+/* Nodo destino del drop: resaltado claro (el tema por defecto es casi gris). */
+.p-tree .p-tree-container .p-treenode .p-treenode-content.p-treenode-dragover {
+  background: #e8f5e9 !important;
+  box-shadow: inset 0 0 0 2px #2e7d32;
+}
+
 /* Estilo para botones con texto */
 .p-button[label] {
   width: auto !important;

@@ -72,6 +72,29 @@
   margin-right: 8px;
 }
 
+/* Drag handle: único punto de agarre para mover un bloque */
+.block-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  color: #9e9e9e;
+  cursor: grab;
+  user-select: none;
+}
+
+.block-drag-handle:hover {
+  color: #424242;
+}
+
+.block-drag-handle:active {
+  cursor: grabbing;
+}
+
+.block-drag-handle .pi {
+  font-size: 0.75rem;
+}
+
 /* Header sections - REDUCIDAS */
 .block-label {
   width: 100px;
