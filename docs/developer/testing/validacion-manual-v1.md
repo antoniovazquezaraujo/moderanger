@@ -135,11 +135,20 @@
 - [ ] **11.5.** Pasa el ratón y haz clic sobre las líneas: no seleccionan ni bloquean nada; el drag & drop sigue funcionando (reordenar, anidar y soltar de nuevo con los casos 10.2–10.4).
 - [ ] **11.6.** No aparecen errores nuevos en la consola del navegador.
 
-## 12. Cierre: suite, build y registro
+## 12. Caso 12 — Ramal de la guía hasta el asa (fix/tree-guides-coverage, 2026-10-05)
 
-- [ ] **12.1.** `npm test` en verde: **28 suites / 367 tests** (cifra de la v1, 2026-10-03).
-- [ ] **12.2.** `npm run build` termina con exit 0.
-- [ ] **12.3.** Registro de resultados:
+- [ ] **12.1.** Carga `ramal.mr` (anexo A): `Raiz > Block4` con Commands (`OCT`, `SCALE`) y Operations (`VARY`) pobladas y cuatro hijos (`Block5`, `Block6`, `Block7`, `Block9`); `Block10` con Commands/Operations pero **sin** hijos; `Block11 > Block12`; y la parte `Bajo` con `SueltoA` (Commands/Operations + hijo `NietoA`) y `SueltoB`.
+- [ ] **12.2.** La guía de los hijos de `Block4` **sube hasta su asa** `≡`: arranca a la altura del icono y baja continua por delante de Commands y Operations hasta la lista de hijos (sin cortes en los bordes de las filas).
+- [ ] **12.3.** Lo mismo en la raíz de contenedor `SueltoA` (su header no lleva el conector de los nodos anidados, pero el ramal llega igualmente al asa).
+- [ ] **12.4.** `Block10` (Commands/Operations sin hijos) **no** muestra ninguna línea suelta; la raíz `Raiz` (sin asa) tampoco recibe ramal.
+- [ ] **12.5.** El ramal no genera *layout shift*: asas, nombres, controles y editores conservan su posición, y el conector horizontal del bloque superior sigue presente.
+- [ ] **12.6.** Repite los drags del caso 10 (reordenar y soltar entre árboles): siguen funcionando y no aparecen errores nuevos en consola.
+
+## 13. Cierre: suite, build y registro
+
+- [ ] **13.1.** `npm test` en verde: **33 suites / 430 tests** (cifra a 2026-10-05).
+- [ ] **13.2.** `npm run build` termina con exit 0.
+- [ ] **13.3.** Registro de resultados:
 
 | Caso | Resultado | Notas |
 |---|---|---|
@@ -154,9 +163,10 @@
 | 9. NeoVim | ☐ OK ☐ Falla | |
 | 10. Drag & drop de bloques | ☐ OK ☐ Falla | |
 | 11. Guías de jerarquía | ☐ OK ☐ Falla | |
-| 12. Suite + build | ☐ OK ☐ Falla | |
+| 12. Ramal de la guía | ☐ OK ☐ Falla | |
+| 13. Suite + build | ☐ OK ☐ Falla | |
 
-- [ ] **12.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
+- [ ] **13.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
 
 ```text
 - …
@@ -231,6 +241,75 @@ part Piano
 
   block
     notes default 16n
+```
+
+### `ramal.mr`
+
+```mr
+song "Ramal de guías"
+version 1
+bpm 100
+
+vars
+  $oct = 2
+
+part Piano
+  block Raiz
+    notes default 16n
+      0
+      2
+
+    block Block4
+      notes default 16n
+        4
+        7
+      commands
+        OCT $oct
+        SCALE WHITE
+      operations
+        VARY $oct 1
+
+      block Block5
+        notes
+          4n:0
+
+      block Block6
+        notes
+          4n:2
+
+      block Block7
+        notes
+          4n:4
+
+      block Block9
+        notes
+          4n:7
+
+    block Block10
+      notes
+        4n:9
+      commands
+        OCT 1
+      operations
+        VARY $oct 2
+
+part Bajo
+  block
+    block SueltoA
+      notes
+        4n:1
+      commands
+        OCT 1
+      operations
+        VARY $oct 1
+
+      block NietoA
+        notes
+          4n:2
+
+    block SueltoB
+      notes
+        4n:3
 ```
 
 ### `carga-invalida.mr` (ejemplo de error esperado)
