@@ -40,6 +40,13 @@
   box-sizing: border-box;
 }
 
+/* Combo de duración por defecto: auto-fit (field-sizing global) con clamp
+   para que no salte entre opciones cortas y largas. */
+.default-duration-select {
+  min-width: 40px;
+  max-width: 80px;
+}
+
 /* Playback controls container */
 .playback-controls {
   display: flex; 
