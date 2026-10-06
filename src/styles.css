@@ -2237,3 +2237,60 @@ html body .operations-row .operation-item:has(+ .operation-item)::after {
   font-size: 12px !important;
   line-height: 1 !important;
 }
+
+/* ====== ACCIONES `$`/`✕` COMO SUPERÍNDICES ====== */
+/* Fuera del flujo en reposo: aparecen al hover o al enfocar el comando y no
+   reservan hueco (0 layout shift). Con `opacity` en vez de `visibility` para
+   que sigan siendo alcanzables con Tab (el foco revela el comando). */
+html body .commands-container > .command,
+html body .operations-container > .operation-item {
+  position: relative;
+  overflow: visible;
+}
+
+html body .commands-row .command > .command-actions,
+html body .operations-row .operation-item > .command-controls {
+  position: absolute !important;
+  top: -7px !important;
+  right: -2px !important;
+  display: flex !important;
+  gap: 1px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 3;
+}
+
+html body .commands-row .command:hover > .command-actions,
+html body .commands-row .command:focus-within > .command-actions,
+html body .operations-row .operation-item:hover > .command-controls,
+html body .operations-row .operation-item:focus-within > .command-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Tamaño de superíndice: cajas de 16px con glifos de 10px. */
+html body .commands-row .command .command-actions .p-button,
+html body .operations-row .operation-item .command-controls .p-button {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  max-width: 16px !important;
+  max-height: 16px !important;
+}
+
+html body .commands-row .command .command-actions .p-button .p-button-icon,
+html body .operations-row .operation-item .command-controls .p-button .p-button-icon {
+  font-size: 10px !important;
+}
+
+/* El `+` de añadir no queda pegado a los superíndices del último comando. */
+html body .commands-row .add-wrapper,
+html body .operations-row .add-wrapper {
+  margin-left: 6px !important;
+}
