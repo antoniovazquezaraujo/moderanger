@@ -80,17 +80,19 @@
 /* El chrome editable (borde al hover/focus, comas, botones y editor PATTERN)
    vive en styles.css para no engordar los estilos del componente. */
 
-/* Form controls - MÁS PEQUEÑOS POSIBLE */
+/* Form controls - MÁS PEQUEÑOS POSIBLE.
+   Altura y tipografía únicas de la fila (20px/12px); styles.css reafirma
+   estos valores con `html body` para neutralizar las reglas legacy. */
 .command-type,
 .command-value,
 .number-input {
-  height: 18px;
+  height: 20px;
   padding: 0 2px;
   border: 1px solid #ced4da;
   border-radius: 2px;
   margin: 0 1px;
   background-color: white;
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -116,7 +118,7 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  height: 24px;
+  height: 20px;
   margin: 1px;
   padding: 0;
 }
@@ -139,7 +141,8 @@
   }
 
   .p-button .p-button-icon {
-    font-size: 0.65rem !important;
+    /* 12px: coherente con la tipografía de la fila (cajas de 20px). */
+    font-size: 0.75rem !important;
   }
 
   /* El chrome de los botones `$`/`✕` y el foco visible viven en styles.css

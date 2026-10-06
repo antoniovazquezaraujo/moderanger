@@ -2170,3 +2170,70 @@ app-melody-editor .notes-container > * + *:not(.add-note)::before {
   padding: 0 2px !important;
   field-sizing: content;
 }
+
+/* ====== MÉTRICAS ÚNICAS DE COMMANDS/OPERATIONS ====== */
+/* Una sola tipografía (12px) y una sola altura (20px) para todos los
+   controles de la fila, en reposo y en hover. El prefijo `html body` empata
+   en especificidad con las reglas legacy `html body input[...]` y, al ir al
+   final, las neutraliza SOLO en este contexto: toolbar (#repetitions 32px,
+   #bpm 45px) e inputs de variables quedan intactos. */
+html body .commands-row select.command-type,
+html body .operations-row select.command-type,
+html body .commands-row .command-value,
+html body .operations-row .command-value,
+html body .commands-row .number-input,
+html body .operations-row .number-input,
+html body .commands-row input.command-value.number-input,
+html body .operations-row input.command-value.number-input,
+html body .commands-row input.number-input,
+html body .operations-row input.number-input {
+  width: auto !important;
+  min-width: 24px !important;
+  max-width: 64px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  padding: 0 2px !important;
+  field-sizing: content;
+}
+
+/* Los selects mantienen el ancho al contenido con su clamp (field-sizing);
+   solo se reafirma su métrica. */
+html body .commands-row select.command-type,
+html body .operations-row select.command-type {
+  max-width: 140px !important;
+}
+
+html body .commands-row .command-actions .p-button,
+html body .operations-row .command-controls .p-button,
+html body .commands-row .add-wrapper .p-button,
+html body .operations-row .add-wrapper .p-button {
+  height: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+}
+
+html body .commands-row .command-actions .p-button-icon,
+html body .operations-row .command-controls .p-button-icon,
+html body .commands-row .add-wrapper .p-button-icon,
+html body .operations-row .add-wrapper .p-button-icon {
+  font-size: 12px !important;
+}
+
+html body .commands-row .command-actions,
+html body .operations-row .command-controls,
+html body .commands-row .add-wrapper,
+html body .operations-row .add-wrapper {
+  height: 20px !important;
+  min-height: 20px !important;
+  align-items: center;
+}
+
+/* La coma comparte la tipografía de la fila y queda centrada como flex item. */
+html body .commands-row .command:has(+ .command)::after,
+html body .operations-row .operation-item:has(+ .operation-item)::after {
+  font-size: 12px !important;
+  line-height: 1 !important;
+}

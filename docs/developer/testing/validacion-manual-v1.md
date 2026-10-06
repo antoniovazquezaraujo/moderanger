@@ -168,10 +168,11 @@
 - [ ] **14.8.** Notas compactas y uniformes: en el header de un bloque con 4 notas (`4n 1, 4n -2, 4n 1, 4n -5`) todas miden **20px** de alto, sin borde/fondo en reposo y con coma entre ellas; al seleccionar o pasar el ratón solo cambian borde/fondo (sin `scale` ni sombra, misma altura). El `+` de añadir nota conserva su borde discontinuo.
 - [ ] **14.9.** Commands/Operations compactos: los huecos entre tipo→valor→`$`→`✕` son ~3px, la caja queda con padding 1×2px y los inputs numéricos se ajustan al contenido (`1` ≈ 27px, max 64) sin tocar `#repetitions` (32px), `#bpm` (45px) ni los inputs de variables.
 - [ ] **14.10.** Alturas uniformes: selects, inputs, botones y notas de estas filas comparten un único alto de **20px**, y enfocar no cambia la caja.
+- [ ] **14.11.** Métrica única en Commands/Operations (fila `Scale WHITE, Gap -3, Width 3, Playmode EVEN_ASC_ODD_ASC, Oct 0`): **todos** los controles (selects, inputs, `$`, `✕`, coma, `+`) muestran **12px** de fuente y **20px** de alto, con el mismo centro vertical; en hover no cambia ningún tamaño. El toolbar (`#repetitions` 32px, `#bpm` 45px) y los inputs de variables quedan intactos.
 
 ## 15. Cierre: suite, build y registro
 
-- [ ] **15.1.** `npm test` en verde: **38 suites / 454 tests** (cifra a 2026-10-06).
+- [ ] **15.1.** `npm test` en verde: **38 suites / 455 tests** (cifra a 2026-10-06).
 - [ ] **15.2.** `npm run build` termina con exit 0.
 - [ ] **15.3.** Registro de resultados:
 

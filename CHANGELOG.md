@@ -21,6 +21,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- Uniform metrics in Commands/Operations: a single 12px font and 20px height for selects, number inputs, buttons, the comma and the add `+` wrapper (icon glyphs 12px), with no size change on hover/focus. The legacy 14px/30px `html body input[...]`/`select.command-type` rules are neutralized only inside these rows; toolbar (`#repetitions` 32px, `#bpm` 45px) and variable inputs are untouched.
 - Free-text follow-up (compactness): melody notes in every editor (block header, PATTERN) share the rest/hover/selected treatment — transparent reserved border, no background, uniform 20px height, no scale/shadow on selection — with commas between notes and tighter spacing. Commands/Operations rows are more compact: 3px gaps, tighter padding/actions, `$`/`✕` without extra margins, and number inputs auto-fit their content (24–64px) instead of the global 45/80px.
 - Commands/Operations now read as free text: capitalized type labels with colon (`Inv: 0`), no borders/backgrounds or native select arrow at rest, commas between commands and between PATTERN notes. The editable chrome (box border, control borders, own chevron, `$`/`✕` buttons) appears on hover or focus. Model and `.mr` are untouched (display-only labels).
 - Selects now auto-fit their selected option (`field-sizing: content`, progressive) with per-component clamps: command selects 44–140px, toolbar duration 40–80px, variable selects 60–160px. Browsers without support keep the previous intrinsic width.
