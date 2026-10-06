@@ -112,6 +112,31 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     expect(declaration(formControl, 'font-size')).toBe('12px');
   });
 
+  it('oculta las acciones en reposo y las muestra como superíndices al hover/foco', () => {
+    const base = ruleBody(styles, 'html body .operations-row .operation-item > .command-controls');
+    expect(declaration(base, 'position')).toBe('absolute !important');
+    expect(declaration(base, 'top')).toBe('-7px !important');
+    expect(declaration(base, 'right')).toBe('-2px !important');
+    expect(declaration(base, 'opacity')).toBe('0');
+    expect(declaration(base, 'pointer-events')).toBe('none');
+
+    const visible = ruleBody(styles, 'html body .operations-row .operation-item:focus-within > .command-controls');
+    expect(declaration(visible, 'opacity')).toBe('1');
+    expect(declaration(visible, 'pointer-events')).toBe('auto');
+
+    const button = ruleBody(styles, 'html body .operations-row .operation-item .command-controls .p-button');
+    expect(declaration(button, 'width')).toBe('16px !important');
+    expect(declaration(button, 'height')).toBe('16px !important');
+
+    const icon = ruleBody(styles, 'html body .operations-row .operation-item .command-controls .p-button .p-button-icon');
+    expect(declaration(icon, 'font-size')).toBe('10px !important');
+
+    // La caja del comando es el anclaje de los superíndices.
+    const anchor = ruleBody(styles, 'html body .operations-container > .operation-item');
+    expect(declaration(anchor, 'position')).toBe('relative');
+    expect(declaration(anchor, 'overflow')).toBe('visible');
+  });
+
   it('los iconos $/✕ no tienen chrome en reposo y lo recuperan al hover', () => {
     const rest = ruleBody(styles, '.command-controls .p-button');
     expect(declaration(rest, 'border-color')).toBe('transparent !important');
