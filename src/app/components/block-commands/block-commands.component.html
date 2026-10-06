@@ -8,10 +8,12 @@
             <div *ngFor="let command of block.commands" class="command">
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
                     <optgroup label="">
-                        <!-- El `:` es solo presentación; el valor del modelo no cambia. -->
-                        <option *ngFor="let type of commandTypeNames" [value]="type">{{typeLabel(type)}}:</option>
+                        <option *ngFor="let type of commandTypeNames" [value]="type">{{typeLabel(type)}}</option>
                     </optgroup>
                 </select>
+                <!-- `:` solo presentación (el modelo no cambia); oculto si el
+                     control de valor muestra un placeholder. -->
+                <span class="command-label-sep" *ngIf="showCommandColon(command)" aria-hidden="true">:</span>
 
                 <ng-container [ngSwitch]="command.type">
                     <ng-container *ngSwitchCase="commandTypes.PLAYMODE">
@@ -125,8 +127,9 @@
         <div class="container-wrapper operations-container">
             <div *ngFor="let operation of operations; let i = index" class="operation-item">
                 <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">
-                    <option *ngFor="let type of operationTypeNames" [value]="type">{{typeLabel(type)}}:</option>
+                    <option *ngFor="let type of operationTypeNames" [value]="type">{{typeLabel(type)}}</option>
                 </select>
+                <span class="command-label-sep" *ngIf="showOperationColon(operation)" aria-hidden="true">:</span>
                 <select class="command-type" 
                     [(ngModel)]="operation.variableName" 
                     (ngModelChange)="onVariableSelected($event)"

@@ -1437,8 +1437,9 @@ select.command-type,
 .command .command-type,
 .operation-item select.command-type {
   height: 30px !important;
-  /* Hueco compacto para el chevron de hover (no visible en reposo). */
-  padding: 0 10px 0 2px !important;
+  /* Hueco reservado para el chevron de hover (no visible en reposo):
+     8px de glifo + 2px de offset + 4px de separación al texto. */
+  padding: 0 14px 0 2px !important;
   border: 1px solid transparent !important;
   border-radius: 4px !important;
   margin: 0 4px !important;
@@ -1469,7 +1470,7 @@ select.command-type,
   background-color: white !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23666' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 1px center;
+  background-position: right 2px center;
 }
 
 .command:hover .command-value,
@@ -2251,7 +2252,9 @@ html body .operations-container > .operation-item {
 html body .commands-row .command > .command-actions,
 html body .operations-row .operation-item > .command-controls {
   position: absolute !important;
-  top: -7px !important;
+  /* Suficiente para que el borde inferior del chip no toque el texto del
+     comando (los controles empiezan 2px dentro de la caja). */
+  top: -12px !important;
   right: -2px !important;
   display: flex !important;
   gap: 1px !important;
@@ -2293,4 +2296,31 @@ html body .operations-row .operation-item .command-controls .p-button .p-button-
 html body .commands-row .add-wrapper,
 html body .operations-row .add-wrapper {
   margin-left: 6px !important;
+}
+
+/* ====== PULIDO DE CHIPS/COLONES EN COMMANDS ====== */
+/* El grupo de métricas fija `padding: 0 2px` al select; se restablece aquí
+   el hueco del chevron (constante en reposo y hover, field-sizing estable). */
+html body .commands-row .command select.command-type,
+html body .operations-row .operation-item select.command-type {
+  padding-right: 14px !important;
+}
+
+/* Con wrap, los chips de una línea no deben pisar la línea anterior: el chip
+   sobresale 12px por encima de su caja y entre líneas hay 2px de márgenes,
+   así que 12px de row-gap deja 2px de aire. */
+html body .commands-row .commands-container,
+html body .operations-row .operations-container {
+  row-gap: 12px !important;
+}
+
+/* Separador `:` de la lectura (solo presentación; el modelo no cambia).
+   Se pega a la etiqueta con un desplazamiento relativo: el hueco reservado
+   del chevron queda a su derecha (donde aparece al hover) sin mover el flujo
+   ni el ancho del select (field-sizing estable). */
+.command-label-sep {
+  position: relative;
+  left: -17px;
+  margin-right: -4px;
+  color: inherit;
 }

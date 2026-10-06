@@ -170,10 +170,11 @@
 - [ ] **14.10.** Alturas uniformes: selects, inputs, botones y notas de estas filas comparten un único alto de **20px**, y enfocar no cambia la caja.
 - [ ] **14.11.** Métrica única en Commands/Operations (fila `Scale WHITE, Gap -3, Width 3, Playmode EVEN_ASC_ODD_ASC, Oct 0`): **todos** los controles (selects, inputs, coma y `+`) muestran **12px** de fuente y **20px** de alto, con el mismo centro vertical; los superíndices `$`/`✕` usan 10px/16px (por diseño). El toolbar (`#repetitions` 32px, `#bpm` 45px) y los inputs de variables quedan intactos.
 - [ ] **14.12.** Acciones como superíndices: en reposo `$` y `✕` no se ven y el comando se lee limpio (`Oct: 0, Scale: WHITE, …`); al pasar el ratón por un comando (o al enfocar con Tab cualquiera de sus controles) aparecen como chips pequeños (16px) en la esquina superior derecha, sin mover el texto ni cambiar el ancho de la fila (medir antes/durante hover: idénticos). Clic real en `$` activa el modo variable y en `✕` borra el comando; sus tooltips siguen. En Operaciones igual (`Vary: 1` + `✕`).
+- [ ] **14.13.** Pulido de chips/chevron/colones: los chips quedan **por encima del texto** (borde inferior 3px por encima del control; ~2px de aire respecto al glifo) y al hacer wrap no pisan la línea anterior (row-gap 12px, holgura medida ≥ 6px). El chevron del combo no pisa el valor: hueco reservado constante de 14px con ~6px de separación al texto y el ancho del select idéntico en reposo y hover. Los colones **no** aparecen en la lista de opciones (`option.textContent` limpio) y sí en la lectura como span pegado a la etiqueta; se ocultan si el select de valor muestra placeholder (`Select … variable`). El modelo y el `.mr` no cambian.
 
 ## 15. Cierre: suite, build y registro
 
-- [ ] **15.1.** `npm test` en verde: **38 suites / 456 tests** (cifra a 2026-10-06).
+- [ ] **15.1.** `npm test` en verde: **39 suites / 460 tests** (cifra a 2026-10-06).
 - [ ] **15.2.** `npm run build` termina con exit 0.
 - [ ] **15.3.** Registro de resultados:
 
