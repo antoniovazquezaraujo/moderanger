@@ -28,8 +28,11 @@ function declaration(body: string, property: string): string | null {
 
 describe('Commands/Operations en texto libre (CSS/template)', () => {
   it('usa la etiqueta capitalizada con `:` en los tipos (comandos y operaciones)', () => {
-    expect(template).toContain('<option *ngFor="let type of commandTypeNames" [value]="type">{{typeLabel(type)}}:</option>');
-    expect(template).toContain('<option *ngFor="let type of operationTypeNames" [value]="type">{{typeLabel(type)}}:</option>');
+    // Las opciones no llevan `:`; el separador va en un span de la lectura.
+    expect(template).toContain('<option *ngFor="let type of commandTypeNames" [value]="type">{{typeLabel(type)}}</option>');
+    expect(template).toContain('<option *ngFor="let type of operationTypeNames" [value]="type">{{typeLabel(type)}}</option>');
+    expect(template).toContain('class="command-label-sep" *ngIf="showCommandColon(command)"');
+    expect(template).toContain('class="command-label-sep" *ngIf="showOperationColon(operation)"');
   });
 
   it('en reposo el combo no tiene borde/fondo/flecha nativa y reserva el chevron', () => {
@@ -38,7 +41,7 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     expect(declaration(body, 'appearance')).toBe('none !important');
     expect(declaration(body, 'border')).toBe('1px solid transparent !important');
     expect(declaration(body, 'background-color')).toBe('transparent !important');
-    expect(declaration(body, 'padding')).toContain('10px');
+    expect(declaration(body, 'padding')).toContain('14px');
   });
 
   it('al hover/focus aparece el borde del combo y el chevron propio', () => {
@@ -115,7 +118,7 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
   it('oculta las acciones en reposo y las muestra como superíndices al hover/foco', () => {
     const base = ruleBody(styles, 'html body .operations-row .operation-item > .command-controls');
     expect(declaration(base, 'position')).toBe('absolute !important');
-    expect(declaration(base, 'top')).toBe('-7px !important');
+    expect(declaration(base, 'top')).toBe('-12px !important');
     expect(declaration(base, 'right')).toBe('-2px !important');
     expect(declaration(base, 'opacity')).toBe('0');
     expect(declaration(base, 'pointer-events')).toBe('none');
@@ -135,6 +138,22 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     const anchor = ruleBody(styles, 'html body .operations-container > .operation-item');
     expect(declaration(anchor, 'position')).toBe('relative');
     expect(declaration(anchor, 'overflow')).toBe('visible');
+  });
+
+  it('reserva el hueco del chevron y pega el `:` a la etiqueta sin pisarlo', () => {
+    // Hueco constante del chevron en los selects de la fila.
+    const selectPadding = ruleBody(styles, 'html body .operations-row .operation-item select.command-type');
+    expect(declaration(selectPadding, 'padding-right')).toBe('14px !important');
+
+    // El `:` se pega a la etiqueta con desplazamiento relativo (no mueve el flujo).
+    const sep = ruleBody(styles, '.command-label-sep');
+    expect(declaration(sep, 'position')).toBe('relative');
+    expect(declaration(sep, 'left')).toBe('-17px');
+    expect(declaration(sep, 'margin-right')).toBe('-4px');
+
+    // Wrap: row-gap mínimo para que los chips no pisen la línea anterior.
+    const wrap = ruleBody(styles, 'html body .operations-row .operations-container');
+    expect(declaration(wrap, 'row-gap')).toBe('12px !important');
   });
 
   it('los iconos $/✕ no tienen chrome en reposo y lo recuperan al hover', () => {
