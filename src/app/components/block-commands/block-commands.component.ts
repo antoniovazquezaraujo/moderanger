@@ -11,6 +11,11 @@ import { NoteDuration, NoteConverter, MusicElement } from 'src/app/model/melody'
 import { NoteData } from 'src/app/model/note';
 import { MelodyEditorComponent } from '../melody-editor/melody-editor.component';
 import { commandTypeLabel } from './command-type-label';
+import {
+    showCommandColon as commandColonVisible,
+    showOperationColon as operationColonVisible,
+    VariableAwareCommand
+} from './command-colon';
 
 interface VariableOption {
     label: string;
@@ -309,6 +314,16 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             return command.getVariableName() || '';
         }
         return ''; 
+    }
+
+    /** `:` de la lectura para un comando (oculto si el valor es placeholder). */
+    showCommandColon(command: Command): boolean {
+        return commandColonVisible(command as VariableAwareCommand);
+    }
+
+    /** `:` de la lectura en operaciones (oculto si la variable es placeholder). */
+    showOperationColon(operation: { variableName: string }): boolean {
+        return operationColonVisible(operation);
     }
 
     getFilteredVariables(command: Command): VariableOption[] {
