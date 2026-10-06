@@ -11,6 +11,7 @@ import * as path from 'path';
 
 const template = fs.readFileSync(path.resolve(__dirname, '../block-commands.component.html'), 'utf8');
 const styles = fs.readFileSync(path.resolve(__dirname, '../../../../styles.css'), 'utf8');
+const componentScss = fs.readFileSync(path.resolve(__dirname, '../block-commands.component.scss'), 'utf8');
 
 /** Devuelve el cuerpo de la regla exacta `selector { ... }` (o '' si no existe). */
 function ruleBody(stylesheet: string, selector: string): string {
@@ -80,6 +81,35 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     expect(declaration(input, 'max-width')).toBe('64px !important');
     expect(declaration(input, 'height')).toBe('20px !important');
     expect(declaration(input, 'field-sizing')).toBe('content');
+  });
+
+  it('fija una métrica única (12px/20px) neutralizando las reglas legacy', () => {
+    // Override final con `html body` (empata con las legacy y va después).
+    const metrics = ruleBody(styles, 'html body .operations-row input.number-input');
+    expect(declaration(metrics, 'height')).toBe('20px !important');
+    expect(declaration(metrics, 'font-size')).toBe('12px !important');
+    expect(declaration(metrics, 'line-height')).toBe('1 !important');
+    expect(declaration(metrics, 'width')).toBe('auto !important');
+    expect(declaration(metrics, 'field-sizing')).toBe('content');
+
+    // Los selects conservan su clamp propio.
+    const selectClamp = ruleBody(styles, 'html body .operations-row select.command-type');
+    expect(declaration(selectClamp, 'max-width')).toBe('140px !important');
+
+    // La coma comparte la tipografía de la fila.
+    const comma = ruleBody(styles, 'html body .operations-row .operation-item:has(+ .operation-item)::after');
+    expect(declaration(comma, 'font-size')).toBe('12px !important');
+    expect(declaration(comma, 'line-height')).toBe('1 !important');
+
+    // Wrapper del `+` a 20px y fuente del componente coherente.
+    const addWrapper = ruleBody(styles, 'html body .operations-row .add-wrapper');
+    expect(declaration(addWrapper, 'height')).toBe('20px !important');
+    expect(componentScss).toMatch(/\.p-button-icon\s*\{[\s\S]*?font-size:\s*0\.75rem !important/);
+
+    // Métrica base del componente (altura/tipografía).
+    const formControl = ruleBody(componentScss, '.number-input');
+    expect(declaration(formControl, 'height')).toBe('20px');
+    expect(declaration(formControl, 'font-size')).toBe('12px');
   });
 
   it('los iconos $/✕ no tienen chrome en reposo y lo recuperan al hover', () => {
