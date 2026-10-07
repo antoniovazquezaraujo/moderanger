@@ -38,8 +38,10 @@ describe('bloque compacto (template/CSS)', () => {
     expect(header).not.toContain('app-melody-editor-wrapper');
 
     expect(body).toContain('notes-section');
-    expect(body).toContain('pi pi-pencil');
+    expect(body).toContain('class="block-section-icon"');
+    expect(body).toContain('&#9835;'); // ♫ Notes
     expect(body).toContain('pTooltip="Notes"');
+    expect(body).toContain('aria-label="Notes"');
     expect(body).toContain('id="melody-{{node.id}}"');
     expect(body).toContain('[(ngModel)]="node.blockContent.notes"');
     expect(body).toContain('[showVariableIcon]="false"');
@@ -47,12 +49,15 @@ describe('bloque compacto (template/CSS)', () => {
     expect(body.indexOf('notes-section')).toBeLessThan(body.indexOf('app-block-commands'));
   });
 
-  it('Commands y Operations usan título-icono con tooltip', () => {
-    expect(commandsTemplate).toContain('pi pi-sliders-h');
+  it('Commands y Operations usan los glifos ⚙/≚ con tooltip y aria-label', () => {
+    expect(commandsTemplate).toContain('&#9881;'); // ⚙ Commands
     expect(commandsTemplate).toContain('pTooltip="Commands"');
-    expect(commandsTemplate).toContain('pi pi-sync');
+    expect(commandsTemplate).toContain('aria-label="Commands"');
+    expect(commandsTemplate).toContain('&#8794;'); // ≚ Operations
     expect(commandsTemplate).toContain('pTooltip="Operations"');
+    expect(commandsTemplate).toContain('aria-label="Operations"');
     expect(commandsTemplate).not.toContain('class="section-title"');
+    expect(commandsTemplate).not.toContain('class="block-section-title"');
   });
 
   it('las acciones del header se ocultan en reposo y se revelan al hover/foco', () => {
@@ -75,11 +80,19 @@ describe('bloque compacto (template/CSS)', () => {
     expect(declaration(header, 'padding')).toBe('2px 0');
   });
 
-  it('el título de sección compartido es pequeño, flotante y con fondo blanco', () => {
-    const title = ruleBody(styles, '.block-section-title');
-    expect(declaration(title, 'position')).toBe('absolute');
-    expect(declaration(title, 'top')).toBe('-8px');
-    expect(declaration(title, 'background-color')).toBe('white');
-    expect(declaration(title, 'font-size')).toBe('12px');
+  it('la columna de iconos tiene ancho fijo, fallback de glifos y arranca tras la línea', () => {
+    const icon = ruleBody(styles, '.block-section-icon');
+    expect(declaration(icon, 'flex')).toBe('0 0 18px');
+    expect(declaration(icon, 'width')).toBe('18px');
+    expect(declaration(icon, 'font-family')).toContain('Segoe UI Symbol');
+    expect(declaration(icon, 'font-family')).toContain('Noto Sans Symbols');
+    expect(declaration(icon, 'font-size')).toBe('13px');
+
+    // La sección deja 4px hasta la guía (content+7..9) y el contenido va
+    // tras la columna; las filas de comandos reservan lo mismo.
+    const section = ruleBody(styles, '.block-section');
+    expect(declaration(section, 'padding')).toBe('1px 1px 1px 4px');
+    expect(styles).toMatch(/html body app-block-commands \.commands-row,\s*\nhtml body app-block-commands \.operations-row \{/);
+    expect(styles).toContain('padding-left: 4px !important');
   });
 });
