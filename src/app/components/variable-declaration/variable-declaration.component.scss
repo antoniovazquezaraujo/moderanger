@@ -36,11 +36,14 @@ input[type="text"] {
 }
 
 /* Combos con auto-fit (field-sizing global) y clamp: los tipos y valores
-   cortos no ocupan 120px fijos y los nombres largos tienen tope. */
+   cortos no ocupan 120px fijos y los nombres largos tienen tope. Sin flecha
+   nativa (se siguen abriendo al clic), coherente con Commands/Operations. */
 select {
     @extend .variable-input;
     min-width: 60px;
     max-width: 160px;
+    appearance: none;
+    -webkit-appearance: none;
     
     @media (max-width: 768px) {
         font-size: 12px;
