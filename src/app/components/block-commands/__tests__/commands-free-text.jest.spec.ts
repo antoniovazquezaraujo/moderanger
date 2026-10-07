@@ -118,7 +118,7 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
   it('oculta las acciones en reposo y las muestra como superíndices al hover/foco', () => {
     const base = ruleBody(styles, 'html body .operations-row .operation-item > .command-controls');
     expect(declaration(base, 'position')).toBe('absolute !important');
-    expect(declaration(base, 'top')).toBe('-12px !important');
+    expect(declaration(base, 'top')).toBe('calc(-12px - 2mm) !important');
     expect(declaration(base, 'left')).toBe('0 !important');
     expect(declaration(base, 'opacity')).toBe('0');
     expect(declaration(base, 'pointer-events')).toBe('none');
@@ -151,9 +151,9 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     expect(declaration(sep, 'left')).toBe('-17px');
     expect(declaration(sep, 'margin-right')).toBe('-4px');
 
-    // Wrap: row-gap mínimo para que los chips no pisen la línea anterior.
+    // Wrap: row-gap sube con los chips (12px + 2mm) para no pisar la línea anterior.
     const wrap = ruleBody(styles, 'html body .operations-row .operations-container');
-    expect(declaration(wrap, 'row-gap')).toBe('12px !important');
+    expect(declaration(wrap, 'row-gap')).toBe('calc(12px + 2mm) !important');
   });
 
   it('los iconos $/✕ no tienen chrome en reposo y lo recuperan al hover', () => {
