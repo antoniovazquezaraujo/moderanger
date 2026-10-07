@@ -171,10 +171,11 @@
 - [ ] **14.11.** Métrica única en Commands/Operations (fila `Scale WHITE, Gap -3, Width 3, Playmode EVEN_ASC_ODD_ASC, Oct 0`): **todos** los controles (selects, inputs, coma y `+`) muestran **12px** de fuente y **20px** de alto, con el mismo centro vertical; los superíndices `$`/`✕` usan 10px/16px (por diseño). El toolbar (`#repetitions` 32px, `#bpm` 45px) y los inputs de variables quedan intactos.
 - [ ] **14.12.** Acciones como superíndices: en reposo `$` y `✕` no se ven y el comando se lee limpio (`Oct: 0, Scale: WHITE, …`); al pasar el ratón por un comando (o al enfocar con Tab cualquiera de sus controles) aparecen como chips pequeños (16px) en la esquina superior derecha, sin mover el texto ni cambiar el ancho de la fila (medir antes/durante hover: idénticos). Clic real en `$` activa el modo variable y en `✕` borra el comando; sus tooltips siguen. En Operaciones igual (`Vary: 1` + `✕`).
 - [ ] **14.13.** Pulido de chips/chevron/colones: los chips quedan **por encima del texto** (borde inferior 3px por encima del control; ~2px de aire respecto al glifo) y al hacer wrap no pisan la línea anterior (row-gap 12px, holgura medida ≥ 6px). El chevron del combo no pisa el valor: hueco reservado constante de 14px con ~6px de separación al texto y el ancho del select idéntico en reposo y hover. Los colones **no** aparecen en la lista de opciones (`option.textContent` limpio) y sí en la lectura como span pegado a la etiqueta; se ocultan si el select de valor muestra placeholder (`Select … variable`). El modelo y el `.mr` no cambian.
+- [ ] **14.14.** Bloque compacto: en reposo la fila muestra solo `[≡ asa][> toggler][nombre]` (sin botones, repeats ni notas); al pasar el ratón o enfocar el header aparecen `+`, `✕`, `⧉` y `×N` junto al nombre **sin mover nada** (mismo x en reposo/hover). Desplegado, el cuerpo tiene tres secciones con **título-icono y tooltip** — Notes (lápiz; el editor de melodía ahora vive ahí, mismo id/binding), Commands (sliders) y Operations (sync) —; colapsado no se ve ninguna. Altura del header 66 → 24px.
 
 ## 15. Cierre: suite, build y registro
 
-- [ ] **15.1.** `npm test` en verde: **39 suites / 460 tests** (cifra a 2026-10-06).
+- [ ] **15.1.** `npm test` en verde: **40 suites / 465 tests** (cifra a 2026-10-07).
 - [ ] **15.2.** `npm run build` termina con exit 0.
 - [ ] **15.3.** Registro de resultados:
 

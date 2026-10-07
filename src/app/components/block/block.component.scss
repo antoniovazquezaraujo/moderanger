@@ -59,8 +59,9 @@
   align-items: center;
   flex-wrap: wrap;
   width: 100%;
-  min-height: 32px;
-  padding: 3px 0;
+  /* Una sola línea compacta: el editor de melodía vive ahora en el cuerpo. */
+  min-height: 24px;
+  padding: 2px 0;
   margin: 0;
 }
 
@@ -186,7 +187,8 @@ input[type="number"]#repeatingTimes {
 }
 
 .melody-editor-inline-container {
-  flex-grow: 1;
+  display: block;
+  width: 100%;
   min-width: 100px;
 
   ::ng-deep app-melody-editor-wrapper {

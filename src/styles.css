@@ -2324,3 +2324,51 @@ html body .operations-row .operations-container {
   margin-right: -4px;
   color: inherit;
 }
+
+/* ====== BLOQUE COMPACTO: TÍTULOS-ICONO Y ACCIONES AL HOVER ====== */
+/* Sección del cuerpo (Notes) con el mismo tratamiento que las filas de
+   Commands/Operations: borde superior y título flotante. */
+.block-section {
+  position: relative;
+  border-top: 1px solid #eee;
+  padding: 1px;
+  min-height: 20px;
+}
+
+/* Título de sección como icono (Notes / Commands / Operations). */
+.block-section-title {
+  position: absolute;
+  top: -8px;
+  left: 15px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  background-color: white;
+  color: #666;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.block-section-title .pi {
+  font-size: 12px;
+}
+
+/* Acciones del header (+ / x / copiar y ×N): ocupan su espacio siempre
+   (0 layout shift al aparecer) pero solo se ven al hover o al enfocar el
+   header; siguen siendo tabulables (opacity, no visibility). */
+.p-tree .block-header .block-controls,
+.p-tree .block-header .repetitions-container {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.p-tree .block-header:hover .block-controls,
+.p-tree .block-header:focus-within .block-controls,
+.p-tree .block-header:hover .repetitions-container,
+.p-tree .block-header:focus-within .repetitions-container {
+  opacity: 1;
+  pointer-events: auto;
+}

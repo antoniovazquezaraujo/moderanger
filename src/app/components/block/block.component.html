@@ -55,9 +55,16 @@
           <span class="header-item block-controls"><p-button (click)="addChild(node)" icon="pi pi-plus" pTooltip="Add Block" tooltipPosition="top"></p-button><p-button (click)="removeChild(node)" icon="pi pi-times" pTooltip="Remove Block" tooltipPosition="top"></p-button><p-button (click)="duplicateBlock(node)" icon="pi pi-copy" pTooltip="Duplicate Block" tooltipPosition="top"></p-button></span>
           <span class="header-item repetitions-container"><span class="repetitions-label" style="margin-right: 2px; font-size: 12px;">×</span><input type="number" id="repeatingTimes" class="repetitions-input" style="width:32px !important; max-width:32px !important;" [(ngModel)]="node.repeatingTimes" min="0" max="99" step="1"></span>
           
-          <!-- Melody Editor integrated into header -->
-          <span class="header-item melody-editor-inline-container">
-              <!-- Remove the outer wrapper and title, keep the editor container -->
+      </div> <!-- End of block-header -->
+
+      <!-- Cuerpo del bloque: Notes + Commands + Operations (solo desplegado) -->
+      <div class="block-body" *ngIf="node.expanded">
+        <!-- Notes: el editor de melodía vive ahora en el cuerpo -->
+        <div class="block-section notes-section">
+          <span class="block-section-title" pTooltip="Notes" tooltipPosition="top" aria-label="Notes">
+            <i class="pi pi-pencil" aria-hidden="true"></i>
+          </span>
+          <span class="melody-editor-inline-container">
              <div class="melody-editor-container">
                 <div class="p-field p-col-12">
                   <app-melody-editor-wrapper 
@@ -69,17 +76,8 @@
                 </div>
              </div>
           </span>
-      </div> <!-- End of block-header -->
-      
-      <!-- REMOVE Melody Editor Wrapper from here -->
-      <!-- 
-      <div class="melody-editor-wrapper"> 
-        ...
-      </div>
-      -->
+        </div>
 
-      <!-- Block Body (Commands) - Render only if expanded -->
-      <div class="block-body" *ngIf="node.expanded">
         <app-block-commands 
           [block]="node" 
           >
