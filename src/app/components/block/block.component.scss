@@ -187,9 +187,8 @@ input[type="number"]#repeatingTimes {
 }
 
 .melody-editor-inline-container {
-  display: block;
-  width: 100%;
-  min-width: 100px;
+  flex: 1 1 auto;
+  min-width: 0;
 
   ::ng-deep app-melody-editor-wrapper {
     .notes-container {

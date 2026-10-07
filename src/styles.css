@@ -2325,34 +2325,41 @@ html body .operations-row .operations-container {
   color: inherit;
 }
 
-/* ====== BLOQUE COMPACTO: TÍTULOS-ICONO Y ACCIONES AL HOVER ====== */
+/* ====== BLOQUE COMPACTO: COLUMNA DE ICONOS Y ACCIONES AL HOVER ====== */
 /* Sección del cuerpo (Notes) con el mismo tratamiento que las filas de
-   Commands/Operations: borde superior y título flotante. */
+   Commands/Operations: borde superior y contenido tras la columna. */
 .block-section {
-  position: relative;
+  display: flex;
+  align-items: flex-start;
   border-top: 1px solid #eee;
-  padding: 1px;
+  /* 4px hasta la línea del árbol (content+7..9) + columna de iconos. */
+  padding: 1px 1px 1px 4px;
   min-height: 20px;
 }
 
-/* Título de sección como icono (Notes / Commands / Operations). */
-.block-section-title {
-  position: absolute;
-  top: -8px;
-  left: 15px;
-  z-index: 1;
+/* Columna de iconos del cuerpo: un glifo por sección (Notes/Commands/
+   Operations), alineado con el inicio de su sección. El ancho fijo mantiene
+   los tres contenidos en la misma x. */
+.block-section-icon {
+  flex: 0 0 18px;
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  padding: 0 6px;
-  background-color: white;
+  justify-content: center;
+  width: 18px;
+  height: 20px;
+  margin: 1px 2px 0 0;
   color: #666;
-  font-size: 12px;
-  font-weight: 500;
+  font-family: 'Segoe UI Symbol', 'Noto Sans Symbols', 'Noto Sans Symbols 2', 'DejaVu Sans', sans-serif;
+  font-size: 13px;
   line-height: 1;
+  cursor: default;
 }
 
-.block-section-title .pi {
-  font-size: 12px;
+/* Las filas de Commands/Operations también reservan la columna. */
+html body app-block-commands .commands-row,
+html body app-block-commands .operations-row {
+  padding-left: 4px !important;
 }
 
 /* Acciones del header (+ / x / copiar y ×N): ocupan su espacio siempre
