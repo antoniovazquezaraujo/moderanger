@@ -119,7 +119,7 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     const base = ruleBody(styles, 'html body .operations-row .operation-item > .command-controls');
     expect(declaration(base, 'position')).toBe('absolute !important');
     expect(declaration(base, 'top')).toBe('-12px !important');
-    expect(declaration(base, 'right')).toBe('-2px !important');
+    expect(declaration(base, 'left')).toBe('0 !important');
     expect(declaration(base, 'opacity')).toBe('0');
     expect(declaration(base, 'pointer-events')).toBe('none');
 
