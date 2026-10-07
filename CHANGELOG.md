@@ -21,6 +21,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- Part headers follow the block pattern: the add-child/remove/duplicate/play/stop buttons stay hidden at rest (`opacity: 0`, `pointer-events: none`) and reveal on header hover or keyboard focus (`:focus-within`), keeping their space so nothing shifts; the toggler and name remain visible.
 - Block icon column: when expanded, the body shows a fixed left column with the Unicode glyphs ♫ (Notes), ⚙ (Commands) and ≚ (Operations), each aligned with its section and just right of the tree guide; all three contents start at the same x. Tooltips and aria-labels kept; glyph fallback `Segoe UI Symbol, Noto Sans Symbols, DejaVu Sans`.
 - Compact block rows: the header is a single line showing only the drag handle, toggler and name (height 66 → 24px); `+`/`✕`/duplicate and the `×N` repeats reveal on hover or keyboard focus without moving anything (they keep their flow space). When expanded, the body shows three sections — Notes (the melody editor moved from the header), Commands and Operations; collapsed hides all three.
 - Command/Operations polish: the `$`/`✕` superscript chips sit higher (`top: -12px`, clear of the text) and wrapped rows get a 12px row-gap so chips never touch the line above; the combo reserves a constant 14px chevron slot (text keeps a ~6px gap, no overlap and no width change rest↔hover); the `:` is rendered by a separate reading span (options are clean) and is hidden while a variable select shows its placeholder. Model and `.mr` unchanged.
