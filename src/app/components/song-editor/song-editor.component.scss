@@ -41,10 +41,13 @@
 }
 
 /* Combo de duración por defecto: auto-fit (field-sizing global) con clamp
-   para que no salte entre opciones cortas y largas. */
+   para que no salte entre opciones cortas y largas. Sin flecha (mismo
+   enfoque que los combos de Commands/Operations): sigue abriéndose al clic. */
 .default-duration-select {
   min-width: 40px;
   max-width: 80px;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 /* Playback controls container */
