@@ -2255,7 +2255,10 @@ html body .operations-row .operation-item > .command-controls {
   /* Suficiente para que el borde inferior del chip no toque el texto del
      comando (los controles empiezan 2px dentro de la caja). */
   top: -12px !important;
-  right: -2px !important;
+  /* Anclados a la izquierda: los chips flotan sobre el select de tipo
+     (`Scale:`), no sobre el valor. `left: 0` los mantiene dentro de la caja
+     y el ancho del tipo (field-sizing, min ~36px) cubre los 33px del grupo. */
+  left: 0 !important;
   display: flex !important;
   gap: 1px !important;
   height: auto !important;
