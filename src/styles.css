@@ -2379,3 +2379,24 @@ html body app-block-commands .operations-row {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* ====== PARTS: ACCIONES AL HOVER ====== */
+/* Mismo patrón que el header de bloque: los botones de `.part-controls`
+   reservan su espacio (sin layout shift) pero solo se ven al pasar el ratón
+   por el header o al enfocar (focus-within); siguen siendo tabulables. */
+.part-header .part-controls {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.part-header:hover .part-controls,
+.part-header:focus-within .part-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.part-header .p-button:focus-visible {
+  outline: 2px solid rgba(0, 119, 204, 0.55) !important;
+  outline-offset: 1px;
+}
