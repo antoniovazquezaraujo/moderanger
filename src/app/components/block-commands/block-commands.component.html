@@ -1,9 +1,9 @@
 <div class="block-container">
     <!-- Second Row: Comandos -->
     <div class="commands-row">
-        <div class="title-container">
-            <span class="section-title">Commands</span>
-        </div>
+        <span class="block-section-title" pTooltip="Commands" tooltipPosition="top" aria-label="Commands">
+            <i class="pi pi-sliders-h" aria-hidden="true"></i>
+        </span>
         <div class="container-wrapper commands-container">
             <div *ngFor="let command of block.commands" class="command">
                 <select class="command-type" [(ngModel)]="command.type" (ngModelChange)="onCommandTypeChange(command)">
@@ -121,9 +121,9 @@
 
     <!-- Third Row: Operaciones -->
     <div class="operations-row">
-        <div class="title-container">
-            <span class="section-title">Operations</span>
-        </div>
+        <span class="block-section-title" pTooltip="Operations" tooltipPosition="top" aria-label="Operations">
+            <i class="pi pi-sync" aria-hidden="true"></i>
+        </span>
         <div class="container-wrapper operations-container">
             <div *ngFor="let operation of operations; let i = index" class="operation-item">
                 <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">

@@ -8,21 +8,8 @@
   width: 100%;
 }
 
-/* Section titles */
-.title-container {
-  position: absolute;
-  top: -7px;
-  left: 15px;
-  z-index: 1;
-}
-
-.section-title {
-  background-color: white;
-  padding: 0 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #666;
-}
+/* Los títulos de sección (icono) usan `.block-section-title` global
+   (styles.css), compartido con la sección Notes del bloque. */
 
 /* Row layouts - MÁS COMPACTO */
 .commands-row,
