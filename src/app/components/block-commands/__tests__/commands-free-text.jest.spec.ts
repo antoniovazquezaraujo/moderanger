@@ -35,21 +35,21 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     expect(template).toContain('class="command-label-sep" *ngIf="showOperationColon(operation)"');
   });
 
-  it('en reposo el combo no tiene borde/fondo/flecha nativa y reserva el chevron', () => {
+  it('en reposo el combo no tiene borde/fondo ni flecha (nativa o decorativa)', () => {
     const body = ruleBody(styles, '.operation-item select.command-type');
 
     expect(declaration(body, 'appearance')).toBe('none !important');
     expect(declaration(body, 'border')).toBe('1px solid transparent !important');
     expect(declaration(body, 'background-color')).toBe('transparent !important');
-    expect(declaration(body, 'padding')).toContain('14px');
+    expect(declaration(body, 'padding')).toBe('0 2px !important');
   });
 
-  it('al hover/focus aparece el borde del combo y el chevron propio', () => {
+  it('al hover/focus aparece el borde del combo sin chevron', () => {
     const body = ruleBody(styles, '.operation-item:focus-within select.command-type');
 
     expect(declaration(body, 'border-color')).toBe('#ced4da !important');
     expect(declaration(body, 'background-color')).toBe('white !important');
-    expect(declaration(body, 'background-image')).toContain('url(');
+    expect(declaration(body, 'background-image')).toBeNull();
   });
 
   it('la caja del comando mantiene el box y muestra borde al hover/focus', () => {
@@ -140,15 +140,19 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     expect(declaration(anchor, 'overflow')).toBe('visible');
   });
 
-  it('reserva el hueco del chevron y pega el `:` a la etiqueta sin pisarlo', () => {
-    // Hueco constante del chevron en los selects de la fila.
-    const selectPadding = ruleBody(styles, 'html body .operations-row .operation-item select.command-type');
-    expect(declaration(selectPadding, 'padding-right')).toBe('14px !important');
+  it('sin chevron: padding simétrico y `:` pegado a la etiqueta', () => {
+    // Sin hueco reservado: padding simétrico y appearance none.
+    const selectRule = ruleBody(styles, '.operation-item select.command-type');
+    expect(declaration(selectRule, 'appearance')).toBe('none !important');
+    expect(declaration(selectRule, 'padding')).toBe('0 2px !important');
+
+    // Ya no queda ningún fondo SVG de chevron.
+    expect(styles).not.toContain("width='8' height='5'");
 
     // El `:` se pega a la etiqueta con desplazamiento relativo (no mueve el flujo).
     const sep = ruleBody(styles, '.command-label-sep');
     expect(declaration(sep, 'position')).toBe('relative');
-    expect(declaration(sep, 'left')).toBe('-17px');
+    expect(declaration(sep, 'left')).toBe('-5px');
     expect(declaration(sep, 'margin-right')).toBe('-4px');
 
     // Wrap: row-gap sube con los chips (12px + 2mm) para no pisar la línea anterior.
