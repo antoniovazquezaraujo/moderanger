@@ -2252,9 +2252,9 @@ html body .operations-container > .operation-item {
 html body .commands-row .command > .command-actions,
 html body .operations-row .operation-item > .command-controls {
   position: absolute !important;
-  /* Suficiente para que el borde inferior del chip no toque el texto del
-     comando (los controles empiezan 2px dentro de la caja). */
-  top: -12px !important;
+  /* Base -12px (borde inferior sin tocar el texto del comando) + 2mm extra
+     pedidos por el usuario (~7.56px a 96dpi => top ≈ -19.6px). */
+  top: calc(-12px - 2mm) !important;
   /* Anclados a la izquierda: los chips flotan sobre el select de tipo
      (`Scale:`), no sobre el valor. `left: 0` los mantiene dentro de la caja
      y el ancho del tipo (field-sizing, min ~36px) cubre los 33px del grupo. */
@@ -2310,11 +2310,11 @@ html body .operations-row .operation-item select.command-type {
 }
 
 /* Con wrap, los chips de una línea no deben pisar la línea anterior: el chip
-   sobresale 12px por encima de su caja y entre líneas hay 2px de márgenes,
-   así que 12px de row-gap deja 2px de aire. */
+   sobresale `12px + 2mm` por encima de su caja y entre líneas hay 2px de
+   márgenes, así que el row-gap sube en la misma cantidad (2px de aire). */
 html body .commands-row .commands-container,
 html body .operations-row .operations-container {
-  row-gap: 12px !important;
+  row-gap: calc(12px + 2mm) !important;
 }
 
 /* Separador `:` de la lectura (solo presentación; el modelo no cambia).
