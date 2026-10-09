@@ -102,15 +102,21 @@ export class Scale {
         return decoratedGrades;
     }
  
+    /**
+     * Desplaza en octavas la ventana `[shiftStart, shiftStart + shiftSize)` de
+     * una lista de grados ya ordenada (el acorde final). La ventana se recorta
+     * a los límites disponibles (`clamp`), `shiftSize <= 0` no hace nada y el
+     * desplazamiento se aplica in-place, como esperan sus consumidores.
+     */
     getShiftedGrades(octavedGrades: OctavedGrade[], shiftStart: number, shiftSize: number, shiftValue: number): OctavedGrade[] {
-        for(const grade of octavedGrades){
-            grade
+        if (shiftSize <= 0 || shiftValue === 0 || octavedGrades.length === 0) {
+            return octavedGrades;
         }
-        for (var n = 0; n < shiftSize; n++) {
-            if (n + shiftStart > octavedGrades.length) {
-                break;
-            }
-            octavedGrades[n + shiftStart].octave += shiftValue;
+        // Con valores no enteros, el primer/último índice entero de la ventana.
+        const start = Math.max(0, Math.ceil(shiftStart));
+        const end = Math.min(octavedGrades.length, Math.ceil(shiftStart + shiftSize));
+        for (let n = start; n < end; n++) {
+            octavedGrades[n].octave += shiftValue;
         }
         return octavedGrades;
     }
