@@ -174,6 +174,28 @@ part P
   });
 });
 
+describe('round-trip: comandos de shift', () => {
+  it('es idempotente con valores negativos en SHIFTSTART/SHIFTSIZE/SHIFTVALUE', () => {
+    const text = `song Negativos
+version 1
+
+part P
+  block B
+    notes
+      4n:0
+    commands
+      SHIFTSTART -2
+      SHIFTSIZE -1
+      SHIFTVALUE -3
+`;
+
+    const once = serializeSong(parseSong(text));
+
+    expect(once).toBe(text);
+    expect(serializeSong(parseSong(once))).toBe(once);
+  });
+});
+
 describe('round-trip: modelo construido a mano', () => {
   function buildDocument(): SongDocument {
     const song = new Song();
