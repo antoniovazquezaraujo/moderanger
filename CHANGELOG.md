@@ -12,6 +12,7 @@ All notable changes to **Mode Ranger**. Format based on
 - In-app `.mr` text view (Phase 2): live validation, apply/revert and per-part/block source map.
 - Save/load `.mr` from the UI (Phase 3).
 - `PATTERN` accepts string variables; the pattern is applied **before** the playmode (new `PLAYMODE SINGLE`).
+- `SHIFTSTART`/`SHIFTSIZE`/`SHIFTVALUE` now shift the generated chord window by whole octaves (window clamped to the chord, `SHIFTSIZE 0` is a no-op); `PATTERN_GAP` decoration remains format-only.
 - Groups inside `PATTERN` with subdivision and strict measure validation.
 - String variables (melodies) are listed and editable in the sidebar.
 - English translation of the `.mr` manual (Spanish version kept as `docs/user/manual_es.md`).

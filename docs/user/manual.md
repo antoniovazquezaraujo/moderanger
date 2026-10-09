@@ -324,7 +324,8 @@ Notes:
 - `PLAYMODE SINGLE` plays each note on its own, without chord or arpeggio (useful with `PATTERN`).
 - `PATTERN` is **independent from the playmode**: when present, it expands every note before the playmode generates its sound (chord, arpeggio, random...). Without `PATTERN`, nothing changes. Its melody is written on one line (durations, rests and groups allowed).
 - In a numeric command, the `$variable` is resolved at playback time; it must contain a number.
-- `SHIFTSTART`, `SHIFTSIZE`, `SHIFTVALUE` and `PATTERN_GAP` are part of the format (they are read and saved), but the current generation engine does not apply the shift or the decoration: today they do not change the sound. They remain as legacy fields ([limitations](#10-known-v1-limitations)).
+- `SHIFTSTART`, `SHIFTSIZE` and `SHIFTVALUE` add whole octaves to the chord notes in the window `[SHIFTSTART, SHIFTSTART+SHIFTSIZE)` (0-based, on the final chord order after `INV`). The window is clamped to the chord, `SHIFTSIZE 0` does nothing and a negative `SHIFTVALUE` lowers the affected notes. They shape the generated chord/arpeggio; with `PLAYMODE SINGLE` there is no chord, so they have no effect (same as `WIDTH`/`INV`).
+- `PATTERN_GAP` is part of the format (it is read and saved), but the current generation engine does not apply the decoration: today it does not change the sound. It remains a legacy field ([limitations](#10-known-v1-limitations)).
 
 Example with the twelve commands:
 
@@ -503,7 +504,7 @@ In the `.mr` view, errors appear below the text with their `line, column`; click
 4. **Multiline groups.** Not allowed in v1; a group must open and close on its line.
 5. **Literal chords and arpeggios.** They are not written in the text; `PLAYMODE` generates them from grades, scale and commands.
 6. **Variables sidebar.** Lists and edits all four types (number, scale, playmode and string). String variables are edited as plain text.
-7. **Legacy commands without audible effect.** `SHIFTSTART`, `SHIFTSIZE`, `SHIFTVALUE` and `PATTERN_GAP` are read and saved, but the current engine does not apply shift or decoration; today they do not change the sound.
+7. **Pattern decoration without audible effect.** `PATTERN_GAP` is read and saved, but the current engine does not apply the decoration; today it does not change the sound.
 8. **Instruments.** Only `PIANO` in v1.
 9. **`pulse` and `beatsPerBar`.** Not serialized.
 10. **One parse error at a time.** The parser stops at the first error; the dialog is ready to show more.

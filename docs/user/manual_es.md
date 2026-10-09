@@ -324,7 +324,8 @@ Notas:
 - `PLAYMODE SINGLE` toca cada nota suelta, sin acorde ni arpegio (útil con `PATTERN`).
 - `PATTERN` es **independiente del playmode**: si existe, expande cada nota antes de que el playmode genere su sonido (acorde, arpegio, aleatorio…). Si no hay `PATTERN`, nada cambia. Su melodía se escribe en una línea (duraciones, silencios y grupos admitidos).
 - En un comando numérico, la `$variable` se resuelve al reproducir; debe contener un número.
-- `SHIFTSTART`, `SHIFTSIZE`, `SHIFTVALUE` y `PATTERN_GAP` forman parte del formato (se leen y se guardan), pero el motor de generación actual no aplica el desplazamiento ni la decoración: hoy no cambian el sonido. Se mantienen como campos heredados ([limitaciones](#10-limitaciones-conocidas-de-la-v1)).
+- `SHIFTSTART`, `SHIFTSIZE` y `SHIFTVALUE` suman octavas completas a las notas del acorde en la ventana `[SHIFTSTART, SHIFTSTART+SHIFTSIZE)` (0-based, sobre el orden final del acorde tras `INV`). La ventana se recorta al acorde, `SHIFTSIZE 0` no hace nada y un `SHIFTVALUE` negativo baja las notas afectadas. Dan forma al acorde/arpegio generado; con `PLAYMODE SINGLE` no hay acorde, así que no tienen efecto (igual que `WIDTH`/`INV`).
+- `PATTERN_GAP` forma parte del formato (se lee y se guarda), pero el motor de generación actual no aplica la decoración: hoy no cambia el sonido. Se mantiene como campo heredado ([limitaciones](#10-limitaciones-conocidas-de-la-v1)).
 
 Ejemplo con los doce comandos:
 
@@ -501,7 +502,7 @@ En la vista `.mr`, los errores aparecen bajo el texto con su `línea, columna`; 
 4. **Grupos multilínea.** No se admiten en v1; el grupo debe abrirse y cerrarse en su línea.
 5. **Acordes y arpegios literales.** No se escriben en el texto; los genera `PLAYMODE` a partir de grados, escala y comandos.
 6. **Sidebar de variables.** Lista y edita los cuatro tipos (número, escala, playmode y string). Las variables string se editan como texto plano.
-7. **Comandos heredados sin efecto audible.** `SHIFTSTART`, `SHIFTSIZE`, `SHIFTVALUE` y `PATTERN_GAP` se leen y se guardan, pero el motor actual no aplica desplazamiento ni decoración; hoy no cambian el sonido.
+7. **Decoración de patrón sin efecto audible.** `PATTERN_GAP` se lee y se guarda, pero el motor actual no aplica la decoración; hoy no cambia el sonido.
 8. **Instrumentos.** Solo `PIANO` en v1.
 9. **`pulse` y `beatsPerBar`.** No se serializan.
 10. **Un error de parseo por vez.** El parser se detiene en el primer error; el diálogo está preparado para pintar más.
