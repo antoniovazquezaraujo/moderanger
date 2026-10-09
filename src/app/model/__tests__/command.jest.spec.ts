@@ -179,3 +179,60 @@ describe('Command.execute', () => {
     error.mockRestore();
   });
 });
+
+describe('Command.execute · variables de SHIFTSTART/SHIFTSIZE/SHIFTVALUE', () => {
+  beforeEach(() => {
+    VariableContext.context.clear();
+  });
+
+  it('resuelve $variables numéricas de los tres comandos vía Command.value', () => {
+    VariableContext.setValue('startVar', 1);
+    VariableContext.setValue('sizeVar', 2);
+    VariableContext.setValue('valueVar', -1);
+
+    const start = new Command({ type: CommandType.SHIFTSTART });
+    start.setVariable('startVar');
+    const size = new Command({ type: CommandType.SHIFTSIZE });
+    size.setVariable('sizeVar');
+    const value = new Command({ type: CommandType.SHIFTVALUE });
+    value.setVariable('valueVar');
+
+    expect(start.value).toBe(1);
+    expect(size.value).toBe(2);
+    expect(value.value).toBe(-1);
+  });
+
+  it('aplica las variables resueltas al player al ejecutar', () => {
+    const player = createFakePlayer();
+    VariableContext.setValue('startVar', 1);
+    VariableContext.setValue('sizeVar', 2);
+    VariableContext.setValue('valueVar', -1);
+    const commands = [
+      new Command({ type: CommandType.SHIFTSTART }),
+      new Command({ type: CommandType.SHIFTSIZE }),
+      new Command({ type: CommandType.SHIFTVALUE })
+    ];
+    commands[0].setVariable('startVar');
+    commands[1].setVariable('sizeVar');
+    commands[2].setVariable('valueVar');
+
+    commands.forEach((command) => command.execute(player));
+
+    expect(player.shiftStart).toBe(1);
+    expect(player.shiftSize).toBe(2);
+    expect(player.shiftValue).toBe(-1);
+  });
+
+  it('una variable de shift sin definir se resuelve a 0 (no-op)', () => {
+    const player = createFakePlayer();
+    player.shiftStart = 5;
+    player.shiftSize = 2;
+    player.shiftValue = 1;
+    const command = new Command({ type: CommandType.SHIFTSTART });
+    command.setVariable('noExiste');
+
+    command.execute(player);
+
+    expect(player.shiftStart).toBe(0);
+  });
+});

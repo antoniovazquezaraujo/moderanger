@@ -59,7 +59,7 @@ part Piano instrument PIANO
 | `WIDTH` | Extra chord notes | `WIDTH 3` |
 | `INV` | Inversion | `INV 1` |
 | `KEY` | Transposition in semitones | `KEY 0` |
-| `SHIFTSTART`/`SHIFTSIZE`/`SHIFTVALUE` | Legacy shift fields | `SHIFTSIZE 3` |
+| `SHIFTSTART`/`SHIFTSIZE`/`SHIFTVALUE` | Shift chord window by whole octaves | `SHIFTSIZE 3` |
 | `PATTERN` | Pattern melody (or `$variable`) | `PATTERN 4t:0 4t:2` |
 | `PATTERN_GAP` | Legacy pattern decoration gap | `PATTERN_GAP 1` |
 

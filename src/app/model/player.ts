@@ -145,9 +145,15 @@ export class Player {
             const invertedNotes = notesToInvert.map(g => g + scaleSize);
             grades = [...remainingNotes, ...invertedNotes];
         }
-        
-        let midiNotes: NoteData[] = grades.map(grade => {
-            const octavedGrade = new OctavedGrade(scale, grade, this.octave);
+
+        // SHIFTSTART/SHIFTSIZE/SHIFTVALUE: la ventana [shiftStart, shiftStart+shiftSize)
+        // se aplica sobre el acorde final (después de la inversión) y suma
+        // shiftValue octavas a las notas afectadas. Sin comandos (0/0/0) el
+        // resultado es idéntico al de siempre.
+        const octavedGrades = grades.map(grade => new OctavedGrade(scale, grade, this.octave));
+        scale.getShiftedGrades(octavedGrades, this.shiftStart, this.shiftSize, this.shiftValue);
+
+        let midiNotes: NoteData[] = octavedGrades.map(octavedGrade => {
             const midiNote = octavedGrade.toNote() + this.tonality;
             
             // Use unified service for consistent note creation

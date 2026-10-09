@@ -85,4 +85,60 @@ describe('Scale.getShiftedGrades', () => {
 
     expect(grades.map(g => g.octave)).toEqual([1, 1, 0]);
   });
+
+  it('no hace nada con SHIFTSIZE 0', () => {
+    const grades = whiteScale.getSelectedGrades(0, 2, 2);
+
+    whiteScale.getShiftedGrades(grades, 0, 0, 1);
+
+    expect(grades.map(g => g.octave)).toEqual([0, 0, 0]);
+  });
+
+  it('no hace nada con SHIFTSIZE negativo', () => {
+    const grades = whiteScale.getSelectedGrades(0, 2, 2);
+
+    whiteScale.getShiftedGrades(grades, 0, -2, 1);
+
+    expect(grades.map(g => g.octave)).toEqual([0, 0, 0]);
+  });
+
+  it('no hace nada con SHIFTVALUE 0', () => {
+    const grades = whiteScale.getSelectedGrades(0, 2, 2);
+
+    whiteScale.getShiftedGrades(grades, 0, 3, 0);
+
+    expect(grades.map(g => g.octave)).toEqual([0, 0, 0]);
+  });
+
+  it('recorta la ventana si desborda el final del acorde', () => {
+    const grades = whiteScale.getSelectedGrades(0, 2, 2);
+
+    whiteScale.getShiftedGrades(grades, 1, 99, 1);
+
+    expect(grades.map(g => g.octave)).toEqual([0, 1, 1]);
+  });
+
+  it('no toca ninguna nota si SHIFTSTART queda fuera del acorde', () => {
+    const grades = whiteScale.getSelectedGrades(0, 2, 2);
+
+    expect(() => whiteScale.getShiftedGrades(grades, 3, 2, 1)).not.toThrow();
+
+    expect(grades.map(g => g.octave)).toEqual([0, 0, 0]);
+  });
+
+  it('recorta un SHIFTSTART negativo a la primera nota', () => {
+    const grades = whiteScale.getSelectedGrades(0, 2, 2);
+
+    whiteScale.getShiftedGrades(grades, -2, 3, 1);
+
+    expect(grades.map(g => g.octave)).toEqual([1, 0, 0]);
+  });
+
+  it('admite valores negativos de SHIFTVALUE', () => {
+    const grades = whiteScale.getSelectedGrades(0, 2, 2);
+
+    whiteScale.getShiftedGrades(grades, 2, 1, -1);
+
+    expect(grades.map(g => g.octave)).toEqual([0, 0, -1]);
+  });
 });
