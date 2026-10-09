@@ -2,6 +2,7 @@ import { AudioEngineService, InstrumentType } from '../../services/audio-engine.
 import { NoteGenerationService } from '../note-generation.service';
 import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
 import { Block } from '../../model/block';
+import { Command, CommandType } from '../../model/command';
 import { NoteData } from '../../model/note';
 import { Player } from '../../model/player';
 import { PlayMode } from '../../model/play.mode';
@@ -318,5 +319,138 @@ describe('PATTERN con grupos (subdivisión)', () => {
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe('rest');
     error.mockRestore();
+  });
+});
+
+describe('SHIFTSTART/SHIFTSIZE/SHIFTVALUE (generateNotesForBlock)', () => {
+  beforeEach(() => {
+    VariableContext.context.clear();
+  });
+
+  /** Bloque `4n:0` (u otro) con los tres comandos de shift, como los ejecuta SongPlayer. */
+  const shiftedBlock = (start: number, size: number, value: number, notes = '4n:0'): Block => {
+    const block = blockWith(notes);
+    block.commands = [
+      new Command({ type: CommandType.SHIFTSTART, value: start }),
+      new Command({ type: CommandType.SHIFTSIZE, value: size }),
+      new Command({ type: CommandType.SHIFTVALUE, value: value })
+    ];
+    return block;
+  };
+
+  const chordedPlayer = (): Player => {
+    const player = createPlayer();
+    player.density = 2;
+    player.gap = 2;
+    return player;
+  };
+
+  it('sin comandos la salida es idéntica a la de SHIFTSTART 0/SHIFTSIZE 0/SHIFTVALUE 0', () => {
+    const plain = createService().generateNotesForBlock(blockWith('4n:0'), chordedPlayer());
+
+    const explicitPlayer = chordedPlayer();
+    const explicitBlock = shiftedBlock(0, 0, 0);
+    explicitPlayer.executeCommands(explicitBlock);
+    const explicit = createService().generateNotesForBlock(explicitBlock, explicitPlayer);
+
+    expect(plain[0].noteDatas!.map(n => n.note)).toEqual([60, 63, 67]);
+    expect(explicit[0].noteDatas!.map(n => n.note)).toEqual(plain[0].noteDatas!.map(n => n.note));
+  });
+
+  it('desplaza la ventana [SHIFTSTART, SHIFTSTART+SHIFTSIZE) del acorde', () => {
+    const player = chordedPlayer();
+    const block = shiftedBlock(0, 2, 1);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe('chord');
+    expect(result[0].noteDatas!.map(n => n.note)).toEqual([72, 75, 67]);
+  });
+
+  it('SHIFTVALUE negativo baja la ventana', () => {
+    const player = chordedPlayer();
+    const block = shiftedBlock(1, 2, -1);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result[0].noteDatas!.map(n => n.note)).toEqual([60, 51, 55]);
+  });
+
+  it('recorta la ventana fuera de rango y SHIFTSIZE 0 no cambia nada', () => {
+    const outOfRangePlayer = chordedPlayer();
+    const outOfRangeBlock = shiftedBlock(5, 2, 1);
+    outOfRangePlayer.executeCommands(outOfRangeBlock);
+    const outOfRange = createService().generateNotesForBlock(outOfRangeBlock, outOfRangePlayer);
+
+    const oversizedPlayer = chordedPlayer();
+    const oversizedBlock = shiftedBlock(1, 99, 1);
+    oversizedPlayer.executeCommands(oversizedBlock);
+    const oversized = createService().generateNotesForBlock(oversizedBlock, oversizedPlayer);
+
+    const zeroSizePlayer = chordedPlayer();
+    const zeroSizeBlock = shiftedBlock(0, 0, 1);
+    zeroSizePlayer.executeCommands(zeroSizeBlock);
+    const zeroSize = createService().generateNotesForBlock(zeroSizeBlock, zeroSizePlayer);
+
+    expect(outOfRange[0].noteDatas!.map(n => n.note)).toEqual([60, 63, 67]);
+    expect(oversized[0].noteDatas!.map(n => n.note)).toEqual([60, 75, 79]);
+    expect(zeroSize[0].noteDatas!.map(n => n.note)).toEqual([60, 63, 67]);
+  });
+
+  it('aplica la ventana sobre el acorde final tras la inversión (INV)', () => {
+    const player = chordedPlayer();
+    player.inversion = 1;
+    const block = shiftedBlock(0, 2, 1);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    // INV 1: grados [0,2,4] -> [2,4,7] -> MIDI [63,67,72] y la ventana sube los dos primeros.
+    expect(result[0].noteDatas!.map(n => n.note)).toEqual([75, 79, 72]);
+  });
+
+  it('el shift también afecta a las notas del arpegio', () => {
+    const player = chordedPlayer();
+    player.playMode = PlayMode.ASCENDING;
+    const block = shiftedBlock(0, 1, 1);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result[0].type).toBe('arpeggio');
+    expect(result[0].noteDatas!.map(n => n.note)).toEqual([72, 63, 67]);
+  });
+
+  it('con PATTERN la ventana se aplica al acorde generado para cada nota expandida', () => {
+    const player = chordedPlayer();
+    player.playMode = PlayMode.CHORD;
+    player.currentPattern = parseBlockNotes('4t:1 4t:2');
+    const block = shiftedBlock(0, 1, 1);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result).toHaveLength(2);
+    expect(result.map(chord => chord.noteDatas!.map(n => n.note))).toEqual([
+      [74, 65, 69],
+      [75, 67, 70]
+    ]);
+  });
+
+  it('documenta comportamiento: PLAYMODE SINGLE no tiene acorde y no aplica el shift', () => {
+    // Igual que WIDTH/GAP/INV: la ventana describe notas del acorde; SINGLE toca una nota suelta.
+    const player = chordedPlayer();
+    player.playMode = PlayMode.SINGLE;
+    const block = shiftedBlock(0, 1, 1);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe('note');
+    expect(result[0].note).toBe(60);
   });
 });
