@@ -17,6 +17,8 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 0.25rem;
+    /* Los controles (al hover) bajan de línea en parts estrechas. */
+    flex-wrap: wrap;
 }
 
 .part-info {
