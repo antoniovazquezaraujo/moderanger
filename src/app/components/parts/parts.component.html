@@ -1,11 +1,29 @@
-<!-- EXPERIMENTO (experiment/parts-side-by-side): parts en fila horizontal.
-     Variante por defecto: `parts--equal`. Para la otra, cambia la clase a
-     `parts--content` (o hazlo desde la consola del navegador). -->
-<div class="parts parts--equal">
-    <app-part *ngFor="let part of parts" 
-        [part]="part"
-        [song]="song"
-        (onDuplicatePart)="handleDuplicatePart($event)"
-        (onRemovePart)="removePart($event)">
-    </app-part>
+<!-- Parts en fila horizontal (orden canción, izquierda → derecha) con
+     splitter arrastrable entre parts adyacentes. El reparto inicial es igual
+     (flex); tras el primer arrastre se fijan anchos explícitos en px y, si no
+     caben, la fila hace scroll horizontal. -->
+<div class="parts" [class.parts--dragging]="draggingIndex !== null">
+    <ng-container *ngFor="let part of parts; let i = index; let last = last">
+        <app-part
+            [part]="part"
+            [song]="song"
+            [style.flex]="flexFor(i)"
+            [style.width.px]="widthFor(i)"
+            (onDuplicatePart)="handleDuplicatePart($event)"
+            (onRemovePart)="removePart($event)">
+        </app-part>
+        <div *ngIf="!last"
+             class="parts-splitter"
+             [class.parts-splitter--dragging]="isDragging(i)"
+             role="separator"
+             aria-orientation="vertical"
+             [attr.aria-label]="'Resize parts ' + (i + 1) + ' and ' + (i + 2)"
+             tabindex="0"
+             (pointerdown)="onSplitterPointerDown($event, i)"
+             (pointermove)="onSplitterPointerMove($event)"
+             (pointerup)="onSplitterPointerUp($event)"
+             (pointercancel)="onSplitterPointerUp($event)"
+             (dblclick)="resetWidths()"
+             (keydown)="onSplitterKeydown($event, i)"></div>
+    </ng-container>
 </div>
