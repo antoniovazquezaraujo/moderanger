@@ -6,6 +6,12 @@
     border: 1px solid #ddd;
 }
 
+/* EXPERIMENTO parts en fila: el margen inferior (pensado para el apilado
+   vertical) no aplica; el `gap` de la fila ya separa las parts. */
+:host-context(.parts) .part {
+    margin-bottom: 0;
+}
+
 .part-header {
     display: flex;
     align-items: center;
