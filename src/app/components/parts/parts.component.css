@@ -4,3 +4,41 @@
     justify-content: flex-start;
     gap: 10px;
 }
+
+/* ==========================================================================
+   EXPERIMENTO: parts en fila horizontal (experiment/parts-side-by-side).
+   Solo presentación. La fila ordena las parts de izquierda a derecha en el
+   mismo orden que la canción y scrollea en horizontal si no caben.
+
+   Variantes:
+   - `parts--equal` (por defecto): cada part reparte el ancho a partes iguales
+     (`flex: 1 1 0`) con un mínimo razonable; si no caben, scroll horizontal.
+   - `parts--content`: cada part ocupa su ancho de contenido (`flex: 0 0 auto`);
+     si desbordan, scroll horizontal.
+   ========================================================================== */
+
+.parts {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    overflow-x: auto;
+    /* Aire para que la barra de scroll no pise el borde de la última part. */
+    padding-bottom: 6px;
+}
+
+.parts > app-part {
+    display: block;
+    min-width: 0;
+}
+
+/* Variante A: reparto igual con scroll al desbordar. */
+.parts--equal > app-part {
+    flex: 1 1 0;
+    min-width: 340px;
+}
+
+/* Variante B: ancho de contenido con scroll al desbordar. */
+.parts--content > app-part {
+    flex: 0 0 auto;
+}

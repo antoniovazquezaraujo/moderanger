@@ -1,4 +1,7 @@
-<div class="parts">
+<!-- EXPERIMENTO (experiment/parts-side-by-side): parts en fila horizontal.
+     Variante por defecto: `parts--equal`. Para la otra, cambia la clase a
+     `parts--content` (o hazlo desde la consola del navegador). -->
+<div class="parts parts--equal">
     <app-part *ngFor="let part of parts" 
         [part]="part"
         [song]="song"
