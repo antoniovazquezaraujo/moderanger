@@ -174,11 +174,14 @@ describe('guías de jerarquía del árbol de bloques (CSS)', () => {
     expect(ruleBody(css, '.p-tree .p-tree-container .block-header')).toBe('');
   });
 
-  it('mantiene intactos el droppoint de 12px y el overflow-x del header (fix/block-dnd)', () => {
+  it('mantiene el droppoint de 12px y el header sin scroll interno (parts-resizable)', () => {
     const droppoint = ruleBody(css, '.p-tree .p-treenode-droppoint');
     expect(declaration(droppoint, 'height')).toBe('12px !important');
 
+    // El header del bloque envuelve (wrap) en vez de scrollear en horizontal:
+    // necesario para que quepa en parts estrechas (feat/parts-resizable).
     const header = ruleBody(css, '.block-header');
-    expect(declaration(header, 'overflow-x')).toBe('auto !important');
+    expect(declaration(header, 'flex-wrap')).toContain('wrap');
+    expect(declaration(header, 'overflow-x')).toBeNull();
   });
 });

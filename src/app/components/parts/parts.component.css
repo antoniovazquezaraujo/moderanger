@@ -4,3 +4,74 @@
     justify-content: flex-start;
     gap: 10px;
 }
+
+/* ==========================================================================
+   Parts en fila horizontal, redimensionables con splitter.
+   - Reparto inicial igual con flex; tras el primer arrastre el componente fija
+     anchos explícitos en px (inline flex/width).
+   - `min-width` por part sincronizado con MIN_PART_WIDTH (parts-layout.ts).
+   - Si la suma supera el contenedor, la fila hace scroll horizontal.
+   ========================================================================== */
+
+.parts {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+    overflow-x: auto;
+    /* Aire para que la barra de scroll no pise el borde de la última part. */
+    padding-bottom: 6px;
+}
+
+.parts > app-part {
+    display: block;
+    flex: 1 1 0;
+    min-width: 260px;
+}
+
+/* Mientras se arrastra: sin selección de texto y cursor de redimensión en
+   toda la fila (el puntero puede salir del agarre y el capture lo mantiene). */
+.parts--dragging {
+    cursor: col-resize;
+    user-select: none;
+}
+
+/* Agarre entre parts adyacentes: 10px de ancho, línea centrada de 2px que se
+   engrosa y colorea al hover/foco/arrastre. */
+.parts-splitter {
+    flex: 0 0 10px;
+    align-self: stretch;
+    position: relative;
+    cursor: col-resize;
+    touch-action: none;
+    border-radius: 2px;
+}
+
+.parts-splitter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background-color: #e0e0e0;
+    border-radius: 1px;
+    transition: background-color 120ms ease, width 120ms ease;
+}
+
+.parts-splitter:hover,
+.parts-splitter:focus-visible {
+    background-color: rgba(33, 150, 243, 0.06);
+}
+
+.parts-splitter:hover::before,
+.parts-splitter:focus-visible::before,
+.parts-splitter--dragging::before {
+    width: 4px;
+    background-color: #2196f3;
+}
+
+.parts-splitter:focus-visible {
+    outline: none;
+}

@@ -1280,7 +1280,8 @@ input[type="number"]:focus::-webkit-outer-spin-button,
 .operation-item,
 .notes-input {
   display: flex !important;
-  flex-flow: row nowrap !important;
+  /* Wrap: comandos/operaciones/notas envuelven al estrecharse la part. */
+  flex-flow: row wrap !important;
   align-items: center !important;
   background-color: transparent !important;
   border-radius: 0 !important;
@@ -1527,7 +1528,8 @@ input[type="number"],
 .operation-item, 
 .notes-input {
   display: flex !important;
-  flex-flow: row nowrap !important;
+  /* Wrap: comandos/operaciones/notas envuelven al estrecharse la part. */
+  flex-flow: row wrap !important;
   align-items: center !important;
   background-color: transparent !important;
   border-radius: 0 !important;
@@ -1837,9 +1839,10 @@ select {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  flex-wrap: nowrap !important;
+  /* Wrap: al estrechar la part, los controles bajan de línea en vez de
+     generar scroll horizontal interno (el header sigue compacto si caben). */
+  flex-wrap: wrap !important;
   width: 100% !important;
-  overflow-x: auto !important;
 }
 
 .block-header > * {
