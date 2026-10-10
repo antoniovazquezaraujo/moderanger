@@ -73,6 +73,13 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             /* Oculta si la duración es heredada; aparece al hacer hover. */
             visibility: hidden;
             min-width: 14px;
+            /* Ocupa todo el alto de la nota: con la duración vacía (heredada)
+               el texto mide 0 y, sin esta zona, la rueda no tendría dónde
+               apoyarse para volver a una duración explícita. */
+            align-self: stretch;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
         }
 
         .note-duration.duration-explicit,
