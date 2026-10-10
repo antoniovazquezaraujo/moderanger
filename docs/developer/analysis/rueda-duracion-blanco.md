@@ -48,6 +48,30 @@ bloqueo matemático del ciclo:
   de `1n`/`8t` vuelve a dejar en blanco (heredar); desde blanco se parte del
   fallback del grupo/editor.
 
+## Ajuste posterior: anillo único (consistencia direccional)
+
+Feedback de uso tras el primer arreglo: cada sentido se quedaba dando vueltas a
+media lista (`…4n→2n→1n→blanco→2n…` en uno y `…4n→8n→16n→4t→8t→blanco→8n…`
+en el otro), porque desde blanco se reenganchaba la duración del grupo o el
+`defaultDuration` para calcular el índice.
+
+Se eliminó ese reenganche: `nextDuration` es ahora un **anillo de 8 estados**
+(las 7 duraciones + blanco, sin parámetro `isBlank` ni fallback). Ambos sentidos
+recorren el anillo completo, uno al revés del otro, y desde blanco se entra por
+los extremos (`8t` hacia largo, `1n` hacia corto):
+
+- largo: `8t → 4t → 16n → 8n → 4n → 2n → 1n → blanco → 8t`
+- corto: `1n → 2n → 4n → 8n → 16n → 4t → 8t → blanco → 1n`
+
+`melody-editor.component.ts` (`stepDuration`) ya no consulta
+`findParentGroup`/`defaultDuration` para el índice; todas las rutas de rueda
+(nota, PATTERN, marcadores de grupo y Shift+↑/↓) pasan por el mismo helper.
+
+Verificado en E2E (CDP 4324): T1/T3 (nota suelta y grupo `1n`, hacia largo) dan
+la misma traza `8t → 4t → 16n → 8n → 4n → 2n → 1n → vacío → 8t`; T2/T4 (nota
+suelta y grupo `8t`, hacia corto) dan `1n → 2n → 4n → 8n → 16n → 4t → 8t →
+vacío → 1n`; sin pasos muertos y consola limpia.
+
 ## Verificación
 
 - Jest: `duration-cycle.jest.spec.ts`,
