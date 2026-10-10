@@ -4,7 +4,7 @@ import { parseBlockNotesForEditor } from '../../model/mr/notes.parser';
 import { MelodyEditorService } from '../../services/melody-editor.service';
 import { MusicElement, NoteDuration, SingleNote, CompositeNote, GenericGroup } from '../../model/melody';
 import { Subscription } from 'rxjs';
-import { nextDuration, normalizeDuration, DurationDirection } from './duration-cycle';
+import { nextDuration, DurationDirection } from './duration-cycle';
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 import { MelodyGroupComponent } from '../melody-group/melody-group.component';
 import { SongPlayer } from '../../model/song.player';
@@ -450,10 +450,10 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   }
 
   /**
-   * Aplica un paso del ciclo de duraciones a la nota indicada (o a la
-   * seleccionada). `nextDuration` incluye el estado "en blanco" (heredado) y
-   * garantiza que desde él la rueda siempre devuelva una duración explícita,
-   * aunque el fallback del grupo o del editor sea `1n`/`8t`.
+   * Aplica un paso del anillo de duraciones a la nota indicada (o a la
+   * seleccionada). El anillo es único (7 duraciones + estado en blanco) y no
+   * reengancha por la duración del grupo ni por el `defaultDuration`: así los
+   * dos sentidos recorren siempre los mismos 8 valores.
    */
   private stepDuration(elementId: string | undefined, direction: DurationDirection): void {
       const targetId = elementId ?? this.focusedElement?.id;
@@ -461,16 +461,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       const currentElement = this.findElement(targetId, this.elements);
       if (!currentElement) return;
 
-      const explicitDuration = normalizeDuration(currentElement.duration);
-      const fallbackDuration =
-          normalizeDuration(this.findParentGroup(targetId, this.elements)?.duration) ??
-          normalizeDuration(this.defaultDuration);
-      const newDuration = nextDuration(
-          explicitDuration ?? fallbackDuration,
-          explicitDuration === undefined,
-          direction,
-          this.durations
-      );
+      const newDuration = nextDuration(currentElement.duration, direction, this.durations);
 
       this.melodyEditorService.updateNote(targetId, { duration: newDuration });
       this.emitNotesChange();

@@ -1,7 +1,8 @@
 /**
- * Rueda de duración en `MelodyEditorComponent`: el estado "en blanco"
- * (heredado) siempre se puede abandonar, el fallback del grupo se respeta y la
- * nota sigue resolviéndose por su id en pasos sucesivos (sin quedarse muerta).
+ * Rueda de duración en `MelodyEditorComponent`: anillo único de 8 estados
+ * (7 duraciones + blanco). Los dos sentidos recorren los mismos valores, el
+ * estado blanco (heredado) sigue siendo alcanzable y siempre se sale de él, y
+ * el índice no reengancha por la duración del grupo ni por `defaultDuration`.
  *
  * Se instancia el componente directamente con un `MelodyEditorService` real
  * (mock local de `@angular/core`, sin TestBed), igual que `melody-editor-vars`.
@@ -73,7 +74,7 @@ const findNote = (elements: MusicElement[], id: string): SingleNote | null => {
     return null;
 };
 
-describe('MelodyEditorComponent · rueda de duración (salir del blanco)', () => {
+describe('MelodyEditorComponent · anillo de duración con la rueda', () => {
     let component: MelodyEditorComponent;
     let service: MelodyEditorService;
     let emitted: string[];
@@ -93,64 +94,77 @@ describe('MelodyEditorComponent · rueda de duración (salir del blanco)', () =>
 
     const lastEmitted = (): string => emitted[emitted.length - 1];
 
-    it('desde blanco la rueda siempre vuelve a una duración explícita (top-level)', () => {
+    const collect = (id: string, delta: number, steps: number): string[] => {
+        const out: string[] = [];
+        for (let i = 0; i < steps; i += 1) {
+            component.changeDuration(id, delta);
+            out.push(lastEmitted());
+        }
+        return out;
+    };
+
+    it('los dos sentidos recorren los mismos 8 estados (blanco → extremos)', () => {
+        service.loadFromNoteData([new NoteData({ type: 'note', note: 1 })]);
+        const id = service.getElements()[0].id;
+
+        const longer = collect(id, 1, 8); // hacia largo desde blanco: entra por 8t
+        expect(longer).toEqual(['8t:1', '4t:1', '16n:1', '8n:1', '4n:1', '2n:1', '1n:1', '1']);
+
+        const shorter = collect(id, -1, 8); // hacia corto desde blanco: entra por 1n
+        expect(shorter).toEqual(['1n:1', '2n:1', '4n:1', '8n:1', '16n:1', '4t:1', '8t:1', '1']);
+
+        // Mismos 8 estados en ambos sentidos (7 duraciones + blanco).
+        expect(new Set([...longer, ...shorter]).size).toBe(8);
+    });
+
+    it('desde una duración explícita el anillo es idéntico y pasa por blanco', () => {
         service.loadFromNoteData([new NoteData({ type: 'note', note: 1, duration: '1n' })]);
         const id = service.getElements()[0].id;
 
-        component.changeDuration(id, 1); // 1n → blanco (fin de ciclo, por diseño)
+        component.changeDuration(id, 1); // 1n → blanco (fin del anillo)
         expect(lastEmitted()).toBe('1');
 
-        component.changeDuration(id, 1); // blanco → 2n (nunca se queda bloqueado)
+        component.changeDuration(id, 1); // blanco → 8t
+        expect(lastEmitted()).toBe('8t:1');
+
+        component.changeDuration(id, -1); // 8t → blanco
+        expect(lastEmitted()).toBe('1');
+
+        component.changeDuration(id, -1); // blanco → 1n
+        expect(lastEmitted()).toBe('1n:1');
+
+        component.changeDuration(id, -1); // 1n → 2n
         expect(lastEmitted()).toBe('2n:1');
-
-        component.changeDuration(id, -1); // 2n → 4n
-        expect(lastEmitted()).toBe('4n:1');
-
-        component.changeDuration(id, -1); // 4n → 8n
-        expect(lastEmitted()).toBe('8n:1');
     });
 
-    it('fallback de grupo `1n`: blanco → 8t → blanco → 2n', () => {
+    it('dentro de un grupo el anillo es el mismo: el grupo ya no decide el índice', () => {
         service.loadFromNoteData([
-            new NoteData({ type: 'group', duration: '1n', children: [new NoteData({ type: 'note', note: 0 })] })
+            new NoteData({ type: 'group', duration: '4n', children: [new NoteData({ type: 'note', note: 0 })] })
         ]);
         const childId = (service.getElements()[0] as GenericGroup).children[0].id;
 
-        component.changeDuration(childId, 1); // blanco + largo, fallback 1n → 8t
-        expect(lastEmitted()).toBe('1n:( 8t:0 )');
+        component.changeDuration(childId, 1); // blanco + largo → 8t (antes, con fallback 4n, daba 2n)
+        expect(lastEmitted()).toBe('4n:( 8t:0 )');
 
-        component.changeDuration(childId, -1); // 8t + corto → blanco
-        expect(lastEmitted()).toBe('1n:( 0 )');
+        component.changeDuration(childId, -1); // 8t → blanco
+        expect(lastEmitted()).toBe('4n:( 0 )');
 
-        component.changeDuration(childId, -1); // blanco + corto, fallback 1n → 2n
-        expect(lastEmitted()).toBe('1n:( 2n:0 )');
-    });
-
-    it('fallback de grupo `8t`: blanco → 1n → blanco → 4t', () => {
-        service.loadFromNoteData([
-            new NoteData({ type: 'group', duration: '8t', children: [new NoteData({ type: 'note', note: 3 })] })
-        ]);
-        const childId = (service.getElements()[0] as GenericGroup).children[0].id;
-
-        component.changeDuration(childId, -1); // blanco + corto, fallback 8t → 1n
-        expect(lastEmitted()).toBe('8t:( 1n:3 )');
-
-        component.changeDuration(childId, 1); // 1n + largo → blanco
-        expect(lastEmitted()).toBe('8t:( 3 )');
-
-        component.changeDuration(childId, 1); // blanco + largo, fallback 8t → 4t
-        expect(lastEmitted()).toBe('8t:( 4t:3 )');
+        component.changeDuration(childId, -1); // blanco + corto → 1n
+        expect(lastEmitted()).toBe('4n:( 1n:0 )');
     });
 
     it("normaliza una duración desconocida (`''`) como estado en blanco", () => {
         service.loadFromNoteData([new NoteData({ type: 'note', note: 7, duration: '' })]);
         const id = service.getElements()[0].id;
 
-        component.changeDuration(id, 1); // '' → blanco → 2n (fallback 4n del editor)
-        expect(lastEmitted()).toBe('2n:7');
+        component.changeDuration(id, 1); // '' = blanco → 8t
+        expect(lastEmitted()).toBe('8t:7');
 
-        component.changeDuration(id, -1); // 2n → 4n
-        expect(lastEmitted()).toBe('4n:7');
+        component.changeDuration(id, -1); // 8t → blanco
+        expect(lastEmitted()).toBe('7');
+
+        component.changeDuration(id, -1); // blanco → 1n
+        expect(lastEmitted()).toBe('1n:7');
     });
 
     it('30 giros seguidos: cada paso cambia el modelo y el id sigue resolviéndose', () => {
