@@ -40,6 +40,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Fixed
 
+- Duration wheel no longer gets stuck when the note falls back to the inherited "empty" duration: the empty duration zone keeps the note height (14×18px, revealed on hover) so the wheel still reaches it, and the cycle always leaves the empty state (it is skipped once when stepping from it), including when the inherited fallback is `1n` or `8t`; empty/unknown duration values are normalized.
 - Block drag handle tooltip: it is now disabled while dragging, so it cannot stay stuck when the node is reordered/re-rendered and the mouseleave never reaches the original handle; normal hover and the rest of the app tooltips are unchanged.
 - Block tree guides now rise from the parent block's drag handle and run in front of its Commands/Operations sections down to the child list (the guide no longer appeared to start mid-height); blocks without children and handle-less roots keep no extra line.
 - Block drag & drop: the tree keeps a stable value reference while dragging, drag starts only from the new visible handle, insertion drop points are larger and highlighted, and dropping a block onto another one expands the target so the moved block stays visible.
