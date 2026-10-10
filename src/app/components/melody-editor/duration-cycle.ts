@@ -1,6 +1,6 @@
 import { NoteDuration } from '../../model/melody';
 
-/** Duraciones ordenadas de más larga a más corta (la rueda las recorre en ciclo). */
+/** Duraciones ordenadas de más larga a más corta (orden interno estable). */
 export const DURATION_CYCLE: readonly NoteDuration[] = ['1n', '2n', '4n', '8n', '16n', '4t', '8t'];
 
 /** Sentido del giro de la rueda sobre la zona de duración. */
@@ -16,41 +16,38 @@ export function normalizeDuration(value: string | null | undefined): NoteDuratio
 }
 
 /**
- * Siguiente duración del ciclo cuando se gira la rueda sobre una nota.
+ * Siguiente duración del anillo cuando se gira la rueda sobre una nota.
  *
- * El ciclo completo incluye el estado "en blanco" (sin duración explícita, la
- * nota hereda la del grupo) situado entre `1n` y `8t`:
+ * El anillo tiene **8 estados**: las 7 duraciones más el estado "en blanco"
+ * (sin duración explícita; la nota hereda la del grupo), situado entre `1n` y
+ * `8t`:
  *
- *   ... 2n → 1n → (en blanco) → 8t → 4t → ...
+ *   (más larga) 1n → blanco → 8t (más corta)
  *
- * - Con duración explícita, girar más allá de `1n` o `8t` deja la nota en
- *   blanco: es el comportamiento de diseño ("volver a heredar").
- * - Si la nota YA está en blanco (o su duración es desconocida/`''`), el giro
- *   nunca puede devolver "en blanco": se salta ese estado una vez para que la
- *   rueda siempre pueda volver a una duración explícita (antes, con fallback
- *   `1n` hacia larga o `8t` hacia corta, el ciclo quedaba bloqueado).
+ * Cada sentido recorre el anillo **completo**: ambos pasan por los mismos 8
+ * estados, uno al revés del otro:
  *
- * @param current  Duración efectiva actual (explícita o la del grupo/editor).
- * @param isBlank  `true` si la nota no tiene duración explícita utilizable.
- * @param direction `longer` al girar hacia duraciones más largas, `shorter`
- *                  hacia más cortas.
+ *   largo:   8t → 4t → 16n → 8n → 4n → 2n → 1n → blanco → 8t → …
+ *   corto:   blanco → 1n → 2n → 4n → 8n → 16n → 4t → 8t → blanco → …
+ *
+ * Desde blanco, girar hacia largo entra por `8t` y hacia corto por `1n`. No
+ * hay reenganche por la duración del grupo ni por el `defaultDuration`: el
+ * estado de la nota es solo el suyo (así los dos sentidos muestran siempre la
+ * misma lista de valores).
+ *
+ * @param current   Duración explícita actual (`undefined`/`''`/desconocida =
+ *                  en blanco).
+ * @param direction `longer` o `shorter`.
  */
 export function nextDuration(
-    current: NoteDuration | undefined,
-    isBlank: boolean,
+    current: NoteDuration | string | null | undefined,
     direction: DurationDirection,
     durations: readonly NoteDuration[] = DURATION_CYCLE
 ): NoteDuration | undefined {
     const cycle: Array<NoteDuration | undefined> = [undefined, ...durations];
-    const rawIndex = current === undefined ? 0 : cycle.indexOf(current);
+    const normalized = normalizeDuration(current);
+    const rawIndex = normalized === undefined ? 0 : cycle.indexOf(normalized);
     const index = rawIndex === -1 ? 0 : rawIndex;
     const step = direction === 'longer' ? -1 : 1;
-
-    const next = cycle[(index + step + cycle.length) % cycle.length];
-    if (next === undefined && (isBlank || rawIndex === -1)) {
-        // Ya estábamos en blanco (o el índice era inválido): saltar el estado
-        // en blanco para no dejarlo nunca bloqueado.
-        return cycle[(index + step * 2 + cycle.length * 2) % cycle.length];
-    }
-    return next;
+    return cycle[(index + step + cycle.length) % cycle.length];
 }
