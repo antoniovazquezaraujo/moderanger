@@ -197,6 +197,18 @@ $z-index-base: 10;
         box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.3);
         z-index: $z-index-base + 1;
     }
+
+    // Fallback del resaltado: cuando la nota-origen resuelve a un grupo.
+    &.playing {
+        border-color: $primary-color;
+        box-shadow: 0 0 6px 1px rgba(0, 119, 204, 0.55);
+    }
+}
+
+// Fallback del resaltado para grupos compuestos (acordes/arpegios del editor).
+app-melody-group.playing {
+    border-radius: 4px;
+    box-shadow: 0 0 6px 1px rgba(0, 119, 204, 0.55);
 }
 
 // Duración dentro del marcador de grupo (small, on the left)

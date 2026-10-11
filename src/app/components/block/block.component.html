@@ -68,6 +68,7 @@
                   <app-melody-editor-wrapper 
                     id="melody-{{node.id}}" 
                     [(ngModel)]="node.blockContent.notes"
+                    [blockId]="node.id"
                     [showVariableIcon]="false"
                     >
                   </app-melody-editor-wrapper>
