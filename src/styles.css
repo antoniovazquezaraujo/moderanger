@@ -555,10 +555,12 @@ select.command-type,
   text-align: center;
 }
 
-/* Asegurar que los contenedores tengan la misma altura - COMPACTO */
+/* Asegurar que los contenedores tengan la misma altura - COMPACTO.
+   `height: auto` + `min-height`: una línea queda en 24px como siempre y un
+   PATTERN que envuelve a 2+ líneas crece en vez de desbordar la caja. */
 .operation-item,
 .command {
-  height: 24px;
+  height: auto;
   min-height: 24px;
   align-items: center;
   box-sizing: border-box;

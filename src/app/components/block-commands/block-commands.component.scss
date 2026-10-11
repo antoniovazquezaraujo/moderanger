@@ -153,32 +153,44 @@
     height: 100%;
   }
 
-  /* Embedded melody editor styles (PATTERN en texto libre). */
+  /* Embedded melody editor styles (PATTERN en texto libre).
+     Sin padding vertical en toda la cadena: el único alto es la nota (20px),
+     igual que el resto de controles de la fila. Antes se apilaban 2+2+4+2px
+     de padding y el editor medía 40px dentro de una caja de 24px, lo que
+     descuadraba verticalmente el PATTERN respecto a los demás comandos. */
   app-melody-editor {
     .melody-editor {
-      min-height: auto;
-      border: none;
-      padding: 2px;
-      background-color: transparent;
+      min-height: auto !important;
+      border: none !important;
+      padding: 0 !important;
+      background-color: transparent !important;
     }
-    
+
     .editor-content {
-      padding: 2px;
-      border: none;
-      background-color: transparent;
+      padding: 0 !important;
+      border: none !important;
+      background-color: transparent !important;
     }
-    
+
+    .notes-container-wrapper {
+      padding: 0 !important;
+    }
+
+    /* `!important`: la regla anidada del editor
+       (`.melody-editor .editor-content .notes-container`) tiene más
+       especificidad y volvería a meter 2px de padding vertical. */
     .notes-container {
-      padding: 2px 0;
-      gap: 2px;
+      padding: 0 !important;
+      min-height: 20px !important;
+      gap: 2px !important;
     }
-    
+
     /* El texto libre del PATTERN (comas y bordes) vive en styles.css; mismo
        padding que las notas del header para alturas/anchos uniformes. */
     .note-item {
       padding: 0 2px;
     }
-    
+
     .note-duration select {
       width: 30px;
       height: 18px;
