@@ -182,6 +182,8 @@
 
 - [ ] **14.20.** Notas como texto seguido: valor, duración y símbolos de grupo comparten la tipografía de comandos (12px/400). Medido antes → después: `.note-value` 19.2px/700 → **12px/400**; `.note-duration` y `.duration-value` 12.8px → **12px/400** (color `#666` se mantiene); `.group-duration` 12.8px monospace → **12px/400 Segoe UI**; `.group-bracket` 16px/700 → **12px/400**; botón `+` 19.2px/700 → **12px/400**. Sin layout shift de alto: nota 20px y grupo 36px idénticos; los anchos se adaptan al texto (nota 34.9→30px, editor Notes 461→420px, PATTERN 227→157px). Regresión: rueda sin Shift (valor `1→0`, duración intacta `4n`), con Shift sobre el valor (`4n→2n`; duración), hover (borde `#2196F3`/fondo `#E3F2FD`) y selección con clic real, chips `0→1`, combos `appearance:none` + colón, guías 2px, DnD `[Eco, Canon]→[Canon, Eco]`, highlight `playing` en reproducción real (aparece con ▶ y se apaga con ■) y consola 0 errores/avisos.
 
+- [ ] **14.21.** Parts crecen sin tope (feat/parts-grow-past-container): mientras la vecina no tope el par mantiene la suma; cuando la que se encoge llega a **260px**, la que crece sigue 1:1 sin tope y la fila se ensancha (crece el scroll). Medido con 2 parts: `700|700 → 3240|260` (izquierda ≈ 2,3× el contenedor de 1410), scroll 0→1824. Auto-scroll al acercar el puntero a <48px de un borde (ambos sentidos): durante el hold ancho y scroll crecen en lockstep (`1752|260 [336] → 3240|260 [1824]`, Δ208px por muestra) con el borde clavado bajo el puntero y sin deadlock al llegar al máximo. Encoger de vuelta funciona (`2840|660`) y el doble clic resetea (`700|700`); teclado: 30×→ `1300|260`, 30×← `700|860`. Con 4 parts solo cambian los dos vecinos (`345|345|345|345 → 3192|260|345|345`). Wrap intacto en la part de 260 (0 violaciones de `scrollWidth > clientWidth`), sin regresión (hover de part 0→1, chips 0→1, guías 2px, DnD `[Eco, Canon]→[Canon, Eco]`, `playing` con ▶/■) y consola 0 errores.
+
 ## 15. Caso 15 — Resaltado de la nota-origen (feat/note-highlight-playback, 2026-10-11)
 
 - [ ] **15.1.** Carga una canción con un bloque expandido (p. ej. `panel-de-control.mr` o `semilla.mr`) y pulsa **Play**: en la sección Notes, la **nota-origen** que está sonando se enciende con un glow azul aunque suene como acorde/arpegio (`WIDTH`/`GAP`/`INV`/`SHIFT`) o expandida por `PATTERN`.
@@ -195,7 +197,7 @@
 
 ## 16. Cierre: suite, build y registro
 
-- [ ] **16.1.** `npm test` en verde: **53 suites / 578 tests** (cifra a 2026-10-11).
+- [ ] **16.1.** `npm test` en verde: **53 suites / 582 tests** (cifra a 2026-10-11).
 - [ ] **16.2.** `npm run build` termina con exit 0.
 - [ ] **16.3.** Registro de resultados:
 

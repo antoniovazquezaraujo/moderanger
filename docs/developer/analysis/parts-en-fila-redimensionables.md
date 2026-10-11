@@ -51,6 +51,37 @@ El spec `block-tree-guides.jest.spec.ts` (que fijaba el `overflow-x: auto` del
 header del fix DnD) se actualiza al nuevo contrato: `flex-wrap: wrap` y sin
 `overflow-x`. No había ningún spec que asumiera el apilado vertical de parts.
 
+## Evolución: crecer sin tope + auto-scroll (feat/parts-grow-past-container)
+
+Feedback del usuario: como la fila ya hace scroll horizontal, una part debería
+poder ensancharse tanto como se quiera. Nuevo invariante de `clampBoundary`:
+
+```
+left  = max(MIN_PART_WIDTH, left + delta)
+right = max(MIN_PART_WIDTH, right - delta)
+```
+
+Mientras la que decrece no toca el mínimo la suma se mantiene; cuando lo toca,
+la que crece **sigue 1:1 sin tope** y la fila se ensancha (el scroll horizontal
+del contenedor crece). La part que se encoge nunca baja de `MIN_PART_WIDTH`
+(260px). `applyDrag` recalcula siempre desde el snapshot del `pointerdown`
+(`left`, `right`, `clientX`) + `autoScrollExtra`, así el gesto es reversible: al
+volver con el puntero se deshace el crecimiento.
+
+**Auto-scroll** (`PartsComponent`): el splitter guarda su contenedor `.parts`;
+un bucle `requestAnimationFrame` comprueba si el puntero está a menos de 48px de
+un borde y, en ese caso, suma 16px a `autoScrollExtra`, recalcula los anchos,
+fuerza `detectChanges()` (para que el layout tenga el ancho nuevo) y desplaza
+`scrollLeft` el mismo paso. El ancho se adelanta al scroll, de modo que no hay
+deadlock cuando el contenedor ya estaba al máximo; el borde queda clavado bajo
+el puntero. Teclado: mismas reglas con paso de 20px (puede superar el
+contenedor). Doble clic sigue reseteando al reparto igual.
+
+Verificado en E2E (CDP 4332) con 2 y 4 parts: `700|700 → 3240|260` con scroll
+0→1824 (lockstep de 208px por muestra durante el hold), encoger de vuelta,
+reset, teclado, wrap sin violaciones en la part de 260, regresión (hover,
+chips, guías, DnD, `playing`) y consola limpia.
+
 ## Verificación
 
 - Jest: `parts-layout.jest.spec.ts` (clamps/suma/sin saltos),

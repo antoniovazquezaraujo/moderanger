@@ -3,6 +3,7 @@
  * parts vecinas, aplica clamps, el doble clic resetea y las flechas mueven el
  * borde un paso fijo.
  */
+import type { ChangeDetectorRef } from '@angular/core';
 import type { Part } from 'src/app/model/part';
 import { PartsComponent } from '../parts.component';
 import { MIN_PART_WIDTH } from '../parts-layout';
@@ -37,7 +38,9 @@ const fakeHost = (widths: number[]) => {
         getBoundingClientRect: () => ({ width })
     }));
     const host = {
-        querySelectorAll: (_selector: string): FakeElement[] => parts
+        querySelectorAll: (_selector: string): FakeElement[] => parts,
+        scrollLeft: 0,
+        getBoundingClientRect: () => ({ left: 0, right: 800, top: 0, bottom: 600, width: 800, height: 600 })
     };
     return { host, parts };
 };
@@ -57,9 +60,11 @@ const keyEvent = (currentTarget: unknown, key: string): KeyboardEvent =>
 
 describe('PartsComponent · splitter redimensionable', () => {
     let component: PartsComponent;
+    let cdr: { detectChanges: jest.Mock; markForCheck: jest.Mock };
 
     beforeEach(() => {
-        component = new PartsComponent();
+        cdr = { detectChanges: jest.fn(), markForCheck: jest.fn() };
+        component = new PartsComponent(cdr as unknown as ChangeDetectorRef);
         component.parts = [{}, {}, {}] as Part[];
     });
 
@@ -90,12 +95,66 @@ describe('PartsComponent · splitter redimensionable', () => {
 
         component.onSplitterPointerDown(pointerEvent(splitter, 100), 1);
         component.onSplitterPointerMove(pointerEvent(splitter, 3000));
-        expect(component.widths).toEqual([400, 840, 260]);
-
-        component.onSplitterPointerMove(pointerEvent(splitter, -3000));
-        expect(component.widths).toEqual([400, 260, 840]);
+        expect(component.widths).toEqual([400, 3400, 260]);
         expect(component.widths?.[1]).toBeGreaterThanOrEqual(MIN_PART_WIDTH);
         expect(component.widths?.[2]).toBeGreaterThanOrEqual(MIN_PART_WIDTH);
+
+        component.onSplitterPointerMove(pointerEvent(splitter, -3000));
+        expect(component.widths).toEqual([400, 260, 3700]);
+    });
+
+    it('cuando la vecina topa el mínimo, la part crece sin tope y la fila se ensancha', () => {
+        const { host } = fakeHost([400, 500, 600]);
+        const splitter = splitterFor(host);
+
+        component.onSplitterPointerDown(pointerEvent(splitter, 100), 1);
+        component.onSplitterPointerMove(pointerEvent(splitter, 600));
+        // 500/600 → 1000/260: la derecha topa y la izquierda no se compensa.
+        expect(component.widths).toEqual([400, 1000, 260]);
+        const grownTotal = (component.widths?.[1] ?? 0) + (component.widths?.[2] ?? 0);
+        expect(grownTotal).toBeGreaterThan(500 + 600);
+    });
+
+    it('el auto-scroll ensancha el par y desplaza el contenedor el mismo paso', () => {
+        const { host } = fakeHost([500, 500, 500]);
+        const splitter = splitterFor(host);
+        const tick = (): void => (component as unknown as { autoScrollTick(): void }).autoScrollTick();
+
+        // Puntero en la zona de borde derecho (right=800, margen 48).
+        component.onSplitterPointerDown(pointerEvent(splitter, 780), 0);
+        expect(component.widths).toEqual([500, 500, 500]);
+
+        tick();
+        expect(component.widths).toEqual([516, 484, 500]);
+        expect(host.scrollLeft).toBe(16);
+        expect(cdr.detectChanges).toHaveBeenCalled();
+
+        tick();
+        expect(component.widths).toEqual([532, 468, 500]);
+        expect(host.scrollLeft).toBe(32);
+
+        // Fuera de la zona de borde no hay auto-scroll.
+        component.onSplitterPointerMove(pointerEvent(splitter, 300));
+        const before = [...(component.widths ?? [])];
+        tick();
+        expect(component.widths).toEqual(before);
+        expect(host.scrollLeft).toBe(32);
+
+        component.onSplitterPointerUp(pointerEvent(splitter, 300));
+        tick();
+        expect(component.widths).toEqual(before);
+    });
+
+    it('el auto-scroll también funciona hacia el borde izquierdo', () => {
+        const { host } = fakeHost([500, 500, 500]);
+        const splitter = splitterFor(host);
+        const tick = (): void => (component as unknown as { autoScrollTick(): void }).autoScrollTick();
+
+        component.onSplitterPointerDown(pointerEvent(splitter, 10), 0);
+        tick();
+        expect(component.widths).toEqual([484, 516, 500]);
+        expect(host.scrollLeft).toBe(-16);
+        component.onSplitterPointerUp(pointerEvent(splitter, 10));
     });
 
     it('las flechas ←/→ mueven el borde un paso fijo y parten del reparto actual', () => {
