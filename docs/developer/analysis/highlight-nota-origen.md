@@ -1,9 +1,9 @@
-# Resaltado de la nota-origen durante la reproducción (experimento)
+# Resaltado de la nota-origen durante la reproducción
 
 - **Fecha:** 2026-10-11
 - **Autor:** ROBER (full-stack TS/Angular)
-- **Rama:** `feat/note-highlight-playback` (experimento; PR abierto, **sin mergear**)
-- **Estado:** implementado, con tests y build en verde; a la espera de que el mantenedor lo pruebe en `ng serve` y decida.
+- **Rama:** `feat/note-highlight-playback`
+- **Estado:** implementada, con tests y build en verde; validada en `ng serve` y aprobada como feature.
 - **Alcance:** player legacy de la GUI (`SongPlayer`/`NoteGenerationService`) y editor de Notes. Sin cambios de `.mr`, parser, serializador ni player v2.
 
 ---
@@ -53,5 +53,5 @@ Mientras suena el tema, iluminar en el editor la **nota-origen** que está sonan
 ## 6. Fuera de alcance / pendiente
 
 - Iluminar sub-notas del PATTERN por separado, playhead preciso y auto-scroll: no incluidos.
-- El player v2 (`features/player/*`) no está cableado: este experimento instrumenta el player legacy.
+- El player v2 (`features/player/*`) no está cableado: esta feature instrumenta el player legacy.
 - Cualquier decisión de producto (color, duración mínima, resaltado de rest) se puede ajustar sin tocar el etiquetado del motor.

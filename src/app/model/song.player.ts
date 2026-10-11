@@ -148,7 +148,7 @@ export class SongPlayer {
         this._metronome.next(0);
     }
 
-    // --- Resaltado de la nota-origen que suena (experimento UI) ---
+    // --- Resaltado de la nota-origen que suena ---
 
     /** Clave estable de un origen (`bloque:0.2`). */
     private _playingSourceKey(source: PlayingNoteSource): string {

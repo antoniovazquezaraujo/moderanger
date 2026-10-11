@@ -13,7 +13,7 @@ All notable changes to **Mode Ranger**. Format based on
 - Save/load `.mr` from the UI (Phase 3).
 - `PATTERN` accepts string variables; the pattern is applied **before** the playmode (new `PLAYMODE SINGLE`).
 - `SHIFTSTART`/`SHIFTSIZE`/`SHIFTVALUE` now shift the generated chord window by whole octaves (window clamped to the chord, `SHIFTSIZE 0` is a no-op); `PATTERN_GAP` decoration remains format-only.
-- **Experiment** (branch `feat/note-highlight-playback`, not merged): while playing, the Notes editor lights up the **source note** that is sounding with a subtle blue glow (`playing` class), including when it sounds as chord/arpeggio or expands through `PATTERN`. `SongPlayer` exposes `playingSources$` (`blockId` + `sourcePath`) on the 16n tick with a ~100 ms minimum visibility and full cleanup on stop/end; the origin is internal metadata and the `.mr` does not change.
+- While playing, the Notes editor highlights the **source note** that is sounding with a subtle blue glow (`playing` class), including when it sounds as chord/arpeggio or expands through `PATTERN`. `SongPlayer` exposes `playingSources$` (`blockId` + `sourcePath`) on the 16n tick with a ~100 ms minimum visibility and full cleanup on stop/end; the origin is internal metadata and the `.mr` does not change.
 - Groups inside `PATTERN` with subdivision and strict measure validation.
 - String variables (melodies) are listed and editable in the sidebar.
 - English translation of the `.mr` manual (Spanish version kept as `docs/user/manual_es.md`).
