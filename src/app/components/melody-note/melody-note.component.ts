@@ -74,7 +74,8 @@ import { SingleNote, NoteDuration } from '../../model/melody';
         }
         
         .note-duration {
-            font-size: 0.8em;
+            /* Mismo tamaño que el valor; #666 solo distingue la duración. */
+            font-size: 12px;
             color: #666;
             cursor: ns-resize;
             padding: 0 1px;
@@ -103,9 +104,11 @@ import { SingleNote, NoteDuration } from '../../model/melody';
             cursor: none;
         }
 
+        /* Mismo tamaño/peso que los comandos: las notas se leen como texto
+           seguido (12px, normal) sin cambiar la caja de 20px. */
         .note-visual .note-value {
-           font-size: 1.2em; 
-           font-weight: bold;
+           font-size: 12px;
+           font-weight: normal;
         }
         
         .note-visual .silence {
