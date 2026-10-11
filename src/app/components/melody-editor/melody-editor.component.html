@@ -27,6 +27,7 @@
       *ngIf="element.type === 'note' || element.type === 'rest'"
       [note]="element.originalElement"
       [isSelected]="element.id === selectedId"
+      [isPlaying]="isPlaying(element.id)"
       (click)="selectElement(element.id)"
       (toggleSilence)="toggleSilence(element.originalElement.id)"
       (changeDuration)="changeDuration(element.originalElement.id, $event)"
@@ -41,6 +42,7 @@
       [isExpanded]="isGroupExpanded(element.originalElement.id)"
       [selectedNoteId]="selectedId ?? undefined"
       [expandedGroups]="expandedGroups"
+      [class.playing]="isPlaying(element.id)"
       (click)="selectElement(element.id)"
       (wheel)="onWheel($event, element)"      
       (toggleExpand)="toggleGroup($event)"
@@ -55,6 +57,7 @@
             [class.group-start-marker]="element.type === 'group-start'"
             [class.group-end-marker]="element.type === 'group-end'"
             [class.active-marker]="element.id === selectedId"
+            [class.playing]="isPlaying(element.id)"
             (click)="selectElement(element.id)"
             (wheel)="onWheel($event, element)">
         <!-- Quitar contenedor extra -->

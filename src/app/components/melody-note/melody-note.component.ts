@@ -4,7 +4,7 @@ import { SingleNote, NoteDuration } from '../../model/melody';
 @Component({
     selector: 'app-melody-note',
     template: `
-        <div class="note-item" [class.selected]="isSelected" (click)="onClick()">
+        <div class="note-item" [class.selected]="isSelected" [class.playing]="isPlaying" (click)="onClick()">
             <!-- Duración a la izquierda del valor; oculta si es heredada.
                  Al hacer hover, la zona queda activa para cambiarla con la rueda. -->
             <div class="note-duration"
@@ -55,6 +55,16 @@ import { SingleNote, NoteDuration } from '../../model/melody';
         .note-item.selected {
             border-color: #2196F3;
             background-color: #E3F2FD;
+        }
+
+        /* Nota-origen sonando: glow azul sutil, sin mover nada del layout.
+           No pisa la selección (el borde/fondo se combinan) y usa filter
+           para no tocar el contrato de sombra del estado en reposo. */
+        .note-item.playing {
+            border-color: #2196F3;
+            background-color: #E3F2FD;
+            filter: drop-shadow(0 0 3px rgba(33, 150, 243, 0.9));
+            transition: filter 80ms ease-out;
         }
         
         .note-visual {
@@ -111,6 +121,8 @@ import { SingleNote, NoteDuration } from '../../model/melody';
 export class MelodyNoteComponent implements OnDestroy {
     @Input() note!: SingleNote;
     @Input() isSelected = false;
+    /** Nota-origen sonando: aplica el resaltado `playing`. */
+    @Input() isPlaying = false;
     
     @Output() select = new EventEmitter<void>();
     @Output() toggleSilence = new EventEmitter<void>();

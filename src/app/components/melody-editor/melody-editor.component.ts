@@ -7,7 +7,8 @@ import { Subscription } from 'rxjs';
 import { nextDuration, DurationDirection } from './duration-cycle';
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 import { MelodyGroupComponent } from '../melody-group/melody-group.component';
-import { SongPlayer } from '../../model/song.player';
+import { SongPlayer, PlayingNoteSource } from '../../model/song.player';
+import { resolvePlayingElementIds } from './playing-path-map';
 
 /**
  * Interfaz para notas en el editor de melodías
@@ -51,6 +52,12 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   @Input() notes: string = '';
   @Input() showVariableIcon: boolean = true;
   @Input() defaultDuration: NoteDuration = '4n';
+  /**
+   * Id del bloque que edita este editor. Si coincide con el bloque que suena,
+   * el editor resalta la nota-origen (`playing`). `undefined` (p. ej. el editor
+   * de PATTERN) desactiva el resaltado.
+   */
+  @Input() playingBlockId?: number;
   @Output() notesChange = new EventEmitter<string>();
   @ViewChild('editorContainer') editorContainer!: ElementRef;
   @ViewChildren(MelodyNoteComponent) noteComponents!: QueryList<MelodyNoteComponent>;
@@ -60,8 +67,12 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   elements: MusicElement[] = [];
   visualElements: VisualElement[] = [];
   selectedId: string | null = null;
+  /** Ids de elementos del editor que están sonando ahora mismo. */
+  playingElementIds = new Set<string>();
+  private activePlayingPaths: ReadonlyArray<readonly number[]> = [];
   private elementsSub!: Subscription;
   private selectedIdSub!: Subscription;
+  private playingSourcesSub!: Subscription;
   private lastEmittedNotesString: string | null = null;
   private globalDurationSub!: Subscription;
   expandedGroups = new Set<string>();
@@ -149,6 +160,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
     this.elementsSub = this.melodyEditorService.elements$.subscribe(elements => {
       this.elements = elements;
       this.visualElements = this.flattenElements(elements);
+      this.playingElementIds = resolvePlayingElementIds(elements, this.activePlayingPaths);
 
       // Update focused element based on current selection ID
       // No longer call scrollToElement from here
@@ -172,7 +184,33 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       // DO NOT call scrollToElement here
     });
 
+    this.playingSourcesSub = this.songPlayer.playingSources$.subscribe(sources => {
+      this.activePlayingPaths = this.collectPlayingPaths(sources);
+      this.playingElementIds = resolvePlayingElementIds(this.elements, this.activePlayingPaths);
+      this.cdr.detectChanges();
+    });
+
     this.editorContainer?.nativeElement.focus();
+  }
+
+  /** Rutas de origen que están sonando en el bloque de este editor. */
+  private collectPlayingPaths(sources: PlayingNoteSource[]): ReadonlyArray<readonly number[]> {
+    if (this.playingBlockId === undefined) {
+      return [];
+    }
+    return sources
+      .filter(source => source.blockId === this.playingBlockId)
+      .map(source => source.sourcePath);
+  }
+
+  /** `true` si el elemento (o el grupo propietario de un marcador) suena. */
+  isPlaying(elementId: string): boolean {
+    if (this.playingElementIds.has(elementId)) {
+      return true;
+    }
+    // Los marcadores de grupo se pintan como `id_start`/`id_end`, pero el
+    // mapeo por path devuelve el id del grupo.
+    return this.playingElementIds.has(elementId.replace(/_(start|end)$/, ''));
   }
 
   private scrollToElement(elementId: string): void {
@@ -492,6 +530,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   ngOnDestroy() {
     this.elementsSub?.unsubscribe();
     this.selectedIdSub?.unsubscribe();
+    this.playingSourcesSub?.unsubscribe();
     this.globalDurationSub?.unsubscribe();
   }
 

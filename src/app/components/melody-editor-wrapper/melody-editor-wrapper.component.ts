@@ -8,7 +8,8 @@ import { MelodyEditorService } from '../../services/melody-editor.service';
         <app-melody-editor 
             [notes]="notes" 
             (notesChange)="onNotesChange($event)"
-            [showVariableIcon]="showVariableIcon">
+            [showVariableIcon]="showVariableIcon"
+            [playingBlockId]="blockId">
         </app-melody-editor>
     `,
     providers: [
@@ -23,6 +24,8 @@ import { MelodyEditorService } from '../../services/melody-editor.service';
 export class MelodyEditorWrapperComponent implements ControlValueAccessor {
     @Input() notes: string = '';
     @Input() showVariableIcon: boolean = true;
+    /** Bloque que edita el control; el editor lo usa para el resaltado `playing`. */
+    @Input() blockId?: number;
 
     private onChange = (_: any) => {};
     private onTouched = () => {};
