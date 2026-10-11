@@ -184,6 +184,8 @@
 
 - [ ] **14.21.** Parts crecen sin tope (feat/parts-grow-past-container): mientras la vecina no tope el par mantiene la suma; cuando la que se encoge llega a **260px**, la que crece sigue 1:1 sin tope y la fila se ensancha (crece el scroll). Medido con 2 parts: `700|700 → 3240|260` (izquierda ≈ 2,3× el contenedor de 1410), scroll 0→1824. Auto-scroll al acercar el puntero a <48px de un borde (ambos sentidos): durante el hold ancho y scroll crecen en lockstep (`1752|260 [336] → 3240|260 [1824]`, Δ208px por muestra) con el borde clavado bajo el puntero y sin deadlock al llegar al máximo. Encoger de vuelta funciona (`2840|660`) y el doble clic resetea (`700|700`); teclado: 30×→ `1300|260`, 30×← `700|860`. Con 4 parts solo cambian los dos vecinos (`345|345|345|345 → 3192|260|345|345`). Wrap intacto en la part de 260 (0 violaciones de `scrollWidth > clientWidth`), sin regresión (hover de part 0→1, chips 0→1, guías 2px, DnD `[Eco, Canon]→[Canon, Eco]`, `playing` con ▶/■) y consola 0 errores.
 
+- [ ] **14.22.** Alineación del PATTERN: en una fila mixta (`Oct: 0`, `Width: 2`, `Pattern: 4n 1, 2n 3`, `Pattern: $motif`) los cuatro valores comparten y-centro: medido, el PATTERN literal pasa de **266.5 → 255.5** y el resto queda en 255.5 (diff **0.0px** ≤ 0.5). La cadena embebida queda a 20px (antes 40/36/32/24) y la caja del comando no cambia (24px). Con la fila envuelta (viewport 700) el PATTERN queda en 275.5 = resto. PATTERN largo multi-línea a 420px: la caja del comando crece a 67px (`height: auto` + min 24) sin desbordar y el editor de 42px queda dentro. Regresión: rueda valor/duración/Shift, chips `0→1`, colón, `appearance:none`, guías 2px, droppoint 12px, splitter, highlight `playing`, consola 0 errores.
+
 ## 15. Caso 15 — Resaltado de la nota-origen (feat/note-highlight-playback, 2026-10-11)
 
 - [ ] **15.1.** Carga una canción con un bloque expandido (p. ej. `panel-de-control.mr` o `semilla.mr`) y pulsa **Play**: en la sección Notes, la **nota-origen** que está sonando se enciende con un glow azul aunque suene como acorde/arpegio (`WIDTH`/`GAP`/`INV`/`SHIFT`) o expandida por `PATTERN`.
@@ -197,7 +199,7 @@
 
 ## 16. Cierre: suite, build y registro
 
-- [ ] **16.1.** `npm test` en verde: **53 suites / 582 tests** (cifra a 2026-10-11).
+- [ ] **16.1.** `npm test` en verde: **54 suites / 585 tests** (cifra a 2026-10-11).
 - [ ] **16.2.** `npm run build` termina con exit 0.
 - [ ] **16.3.** Registro de resultados:
 
