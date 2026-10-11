@@ -1,15 +1,21 @@
-import { Component, EventEmitter, Input, OnInit, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { Part } from 'src/app/model/part';
 import { VariableContext } from 'src/app/model/variable.context';
 import { Song } from 'src/app/model/song';
 import { clampBoundary, KEYBOARD_RESIZE_STEP, MIN_PART_WIDTH } from './parts-layout';
+
+/** Distancia al borde del contenedor que activa el auto-scroll durante el arrastre. */
+const AUTO_SCROLL_EDGE = 48;
+
+/** Píxeles de scroll por frame del auto-scroll. */
+const AUTO_SCROLL_STEP = 16;
 
 @Component({
     selector: 'app-parts',
     templateUrl: './parts.component.html',
     styleUrls: ['./parts.component.css']
 })
-export class PartsComponent implements OnInit, OnChanges {
+export class PartsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() parts: Part[] = [];
     @Input() song!: Song;
     @Output() onRemovePart: EventEmitter<Part>;
@@ -28,10 +34,13 @@ export class PartsComponent implements OnInit, OnChanges {
     /** Índice de la part izquierda del splitter que se está arrastrando. */
     draggingIndex: number | null = null;
 
-    private dragStartX = 0;
-    private dragStart: { left: number; right: number } | null = null;
+    private dragStart: { left: number; right: number; clientX: number } | null = null;
+    private container: HTMLElement | null = null;
+    private lastClientX = 0;
+    private autoScrollExtra = 0;
+    private autoScrollRaf: number | null = null;
 
-    constructor() {
+    constructor(private cdr: ChangeDetectorRef) {
         this.onRemovePart = new EventEmitter<Part>();
         this.onDuplicatePart = new EventEmitter<Part>();
     }
@@ -45,6 +54,10 @@ export class PartsComponent implements OnInit, OnChanges {
         if (changes['parts']) {
             this.resetWidths();
         }
+    }
+
+    ngOnDestroy(): void {
+        this.stopAutoScroll();
     }
 
     removePart(part: Part) {
@@ -88,25 +101,25 @@ export class PartsComponent implements OnInit, OnChanges {
             }
         }
         // Primer arrastre: congela los anchos actuales del reparto flex.
+        this.container = splitter.parentElement;
         this.widths = partElements.map(el => Math.round(el.getBoundingClientRect().width));
         this.draggingIndex = index;
-        this.dragStartX = event.clientX;
-        this.dragStart = { left: this.widths[index], right: this.widths[index + 1] };
+        this.lastClientX = event.clientX;
+        this.autoScrollExtra = 0;
+        this.dragStart = {
+            left: this.widths[index],
+            right: this.widths[index + 1],
+            clientX: event.clientX
+        };
+        this.startAutoScroll();
     }
 
     onSplitterPointerMove(event: PointerEvent): void {
-        if (this.draggingIndex === null || !this.dragStart || !this.widths) {
+        if (this.draggingIndex === null) {
             return;
         }
-        const { left, right } = clampBoundary(
-            this.dragStart.left,
-            this.dragStart.right,
-            event.clientX - this.dragStartX
-        );
-        const next = [...this.widths];
-        next[this.draggingIndex] = left;
-        next[this.draggingIndex + 1] = right;
-        this.widths = next;
+        this.lastClientX = event.clientX;
+        this.applyDrag(event.clientX);
     }
 
     onSplitterPointerUp(event: PointerEvent): void {
@@ -117,6 +130,8 @@ export class PartsComponent implements OnInit, OnChanges {
         if (splitter && splitter.hasPointerCapture && splitter.hasPointerCapture(event.pointerId)) {
             splitter.releasePointerCapture(event.pointerId);
         }
+        this.stopAutoScroll();
+        this.container = null;
         this.draggingIndex = null;
         this.dragStart = null;
     }
@@ -148,9 +163,82 @@ export class PartsComponent implements OnInit, OnChanges {
 
     /** Doble clic en el splitter: vuelve al reparto igual con flex. */
     resetWidths(): void {
+        this.stopAutoScroll();
+        this.container = null;
         this.widths = null;
         this.draggingIndex = null;
         this.dragStart = null;
+        this.autoScrollExtra = 0;
+    }
+
+    /**
+     * Auto-scroll del contenedor mientras el puntero está cerca de un borde:
+     * permite seguir ensanchando una part en un solo gesto.
+     *
+     * Cada frame: crece el par un paso (el ancho se adelanta al scroll, así no
+     * se bloquea cuando el contenedor ya está al máximo) y después se desplaza
+     * el scroll el mismo paso, de forma que el borde del splitter se queda bajo
+     * el puntero en la vista.
+     */
+    private startAutoScroll(): void {
+        if (this.autoScrollRaf !== null || typeof requestAnimationFrame !== 'function') {
+            return;
+        }
+        const tick = () => {
+            this.autoScrollRaf = null;
+            if (this.draggingIndex === null || !this.container) {
+                return;
+            }
+            this.autoScrollTick();
+            this.startAutoScroll();
+        };
+        this.autoScrollRaf = requestAnimationFrame(tick);
+    }
+
+    /** Un paso de auto-scroll (separado para poder probarlo sin rAF). */
+    private autoScrollTick(): void {
+        if (this.draggingIndex === null || !this.container) {
+            return;
+        }
+        const rect = this.container.getBoundingClientRect();
+        let step = 0;
+        if (this.lastClientX > rect.right - AUTO_SCROLL_EDGE) {
+            step = AUTO_SCROLL_STEP;
+        } else if (this.lastClientX < rect.left + AUTO_SCROLL_EDGE) {
+            step = -AUTO_SCROLL_STEP;
+        }
+        if (step === 0) {
+            return;
+        }
+        this.autoScrollExtra += step;
+        this.applyDrag(this.lastClientX);
+        // El scroll necesita el layout con el ancho nuevo para poder avanzar
+        // (si el contenedor estaba al máximo, sin esto se quedaría clavado).
+        this.cdr.detectChanges();
+        this.container.scrollLeft += step;
+    }
+
+    private stopAutoScroll(): void {
+        if (this.autoScrollRaf !== null && typeof cancelAnimationFrame === 'function') {
+            cancelAnimationFrame(this.autoScrollRaf);
+        }
+        this.autoScrollRaf = null;
+    }
+
+    /** Ancho nuevo del par vecino a partir de la posición del puntero. */
+    private applyDrag(clientX: number): void {
+        if (this.draggingIndex === null || !this.dragStart || !this.widths) {
+            return;
+        }
+        const { left, right } = clampBoundary(
+            this.dragStart.left,
+            this.dragStart.right,
+            clientX - this.dragStart.clientX + this.autoScrollExtra
+        );
+        const next = [...this.widths];
+        next[this.draggingIndex] = left;
+        next[this.draggingIndex + 1] = right;
+        this.widths = next;
     }
 
     private partElements(event: Event): HTMLElement[] {

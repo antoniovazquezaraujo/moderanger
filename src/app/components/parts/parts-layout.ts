@@ -12,9 +12,15 @@ export const MIN_PART_WIDTH = 260;
 export const KEYBOARD_RESIZE_STEP = 20;
 
 /**
- * Aplica el desplazamiento `delta` al borde entre dos parts manteniendo la
- * suma de anchos y respetando el mínimo por part. El resultado no da saltos:
- * el borde sigue al puntero hasta topar con un clamp.
+ * Aplica el desplazamiento `delta` al borde entre dos parts.
+ *
+ * Mientras la part que decrece no toca su mínimo, la suma se mantiene (una
+ * crece y la otra decrece). Cuando la que decrece llega a `minWidth`, se queda
+ * ahí y la que crece **sigue creciendo sin tope**: la fila aumenta de ancho y
+ * aparece/crece el scroll horizontal del contenedor.
+ *
+ * La part que se encoge nunca baja de `minWidth`; el resultado es lineal (el
+ * borde sigue al puntero, sin saltos) y simétrico en ambos sentidos.
  *
  * @param left  Ancho actual de la part izquierda (px).
  * @param right Ancho actual de la part derecha (px).
@@ -27,11 +33,8 @@ export function clampBoundary(
     delta: number,
     minWidth: number = MIN_PART_WIDTH
 ): { left: number; right: number } {
-    const total = left + right;
-    // Si las dos parts no suman 2×min (contenedor muy estrecho), se reparte a
-    // la mitad para no dejar el borde bloqueado.
-    const min = Math.min(minWidth, Math.floor(total / 2));
-    const newLeft = Math.min(Math.max(left + delta, min), total - min);
-    const roundedLeft = Math.round(newLeft);
-    return { left: roundedLeft, right: Math.round(total) - roundedLeft };
+    return {
+        left: Math.round(Math.max(minWidth, left + delta)),
+        right: Math.round(Math.max(minWidth, right - delta))
+    };
 }
