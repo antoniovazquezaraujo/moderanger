@@ -149,15 +149,17 @@ $z-index-base: 10;
   margin-right: 4px;
   
   .note-value {
-    font-size: 1.2em;
-    font-weight: bold;
+    /* Homogéneo con comandos/operaciones (12px normal); aplica al `+` de
+       añadir nota, el chrome real de la nota vive en melody-note. */
+    font-size: 12px;
+    font-weight: normal;
     color: #333;
   }
 }
 
 // Duración de la nota
 .note-duration {
-  font-size: 0.8em;
+  font-size: 12px;
   color: $secondary-color;
   padding: 0 2px;
   cursor: ns-resize;
@@ -168,9 +170,9 @@ $z-index-base: 10;
   }
   
   .duration-value {
-    font-family: monospace;
-    font-weight: bold;
-    color: #444;
+    font-family: inherit;
+    font-weight: normal;
+    color: #666;
   }
 }
 
@@ -213,10 +215,9 @@ app-melody-group.playing {
 
 // Duración dentro del marcador de grupo (small, on the left)
 .group-duration {
-    font-size: 0.8em;
+    font-size: 12px;
     color: $secondary-color;
     margin-right: 2px;
-    font-family: monospace;
 }
 
 // Estilos para los corchetes de grupo (on the right)
@@ -226,8 +227,8 @@ app-melody-group.playing {
   justify-content: center;
   padding: 2px 4px;
   font-family: inherit;
-  font-size: 1em;
-  font-weight: bold;
+  font-size: 12px;
+  font-weight: normal;
   color: inherit;
   user-select: none;
 }
