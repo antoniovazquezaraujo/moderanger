@@ -178,11 +178,22 @@
 
 - [ ] **14.18.** Parts en fila redimensionables: las parts se ven una al lado de otra (mismo orden que la canción) con un splitter de 10px entre cada par (`cursor: col-resize`, línea de 2px que pasa a 4px azul al hover/foco/arrastre). Arrastrar el splitter mueve **solo** las dos parts vecinas: medido con 2 parts y `+180px` → `700|700 → 880|520` (muestreo a mitad `790|610`); el borde topa en **260px** por part (`260|1140`); las flechas ←/→ con foco en el separador (`role="separator"`, `aria-orientation="vertical"`) mueven 20px por pulsación; doble clic vuelve al reparto igual (`700|700`). Con anchos fijados, un contenedor de 800px hace scroll horizontal de la fila (clientW 755 vs scrollW 994). Al estrechar una part a 260px **ningún** contenedor interno desborda (`scrollWidth <= clientWidth` en header de part, header de bloque, notes, commands, operations, `command` y `part-content`: 54 contenedores medidos, 0 violaciones). Sin regresión: hover de part 0→1, chips de comando 0→1, guías 2px `rgb(163,163,163)`, DnD dentro de la part (`[Eco, Canon] → [Canon, Eco]`) y consola sin errores.
 
-## 15. Cierre: suite, build y registro
+## 15. Caso 15 — Resaltado de la nota-origen (experiment/note-highlight-playback, 2026-10-11)
 
-- [ ] **15.1.** `npm test` en verde: **49 suites / 543 tests** (cifra a 2026-10-10).
-- [ ] **15.2.** `npm run build` termina con exit 0.
-- [ ] **15.3.** Registro de resultados:
+- [ ] **15.1.** Carga una canción con un bloque expandido (p. ej. `panel-de-control.mr` o `semilla.mr`) y pulsa **Play**: en la sección Notes, la **nota-origen** que está sonando se enciende con un glow azul aunque suene como acorde/arpegio (`WIDTH`/`GAP`/`INV`/`SHIFT`) o expandida por `PATTERN`.
+- [ ] **15.2.** La nota-origen se apaga al terminar el evento, con un **mínimo visible ~100 ms**: en pasajes rápidos (16n a BPM alto) las notas no parpadean.
+- [ ] **15.3.** Al pulsar **Stop** (o al terminar la última repetición) todas las notas se apagan de inmediato; no queda ninguna encendida.
+- [ ] **15.4.** Si el bloque que suena no está visible o está colapsado, no pasa nada: no hay auto-scroll ni errores.
+- [ ] **15.5.** Los bloques que **no** suenan no se encienden, y el editor de `PATTERN` (comandos) no se ilumina aunque el bloque suene.
+- [ ] **15.6.** Los silencios no encienden ninguna nota.
+- [ ] **15.7.** El `.mr` no cambia: guardar después de reproducir produce el mismo texto (el origen es metadato interno).
+- [ ] **15.8.** Reproduce con el metrónomo a la vista: sin errores nuevos en consola y sin saltos de layout al encenderse/apagarse el glow.
+
+## 16. Cierre: suite, build y registro
+
+- [ ] **16.1.** `npm test` en verde: **53 suites / 574 tests** (cifra a 2026-10-11).
+- [ ] **16.2.** `npm run build` termina con exit 0.
+- [ ] **16.3.** Registro de resultados:
 
 | Caso | Resultado | Notas |
 |---|---|---|
@@ -200,9 +211,10 @@
 | 12. Ramal de la guía | ☐ OK ☐ Falla | |
 | 13. Recortes de anchura | ☐ OK ☐ Falla | |
 | 14. Commands/Operations en texto libre | ☐ OK ☐ Falla | |
-| 15. Suite + build | ☐ OK ☐ Falla | |
+| 15. Resaltado de la nota-origen (experimento) | ☐ OK ☐ Falla | |
+| 16. Suite + build | ☐ OK ☐ Falla | |
 
-- [ ] **15.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
+- [ ] **16.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
 
 ```text
 - …
