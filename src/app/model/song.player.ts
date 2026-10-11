@@ -5,7 +5,7 @@ import { NoteData } from "./note";
 import { Part } from "./part";
 import { Block } from "./block";
 import { PlayMode, arpeggiate } from "./play.mode";
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, BehaviorSubject } from 'rxjs';
 import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
 import { NoteGenerationService } from '../services/note-generation.service';
 import { VariableContext } from './variable.context';
@@ -25,6 +25,16 @@ type PartSoundInfo = {
     instrumentId: InstrumentId;
     noteDataIndex: number;
     pendingTurnsToPlay: number;
+}
+
+/**
+ * Nota-origen que está sonando en este momento. `sourcePath` es la ruta de
+ * índices del evento en el árbol de notas del bloque (ver
+ * `NoteGenerationService.tagSourcePaths`). Es metadato de UI: no se serializa.
+ */
+export interface PlayingNoteSource {
+    blockId: number;
+    sourcePath: number[];
 }
 
 type ExecutionUnit = {
@@ -49,6 +59,14 @@ type PartExecutionState = {
 })
 export class SongPlayer {
     private _metronome = new Subject<number>();
+
+    /** Mínimo visible de un origen (evita parpadeos en pasajes rápidos). */
+    private static readonly MIN_PLAYING_SOURCE_MS = 100;
+
+    private readonly _playingSources = new Map<string, { source: PlayingNoteSource; untilMs: number }>();
+    private readonly _playingSourcesSubject = new BehaviorSubject<PlayingNoteSource[]>([]);
+    /** Notas-origen sonando, para el resaltado del editor de Notes. */
+    readonly playingSources$: Observable<PlayingNoteSource[]> = this._playingSourcesSubject.asObservable();
     
     private currentLoopId: LoopId | null = null;
     private currentStopListenerId: ListenerId | null = null;
@@ -120,6 +138,7 @@ export class SongPlayer {
             this.currentStopListenerId = null;
         }
         VariableContext.resetAll();
+        this._clearPlayingSources();
         
         // Update global state
         this.globalState.setIsPlaying(false);
@@ -127,6 +146,63 @@ export class SongPlayer {
         this.globalState.setBeatCount(0);
         this.globalState.resetRepetition();
         this._metronome.next(0);
+    }
+
+    // --- Resaltado de la nota-origen que suena (experimento UI) ---
+
+    /** Clave estable de un origen (`bloque:0.2`). */
+    private _playingSourceKey(source: PlayingNoteSource): string {
+        return `${source.blockId}:${source.sourcePath.join('.')}`;
+    }
+
+    /**
+     * Marca un origen como sonando. Permanece visible al menos
+     * `MIN_PLAYING_SOURCE_MS` o mientras dure la nota, lo que sea mayor.
+     */
+    private _activatePlayingSource(source: PlayingNoteSource, durationSeconds: number): void {
+        const holdMs = Math.max(SongPlayer.MIN_PLAYING_SOURCE_MS, durationSeconds * 1000);
+        this._playingSources.set(this._playingSourceKey(source), { source, untilMs: Date.now() + holdMs });
+        this._emitPlayingSources();
+    }
+
+    /** Activa el origen de un NoteData reproducible (chord/arpeggio/nota). */
+    private _activatePlayingSourceFromNoteData(noteData: NoteData, durationSeconds: number): void {
+        if (noteData.sourceBlockId === undefined || !noteData.sourcePath) {
+            return;
+        }
+        this._activatePlayingSource(
+            { blockId: noteData.sourceBlockId, sourcePath: noteData.sourcePath },
+            durationSeconds
+        );
+    }
+
+    /** Retira los orígenes ya vencidos (se revisa en cada tick del loop). */
+    private _prunePlayingSources(nowMs: number = Date.now()): void {
+        let changed = false;
+        this._playingSources.forEach((entry, key) => {
+            if (entry.untilMs <= nowMs) {
+                this._playingSources.delete(key);
+                changed = true;
+            }
+        });
+        if (changed) {
+            this._emitPlayingSources();
+        }
+    }
+
+    /** Limpieza total (stop, fin de reproducción o nuevo Play). */
+    private _clearPlayingSources(): void {
+        if (this._playingSources.size === 0 && this._playingSourcesSubject.value.length === 0) {
+            return;
+        }
+        this._playingSources.clear();
+        this._playingSourcesSubject.next([]);
+    }
+
+    private _emitPlayingSources(): void {
+        this._playingSourcesSubject.next(
+            Array.from(this._playingSources.values()).map(entry => entry.source)
+        );
     }
 
     /**
@@ -146,6 +222,7 @@ export class SongPlayer {
              this.globalState.setBeatCount(0);
              this.globalState.resetRepetition();
              this._metronome.next(0);
+             this._clearPlayingSources();
              this.currentLoopId = null;
              this.currentStopListenerId = null;
          }
@@ -252,6 +329,7 @@ export class SongPlayer {
         // Update global state
         this.globalState.setIsPlaying(true);
         this.globalState.setCurrentSong(song);
+        this._clearPlayingSources();
         // Las repeticiones de canción son canónicas en `Song.repeats` (igual
         // que el bpm): se aplican al iniciar y antes de `resetRepetition` para
         // que `canAdvance` se calcule con el valor nuevo.
@@ -362,6 +440,7 @@ export class SongPlayer {
     private async _schedulePlayback(partSoundInfo: PartSoundInfo[]): Promise<void> {
         if (partSoundInfo.length === 0) {
             this.globalState.setIsPlaying(false);
+            this._clearPlayingSources();
             return;
         }
         // Reset beat count and repetition for new playback
@@ -390,6 +469,9 @@ export class SongPlayer {
         const currentBeatCount = this.globalState.beatCount;
         const beatsPerBar = this.globalState.getCurrentPlaybackState().beatsPerBar;
         this._metronome.next(currentBeatCount % beatsPerBar); // Use modulo for metronome display
+        // El resaltado de origen se revisa una vez por tick: los puntos que ya
+        // cumplieron su mínimo visible/duración se apagan.
+        this._prunePlayingSources();
         let turnPlayed = false;
         const sixteenthNoteDuration = this.audioEngine.timeToSeconds('16n');
 
@@ -472,11 +554,13 @@ export class SongPlayer {
         const instrumentId = partSoundInfo.instrumentId;
         // Use default duration if noteData.duration is undefined
         const durationToUse = noteData.duration ?? '16n'; // Default to 16n if undefined
+        const durationSeconds = this.audioEngine.timeToSeconds(durationToUse);
 
         try {
             switch (noteData.type) {
                 case 'note':
                     if (noteData.note !== undefined) {
+                        this._activatePlayingSourceFromNoteData(noteData, durationSeconds);
                         this.audioEngine.triggerAttackRelease(instrumentId, this.audioEngine.midiToFrequency(noteData.note), durationToUse, time);
                     }
                     break;
@@ -484,6 +568,7 @@ export class SongPlayer {
                     if (Array.isArray(noteData.noteDatas)) {
                          const notesToPlay = this.noteDatasToNotes(noteData.noteDatas);
                          if (notesToPlay.length > 0) {
+                              this._activatePlayingSourceFromNoteData(noteData, durationSeconds);
                               this.audioEngine.triggerAttackRelease(instrumentId, notesToPlay.map(n => this.audioEngine.midiToFrequency(n)), durationToUse, time);
                          }
                     }
@@ -492,6 +577,7 @@ export class SongPlayer {
                      if (Array.isArray(noteData.noteDatas)) {
                          const notesToPlay = this.noteDatasToNotes(noteData.noteDatas);
                          if (notesToPlay.length > 0) {
+                              this._activatePlayingSourceFromNoteData(noteData, durationSeconds);
                               const freqs = notesToPlay.map(n => this.audioEngine.midiToFrequency(n));
                               const totalDurationSeconds = this.audioEngine.timeToSeconds(durationToUse);
                               const singleNoteDurationSeconds = freqs.length > 0 ? totalDurationSeconds / freqs.length : totalDurationSeconds;

@@ -10,6 +10,15 @@ export interface NoteData {
      * numéricas en `parseBlockNotes`.
      */
     variable?: string;
+    /**
+     * Metadato interno de reproducción: ruta de índices del evento original
+     * dentro del árbol de notas del bloque (p. ej. `[0, 2]` = tercer hijo del
+     * primer evento). Lo rellena `NoteGenerationService` al generar; el `.mr`
+     * no lo serializa y la reproducción no lo necesita.
+     */
+    sourcePath?: number[];
+    /** Bloque del que procede el evento original (metadato interno). */
+    sourceBlockId?: number;
     children?: NoteData[];
     noteDatas?: NoteData[]; // Para Arpeggios y Acordes
 }
@@ -20,6 +29,8 @@ export class NoteData implements NoteData {
     duration?: string;
     note?: number | undefined;
     variable?: string;
+    sourcePath?: number[];
+    sourceBlockId?: number;
     children?: NoteData[];
     noteDatas?: NoteData[]; // Para Arpeggios y Acordes
 

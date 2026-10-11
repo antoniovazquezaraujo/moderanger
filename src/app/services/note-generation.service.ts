@@ -109,6 +109,15 @@ export class NoteGenerationService {
       // ---------------------------------------------------------------
     }
 
+    // 1b. Metadato interno de origen: ruta de índices en el árbol de notas del
+    // bloque. Solo los eventos reales del texto tienen origen (el silencio
+    // sintético de un bloque vacío no tiene elemento que resaltar). Lo heredan
+    // los derivados (acordes/arpegios, PATTERN, hijos de grupo) y no se
+    // serializa en `.mr`.
+    if (notesToParse.trim().length > 0) {
+        this.tagSourcePaths(rootNoteDatas, block.id);
+    }
+
     // --- Skip duration propagation if we just created the default rest --- 
     if (rootNoteDatas.length === 1 && rootNoteDatas[0].type === 'rest' && notesToParse.trim().length === 0) {
         console.log(`[NoteGenSvc] Skipping duration propagation for default rest.`);
@@ -323,6 +332,31 @@ export class NoteGenerationService {
       return new NoteData({ type: 'rest', duration });
   }
 
+  /**
+   * Asigna a cada nodo del árbol parseado su ruta de índices dentro del bloque
+   * (`[0, 2]` = tercer hijo del primer evento). Es metadato de origen para la
+   * UI de resaltado: no viaja al `.mr` ni a la serialización.
+   */
+  private tagSourcePaths(noteDatas: NoteData[], blockId: number, parentPath: number[] = []): void {
+      noteDatas.forEach((noteData, index) => {
+          const path = [...parentPath, index];
+          noteData.sourcePath = path;
+          noteData.sourceBlockId = blockId;
+          if (noteData.type === 'group' && noteData.children) {
+              this.tagSourcePaths(noteData.children, blockId, path);
+          } else if ((noteData.type === 'chord' || noteData.type === 'arpeggio') && noteData.noteDatas) {
+              this.tagSourcePaths(noteData.noteDatas, blockId, path);
+          }
+      });
+  }
+
+  /** Hereda el origen del evento raíz en un NoteData generado. */
+  private stampOrigin(generated: NoteData, origin: NoteData): NoteData {
+      generated.sourcePath = origin.sourcePath;
+      generated.sourceBlockId = origin.sourceBlockId;
+      return generated;
+  }
+
   // <<< New method similar to old SongPlayer.processIndividualNoteData >>>
   private processSingleNoteData(noteData: NoteData, player: Player, fallbackDuration: string = '16n'): NoteData[] {
       const results: NoteData[] = [];
@@ -337,6 +371,7 @@ export class NoteGenerationService {
                   //      patrón (independiente del playmode).
                   //   2) Genera lo que toque (nota suelta, acorde, arpegio) para
                   //      cada nota resultante.
+                  // Cada evento generado hereda el origen (sourcePath) de esta nota.
                   let expanded: NoteData[];
                   try {
                       expanded = this.expandNoteWithPattern(baseGrade, duration, player);
@@ -345,13 +380,16 @@ export class NoteGenerationService {
                       expanded = [this.createRestData(duration)];
                   }
                   for (const expandedNote of expanded) {
-                      results.push(...this.generatePlayableData(expandedNote, player, duration));
+                      results.push(
+                          ...this.generatePlayableData(expandedNote, player, duration)
+                              .map(generated => this.stampOrigin(generated, noteData))
+                      );
                   }
               } else {
                   // If baseGrade is undefined (e.g., explicit rest in input)
                   const undefinedRestResult = this.noteGenUnified.createRestNoteData(duration);
                   if (undefinedRestResult.success && undefinedRestResult.data) {
-                    results.push(undefinedRestResult.data);
+                    results.push(this.stampOrigin(undefinedRestResult.data, noteData));
                   }
               }
               break;
@@ -360,7 +398,7 @@ export class NoteGenerationService {
                // Rests/Silences generally shouldn't trigger patterns. Pass them through.
                const passRestResult = this.noteGenUnified.createRestNoteData(duration);
                if (passRestResult.success && passRestResult.data) {
-                 results.push(passRestResult.data);
+                 results.push(this.stampOrigin(passRestResult.data, noteData));
                }
               break;
           case 'chord': 
