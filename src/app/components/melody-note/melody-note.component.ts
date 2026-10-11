@@ -178,9 +178,18 @@ export class MelodyNoteComponent implements OnDestroy {
         this.changeDuration.emit(event.deltaY > 0 ? 1 : -1);
     }
 
+    /**
+     * Rueda sobre el valor: sin Shift cambia el valor de la nota; con Shift
+     * cambia la duración, con la misma convención y sentido que la zona de
+     * duración (patrón del editor: Shift = duración).
+     */
     onWheelValue(event: WheelEvent): void {
         event.preventDefault();
         this.hideCursorWhileWheeling();
+        if (event.shiftKey) {
+            this.changeDuration.emit(event.deltaY > 0 ? 1 : -1);
+            return;
+        }
         this.changeValue.emit(event.deltaY > 0 ? -1 : 1);
     }
 

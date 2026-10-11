@@ -178,6 +178,8 @@
 
 - [ ] **14.18.** Parts en fila redimensionables: las parts se ven una al lado de otra (mismo orden que la canción) con un splitter de 10px entre cada par (`cursor: col-resize`, línea de 2px que pasa a 4px azul al hover/foco/arrastre). Arrastrar el splitter mueve **solo** las dos parts vecinas: medido con 2 parts y `+180px` → `700|700 → 880|520` (muestreo a mitad `790|610`); el borde topa en **260px** por part (`260|1140`); las flechas ←/→ con foco en el separador (`role="separator"`, `aria-orientation="vertical"`) mueven 20px por pulsación; doble clic vuelve al reparto igual (`700|700`). Con anchos fijados, un contenedor de 800px hace scroll horizontal de la fila (clientW 755 vs scrollW 994). Al estrechar una part a 260px **ningún** contenedor interno desborda (`scrollWidth <= clientWidth` en header de part, header de bloque, notes, commands, operations, `command` y `part-content`: 54 contenedores medidos, 0 violaciones). Sin regresión: hover de part 0→1, chips de comando 0→1, guías 2px `rgb(163,163,163)`, DnD dentro de la part (`[Eco, Canon] → [Canon, Eco]`) y consola sin errores.
 
+- [ ] **14.19.** Shift+rueda sobre una nota cambia la **duración** desde cualquier zona (valor o duración), con el anillo de 14.17; sin Shift se mantiene lo actual (zona valor → valor; zona duración → duración). Medido con rueda real (CDP): nota `4n:1` con Shift sobre el valor → `2n → 1n → vacío → 8t → vacío → 1n` (el valor `1` no cambia en ningún paso); sin Shift sobre el valor → `1 → 0 → -1 → 0` (la duración `1n` no cambia); Shift sobre la duración recorre el mismo anillo (no-op adicional); en el PATTERN embebido igual (`2n:1 → 1n:1 → 1 → 8t:1` con Shift y `8t:1 → 8t:0` sin Shift). Consola sin errores ni avisos.
+
 ## 15. Caso 15 — Resaltado de la nota-origen (feat/note-highlight-playback, 2026-10-11)
 
 - [ ] **15.1.** Carga una canción con un bloque expandido (p. ej. `panel-de-control.mr` o `semilla.mr`) y pulsa **Play**: en la sección Notes, la **nota-origen** que está sonando se enciende con un glow azul aunque suene como acorde/arpegio (`WIDTH`/`GAP`/`INV`/`SHIFT`) o expandida por `PATTERN`.
@@ -191,7 +193,7 @@
 
 ## 16. Cierre: suite, build y registro
 
-- [ ] **16.1.** `npm test` en verde: **53 suites / 574 tests** (cifra a 2026-10-11).
+- [ ] **16.1.** `npm test` en verde: **53 suites / 577 tests** (cifra a 2026-10-11).
 - [ ] **16.2.** `npm run build` termina con exit 0.
 - [ ] **16.3.** Registro de resultados:
 

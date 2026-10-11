@@ -43,6 +43,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Fixed
 
+- Shift+wheel over a note now changes its **duration** from either zone (value or duration), matching the editor's Shift = duration pattern; without Shift the wheel keeps its previous behavior (value zone changes the note value, duration zone changes the duration). The duration ring is respected and the cursor hide/preventDefault contracts are unchanged.
 - Duration wheel now follows a single 8-state ring (the 7 durations plus the inherited/empty state): both directions traverse the same values, one exactly the reverse of the other (`8t → 4t → 16n → 8n → 4n → 2n → 1n → empty` and back), with no re-engagement of the group/editor fallback, so the wheel no longer loops over half the list depending on the direction; the empty duration zone keeps the note height (14×18px, revealed on hover) so the wheel still reaches it, empty/unknown duration values are normalized, and the empty state remains reachable and always exitable.
 - Block drag handle tooltip: it is now disabled while dragging, so it cannot stay stuck when the node is reordered/re-rendered and the mouseleave never reaches the original handle; normal hover and the rest of the app tooltips are unchanged.
 - Block tree guides now rise from the parent block's drag handle and run in front of its Commands/Operations sections down to the child list (the guide no longer appeared to start mid-height); blocks without children and handle-less roots keep no extra line.

@@ -67,8 +67,8 @@ describe('MelodyNoteComponent · valor mostrado', () => {
   });
 });
 
-const wheelEvent = (deltaY: number): WheelEvent =>
-  ({ deltaY, preventDefault: () => undefined, stopPropagation: () => undefined } as unknown as WheelEvent);
+const wheelEvent = (deltaY: number, shiftKey = false): WheelEvent =>
+  ({ deltaY, shiftKey, preventDefault: () => undefined, stopPropagation: () => undefined } as unknown as WheelEvent);
 
 describe('MelodyNoteComponent · rueda del ratón', () => {
   it('rueda sobre el valor emite cambio de valor', () => {
@@ -81,6 +81,31 @@ describe('MelodyNoteComponent · rueda del ratón', () => {
     expect(values).toEqual([-1]);
   });
 
+  it('sin Shift sigue cambiando el valor en ambos sentidos', () => {
+    const component = componentFor(4);
+    const values: number[] = [];
+    component.changeValue.subscribe(value => values.push(value));
+
+    component.onWheelValue(wheelEvent(1));
+    component.onWheelValue(wheelEvent(-1));
+
+    expect(values).toEqual([-1, 1]);
+  });
+
+  it('Shift+rueda sobre el valor emite cambio de duración con el mismo signo', () => {
+    const component = componentFor(4);
+    const durations: number[] = [];
+    const values: number[] = [];
+    component.changeDuration.subscribe(delta => durations.push(delta));
+    component.changeValue.subscribe(value => values.push(value));
+
+    component.onWheelValue(wheelEvent(1, true));
+    component.onWheelValue(wheelEvent(-1, true));
+
+    expect(durations).toEqual([1, -1]);
+    expect(values).toEqual([]);
+  });
+
   it('rueda sobre la duración emite cambio de duración', () => {
     const component = componentFor(4);
     const durations: number[] = [];
@@ -89,6 +114,17 @@ describe('MelodyNoteComponent · rueda del ratón', () => {
     component.onWheelDuration(wheelEvent(1));
 
     expect(durations).toEqual([1]);
+  });
+
+  it('Shift+rueda sobre la duración mantiene el cambio de duración', () => {
+    const component = componentFor(4);
+    const durations: number[] = [];
+    component.changeDuration.subscribe(delta => durations.push(delta));
+
+    component.onWheelDuration(wheelEvent(1, true));
+    component.onWheelDuration(wheelEvent(-1, true));
+
+    expect(durations).toEqual([1, -1]);
   });
 
   it('oculta el cursor temporalmente al rodar la duración', () => {
