@@ -68,6 +68,11 @@ import { SingleNote, NoteDuration } from '../../model/melody';
         }
         
         .note-visual {
+            /* Flex para centrar el valor: como span inline heredaba el
+               baseline de la línea y quedaba ~1px por debajo del centro de
+               los demás controles (inputs) de la fila. */
+            display: flex;
+            align-items: center;
             cursor: ns-resize;
             padding: 0;
             margin-right: 0;
