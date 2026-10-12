@@ -227,4 +227,80 @@ describe('NoteGenerationService · DECORATION (adorno del acorde)', () => {
 
     expect(result.map((chord) => chord.sourcePath)).toEqual([[0], [1]]);
   });
+
+  it('con PATTERN $variable cada nota expandida decora su acorde', () => {
+    VariableContext.setValue('motif', '4t:1 4t:2');
+    const player = createPlayer();
+    const patternCommand = new Command({ type: CommandType.PATTERN });
+    patternCommand.setVariable('motif');
+    const block = blockWith('4n:0', [patternCommand, decoration('0 -1')]);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result).toHaveLength(2);
+    expect(result.map((chord) => chord.noteDatas!.map((noteData) => noteData.note))).toEqual([
+      [62, 61],
+      [63, 62]
+    ]);
+  });
+
+  it('resuelve DECORATION $variable numérica como offset único', () => {
+    VariableContext.setValue('off', 5);
+    const player = createPlayer();
+    const command = new Command({ type: CommandType.DECORATION });
+    command.setVariable('off');
+    const block = blockWith('4n:0', [command]);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result[0].noteDatas!.map((noteData) => noteData.note)).toEqual([65]);
+  });
+
+  it('SHIFT con la ventana recortada al acorde: el adorno va después', () => {
+    const player = createPlayer();
+    const block = blockWith('4n:0', [
+      new Command({ type: CommandType.WIDTH, value: 2 }),
+      new Command({ type: CommandType.GAP, value: 2 }),
+      new Command({ type: CommandType.SHIFTSTART, value: 2 }),
+      new Command({ type: CommandType.SHIFTSIZE, value: 5 }),
+      new Command({ type: CommandType.SHIFTVALUE, value: 1 }),
+      decoration('-1')
+    ]);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    // Acorde [60,63,67]; la ventana [2,7) se recorta a la 3ª nota (67→79) y el adorno resta 1.
+    expect(result[0].noteDatas!.map((noteData) => noteData.note)).toEqual([59, 62, 78]);
+  });
+
+  it('SHIFT con SHIFTSIZE 0 no desplaza y el adorno se aplica igual', () => {
+    const player = createPlayer();
+    const block = blockWith('4n:0', [
+      new Command({ type: CommandType.WIDTH, value: 2 }),
+      new Command({ type: CommandType.GAP, value: 2 }),
+      new Command({ type: CommandType.SHIFTSTART, value: 0 }),
+      new Command({ type: CommandType.SHIFTSIZE, value: 0 }),
+      new Command({ type: CommandType.SHIFTVALUE, value: 3 }),
+      decoration('-1')
+    ]);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result[0].noteDatas!.map((noteData) => noteData.note)).toEqual([59, 62, 66]);
+  });
+
+  it('una lista vacía de items equivale a no decorar (regresión)', () => {
+    const player = createPlayer();
+    player.density = 1;
+    player.gap = 2;
+    player.currentDecoration = [];
+
+    const result = createService().generateNotesForBlock(blockWith('4n:0'), player);
+
+    expect(notesAndDurations(result)).toEqual([[60, '4n'], [63, '4n']]);
+  });
 });

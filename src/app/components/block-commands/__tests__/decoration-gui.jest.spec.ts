@@ -51,4 +51,14 @@ describe('GUI de DECORATION', () => {
         expect(canonicalDecorationValueOrRaw('')).toBe('');
         expect(canonicalDecorationValueOrRaw('(0 2)')).toBe('(0 2)');
     });
+
+    it('mientras se edita, un valor con solo espacios no se canonicaliza', () => {
+        expect(canonicalDecorationValueOrRaw('   ')).toBe('   ');
+        expect(canonicalDecorationValueOrRaw('\t')).toBe('\t');
+    });
+
+    it('canonicaliza tabuladores y conserva la duración explícita', () => {
+        expect(canonicalDecorationValueOrRaw('\t0\t-2 ')).toBe('0 -2');
+        expect(canonicalDecorationValueOrRaw('1m:-1 4n:3')).toBe('1m:-1 4n:3');
+    });
 });

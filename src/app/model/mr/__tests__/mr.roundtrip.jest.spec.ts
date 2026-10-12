@@ -196,6 +196,50 @@ part P
   });
 });
 
+describe('round-trip: comandos de decoration', () => {
+  it('es idempotente con duración explícita y shorthand en el mismo documento', () => {
+    const text = `song Decoracion
+version 1
+
+part Piano
+  block Explicita
+    notes
+      4n:0
+    commands
+      DECORATION 4t:0 8t:-2
+
+  block Shorthand
+    notes
+      4n:0
+    commands
+      DECORATION 0 -2 6
+`;
+
+    const once = serializeSong(parseSong(text));
+
+    expect(once).toBe(text);
+    expect(serializeSong(parseSong(once))).toBe(once);
+  });
+
+  it('mantiene DECORATION $variable y su declaración en vars', () => {
+    const text = `song DecoracionVariable
+version 1
+
+vars
+  $deco = "0 -2 6"
+
+part Piano
+  block B
+    notes
+      4n:0
+    commands
+      DECORATION $deco
+`;
+
+    expect(serializeSong(parseSong(text))).toBe(text);
+  });
+});
+
 describe('round-trip: modelo construido a mano', () => {
   function buildDocument(): SongDocument {
     const song = new Song();
