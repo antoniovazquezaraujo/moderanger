@@ -413,7 +413,7 @@ Declared in `vars` and used in any block (commands, notes and operations). The n
 
 In the editor header:
 
-- **Play** starts playback with the tempo (`bpm`) and song repetitions (`repeats`) of the model. **Stop** halts it and resets the playback context (playmode variables go back to CHORD).
+- **Play** starts playback with the tempo (`bpm`) and song repetitions (`repeats`) of the model. **Stop** halts it and restores the variables to their pre-Play state (operations do not accumulate between plays).
 - **Repeat** (1-99) and **BPM** (30-240) edit the model, so the change travels to the file when saving.
 - **Live BPM:** changing BPM while playing applies it immediately (live-tempo). When stopped, it applies on the next Play.
 - **Live Repeat:** changing repetitions while playing does **not** reschedule the current sequence; it applies on the next Play.
