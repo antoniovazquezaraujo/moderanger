@@ -9,6 +9,7 @@ import { PlayState } from "./play.state";
 import { BehaviorSubject, Subject } from "rxjs";
 import { OctavedGrade } from "./octaved-grade";
 import { NoteGenerationUnifiedService } from "../shared/services/note-generation-unified.service";
+import { DecorationItem } from "./mr/decoration.parser";
 
 // Define missing constants (assuming default values, adjust if needed)
 const DEFAULT_BPM = 120;
@@ -37,6 +38,8 @@ export class Player {
     instrumentType: InstrumentType;
     instrumentId: InstrumentId;
     currentPattern: NoteData[] | null = null;
+    /** Items de `DECORATION` activos; `null` = sin adorno. */
+    currentDecoration: DecorationItem[] | null = null;
 
     // Unified note generation service for consistent note creation
     private noteGenUnified = new NoteGenerationUnifiedService();

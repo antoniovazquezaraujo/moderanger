@@ -3,6 +3,7 @@ import { getPlayModeFromString, PlayMode } from './play.mode';
 import { ScaleTypes } from './scale';
 import { NoteData } from './note';
 import { parseBlockNotes } from './mr/notes.parser';
+import { parseDecorationItems } from './mr/decoration.parser';
 
 export enum CommandType {
     OCT = 'OCT',
@@ -16,7 +17,8 @@ export enum CommandType {
     SHIFTSIZE = 'SHIFTSIZE',
     SHIFTVALUE = 'SHIFTVALUE',
     PATTERN_GAP = 'PATTERN_GAP',
-    PATTERN = 'PATTERN'
+    PATTERN = 'PATTERN',
+    DECORATION = 'DECORATION'
 }
 
 export class Command {
@@ -48,21 +50,26 @@ export class Command {
                     if (typeof varValue === 'string') return getPlayModeFromString(varValue.toUpperCase());
                     if (typeof varValue === 'number' && PlayMode[varValue]) return varValue;
                 }
-                if (this.type === CommandType.PATTERN && typeof varValue === 'string') return varValue;
+                if (this.isStringValued() && typeof varValue === 'string') return varValue;
                 if (typeof varValue === 'number') return varValue;
                 return varValue;
             }
             return this.type === CommandType.SCALE ? 'WHITE' as ScaleType :
                    this.type === CommandType.PLAYMODE ? PlayMode.CHORD :
-                   this.type === CommandType.PATTERN ? '' : 0;
+                   this.isStringValued() ? '' : 0;
         }
         if (this.type === CommandType.PLAYMODE && typeof this._value === 'number' && PlayMode[this._value]) {
             return this._value;
         }
-        if (this.type === CommandType.PATTERN && typeof this._value === 'string') {
+        if (this.isStringValued() && typeof this._value === 'string') {
             return this._value;
         }
         return this._value;
+    }
+
+    /** PATTERN y DECORATION guardan su valor como string (melodía/items). */
+    private isStringValued(): boolean {
+        return this.type === CommandType.PATTERN || this.type === CommandType.DECORATION;
     }
 
     setVariable(name: string | null): void {
@@ -82,7 +89,7 @@ export class Command {
         if (value === null || value === undefined) {
             this._value = this.type === CommandType.SCALE ? 'WHITE' :
                          this.type === CommandType.PLAYMODE ? PlayMode.CHORD :
-                         this.type === CommandType.PATTERN ? '' : 0;
+                         this.isStringValued() ? '' : 0;
             this.isVariable = false;
             return;
         }
@@ -102,7 +109,7 @@ export class Command {
                 } else {
                     this._value = PlayMode.CHORD;
                 }
-            } else if (this.type === CommandType.PATTERN && typeof value === 'string') {
+            } else if (this.isStringValued() && typeof value === 'string') {
                 this._value = value;
             } else if (typeof value === 'number') {
                 this._value = Number(value);
@@ -129,6 +136,22 @@ export class Command {
             } catch (e) {
                 console.error(`[Command PATTERN] Failed to parse pattern string "${patternString}":`, e);
                 player.currentPattern = null;
+            }
+            return;
+        }
+
+        if (this.type === CommandType.DECORATION) {
+            const decorationString = String(value);
+            if (decorationString.trim() === '') {
+                // Variable no definida o valor vacío: sin adorno y sin ruido.
+                player.currentDecoration = null;
+                return;
+            }
+            try {
+                player.currentDecoration = parseDecorationItems(decorationString);
+            } catch (e) {
+                console.error(`[Command DECORATION] Failed to parse decoration string "${decorationString}":`, e);
+                player.currentDecoration = null;
             }
             return;
         }
