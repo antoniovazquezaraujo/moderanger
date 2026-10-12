@@ -310,9 +310,10 @@ describe('parseSong: comandos (todos los CommandType)', () => {
       SHIFTVALUE 1
       PATTERN_GAP 1
       PATTERN 4t:0 4t:-1 4t:3
+      DECORATION 0 -2 6
 `;
 
-  it('parsea los 12 comandos en orden', () => {
+  it('parsea los 13 comandos en orden', () => {
     const commands = parseSong(ALL_COMMANDS).song.parts[0].blocks[0].commands;
 
     expect(commands.map((command) => command.type)).toEqual([
@@ -327,12 +328,14 @@ describe('parseSong: comandos (todos los CommandType)', () => {
       CommandType.SHIFTSIZE,
       CommandType.SHIFTVALUE,
       CommandType.PATTERN_GAP,
-      CommandType.PATTERN
+      CommandType.PATTERN,
+      CommandType.DECORATION
     ]);
     expect(commands[0].value).toBe(2);
     expect(commands[1].value).toBe('WHITE');
     expect(commands[3].value).toBe(PlayMode.ASCENDING);
     expect(commands[11].value).toBe('4t:0 4t:-1 4t:3');
+    expect(commands[12].value).toBe('0 -2 6');
   });
 
   it('acepta INVERSION como alias y lo normaliza a INV', () => {
@@ -500,6 +503,48 @@ describe('PATTERN con variable', () => {
     expect(command.isVariable).toBe(true);
     expect(command.getVariableName()).toBe('motif');
     expect(serializeSong(doc)).toContain('PATTERN $motif');
+  });
+});
+
+describe('DECORATION: lista de items', () => {
+  const songWithDecoration = (decoration: string): string =>
+    ['song P', 'version 1', '', 'part Piano', '  block B', '    notes', '      4n:0', '    commands', `      DECORATION ${decoration}`, ''].join('\n');
+
+  it('parsea offsets y duración:offset y canoniza la forma', () => {
+    const command = parseSong(songWithDecoration(' 4t:0   0   -2 ')).song.parts[0].blocks[0].commands[0];
+
+    expect(command.type).toBe(CommandType.DECORATION);
+    expect(command.value).toBe('4t:0 0 -2');
+  });
+
+  it('acepta DECORATION $variable y lo serializa como variable', () => {
+    const doc = parseSong(songWithDecoration('$deco'));
+    const command = doc.song.parts[0].blocks[0].commands[0];
+
+    expect(command.type).toBe(CommandType.DECORATION);
+    expect(command.isVariable).toBe(true);
+    expect(command.getVariableName()).toBe('deco');
+    expect(serializeSong(doc)).toContain('DECORATION $deco');
+  });
+
+  it('rechaza grupos con línea:columna', () => {
+    const error = expectParseError(songWithDecoration('4t:( 0 2 )'));
+
+    expect(error.message).toBe('DECORATION no admite grupos (v1)');
+    expect(error.line).toBe(9);
+    // Columna física del '(' (1-based): 6 de indent + 'DECORATION ' + '4t:'.
+    expect(error.column).toBe(21);
+  });
+
+  it('rechaza items no enteros', () => {
+    expect(expectParseError(songWithDecoration('0 1.5')).message).toContain(`item de DECORATION inválido '1.5'`);
+    expect(expectParseError(songWithDecoration('s')).message).toContain(`item de DECORATION inválido 's'`);
+  });
+
+  it('exige valor', () => {
+    expect(expectParseError('part "P"\n  block\n    commands\n      DECORATION\n').message).toBe(
+      'DECORATION requiere un valor'
+    );
   });
 });
 
