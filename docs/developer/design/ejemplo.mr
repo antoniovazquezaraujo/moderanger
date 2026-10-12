@@ -1,0 +1,19 @@
+song "Prueba"
+version 1
+repeats 2
+bpm 108
+
+vars
+  $motif = "4t:0"
+
+part "Piano" instrument PIANO
+  block "Origen" repeats 2
+    notes default 8n
+      4n:0  4n:2  4n:( 0 2 )
+      8t:$motif  s  -7
+    commands
+      OCT 2
+      SCALE BLACK
+      PLAYMODE RANDOM
+    operations
+      VARY $oct 1

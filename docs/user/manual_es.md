@@ -413,7 +413,7 @@ Se declaran en `vars` y se usan en cualquier bloque (comandos, notas y operacion
 
 En la cabecera del editor:
 
-- **Play** inicia la reproducción con el tempo (`bpm`) y las repeticiones de canción (`repeats`) del modelo. **Stop** la detiene y reinicia el contexto de reproducción (las variables de playmode vuelven a CHORD).
+- **Play** inicia la reproducción con el tempo (`bpm`) y las repeticiones de canción (`repeats`) del modelo. **Stop** la detiene y restaura las variables al estado previo al Play (las operaciones no se acumulan entre reproducciones).
 - **Repeat** (1–99) y **BPM** (30–240) editan el modelo, así que el cambio viaja al fichero al guardar.
 - **BPM en caliente:** cambiar el BPM mientras suena lo aplica al momento (live-tempo). En parado, se aplica en el siguiente Play.
 - **Repeat en caliente:** cambiar las repeticiones mientras suena **no** re-programa la secuencia actual; se aplica en el siguiente Play.

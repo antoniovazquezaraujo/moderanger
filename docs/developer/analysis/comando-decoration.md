@@ -102,7 +102,7 @@ PATTERN (expande la nota) → playmode/WIDTH/GAP/INV/octava/tonalidad/SHIFT (gra
 ## 8. Validación y pendientes
 
 - **Validación (Bicho):** completada para el comando. `npm test` (642), `npm run test:cov` (umbrales), `npm run build` y CI en verde; ejemplos de `mr.docs-guia` canónicos e idempotentes; corpus sin cambios. Guía corregida: las duraciones de item son metadato en v1 (limitación 12 en ambos manuales).
-- **Hallazgo aparte (no bloquea):** al recargar una canción con `$variable`, el sidebar avisa transitoriamente (`Variable … no longer exists or is inaccessible`). Es preexistente (mismo aviso con `PATTERN $var` en `develop`; mecanismo genérico en `block-commands.component.ts`, commit `36a479e`); no lo introduce `DECORATION`.
+- **Hallazgo aparte (no bloquea):** al recargar una canción con `$variable`, el panel de variables avisa transitoriamente (`Variable … no longer exists or is inaccessible`). Es preexistente (mismo aviso con `PATTERN $var` en `develop`; mecanismo genérico en `block-commands.component.ts`, commit `36a479e`); no lo introduce `DECORATION`.
 - `PATTERN_GAP` sigue aceptándose al leer y guardar por compatibilidad; no se toca.
 
 ## 9. Ajuste: offsets en grados de escala (`fix/decoration-scale-degrees`)
