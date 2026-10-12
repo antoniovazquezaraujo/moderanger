@@ -186,6 +186,8 @@
 
 - [ ] **14.22.** Alineación del PATTERN: en una fila mixta (`Oct: 0`, `Width: 2`, `Pattern: 4n 1, 2n 3`, `Pattern: $motif`) los cuatro valores comparten y-centro: medido, el PATTERN literal pasa de **266.5 → 255.5** y el resto queda en 255.5 (diff **0.0px** ≤ 0.5). La cadena embebida queda a 20px (antes 40/36/32/24) y la caja del comando no cambia (24px). Con la fila envuelta (viewport 700) el PATTERN queda en 275.5 = resto. PATTERN largo multi-línea a 420px: la caja del comando crece a 67px (`height: auto` + min 24) sin desbordar y el editor de 42px queda dentro. Regresión: rueda valor/duración/Shift, chips `0→1`, colón, `appearance:none`, guías 2px, droppoint 12px, splitter, highlight `playing`, consola 0 errores.
 
+- [ ] **14.23.** Panel de Variables plegable: el toolbar ya **no** tiene el botón `$` (0 botones con texto `$`, 0 `p-sidebar`) y las variables viven en un panel encima de la fila de parts: colapsado al cargar (caja de 34px, chevron →, título "Variables"), a 1440 medido con el panel en `top 105 / bottom 139` y las parts en `top 149` (gap de 10px); al pulsar la cabecera se despliega (chevron ↓, formulario + lista, panel de 212px, parts bajan a `top 327`). Editar la variable string `motif` actualiza el valor (`4t:0 4t:2 4t:5`). Debajo, las parts siguen funcionando: resize con el splitter `700|700 → 850|550`; el scroll interno de la canción scrollea con el panel fijo (`scrollTop 0→23`, panel en `top 105`). Un segundo clic pliega. Consola sin errores.
+
 ## 15. Caso 15 — Resaltado de la nota-origen (feat/note-highlight-playback, 2026-10-11)
 
 - [ ] **15.1.** Carga una canción con un bloque expandido (p. ej. `panel-de-control.mr` o `semilla.mr`) y pulsa **Play**: en la sección Notes, la **nota-origen** que está sonando se enciende con un glow azul aunque suene como acorde/arpegio (`WIDTH`/`GAP`/`INV`/`SHIFT`) o expandida por `PATTERN`.
@@ -199,7 +201,7 @@
 
 ## 16. Cierre: suite, build y registro
 
-- [ ] **16.1.** `npm test` en verde: **54 suites / 585 tests** (cifra a 2026-10-11).
+- [ ] **16.1.** `npm test` en verde: **59 suites / 660 tests** (cifra a 2026-10-12).
 - [ ] **16.2.** `npm run build` termina con exit 0.
 - [ ] **16.3.** Registro de resultados:
 
