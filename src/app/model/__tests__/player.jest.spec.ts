@@ -233,4 +233,16 @@ describe('Player.getSelectedOctavedGrades / decoratedMidiNote (DECORATION)', () 
     expect(player.decoratedMidiNote(grade0, 6)).toBe(70);
     expect(player.decoratedMidiNote(grade0, -2)).toBe(58);
   });
+
+  it('decoratedMidiNote no muta el grado recibido', () => {
+    const player = createPlayer();
+    const [grade0] = player.getSelectedOctavedGrades();
+
+    player.decoratedMidiNote(grade0, 6);
+    player.decoratedMidiNote(grade0, -2);
+
+    expect(grade0.grade).toBe(0);
+    expect(grade0.octave).toBe(2);
+    expect(player.decoratedMidiNote(grade0, 0)).toBe(60);
+  });
 });

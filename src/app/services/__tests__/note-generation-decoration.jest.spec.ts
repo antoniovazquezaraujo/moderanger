@@ -209,6 +209,22 @@ describe('NoteGenerationService · DECORATION (adorno del acorde)', () => {
     expect(notesOf(result)).toEqual([69]);
   });
 
+  it('resuelve DECORATION $variable en grados dentro del arpegio', () => {
+    VariableContext.setValue('deco', '-2 6');
+    const command = new Command({ type: CommandType.DECORATION });
+    command.setVariable('deco');
+
+    const result = generate([
+      new Command({ type: CommandType.PLAYMODE, value: 'ASCENDING' }),
+      new Command({ type: CommandType.WIDTH, value: 1 }),
+      new Command({ type: CommandType.GAP, value: 2 }),
+      command
+    ]);
+
+    // Arpegio [60,63] decorado con la lista de la variable: [57,70] y [60,74].
+    expect(notesOf(result)).toEqual([57, 70, 60, 74]);
+  });
+
   it('SHIFT con la ventana recortada al acorde: el adorno va después', () => {
     const result = generate([
       new Command({ type: CommandType.WIDTH, value: 2 }),
@@ -235,6 +251,21 @@ describe('NoteGenerationService · DECORATION (adorno del acorde)', () => {
     ]);
 
     expect(notesOf(result)).toEqual([58, 62, 65]);
+  });
+
+  it('SHIFT en el borde de la ventana: última nota bajada de octava y adorno', () => {
+    const result = generate([
+      new Command({ type: CommandType.WIDTH, value: 2 }),
+      new Command({ type: CommandType.GAP, value: 2 }),
+      new Command({ type: CommandType.SHIFTSTART, value: 2 }),
+      new Command({ type: CommandType.SHIFTSIZE, value: 1 }),
+      new Command({ type: CommandType.SHIFTVALUE, value: -1 }),
+      decoration('0 -1')
+    ]);
+
+    // Acorde [60,63,67]; la ventana [2,3) baja la última octava (67→55);
+    // el item `0` la conserva y `-1` baja un grado (55→53).
+    expect(notesOf(result)).toEqual([60, 58, 63, 62, 55, 53]);
   });
 
   it('los offsets son grados de escala: mismo DECORATION en dos escalas', () => {
@@ -269,6 +300,67 @@ describe('NoteGenerationService · DECORATION (adorno del acorde)', () => {
     expect(allInScale(black, 'BLACK')).toBe(true);
   });
 
+  it('CHORD: los grados se re-normalizan también en escalas de 5 notas (PENTA)', () => {
+    const result = generate([new Command({ type: CommandType.SCALE, value: 'PENTA' }), decoration('-2 6')]);
+
+    // PENTA [0,2,5,7,10]: -2 grados → octava inferior, grado 3 → 55;
+    // +6 grados → una octava más grado 1 → 74.
+    expect(notesOf(result)).toEqual([55, 74]);
+    expect(allInScale(notesOf(result), 'PENTA')).toBe(true);
+  });
+
+  it('ARPEGGIO: decorar no altera el orden de EVEN_ASC_ODD_ASC', () => {
+    const commands = (decorationCommands: Command[]): Command[] => [
+      new Command({ type: CommandType.PLAYMODE, value: 'EVEN_ASC_ODD_ASC' }),
+      new Command({ type: CommandType.WIDTH, value: 3 }),
+      new Command({ type: CommandType.GAP, value: 2 }),
+      ...decorationCommands
+    ];
+
+    const plain = generate(commands([]));
+    const decorated = generate(commands([decoration('0')]));
+
+    // Pares [60,67] y luego impares [63,70]: el item `0` conserva cada posición.
+    expect(notesOf(plain)).toEqual([60, 67, 63, 70]);
+    expect(notesOf(decorated)).toEqual([60, 67, 63, 70]);
+  });
+
+  it('ARPEGGIO: los adornos quedan agrupados por posición (DESC_ASC)', () => {
+    const result = generate([
+      new Command({ type: CommandType.PLAYMODE, value: 'DESC_ASC' }),
+      new Command({ type: CommandType.WIDTH, value: 3 }),
+      new Command({ type: CommandType.GAP, value: 2 }),
+      decoration('0 -2')
+    ]);
+
+    // Posiciones de grados [6,4,2,0,0,2,4,6]; cada posición emite [0, -2 grados].
+    expect(notesOf(result)).toEqual([
+      70, 67, 67, 63, 63, 60, 60, 57,
+      60, 57, 63, 60, 67, 63, 70, 67
+    ]);
+  });
+
+  it('ARPEGGIO RANDOM: decorar conserva todas las notas (permutación)', () => {
+    const commands = (mode: string): Command[] => [
+      new Command({ type: CommandType.PLAYMODE, value: mode }),
+      new Command({ type: CommandType.WIDTH, value: 3 }),
+      new Command({ type: CommandType.GAP, value: 2 }),
+      decoration('-2 6')
+    ];
+
+    const ascending = notesOf(generate(commands('ASCENDING')));
+    const random = notesOf(generate(commands('RANDOM')));
+
+    expect(ascending).toEqual([57, 70, 60, 74, 63, 77, 67, 81]);
+
+    const sorted = (notes: Array<number | undefined>): Array<number | undefined> =>
+      [...notes].sort((a, b) => a! - b!);
+
+    // RANDOM solo permuta posiciones: mismo multiset de notas adornadas.
+    expect(random).toHaveLength(8);
+    expect(sorted(random)).toEqual(sorted(ascending));
+  });
+
   it('con PATTERN $variable cada nota expandida decora su acorde', () => {
     VariableContext.setValue('motif', '4t:1 4t:2');
     const patternCommand = new Command({ type: CommandType.PATTERN });
@@ -291,6 +383,20 @@ describe('NoteGenerationService · DECORATION (adorno del acorde)', () => {
     const result = createService().generateNotesForBlock(block, player);
 
     expect(result.map((chord) => chord.sourcePath)).toEqual([[0], [1]]);
+  });
+
+  it('PATTERN + DECORATION: cada evento expandido hereda el origen original', () => {
+    const player = createPlayer();
+    const block = blockWith('4n:0', [
+      new Command({ type: CommandType.PATTERN, value: '4t:1 4t:2' }),
+      decoration('0')
+    ]);
+    player.executeCommands(block);
+
+    const result = createService().generateNotesForBlock(block, player);
+
+    expect(result).toHaveLength(2);
+    expect(result.map((chord) => chord.sourcePath)).toEqual([[0], [0]]);
   });
 
   it('una lista vacía de items equivale a no decorar (regresión)', () => {
