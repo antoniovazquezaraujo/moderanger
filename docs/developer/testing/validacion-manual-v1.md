@@ -199,11 +199,21 @@
 - [ ] **15.7.** El `.mr` no cambia: guardar después de reproducir produce el mismo texto (el origen es metadato interno).
 - [ ] **15.8.** Reproduce con el metrónomo a la vista: sin errores nuevos en consola y sin saltos de layout al encenderse/apagarse el glow.
 
-## 16. Cierre: suite, build y registro
+## 16. Caso 16 — Variables restauradas al Stop (fix/stop-variable-reset, 2026-10-12)
 
-- [ ] **16.1.** `npm test` en verde: **59 suites / 660 tests** (cifra a 2026-10-12).
-- [ ] **16.2.** `npm run build` termina con exit 0.
-- [ ] **16.3.** Registro de resultados:
+- [ ] **16.1.** Declara `$mode = RANDOM` y `$oct = 2`; reproduce y pulsa **Stop**: `$mode` sigue siendo **RANDOM** (no se convierte en CHORD) y `$oct` vuelve a 2 aunque las operaciones lo hayan subido.
+- [ ] **16.2.** Con una operación `VARY $oct 1`: tras Play → Stop, un segundo Play vuelve a empezar desde 2 (no desde 3): las operaciones no se acumulan entre reproducciones.
+- [ ] **16.3.** Con una operación `ASSIGN $nueva 5` (variable no declarada): durante el Play aparece en el panel; al parar desaparece del contexto.
+- [ ] **16.4.** Deja que la canción termine sola (fin natural, sin Stop manual): las variables vuelven al estado previo al Play.
+- [ ] **16.5.** Pulsa Stop sin haber reproducido: las variables del panel no cambian.
+- [ ] **16.6.** El panel de variables no parpadea ni pierde la declaración al aplicar un `.mr` con el player en marcha (Stop → aplicar → declaración vigente).
+- [ ] **16.7.** Sin errores nuevos en consola.
+
+## 17. Cierre: suite, build y registro
+
+- [ ] **17.1.** `npm test` en verde: **61 suites / 683 tests** (cifra a 2026-10-12).
+- [ ] **17.2.** `npm run build` termina con exit 0.
+- [ ] **17.3.** Registro de resultados:
 
 | Caso | Resultado | Notas |
 |---|---|---|
@@ -222,9 +232,10 @@
 | 13. Recortes de anchura | ☐ OK ☐ Falla | |
 | 14. Commands/Operations en texto libre | ☐ OK ☐ Falla | |
 | 15. Resaltado de la nota-origen | ☐ OK ☐ Falla | |
-| 16. Suite + build | ☐ OK ☐ Falla | |
+| 16. Variables restauradas al Stop | ☐ OK ☐ Falla | |
+| 17. Suite + build | ☐ OK ☐ Falla | |
 
-- [ ] **16.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
+- [ ] **17.4.** Incidencias encontradas (con fichero `.mr`, pasos y captura/consola):
 
 ```text
 - …

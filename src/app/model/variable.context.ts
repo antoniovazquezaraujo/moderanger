@@ -29,36 +29,39 @@ export class VariableContext {
     }
 
     /**
-     * Reinicia todas las variables a sus valores iniciales.
-     * Útil para limpiar las variables cuando se detiene la reproducción.
-     * 
-     * En lugar de eliminar las variables, restaura sus valores a 0, '' o valores predeterminados
-     * según su tipo.
+     * Copia del estado actual de las variables. La usa la reproducción para
+     * restaurar al parar el estado previo al Play (las operaciones no se
+     * acumulan entre reproducciones). Los valores son primitivos: basta con un
+     * `Map` nuevo.
      */
-    static resetAll(): void {
-        const variableBackup = new Map<string, VariableValue>();
-        
-        const variables = Array.from(VariableContext.context.entries());
-        for (const [name, _] of variables) {
-            variableBackup.set(name, null as any);
+    static snapshot(): Map<string, VariableValue> {
+        return new Map(VariableContext.context);
+    }
+
+    /**
+     * Restaura un snapshot: repone sus valores y elimina las claves que se
+     * añadieron después. Sin snapshot no hace nada (parada sin Play). Es
+     * idempotente: si el estado ya coincide, no emite ningún cambio.
+     */
+    static restore(snapshot: Map<string, VariableValue> | null): void {
+        if (!snapshot || VariableContext.matches(snapshot)) {
+            return;
         }
-        
-        for (const [name, _] of variableBackup.entries()) {
-            const currentValue = VariableContext.context.get(name);
-            
-            // Comentar o eliminar el reinicio para variables numéricas
-            // if (typeof currentValue === 'number') {
-            //     VariableContext.setValue(name, 0);
-            // }
-            
-            if (typeof currentValue === 'string') {
-                // Solo reiniciamos variables de playmode
-                if (['CHORD', 'ASCENDING', 'DESCENDING', 'RANDOM'].includes(currentValue)) {
-                    VariableContext.setValue(name, 'CHORD');
-                }
+        VariableContext.context.clear();
+        snapshot.forEach((value, name) => VariableContext.context.set(name, value));
+        VariableContext.onVariablesChange.next();
+    }
+
+    /** `true` si el contexto actual coincide exactamente con el snapshot. */
+    private static matches(snapshot: Map<string, VariableValue>): boolean {
+        if (VariableContext.context.size !== snapshot.size) {
+            return false;
+        }
+        for (const [name, value] of snapshot) {
+            if (VariableContext.context.get(name) !== value) {
+                return false;
             }
         }
-        
-        VariableContext.onVariablesChange.next();
+        return true;
     }
 }

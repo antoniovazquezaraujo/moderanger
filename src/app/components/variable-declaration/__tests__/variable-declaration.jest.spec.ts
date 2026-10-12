@@ -4,6 +4,14 @@
  * `$motif` no aparecía tras cargar un `.mr`.
  */
 import { VariableContext } from 'src/app/model/variable.context';
+import { AudioEngineService } from 'src/app/services/audio-engine.service';
+import { NoteGenerationService } from 'src/app/services/note-generation.service';
+import { AssignOperation, VaryOperation } from 'src/app/model/operation';
+import { Part } from 'src/app/model/part';
+import { Song } from 'src/app/model/song';
+import { SongPlayer } from 'src/app/model/song.player';
+import { NoteGenerationUnifiedService } from 'src/app/shared/services/note-generation-unified.service';
+import { GlobalStateService } from 'src/app/shared/services/global-state.service';
 import { VariableDeclarationComponent } from '../variable-declaration.component';
 
 jest.mock('@angular/core', () => {
@@ -107,5 +115,118 @@ describe('VariableDeclarationComponent · variables string', () => {
 
     expect(VariableContext.getValue('motivo')).toBe('4t:0');
     expect(component.newVariable).toEqual({ name: '', value: '', type: 'number' });
+  });
+});
+
+/** Stub mínimo del motor: el test controla el Play/Stop sin audio real. */
+interface AudioEngineStub {
+  engine: AudioEngineService;
+  emitTransportStop(): void;
+}
+
+const createAudioEngine = (): AudioEngineStub => {
+  const stopListeners: Array<() => void> = [];
+  const engine = {
+    onTransportStop: jest.fn((listener: () => void) => {
+      stopListeners.push(listener);
+      return `stop-listener-${stopListeners.length}`;
+    }),
+    offTransportStop: jest.fn(),
+    cancelTransportEvents: jest.fn(),
+    stopTransport: jest.fn(),
+    disposeLoop: jest.fn(),
+    setTransportBpm: jest.fn(),
+    setTransportPosition: jest.fn(),
+    createInstrument: jest.fn(async () => 'instrument-1'),
+    scheduleLoop: jest.fn(() => 'loop-1'),
+    startLoop: jest.fn(),
+    stopLoop: jest.fn(),
+    startTransport: jest.fn(async () => undefined),
+    triggerAttackRelease: jest.fn(),
+    midiToFrequency: jest.fn((note: number) => note),
+    timeToSeconds: jest.fn(() => 0.5),
+    getTransportTime: jest.fn(() => 0)
+  } as unknown as AudioEngineService;
+
+  return {
+    engine,
+    emitTransportStop: (): void => {
+      [...stopListeners].forEach(listener => listener());
+    }
+  };
+};
+
+const createPlayer = (stub: AudioEngineStub): SongPlayer =>
+  new SongPlayer(
+    stub.engine,
+    new NoteGenerationService(new NoteGenerationUnifiedService()),
+    new GlobalStateService()
+  );
+
+describe('VariableDeclarationComponent · restauración al parar (snapshot/restore)', () => {
+  beforeEach(() => {
+    VariableContext.context.clear();
+  });
+
+  afterEach(() => {
+    VariableContext.context.clear();
+  });
+
+  it('el panel refleja los valores restaurados al parar (suscripción a onVariablesChange)', async () => {
+    // Arrange
+    const component = new VariableDeclarationComponent();
+    component.ngOnInit();
+    VariableContext.setValue('mode', 'RANDOM');
+    VariableContext.setValue('oct', 2);
+    const stub = createAudioEngine();
+    const player = createPlayer(stub);
+    const part = new Part();
+    part.blocks[0].blockContent.notes = '4n:0';
+    part.blocks[0].operations = [
+      new VaryOperation('oct', 1),
+      new AssignOperation('mode', 'CHORD'),
+      new AssignOperation('nueva', 5)
+    ];
+
+    // Act: Play (las operaciones mutan el contexto) y Stop (restaura el snapshot).
+    await player.playPart(part, new Song());
+    const during = declaredVariables(component)
+      .map(variable => `${variable.name}=${variable.value}`)
+      .sort();
+    player.stop();
+    const after = declaredVariables(component)
+      .map(variable => `${variable.name}=${variable.value}`)
+      .sort();
+    component.ngOnDestroy();
+
+    // Assert
+    expect(during).toEqual(['mode=CHORD', 'nueva=5', 'oct=3']);
+    expect(after).toEqual(['mode=RANDOM', 'oct=2']);
+  });
+
+  it('el panel también refleja la restauración tras el fin natural (stop del transporte)', async () => {
+    // Arrange
+    const component = new VariableDeclarationComponent();
+    component.ngOnInit();
+    VariableContext.setValue('mode', 'RANDOM');
+    VariableContext.setValue('oct', 2);
+    const stub = createAudioEngine();
+    const player = createPlayer(stub);
+    const part = new Part();
+    part.blocks[0].blockContent.notes = '4n:0';
+    part.blocks[0].operations = [new VaryOperation('oct', 1), new AssignOperation('mode', 'CHORD')];
+    await player.playPart(part, new Song());
+
+    // Act: fin natural (el Transport emite 'stop'; no hay clic de Stop).
+    stub.emitTransportStop();
+    const after = declaredVariables(component)
+      .map(variable => `${variable.name}=${variable.value}`)
+      .sort();
+    component.ngOnDestroy();
+
+    // Assert: el panel suscriptor vuelve a la declaración previa al Play.
+    // (El repintado del DOM depende del siguiente ciclo de CD de Angular:
+    // la restauración ocurre en el callback del Transport, fuera de la zona.)
+    expect(after).toEqual(['mode=RANDOM', 'oct=2']);
   });
 });
