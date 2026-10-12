@@ -401,7 +401,7 @@ Declared in `vars` and used in any block (commands, notes and operations). The n
 
 - Strings with spaces or quotes are always double-quoted; inside them `\"` and `\\` are escaped.
 - Scale and playmode values are recognized case-insensitively and canonicalized to UPPERCASE: `$scale = black` is saved as `$scale = BLACK`.
-- In the app, the `$` sidebar lists and edits all four types: number, scale, playmode and string (melodies/patterns, edited as text).
+- In the app, the collapsible **Variables** panel (above the parts row) lists and edits all four types: number, scale, playmode and string (melodies/patterns, edited as text).
 - When you press Apply or load a `.mr` file, the variables declared in the text are synchronized with the app (created and removed).
 - Variables are alive during playback: `VARY`/`ASSIGN` change them. When saving, the **current value** is written at that moment, which normally matches the declared one if you have not played with operations.
 
@@ -506,7 +506,7 @@ In the `.mr` view, errors appear below the text with their `line, column`; click
 3. **Comments.** They do not survive applying/saving from the app (they do in the file if you edit it by hand and do not rewrite it).
 4. **Multiline groups.** Not allowed in v1; a group must open and close on its line.
 5. **Literal chords and arpeggios.** They are not written in the text; `PLAYMODE` generates them from grades, scale and commands.
-6. **Variables sidebar.** Lists and edits all four types (number, scale, playmode and string). String variables are edited as plain text.
+6. **Variables panel.** Collapsible and collapsed by default, above the parts row; lists and edits all four types (number, scale, playmode and string). String variables are edited as plain text.
 7. **`PATTERN_GAP` deprecated.** It is read and saved for compatibility but has no effect; chord decoration is now available through `DECORATION` (per-note decoration with literal durations).
 8. **Instruments.** Only `PIANO` in v1.
 9. **`pulse` and `beatsPerBar`.** Not serialized.
