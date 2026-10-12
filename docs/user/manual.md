@@ -315,8 +315,9 @@ The `commands` section carries **one command per line**; line order is execution
 | `SHIFTSTART` | First chord note affected by the shift | integer or `$variable` | `SHIFTSTART 0` |
 | `SHIFTSIZE` | Number of notes affected by the shift | integer or `$variable` | `SHIFTSIZE 3` |
 | `SHIFTVALUE` | Octaves added to shifted notes | integer or `$variable` | `SHIFTVALUE 1` |
-| `PATTERN_GAP` | Decorated pattern separation | integer or `$variable` | `PATTERN_GAP 1` |
+| `PATTERN_GAP` | Deprecated: pattern decoration separation (no effect; use `DECORATION`) | integer or `$variable` | `PATTERN_GAP 1` |
 | `PATTERN` | Pattern melody (full sublanguage, one line); it is applied **before** the playmode, so it combines with chords/arpeggios; or a string variable | melody or `$variable` | `PATTERN 4t:0 4t:-1 4t:3` |
+| `DECORATION` | Decoration added to **each chord/arpeggio note**: for every item, a `{ note + offset }` note | items `offset` or `duration:offset`, or `$variable` | `DECORATION 4t:0 8t:-2` |
 
 Notes:
 
@@ -325,9 +326,10 @@ Notes:
 - `PATTERN` is **independent from the playmode**: when present, it expands every note before the playmode generates its sound (chord, arpeggio, random...). Without `PATTERN`, nothing changes. Its melody is written on one line (durations, rests and groups allowed).
 - In a numeric command, the `$variable` is resolved at playback time; it must contain a number.
 - `SHIFTSTART`, `SHIFTSIZE` and `SHIFTVALUE` add whole octaves to the chord notes in the window `[SHIFTSTART, SHIFTSTART+SHIFTSIZE)` (0-based, on the final chord order after `INV`). The window is clamped to the chord, `SHIFTSIZE 0` does nothing and a negative `SHIFTVALUE` lowers the affected notes. They shape the generated chord/arpeggio; with `PLAYMODE SINGLE` there is no chord, so they have no effect (same as `WIDTH`/`INV`).
-- `PATTERN_GAP` is part of the format (it is read and saved), but the current generation engine does not apply the decoration: today it does not change the sound. It remains a legacy field ([limitations](#10-known-v1-limitations)).
+- `PATTERN_GAP` is **deprecated**: it is read and saved for compatibility, but it has no effect; chord decoration is now done with `DECORATION` ([limitations](#10-known-v1-limitations)).
+- `DECORATION` decorates **each note of the generated chord/arpeggio** (after `WIDTH`/`GAP`/`INV`/`SHIFT`): every item replaces the note with `{ note + offset }` using the item duration (`4t` by default, literal, never rescaled). A `0` item keeps the original note; without any `0` it disappears. Items are a flat list (no groups in v1); with `PLAYMODE SINGLE` there is no chord, so it has no effect. `PATTERN` expands the note first, and then the chord of each expanded note is decorated.
 
-Example with the twelve commands:
+Example with the thirteen commands:
 
 ```mr
 song "Panel de control"
@@ -350,6 +352,7 @@ part Piano
       SHIFTVALUE 1
       PATTERN_GAP 1
       PATTERN 4t:0 4t:-1 4t:3
+      DECORATION 0 -2 6
 ```
 
 ---
@@ -504,7 +507,7 @@ In the `.mr` view, errors appear below the text with their `line, column`; click
 4. **Multiline groups.** Not allowed in v1; a group must open and close on its line.
 5. **Literal chords and arpeggios.** They are not written in the text; `PLAYMODE` generates them from grades, scale and commands.
 6. **Variables sidebar.** Lists and edits all four types (number, scale, playmode and string). String variables are edited as plain text.
-7. **Pattern decoration without audible effect.** `PATTERN_GAP` is read and saved, but the current engine does not apply the decoration; today it does not change the sound.
+7. **`PATTERN_GAP` deprecated.** It is read and saved for compatibility but has no effect; chord decoration is now available through `DECORATION` (per-note decoration with literal durations).
 8. **Instruments.** Only `PIANO` in v1.
 9. **`pulse` and `beatsPerBar`.** Not serialized.
 10. **One parse error at a time.** The parser stops at the first error; the dialog is ready to show more.
