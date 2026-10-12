@@ -73,6 +73,27 @@
                         </ng-template>
                     </ng-container>
 
+                    <ng-container *ngSwitchCase="commandTypes.DECORATION">
+                        <ng-container *ngIf="command.isVariable; else decorationLiteral">
+                            <select class="command-type"
+                                [ngModel]="getSelectedValue(command)"
+                                (ngModelChange)="handleValueInput($event, command)">
+                                <option value="" disabled>Select Decoration variable</option>
+                                <option *ngFor="let variable of getFilteredVariables(command); trackBy: trackByVariable"
+                                        [value]="variable.value">
+                                    {{variable.label}}
+                                </option>
+                            </select>
+                        </ng-container>
+                        <ng-template #decorationLiteral>
+                            <app-melody-editor
+                                [notes]="getDecorationValueAsString(command)"
+                                [defaultDuration]="currentDefaultDuration"
+                                (notesChange)="onDecorationValueChange($event, command)">
+                            </app-melody-editor>
+                        </ng-template>
+                    </ng-container>
+
                     <ng-container *ngSwitchDefault>
                         <ng-container *ngIf="command.isVariable; else numberInput">
                             <select class="command-type"
