@@ -38,8 +38,6 @@
                     </select>
                     <!-- Use metronome$ property of this component -->
                     <app-metronome class="inline-metronome p-ml-2"></app-metronome> 
-                    <!-- Variables button next to metronome -->
-                    <p-button (click)="toggleVariablesSidebar()" label="$" pTooltip="Show/Hide Variables" tooltipPosition="top" class="p-ml-2"></p-button>
                     <!-- Vista avanzada de texto .mr (divulgación progresiva) -->
                     <p-button (click)="toggleMrTextEditor()" label=".mr" icon="pi pi-code" pTooltip="Texto (.mr)" tooltipPosition="top" class="p-ml-2"></p-button>
                     <!-- Guardar/cargar el texto canónico como fichero .mr -->
@@ -54,20 +52,27 @@
         </div>
     </div>
 
-    <!-- Content section now only contains app-song (which will contain app-parts) -->
+    <!-- Contenido: panel de Variables (plegable, como una part más, encima
+         de la fila) + la canción con sus parts. -->
     <div class="content-section">
+        <div class="variables-panel">
+            <div class="variables-panel-header" (click)="toggleVariablesPanel()">
+                <p-button
+                    [icon]="variablesExpanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                    styleClass="p-button-text p-button-sm variables-panel-toggler">
+                </p-button>
+                <span class="variables-panel-title">Variables</span>
+            </div>
+            <div class="variables-panel-content" *ngIf="variablesExpanded">
+                <app-variable-declaration></app-variable-declaration>
+            </div>
+        </div>
         <app-song 
             [song]="song" 
             (removePartEvent)="removePartFromSong($event)"
             (onDuplicatePartEvent)="duplicatePart($event)">
         </app-song>
     </div>
-
-    <!-- Sidebar remains here, controlled by this component -->
-    <p-sidebar [(visible)]="variablesSidebarVisible" position="right" styleClass="variables-sidebar">
-        <h3>Variables</h3>
-        <app-variable-declaration></app-variable-declaration>
-    </p-sidebar>
 
     <!-- Vista avanzada de texto canónico .mr -->
     <app-mr-text-editor

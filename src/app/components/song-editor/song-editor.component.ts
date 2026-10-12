@@ -42,7 +42,8 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     @Output() songChange = new EventEmitter<Song>();
     
     public metronome$: Observable<number>;
-    variablesSidebarVisible: boolean = false;
+    /** Panel de Variables plegable (encima de las parts); plegado al inicio. */
+    variablesExpanded: boolean = false;
     mrTextVisible: boolean = false;
     isPlaying: boolean = false;
 
@@ -83,8 +84,8 @@ export class SongEditorComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    toggleVariablesSidebar(): void {
-        this.variablesSidebarVisible = !this.variablesSidebarVisible;
+    toggleVariablesPanel(): void {
+        this.variablesExpanded = !this.variablesExpanded;
     }
 
     toggleMrTextEditor(): void {

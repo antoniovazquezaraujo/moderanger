@@ -56,11 +56,6 @@
   align-items: center;
 }
 
-/* Variables button container */
-.variables-control {
-  flex-shrink: 0; 
-}
-
 /* Content section fills remaining space and scrolls */
 .content-section {
   flex-grow: 1; 
@@ -71,20 +66,36 @@
   box-sizing: border-box; 
 }
 
-/* Sidebar styles (optional) */
-:host ::ng-deep .variables-sidebar {
-  width: 500px; 
+/* Panel de Variables: mismo lenguaje visual que las parts (borde, radio,
+   padding y margen), plegable desde su cabecera y encima de la fila. */
+.variables-panel {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-bottom: 10px;
+  background-color: transparent;
 }
 
-:host ::ng-deep .variables-sidebar .p-sidebar-content {
-  height: calc(100% - 3rem); 
-  padding: 1rem;
+.variables-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  cursor: pointer;
 }
 
-:host ::ng-deep .variables-sidebar h3 {
-  margin: 0 0 1rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #eee;
+.variables-panel-title {
+  font-weight: bold;
+}
+
+.variables-panel-content {
+  margin-left: 0.75rem;
+}
+
+/* El formulario/lista de variables ya trae su propio espaciado: dentro del
+   panel se recorta el padding vertical para no duplicarlo. */
+:host ::ng-deep .variables-panel app-variable-declaration .variables-container {
+  padding: 4px 0 0 0;
 }
 
 /* Other styles remain */
