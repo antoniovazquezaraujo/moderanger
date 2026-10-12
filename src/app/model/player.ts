@@ -124,7 +124,12 @@ export class Player {
         this.errorSubject.next(error);
     }
 
-    getSelectedNotes(): NoteData[] {
+    /**
+     * Grados finales del acorde (density/gap → INV → SHIFT) en la escala y
+     * octava del player, sin convertir todavía a MIDI. `DECORATION` los usa
+     * para sumar sus offsets en grados de escala.
+     */
+    getSelectedOctavedGrades(): OctavedGrade[] {
         const scaleName = ScaleTypes[this.scale];
         const scale = Scale.getScaleByName(scaleName);
         if (!scale) {
@@ -132,12 +137,11 @@ export class Player {
             return [];
         }
 
-        const baseGrade = this.selectedNote;
         const notesToGenerate = this.density + 1;
         let grades: number[] = [];
 
         for (let i = 0; i < notesToGenerate; i++) {
-            grades.push(baseGrade + i * this.gap);
+            grades.push(this.selectedNote + i * this.gap);
         }
 
         if (this.inversion > 0 && grades.length > 1) {
@@ -155,6 +159,11 @@ export class Player {
         // resultado es idéntico al de siempre.
         const octavedGrades = grades.map(grade => new OctavedGrade(scale, grade, this.octave));
         scale.getShiftedGrades(octavedGrades, this.shiftStart, this.shiftSize, this.shiftValue);
+        return octavedGrades;
+    }
+
+    getSelectedNotes(): NoteData[] {
+        const octavedGrades = this.getSelectedOctavedGrades();
 
         let midiNotes: NoteData[] = octavedGrades.map(octavedGrade => {
             const midiNote = octavedGrade.toNote() + this.tonality;
@@ -164,8 +173,18 @@ export class Player {
             return noteResult.success && noteResult.data ? noteResult.data : new NoteData({ type: 'note', note: midiNote });
         });
         
-        console.log(`[Player] getSelectedNotes for grade ${baseGrade}: Density=${this.density}, Gap=${this.gap}, Inversion=${this.inversion}, Octave=${this.octave}, Tonality=${this.tonality} -> MIDI Notes:`, midiNotes.map(n=>n.note));
+        console.log(`[Player] getSelectedNotes for grade ${this.selectedNote}: Density=${this.density}, Gap=${this.gap}, Inversion=${this.inversion}, Octave=${this.octave}, Tonality=${this.tonality} -> MIDI Notes:`, midiNotes.map(n=>n.note));
         return midiNotes; 
+    }
+
+    /**
+     * MIDI de un grado final del acorde desplazado `offset` **grados de escala**
+     * (DECORATION). Re-normaliza el grado con `OctavedGrade` (misma escala,
+     * octava y tonalidad), así el adorno se mantiene dentro de la escala.
+     */
+    decoratedMidiNote(octavedGrade: OctavedGrade, offset: number): number {
+        const shiftedGrade = new OctavedGrade(octavedGrade.scale, octavedGrade.grade + offset, octavedGrade.octave);
+        return shiftedGrade.toNote() + this.tonality;
     }
 
     generateNoteDataFromScale(scale: any, tunnedNote: number, tonality: number): NoteData[] {
