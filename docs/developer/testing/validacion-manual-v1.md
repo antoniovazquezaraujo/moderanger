@@ -211,7 +211,7 @@
 
 ## 17. Cierre: suite, build y registro
 
-- [ ] **17.1.** `npm test` en verde: **60 suites / 671 tests** (cifra a 2026-10-12).
+- [ ] **17.1.** `npm test` en verde: **61 suites / 683 tests** (cifra a 2026-10-12).
 - [ ] **17.2.** `npm run build` termina con exit 0.
 - [ ] **17.3.** Registro de resultados:
 

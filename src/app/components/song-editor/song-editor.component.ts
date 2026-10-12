@@ -151,9 +151,9 @@ export class SongEditorComponent implements OnInit, OnDestroy {
 
     /**
      * Adopta un documento `.mr` ya validado: para el player ANTES de aplicar
-     * variables (`stop()` reinicia `VariableContext`), las sincroniza y emite
-     * la canción por el mismo camino que la vista de texto. La canción ya trae
-     * `repeats`/`bpm` de la cabecera (los copia `parseSong`).
+     * variables (`stop()` restaura el snapshot previo al Play), las sincroniza
+     * y emite la canción por el mismo camino que la vista de texto. La canción
+     * ya trae `repeats`/`bpm` de la cabecera (los copia `parseSong`).
      */
     applyLoadedDocument(document: SongDocument): void {
         this.stopIfPlaying();

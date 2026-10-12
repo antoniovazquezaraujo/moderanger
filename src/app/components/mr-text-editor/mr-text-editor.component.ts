@@ -154,8 +154,8 @@ export class MrTextEditorComponent implements OnChanges, OnDestroy {
     this.text = canonical;
     this.baseline = canonical;
     // Emitir antes de tocar `VariableContext`: si el padre para el player al
-    // recibir `applied`, `SongPlayer.stop()` reinicia variables y borraría lo
-    // recién aplicado (p. ej. `$mode = RANDOM` volvería a CHORD).
+    // recibir `applied`, `SongPlayer.stop()` restaura el snapshot previo al
+    // Play y borraría lo recién aplicado (p. ej. `$mode = RANDOM`).
     this.applied.emit({ song: document.song });
     applyDocumentVariables(document);
   }
