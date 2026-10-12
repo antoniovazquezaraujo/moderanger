@@ -327,7 +327,7 @@ Notas:
 - En un comando numérico, la `$variable` se resuelve al reproducir; debe contener un número.
 - `SHIFTSTART`, `SHIFTSIZE` y `SHIFTVALUE` suman octavas completas a las notas del acorde en la ventana `[SHIFTSTART, SHIFTSTART+SHIFTSIZE)` (0-based, sobre el orden final del acorde tras `INV`). La ventana se recorta al acorde, `SHIFTSIZE 0` no hace nada y un `SHIFTVALUE` negativo baja las notas afectadas. Dan forma al acorde/arpegio generado; con `PLAYMODE SINGLE` no hay acorde, así que no tienen efecto (igual que `WIDTH`/`INV`).
 - `PATTERN_GAP` está **obsoleto**: se lee y se guarda por compatibilidad, pero no tiene efecto; la decoración del acorde se hace ahora con `DECORATION` ([limitaciones](#10-limitaciones-conocidas-de-la-v1)).
-- `DECORATION` adorna **cada nota del acorde/arpegio generado** (después de `WIDTH`/`GAP`/`INV`/`SHIFT`): cada item sustituye la nota por `{ nota + offset }` con la duración del item (`4t` por defecto, literal, sin reescalar). Un item `0` conserva la nota original; sin ningún `0` desaparece. Los items son una lista plana (sin grupos en v1); con `PLAYMODE SINGLE` no hay acorde, así que no tiene efecto. `PATTERN` expande la nota primero y después se adorna el acorde de cada nota expandida.
+- `DECORATION` adorna **cada nota del acorde/arpegio generado** (después de `WIDTH`/`GAP`/`INV`/`SHIFT`): cada item sustituye la nota por `{ nota + offset }` usando la duración del item (`4t` por defecto) como metadato de la nota, sin reescalar. Un item `0` conserva la nota original; sin ningún `0` desaparece. Los items son una lista plana (sin grupos en v1); con `PLAYMODE SINGLE` no hay acorde, así que no tiene efecto. `PATTERN` expande la nota primero y después se adorna el acorde de cada nota expandida. **El tiempo lo decide el playmode, no las duraciones de los items**: `CHORD` hace sonar todas las notas adornadas a la vez durante la duración del evento, y los arpegios reparten la duración del evento a partes iguales entre las notas emitidas (cada item añade una rebanada); hoy las duraciones de item son metadato ([limitaciones](#10-limitaciones-conocidas-de-la-v1)).
 
 Ejemplo con los trece comandos:
 
@@ -510,6 +510,7 @@ En la vista `.mr`, los errores aparecen bajo el texto con su `línea, columna`; 
 9. **`pulse` y `beatsPerBar`.** No se serializan.
 10. **Un error de parseo por vez.** El parser se detiene en el primer error; el diálogo está preparado para pintar más.
 11. **Sin autoguardado ni "Guardar como".** El `.mr` es el único formato y el nombre del fichero se deriva del nombre de la canción.
+12. **Las duraciones de item de `DECORATION` son metadato en la v1.** El tiempo lo decide el playmode: `CHORD` hace sonar todas las notas adornadas a la vez durante la duración del evento, y los arpegios reparten la duración del evento a partes iguales entre las notas emitidas (cada item añade una rebanada). Las duraciones explícitas (`4t:0`, `8t:-2`) se guardan en el modelo y en el `.mr`, pero hoy no cambian el sonido.
 
 ---
 

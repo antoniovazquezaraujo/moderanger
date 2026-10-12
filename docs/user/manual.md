@@ -327,7 +327,7 @@ Notes:
 - In a numeric command, the `$variable` is resolved at playback time; it must contain a number.
 - `SHIFTSTART`, `SHIFTSIZE` and `SHIFTVALUE` add whole octaves to the chord notes in the window `[SHIFTSTART, SHIFTSTART+SHIFTSIZE)` (0-based, on the final chord order after `INV`). The window is clamped to the chord, `SHIFTSIZE 0` does nothing and a negative `SHIFTVALUE` lowers the affected notes. They shape the generated chord/arpeggio; with `PLAYMODE SINGLE` there is no chord, so they have no effect (same as `WIDTH`/`INV`).
 - `PATTERN_GAP` is **deprecated**: it is read and saved for compatibility, but it has no effect; chord decoration is now done with `DECORATION` ([limitations](#10-known-v1-limitations)).
-- `DECORATION` decorates **each note of the generated chord/arpeggio** (after `WIDTH`/`GAP`/`INV`/`SHIFT`): every item replaces the note with `{ note + offset }` using the item duration (`4t` by default, literal, never rescaled). A `0` item keeps the original note; without any `0` it disappears. Items are a flat list (no groups in v1); with `PLAYMODE SINGLE` there is no chord, so it has no effect. `PATTERN` expands the note first, and then the chord of each expanded note is decorated.
+- `DECORATION` decorates **each note of the generated chord/arpeggio** (after `WIDTH`/`GAP`/`INV`/`SHIFT`): every item replaces the note with `{ note + offset }`, using the item duration (`4t` by default) as the note metadata, never rescaled. A `0` item keeps the original note; without any `0` it disappears. Items are a flat list (no groups in v1); with `PLAYMODE SINGLE` there is no chord, so it has no effect. `PATTERN` expands the note first, and then the chord of each expanded note is decorated. **The timing is decided by the playmode, not by the item durations**: `CHORD` sounds all the decorated notes together for the event duration, and arpeggios split the event duration evenly among the emitted notes (each item adds a slice); item durations are metadata today ([limitations](#10-known-v1-limitations)).
 
 Example with the thirteen commands:
 
@@ -512,6 +512,7 @@ In the `.mr` view, errors appear below the text with their `line, column`; click
 9. **`pulse` and `beatsPerBar`.** Not serialized.
 10. **One parse error at a time.** The parser stops at the first error; the dialog is ready to show more.
 11. **No autosave or "Save as".** `.mr` is the only format and the file name is derived from the song name.
+12. **`DECORATION` item durations are metadata in v1.** The playmode decides the timing: `CHORD` sounds all the decorated notes together for the event duration, and arpeggios split the event duration evenly among the emitted notes (each item adds a slice). The explicit item durations (`4t:0`, `8t:-2`) are stored in the model and the `.mr`, but today they do not change the sound.
 
 ---
 
