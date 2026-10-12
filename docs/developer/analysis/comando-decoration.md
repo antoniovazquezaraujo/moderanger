@@ -3,7 +3,7 @@
 - **Fecha:** 2026-10-12
 - **Autor:** ROBER (full-stack TS/Angular)
 - **Rama:** `feat/decoration-command`
-- **Estado:** motor y lenguaje implementados, con tests y build en verde. GUI pendiente (Jorge) y validación pendiente (Bicho).
+- **Estado:** motor, lenguaje y GUI implementados, con tests y build en verde. Validación pendiente (Bicho).
 - **Referencias:** `docs/user/manual.md` §5 y §10, `docs/developer/design/propuesta-sintaxis-mr.md`, `src/app/model/mr/decoration.parser.ts`.
 - **Alcance:** DSL `.mr` (parser/serializador), `Command`, `Player` y motor de generación. Sin cambios de GUI ni del comportamiento de `PATTERN`.
 
@@ -64,8 +64,38 @@ Se aplica en `NoteGenerationService.generatePlayableData`, justo después de `pl
 - `command.jest.spec.ts`: `execute` (lista, variable string, variable numérica, sin definir, vacío, inválidos).
 - `note-generation-decoration.jest.spec.ts`: CHORD (duración literal, `0` conserva, sin `0` sustituye, WIDTH/GAP), ARPEGGIO (posiciones y duraciones), SINGLE no-op, PATTERN, SHIFT, INV, variable y `sourcePath`.
 
-## 7. Pendiente
+## 7. GUI (Jorge)
 
-- **GUI (Jorge):** selector/tipo de comando, editor del valor y valor por defecto (`DECORATION 0` es válido, pero probablemente convenga algo como `0 -2 6`).
+- **Tipo y etiqueta:** `DECORATION` aparece en el selector de Commands al venir de
+  `CommandType`; la etiqueta es `Decoration` (Title Case) y el `:` de lectura lo
+  pinta el mecanismo común (`command-colon.ts`).
+- **Valor literal:** mismo editor de melodía embebido que `PATTERN`
+  (`app-melody-editor`, texto libre con offsets y duraciones explícitas,
+  negativos incluidos). Hereda el fix de alineación del PATTERN: la cadena del
+  editor no apila paddings verticales (solo la nota de 20px) y el valor queda
+  centrado como el resto de comandos.
+- **Canonicalización al emitir:** `decoration-value.ts`
+  (`canonicalDecorationValueOrRaw`) pasa lo que emite el editor por
+  `canonicalDecoration`; si el texto aún no es parseable (vacío mientras se
+  edita, o un grupo que v1 no admite) se conserva tal cual para poder seguir
+  editando; el parser dará el error real al cargar/serializar.
+- **Variables:** el chip `$` ofrece las variables string
+  (`stringVariables`), con placeholder `Select Decoration variable` (sin `:`
+  hasta elegir). Al cambiar desde otro tipo el valor inicial es `''`, igual que
+  `PATTERN`.
+- **Verificación (CDP):** fila mixta `OCT`, `PATTERN`, `DECORATION 0 -2 6`,
+  `DECORATION 4t:0 4t:-2`, `DECORATION $dec` — y-centros idénticos por línea
+  (255.5 en la línea 1, 304.05 en la 2; 0.0px de diferencia) y cadena del editor
+  a 20px. Edición con rueda: `0 -2 6` → `-1 -2 6` → `8t:-1 -2 6` (canónico, sin
+  materializar duraciones no explícitas; el `PATTERN` vecino no cambia).
+  `dec (0 -2)` listado y seleccionable; el chip `$` convierte y resuelve
+  (`getVariableName() = dec`). Round-trip `.mr` → GUI → modelo sin cambios
+  (`2 4`, `8n:1 8n:-3`). Regresión: chips `0→1`, colón, `appearance:none`,
+  wrap, guías 2px, droppoint 12px, splitter, highlight `playing`; consola sin
+  errores (solo el aviso transitorio de variables al recargar el `.mr`, común a
+  los comandos con `$variable`).
+
+## 8. Pendiente
+
 - **Validación (Bicho).**
 - `PATTERN_GAP` sigue aceptándose al leer y guardar por compatibilidad; no se toca.
