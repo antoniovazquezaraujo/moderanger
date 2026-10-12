@@ -257,9 +257,6 @@ describe('SongEditorComponent · onMrTextApplied', () => {
 describe('SongEditorComponent · applyLoadedDocument (.mr)', () => {
   it('para el player antes de aplicar variables, sincroniza meta y emite la canción', () => {
     const { component, songPlayer, emitted } = createSongEditor(true);
-    // `SongPlayer.stop()` llama a `VariableContext.resetAll()`: simular que la
-    // variable de playmode vuelve a CHORD para comprobar el orden stop → apply.
-    songPlayer.stop.mockImplementation(() => VariableContext.setValue('mode', 'CHORD'));
     const document = parseSong(
       ['song "Cargada"', 'version 1', 'repeats 3', 'bpm 90', 'vars', '  $mode = RANDOM', 'part Piano', ''].join('\n')
     );
@@ -271,6 +268,8 @@ describe('SongEditorComponent · applyLoadedDocument (.mr)', () => {
     expect(document.song.repeats).toBe(3);
     expect(document.song.bpm).toBe(90);
     expect(emitted).toEqual([document.song]);
+    // `stop()` restaura el snapshot de variables (no las machaca): la
+    // declaración aplicada queda intacta.
     expect(VariableContext.getValue('mode')).toBe('RANDOM');
   });
 
