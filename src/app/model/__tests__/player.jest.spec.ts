@@ -1,6 +1,7 @@
 import { AudioEngineService, InstrumentType } from '../../services/audio-engine.service';
 import { NoteData } from '../note';
 import { Player } from '../player';
+import { ScaleTypes } from '../scale';
 
 const audioEngineStub = {
   onTransportStop: jest.fn().mockReturnValue('listener-1'),
@@ -185,5 +186,63 @@ describe('Player.getSelectedNotes · ventana SHIFTSTART/SHIFTSIZE/SHIFTVALUE', (
     const notes = player.getSelectedNotes();
 
     expect(midiOf(notes)).toEqual([70, 86, 89]);
+  });
+});
+
+describe('Player.getSelectedOctavedGrades / decoratedMidiNote (DECORATION)', () => {
+  it('devuelve los grados finales con INV y SHIFT aplicados (misma base que getSelectedNotes)', () => {
+    const player = createPlayer();
+    player.inversion = 1;
+    player.shiftStart = 0;
+    player.shiftSize = 2;
+    player.shiftValue = 1;
+
+    const grades = player.getSelectedOctavedGrades();
+
+    expect(grades.map(grade => grade.toNote())).toEqual(midiOf(player.getSelectedNotes()));
+    expect(midiOf(player.getSelectedNotes())).toEqual([75, 79, 72]);
+  });
+
+  it('decoratedMidiNote suma grados de escala, no semitonos', () => {
+    const player = createPlayer();
+    const [grade0] = player.getSelectedOctavedGrades(); // grado 0, octava 2
+
+    expect(player.decoratedMidiNote(grade0, 0)).toBe(60);
+    expect(player.decoratedMidiNote(grade0, 1)).toBe(62);
+    expect(player.decoratedMidiNote(grade0, 6)).toBe(70);
+    expect(player.decoratedMidiNote(grade0, -1)).toBe(58);
+    expect(player.decoratedMidiNote(grade0, 7)).toBe(72); // grado 7 = octava 3 en WHITE
+  });
+
+  it('decoratedMidiNote respeta tonalidad y octava', () => {
+    const player = createPlayer();
+    player.tonality = 2;
+    player.octave = 4;
+    const [grade0] = player.getSelectedOctavedGrades();
+
+    expect(player.decoratedMidiNote(grade0, 0)).toBe(86); // 48 + 36 + 2
+    expect(player.decoratedMidiNote(grade0, 1)).toBe(88);
+  });
+
+  it('decoratedMidiNote usa la escala activa', () => {
+    const player = createPlayer();
+    player.scale = ScaleTypes.BLACK; // 8 notas: [1,2,4,5,7,8,10,11]
+    const [grade0] = player.getSelectedOctavedGrades();
+
+    expect(player.decoratedMidiNote(grade0, 0)).toBe(61);
+    expect(player.decoratedMidiNote(grade0, 6)).toBe(70);
+    expect(player.decoratedMidiNote(grade0, -2)).toBe(58);
+  });
+
+  it('decoratedMidiNote no muta el grado recibido', () => {
+    const player = createPlayer();
+    const [grade0] = player.getSelectedOctavedGrades();
+
+    player.decoratedMidiNote(grade0, 6);
+    player.decoratedMidiNote(grade0, -2);
+
+    expect(grade0.grade).toBe(0);
+    expect(grade0.octave).toBe(2);
+    expect(player.decoratedMidiNote(grade0, 0)).toBe(60);
   });
 });

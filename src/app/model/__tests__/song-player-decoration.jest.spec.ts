@@ -98,8 +98,9 @@ describe('SongPlayer · DECORATION (traza de reproducción)', () => {
       decoration('4t:0 8t:7')
     ]);
 
-    // Acorde [60,63]; adorno [0,7]: [60,67,63,70]; evento `4n`, mismo instante.
-    expect(calls).toEqual([['instrument-1', [60, 67, 63, 70], '4n', 0]]);
+    // Acorde [60,63] (grados 0 y 2); adorno [0,7] en grados: 60,72,63,75;
+    // evento `4n`, mismo instante.
+    expect(calls).toEqual([['instrument-1', [60, 72, 63, 75], '4n', 0]]);
   });
 
   it('CHORD: la duración del item no cambia el disparo (metadato)', async () => {
@@ -125,12 +126,12 @@ describe('SongPlayer · DECORATION (traza de reproducción)', () => {
       decoration('4t:0 8t:7')
     ]);
 
-    // Arpegio [60,63] decorado: [60,67,63,70]; 0,5 s de evento entre 4 = 0,125 s.
+    // Arpegio [60,63] decorado en grados: [60,72,63,75]; 0,5 s de evento entre 4 = 0,125 s.
     expect(calls).toEqual([
       ['instrument-1', 60, '0.125s', 0],
-      ['instrument-1', 67, '0.125s', 0.125],
+      ['instrument-1', 72, '0.125s', 0.125],
       ['instrument-1', 63, '0.125s', 0.25],
-      ['instrument-1', 70, '0.125s', 0.375]
+      ['instrument-1', 75, '0.125s', 0.375]
     ]);
   });
 

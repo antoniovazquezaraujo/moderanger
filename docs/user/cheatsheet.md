@@ -61,7 +61,7 @@ part Piano instrument PIANO
 | `KEY` | Transposition in semitones | `KEY 0` |
 | `SHIFTSTART`/`SHIFTSIZE`/`SHIFTVALUE` | Shift chord window by whole octaves | `SHIFTSIZE 3` |
 | `PATTERN` | Pattern melody (or `$variable`) | `PATTERN 4t:0 4t:2` |
-| `DECORATION` | Decoration added to each chord note (`offset`, `duration:offset`) | `DECORATION 4t:0 8t:-2` |
+| `DECORATION` | Decoration added to each chord note (offsets in scale degrees) | `DECORATION 4t:0 8t:-2` |
 | `PATTERN_GAP` | Deprecated: pattern decoration gap (no effect) | `PATTERN_GAP 1` |
 
 Numeric commands accept `$variable`.

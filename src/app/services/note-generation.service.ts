@@ -277,6 +277,12 @@ export class NoteGenerationService {
           return [this.gradeToSingleNote(grade, duration, player)];
       }
 
+      const decoration = player.currentDecoration;
+      if (decoration && decoration.length > 0) {
+          // DECORATION trabaja en grados de escala (no en semitonos).
+          return this.generateDecoratedData(player, decoration, duration);
+      }
+
       const derivedNoteDatas = player.getSelectedNotes();
       const midiNotes = this.noteDatasToNotes(derivedNoteDatas);
       if (midiNotes.length === 0) {
@@ -284,16 +290,11 @@ export class NoteGenerationService {
       }
 
       if (player.playMode === PlayMode.CHORD) {
-          const hasDecoration = (player.currentDecoration?.length ?? 0) > 0;
-          const chordNotes = this.applyDecoration(derivedNoteDatas, player.currentDecoration);
-          if (!hasDecoration) {
-              // Sin DECORATION los hijos conservan el comportamiento de siempre.
-              chordNotes.forEach(nd => nd.duration = duration);
-          }
+          derivedNoteDatas.forEach(nd => nd.duration = duration);
           const chordResult = this.noteGenUnified.createNoteData({
               type: 'chord',
               duration,
-              noteDatas: chordNotes
+              noteDatas: derivedNoteDatas
           });
           if (chordResult.success && chordResult.data) {
               return [chordResult.data];
@@ -302,10 +303,7 @@ export class NoteGenerationService {
       }
 
       const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
-      const arpeggioNoteDatas = this.applyDecoration(
-          this.notesToNoteDatas(arpeggioNotes, duration),
-          player.currentDecoration
-      );
+      const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
       if (arpeggioNoteDatas.length === 0) {
           return [this.createRestData(duration)];
       }
@@ -321,29 +319,57 @@ export class NoteGenerationService {
   }
 
   /**
-   * DECORATION: sustituye cada nota del acorde/arpegio por `{ nota + offset_i }`
-   * para cada item, con la duración literal del item (por defecto `4t`). Sin
-   * items devuelve la misma lista (comportamiento de siempre, sin adorno).
-   *
-   * En CHORD las notas emitidas suenan simultáneas con la duración del evento
-   * (las duraciones de los items son metadato); en arpegio el motor reparte la
-   * duración total del evento entre todas las notas emitidas, así que cada item
-   * añade una rebanada en la posición que le toca.
+   * DECORATION: cada grado final del acorde (tras WIDTH/GAP/INV/SHIFT) produce
+   * `{ grado + offset_i }` por item, convertido a MIDI con `OctavedGrade`
+   * (misma escala, octava y tonalidad), con la duración literal del item. En
+   * arpegio se ordenan primero las **posiciones** (mismas transformaciones que
+   * `arpeggiate`) y se decora cada posición: los adornos quedan agrupados por
+   * nota emitida, como en el comportamiento estructural original.
    */
-  private applyDecoration(noteDatas: NoteData[], decoration: DecorationItem[] | null): NoteData[] {
-      if (!decoration || decoration.length === 0) {
-          return noteDatas;
+  private generateDecoratedData(player: Player, decoration: DecorationItem[], duration: string): NoteData[] {
+      const octavedGrades = player.getSelectedOctavedGrades();
+      if (octavedGrades.length === 0) {
+          return [this.createRestData(duration)];
       }
-      const decorated: NoteData[] = [];
-      for (const noteData of noteDatas) {
-          if (noteData.type !== 'note' || noteData.note === undefined) {
-              decorated.push(noteData);
-              continue;
+
+      if (player.playMode === PlayMode.CHORD) {
+          const chordNotes = this.decorateGrades(octavedGrades, decoration, player);
+          const chordResult = this.noteGenUnified.createNoteData({
+              type: 'chord',
+              duration,
+              noteDatas: chordNotes
+          });
+          if (chordResult.success && chordResult.data) {
+              return [chordResult.data];
           }
+          return [this.createRestData(duration)];
+      }
+
+      const order = arpeggiate(octavedGrades.map((_, index) => index), player.playMode);
+      const orderedGrades = order.map(index => octavedGrades[index]);
+      const arpeggioNoteDatas = this.decorateGrades(orderedGrades, decoration, player);
+      if (arpeggioNoteDatas.length === 0) {
+          return [this.createRestData(duration)];
+      }
+      const arpeggioResult = this.noteGenUnified.createNoteData({
+          type: 'arpeggio',
+          duration,
+          noteDatas: arpeggioNoteDatas
+      });
+      if (arpeggioResult.success && arpeggioResult.data) {
+          return [arpeggioResult.data];
+      }
+      return [this.createRestData(duration)];
+  }
+
+  /** Un item por grado: `{ grado + offset }` en grados de escala. */
+  private decorateGrades(octavedGrades: OctavedGrade[], decoration: DecorationItem[], player: Player): NoteData[] {
+      const decorated: NoteData[] = [];
+      for (const octavedGrade of octavedGrades) {
           for (const item of decoration) {
               decorated.push(new NoteData({
                   type: 'note',
-                  note: noteData.note + item.offset,
+                  note: player.decoratedMidiNote(octavedGrade, item.offset),
                   duration: item.duration ?? DEFAULT_DECORATION_DURATION
               }));
           }
