@@ -176,10 +176,14 @@ describe('SongPlayer · variables y Stop (snapshot/restore)', () => {
     const stub = createEngineStub();
     const player = createPlayer(stub);
     VariableContext.setValue('mode', 'RANDOM');
+    const changes = jest.fn();
+    const subscription = VariableContext.onVariablesChange.subscribe(changes);
 
     player.stop();
 
     expect(VariableContext.getValue('mode')).toBe('RANDOM');
+    expect(changes).not.toHaveBeenCalled();
+    subscription.unsubscribe();
   });
 
   it('playSong también captura y restaura', async () => {
@@ -204,6 +208,145 @@ describe('SongPlayer · variables y Stop (snapshot/restore)', () => {
     const part = createPart('', [new VaryOperation('oct', 1)]);
 
     await player.playPart(part, new Song());
+
+    expect(VariableContext.getValue('oct')).toBe(2);
+    expect(player.isPlaying).toBe(false);
+  });
+
+  it('Stop mantiene scale, string y numéricas declaradas (no solo playmodes)', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    VariableContext.setValue('mode', 'RANDOM');
+    VariableContext.setValue('scale', 'BLACK');
+    VariableContext.setValue('motif', '4t:0');
+    VariableContext.setValue('oct', 2);
+    const part = createPart('4n:0', [
+      new VaryOperation('oct', 1),
+      new AssignOperation('mode', 'CHORD'),
+      new AssignOperation('scale', 'RED'),
+      new AssignOperation('motif', '4t:2')
+    ]);
+
+    await player.playPart(part, new Song());
+    expect(VariableContext.getValue('oct')).toBe(3);
+    expect(VariableContext.getValue('mode')).toBe('CHORD');
+    expect(VariableContext.getValue('scale')).toBe('RED');
+    expect(VariableContext.getValue('motif')).toBe('4t:2');
+
+    const changes = jest.fn();
+    const subscription = VariableContext.onVariablesChange.subscribe(changes);
+    player.stop();
+
+    expect(VariableContext.getValue('oct')).toBe(2);
+    expect(VariableContext.getValue('mode')).toBe('RANDOM');
+    expect(VariableContext.getValue('scale')).toBe('BLACK');
+    expect(VariableContext.getValue('motif')).toBe('4t:0');
+    // La restauración notifica al panel una sola vez (contexto con diferencias).
+    expect(changes).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
+  it('varios ciclos Play/Stop no acumulan las operaciones', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    VariableContext.setValue('oct', 2);
+    const part = createPart('4n:0', [new VaryOperation('oct', 1)]);
+
+    for (let ciclo = 0; ciclo < 3; ciclo++) {
+      await player.playPart(part, new Song());
+      expect(VariableContext.getValue('oct')).toBe(3);
+
+      player.stop();
+      expect(VariableContext.getValue('oct')).toBe(2);
+    }
+  });
+
+  it('un Play nuevo captura el estado actual: las ediciones entre plays se conservan', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    VariableContext.setValue('oct', 2);
+    const part = createPart('4n:0', [new VaryOperation('oct', 1)]);
+
+    await player.playPart(part, new Song());
+    player.stop();
+    VariableContext.setValue('oct', 5); // edición del panel con el player parado
+
+    await player.playPart(part, new Song());
+    expect(VariableContext.getValue('oct')).toBe(6); // parte del estado editado, no del declarado inicial
+
+    player.stop();
+    expect(VariableContext.getValue('oct')).toBe(5);
+  });
+
+  it('doble Stop es idempotente: el snapshot se consume una vez y no hay emisiones de ruido', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    VariableContext.setValue('oct', 2);
+    const part = createPart('4n:0', [new VaryOperation('oct', 1)]);
+
+    await player.playPart(part, new Song());
+    player.stop();
+    VariableContext.setValue('oct', 9); // edición posterior al Stop
+
+    const changes = jest.fn();
+    const subscription = VariableContext.onVariablesChange.subscribe(changes);
+    player.stop();
+
+    expect(VariableContext.getValue('oct')).toBe(9);
+    expect(changes).not.toHaveBeenCalled();
+    subscription.unsubscribe();
+  });
+
+  it('Stop tras un Play sin operaciones no emite ruido (contexto idéntico al snapshot)', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    VariableContext.setValue('oct', 2);
+
+    await player.playPart(createPart('4n:0'), new Song());
+
+    const changes = jest.fn();
+    const subscription = VariableContext.onVariablesChange.subscribe(changes);
+    player.stop();
+
+    expect(changes).not.toHaveBeenCalled();
+    subscription.unsubscribe();
+  });
+
+  it('las variables eliminadas durante el Play se restauran al parar', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    VariableContext.setValue('scale', 'BLACK');
+    await player.playPart(createPart('4n:0'), new Song());
+
+    VariableContext.removeValue('scale'); // borrada desde el panel en pleno Play
+    expect(VariableContext.hasValue('scale')).toBe(false);
+
+    player.stop();
+
+    expect(VariableContext.hasValue('scale')).toBe(true);
+    expect(VariableContext.getValue('scale')).toBe('BLACK');
+  });
+
+  it('la última repetición de la canción para el transporte y el stop natural restaura', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    VariableContext.setValue('oct', 2);
+    const song = new Song();
+    song.repeats = 2;
+    song.parts = [createPart('4n:0', [new VaryOperation('oct', 1)])];
+
+    await player.playSong(song);
+    expect(VariableContext.getValue('oct')).toBe(3);
+
+    stub.getLoopCallback()(0); // primera vuelta: todavía quedan repeticiones
+    expect(VariableContext.getValue('oct')).toBe(3);
+    expect(stub.engine.stopLoop).not.toHaveBeenCalled();
+
+    stub.getLoopCallback()(0); // última repetición: programa el stop del transporte
+    expect(stub.engine.stopLoop).toHaveBeenCalledTimes(1);
+    expect(stub.engine.stopTransport).toHaveBeenCalled();
+
+    stub.emitTransportStop(); // Tone dispara el stop programado
 
     expect(VariableContext.getValue('oct')).toBe(2);
     expect(player.isPlaying).toBe(false);
