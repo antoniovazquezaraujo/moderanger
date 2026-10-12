@@ -8,7 +8,7 @@ import { PlayMode, arpeggiate } from "./play.mode";
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
 import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
 import { NoteGenerationService } from '../services/note-generation.service';
-import { VariableContext } from './variable.context';
+import { VariableContext, VariableValue } from './variable.context';
 import { BaseOperation, VaryOperation, AssignOperation } from './operation';
 import { Command } from './command';
 import * as Tone from 'tone';
@@ -67,6 +67,12 @@ export class SongPlayer {
     private readonly _playingSourcesSubject = new BehaviorSubject<PlayingNoteSource[]>([]);
     /** Notas-origen sonando, para el resaltado del editor de Notes. */
     readonly playingSources$: Observable<PlayingNoteSource[]> = this._playingSourcesSubject.asObservable();
+
+    /**
+     * Estado de `VariableContext` previo al Play. Se restaura al parar (o al
+     * terminar) para que las operaciones no se acumulen entre reproducciones.
+     */
+    private variablesSnapshot: Map<string, VariableValue> | null = null;
     
     private currentLoopId: LoopId | null = null;
     private currentStopListenerId: ListenerId | null = null;
@@ -137,7 +143,7 @@ export class SongPlayer {
             this.audioEngine.offTransportStop(this.currentStopListenerId);
             this.currentStopListenerId = null;
         }
-        VariableContext.resetAll();
+        this._restoreVariablesSnapshot();
         this._clearPlayingSources();
         
         // Update global state
@@ -146,6 +152,19 @@ export class SongPlayer {
         this.globalState.setBeatCount(0);
         this.globalState.resetRepetition();
         this._metronome.next(0);
+    }
+
+    /**
+     * Restaura las variables al estado previo al Play y consume el snapshot
+     * (una sola vez por reproducción). Sin snapshot, o si `stop()` ya lo
+     * consumió, no hace nada.
+     */
+    private _restoreVariablesSnapshot(): void {
+        if (!this.variablesSnapshot) {
+            return;
+        }
+        VariableContext.restore(this.variablesSnapshot);
+        this.variablesSnapshot = null;
     }
 
     // --- Resaltado de la nota-origen que suena ---
@@ -223,6 +242,7 @@ export class SongPlayer {
              this.globalState.resetRepetition();
              this._metronome.next(0);
              this._clearPlayingSources();
+             this._restoreVariablesSnapshot();
              this.currentLoopId = null;
              this.currentStopListenerId = null;
          }
@@ -325,6 +345,11 @@ export class SongPlayer {
             console.warn("[SongPlayer] Already playing. Stop previous playback first.");
             return false;
         }
+
+        // Snapshot del estado de variables previo al Play: se restaura al
+        // parar (o al terminar) para que los comandos/operaciones no se
+        // acumulen entre reproducciones.
+        this.variablesSnapshot = VariableContext.snapshot();
 
         // Update global state
         this.globalState.setIsPlaying(true);
@@ -441,6 +466,7 @@ export class SongPlayer {
         if (partSoundInfo.length === 0) {
             this.globalState.setIsPlaying(false);
             this._clearPlayingSources();
+            this._restoreVariablesSnapshot();
             return;
         }
         // Reset beat count and repetition for new playback

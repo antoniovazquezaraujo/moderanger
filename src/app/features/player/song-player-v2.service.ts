@@ -192,6 +192,7 @@ export class SongPlayerV2Service {
 
     // Reset state
     this.songState.resetVariables();
+    this.songState.captureVariablesSnapshot();
     this.songState.resetRepetition();
 
     return true;
