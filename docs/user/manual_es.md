@@ -378,6 +378,8 @@ Azúcar de entrada (cómoda para escribir a mano, **nunca** se guarda así):
 
 `*=` no existe en el modelo y se rechaza con un error explícito. No se pueden mezclar el azúcar y la forma con palabra en la misma línea.
 
+**Las variables vuelven al estado previo al Play** cuando la reproducción para o termina de forma natural: `VARY`/`ASSIGN` se aplican mientras suena la canción, pero no se acumulan entre reproducciones (vuelven las declaraciones de `vars`). Las ediciones hechas en el panel de variables *durante la reproducción* también se revierten al parar.
+
 Ejemplo (obsérvese que al guardar se normaliza a `VARY`/`ASSIGN`):
 
 ```text

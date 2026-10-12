@@ -378,6 +378,8 @@ Input sugar (handy for writing by hand, **never** stored like this):
 
 `*=` does not exist in the model and is rejected with an explicit error. You cannot mix sugar and the word form on the same line.
 
+**Variables return to their pre-Play state** when playback stops or ends naturally: `VARY`/`ASSIGN` apply while the song plays, but they are not cumulative across plays (the `vars` declarations come back). Edits made in the variables panel *while playing* are also reverted on stop.
+
 Example (note how saving normalizes to `VARY`/`ASSIGN`):
 
 ```text
