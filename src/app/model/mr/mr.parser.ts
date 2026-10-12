@@ -30,6 +30,7 @@ import {
 import { MrParsedSong, MrSourceMapEntry, MrSourceNode, MrSourceNodeKind } from './mr.source-map';
 import { MR_FORMAT_VERSION, SongDocument } from './mr.types';
 import { NoteEvent, parseNoteEvents, printNoteEvent } from './notes.parser';
+import { canonicalDecoration } from './decoration.parser';
 import * as Tone from 'tone';
 
 // ---------------------------------------------------------------------------
@@ -49,6 +50,7 @@ const COMMAND_TYPES: ReadonlyMap<string, CommandType> = new Map<string, CommandT
   ['SHIFTVALUE', CommandType.SHIFTVALUE],
   ['PATTERN_GAP', CommandType.PATTERN_GAP],
   ['PATTERN', CommandType.PATTERN],
+  ['DECORATION', CommandType.DECORATION],
   // Alias de entrada por compatibilidad con la gramática antigua; el
   // serializador emite siempre el canónico `INV` (brecha §3.2 #5).
   ['INVERSION', CommandType.INV]
@@ -66,7 +68,8 @@ const COMMAND_NAMES: readonly string[] = [
   'SHIFTSIZE',
   'SHIFTVALUE',
   'PATTERN_GAP',
-  'PATTERN'
+  'PATTERN',
+  'DECORATION'
 ];
 
 const INSTRUMENT_KEYS: readonly string[] = Object.keys(InstrumentType);
@@ -614,6 +617,10 @@ class MrDocumentParser {
       // En un PATTERN los grupos subdividen: se valida que el contenido quepa.
       this.validatePatternGroups(events);
       return new Command({ type, value: melody });
+    }
+    if (type === CommandType.DECORATION) {
+      const decoration = canonicalDecoration(rest, { line: line.number, column: restColumn });
+      return new Command({ type, value: decoration });
     }
     const words = splitLineWords(rest, line.number, restColumn - 1);
     if (words.length !== 1) {

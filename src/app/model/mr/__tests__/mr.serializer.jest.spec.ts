@@ -221,7 +221,8 @@ describe('serializeSong: comandos', () => {
       new Command({ type: CommandType.SHIFTSIZE, value: 3 }),
       new Command({ type: CommandType.SHIFTVALUE, value: 1 }),
       new Command({ type: CommandType.PATTERN_GAP, value: 1 }),
-      new Command({ type: CommandType.PATTERN, value: '4n:(0 2) 8n:s' })
+      new Command({ type: CommandType.PATTERN, value: '4n:(0 2) 8n:s' }),
+      new Command({ type: CommandType.DECORATION, value: '0 -2 6' })
     ];
 
     expect(commandsOf(commands)).toContain(`    commands
@@ -237,6 +238,7 @@ describe('serializeSong: comandos', () => {
       SHIFTVALUE 1
       PATTERN_GAP 1
       PATTERN 4n:( 0 2 ) 8n:s
+      DECORATION 0 -2 6
 `);
   });
 
@@ -258,6 +260,32 @@ describe('serializeSong: comandos', () => {
 
   it('falla con una escala inválida', () => {
     expect(() => commandsOf([new Command({ type: CommandType.SCALE, value: 'FUCSIA' })])).toThrow(MrSerializeError);
+  });
+
+  describe('DECORATION', () => {
+    it('canoniza espacios y conserva la forma de cada item', () => {
+      expect(commandsOf([new Command({ type: CommandType.DECORATION, value: ' 4t:0   0   -2 ' })])).toContain(
+        '      DECORATION 4t:0 0 -2\n'
+      );
+    });
+
+    it('emite variables como $nombre', () => {
+      const command = new Command({ type: CommandType.DECORATION });
+      command.setVariable('deco');
+
+      expect(commandsOf([command])).toContain('      DECORATION $deco\n');
+    });
+
+    it('falla si está vacío o los items son inválidos', () => {
+      expect(() => commandsOf([new Command({ type: CommandType.DECORATION, value: '' })])).toThrow(MrSerializeError);
+
+      const document = createDocument();
+      const block = createBlock();
+      block.commands = [new Command({ type: CommandType.DECORATION, value: '0 1.5' })];
+      addPart(document, 'P', [block]);
+
+      expect(expectSerializeError(document).message).toContain('los items de DECORATION');
+    });
   });
 });
 

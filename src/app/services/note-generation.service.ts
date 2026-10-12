@@ -11,6 +11,7 @@ import { VariableContext } from '../model/variable.context';
 // Import the NoteData parser directly
 import { parseBlockNotes, parseBlockNotesForEditor } from '../model/mr/notes.parser';
 import { MrParseError } from '../model/mr/mr.errors';
+import { DEFAULT_DECORATION_DURATION, DecorationItem } from '../model/mr/decoration.parser';
 import * as Tone from 'tone'; // Import Tone
 // Import unified note generation service
 import { 
@@ -283,11 +284,16 @@ export class NoteGenerationService {
       }
 
       if (player.playMode === PlayMode.CHORD) {
-          derivedNoteDatas.forEach(nd => nd.duration = duration);
+          const hasDecoration = (player.currentDecoration?.length ?? 0) > 0;
+          const chordNotes = this.applyDecoration(derivedNoteDatas, player.currentDecoration);
+          if (!hasDecoration) {
+              // Sin DECORATION los hijos conservan el comportamiento de siempre.
+              chordNotes.forEach(nd => nd.duration = duration);
+          }
           const chordResult = this.noteGenUnified.createNoteData({
               type: 'chord',
               duration,
-              noteDatas: derivedNoteDatas
+              noteDatas: chordNotes
           });
           if (chordResult.success && chordResult.data) {
               return [chordResult.data];
@@ -296,7 +302,10 @@ export class NoteGenerationService {
       }
 
       const arpeggioNotes = arpeggiate(midiNotes, player.playMode);
-      const arpeggioNoteDatas = this.notesToNoteDatas(arpeggioNotes, duration);
+      const arpeggioNoteDatas = this.applyDecoration(
+          this.notesToNoteDatas(arpeggioNotes, duration),
+          player.currentDecoration
+      );
       if (arpeggioNoteDatas.length === 0) {
           return [this.createRestData(duration)];
       }
@@ -309,6 +318,37 @@ export class NoteGenerationService {
           return [arpeggioResult.data];
       }
       return [this.createRestData(duration)];
+  }
+
+  /**
+   * DECORATION: sustituye cada nota del acorde/arpegio por `{ nota + offset_i }`
+   * para cada item, con la duración literal del item (por defecto `4t`). Sin
+   * items devuelve la misma lista (comportamiento de siempre, sin adorno).
+   *
+   * En CHORD las notas emitidas suenan simultáneas con la duración del evento
+   * (las duraciones de los items son metadato); en arpegio el motor reparte la
+   * duración total del evento entre todas las notas emitidas, así que cada item
+   * añade una rebanada en la posición que le toca.
+   */
+  private applyDecoration(noteDatas: NoteData[], decoration: DecorationItem[] | null): NoteData[] {
+      if (!decoration || decoration.length === 0) {
+          return noteDatas;
+      }
+      const decorated: NoteData[] = [];
+      for (const noteData of noteDatas) {
+          if (noteData.type !== 'note' || noteData.note === undefined) {
+              decorated.push(noteData);
+              continue;
+          }
+          for (const item of decoration) {
+              decorated.push(new NoteData({
+                  type: 'note',
+                  note: noteData.note + item.offset,
+                  duration: item.duration ?? DEFAULT_DECORATION_DURATION
+              }));
+          }
+      }
+      return decorated;
   }
 
   /** Nota suelta (playmode SINGLE): grado → MIDI con escala/octava/tonalidad. */

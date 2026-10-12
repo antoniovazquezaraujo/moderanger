@@ -9,6 +9,7 @@ describe('commandTypeLabel', () => {
     expect(commandTypeLabel('INV')).toBe('Inv');
     expect(commandTypeLabel('OCT')).toBe('Oct');
     expect(commandTypeLabel('PATTERN')).toBe('Pattern');
+    expect(commandTypeLabel('DECORATION')).toBe('Decoration');
     expect(commandTypeLabel('KEY')).toBe('Key');
     expect(commandTypeLabel('PLAYMODE')).toBe('Playmode');
     expect(commandTypeLabel('WIDTH')).toBe('Width');

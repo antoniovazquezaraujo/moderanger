@@ -11,6 +11,7 @@ import { NoteDuration, NoteConverter, MusicElement } from 'src/app/model/melody'
 import { NoteData } from 'src/app/model/note';
 import { MelodyEditorComponent } from '../melody-editor/melody-editor.component';
 import { commandTypeLabel } from './command-type-label';
+import { canonicalDecorationValueOrRaw } from './decoration-value';
 import {
     showCommandColon as commandColonVisible,
     showOperationColon as operationColonVisible,
@@ -259,11 +260,13 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         event.stopPropagation();
         
         if (command.isVariable) {
-            // Al volver a valor directo, PATTERN conserva la melodía resuelta.
-            const resolvedPattern = command.type === CommandType.PATTERN ? String(command.value ?? '') : '';
+            // Al volver a valor directo, PATTERN/DECORATION conservan su string.
+            const resolvedString = (command.type === CommandType.PATTERN || command.type === CommandType.DECORATION)
+                ? String(command.value ?? '')
+                : '';
             command.isVariable = false;
-            command.setValue(command.type === CommandType.PATTERN
-                ? resolvedPattern
+            command.setValue((command.type === CommandType.PATTERN || command.type === CommandType.DECORATION)
+                ? resolvedString
                 : this.getDefaultValueForCommandType(command.type));
         } else {
             // Convert to variable mode and pre-select the first compatible variable
@@ -296,7 +299,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
                  }
             } else {
                 valueToSet = typeof event === 'object' ? event.target?.value : event;
-                if (command.type !== CommandType.PATTERN) {
+                if (command.type !== CommandType.PATTERN && command.type !== CommandType.DECORATION) {
                     command.setValue(valueToSet);
                 }
             }
@@ -327,8 +330,8 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getFilteredVariables(command: Command): VariableOption[] {
-        if (command.type === CommandType.PATTERN) {
-            // El patrón puede ser una variable string (melodía/patrón).
+        if (command.type === CommandType.PATTERN || command.type === CommandType.DECORATION) {
+            // Patrón/decoración pueden ser variables string (melodía/items).
             return this.stringVariables;
         }
         return this.availableVariables.filter(v => {
@@ -358,7 +361,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     onCommandTypeChange(command: Command): void {
-        if (command.type === CommandType.PATTERN) {
+        if (command.type === CommandType.PATTERN || command.type === CommandType.DECORATION) {
              command.isVariable = false;
         }
         command.setValue(this.getDefaultValueForCommandType(command.type));
@@ -474,7 +477,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             return this.playModeNames[0] || 'CHORD';
         } else if (type === CommandType.SCALE) {
             return this.scaleNames[0] || 'WHITE';
-        } else if (type === CommandType.PATTERN) {
+        } else if (type === CommandType.PATTERN || type === CommandType.DECORATION) {
             return '';
         } else {
             return 0;
@@ -486,5 +489,19 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             return String(command.value || ''); 
         }
         return '';
+    }
+
+    getDecorationValueAsString(command: Command): string {
+        if (command.type === CommandType.DECORATION) {
+            return String(command.value || '');
+        }
+        return '';
+    }
+
+    /** Edición del DECORATION con el editor de melodía: valor canonicalizado. */
+    onDecorationValueChange(value: string, command: Command): void {
+        if (command.type === CommandType.DECORATION) {
+            command.value = canonicalDecorationValueOrRaw(value);
+        }
     }
 }

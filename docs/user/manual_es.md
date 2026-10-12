@@ -315,8 +315,9 @@ La sección `commands` lleva **un comando por línea**; el orden de las líneas 
 | `SHIFTSTART` | Primera nota del acorde afectada por el desplazamiento | entero o `$variable` | `SHIFTSTART 0` |
 | `SHIFTSIZE` | Número de notas afectadas por el desplazamiento | entero o `$variable` | `SHIFTSIZE 3` |
 | `SHIFTVALUE` | Octavas que se suman a las notas desplazadas | entero o `$variable` | `SHIFTVALUE 1` |
-| `PATTERN_GAP` | Separación de la decoración del patrón | entero o `$variable` | `PATTERN_GAP 1` |
+| `PATTERN_GAP` | Obsoleto: separación de la decoración del patrón (sin efecto; usa `DECORATION`) | entero o `$variable` | `PATTERN_GAP 1` |
 | `PATTERN` | Melodía del patrón (sublenguaje completo, una línea); se aplica **antes** del playmode, así se combina con acordes/arpegios; o una variable string | melodía o `$variable` | `PATTERN 4t:0 4t:-1 4t:3` |
+| `DECORATION` | Adorno añadido a **cada nota del acorde/arpegio**: por cada item, una nota `{ nota + offset }` | items `offset` o `duración:offset`, o `$variable` | `DECORATION 4t:0 8t:-2` |
 
 Notas:
 
@@ -325,9 +326,10 @@ Notas:
 - `PATTERN` es **independiente del playmode**: si existe, expande cada nota antes de que el playmode genere su sonido (acorde, arpegio, aleatorio…). Si no hay `PATTERN`, nada cambia. Su melodía se escribe en una línea (duraciones, silencios y grupos admitidos).
 - En un comando numérico, la `$variable` se resuelve al reproducir; debe contener un número.
 - `SHIFTSTART`, `SHIFTSIZE` y `SHIFTVALUE` suman octavas completas a las notas del acorde en la ventana `[SHIFTSTART, SHIFTSTART+SHIFTSIZE)` (0-based, sobre el orden final del acorde tras `INV`). La ventana se recorta al acorde, `SHIFTSIZE 0` no hace nada y un `SHIFTVALUE` negativo baja las notas afectadas. Dan forma al acorde/arpegio generado; con `PLAYMODE SINGLE` no hay acorde, así que no tienen efecto (igual que `WIDTH`/`INV`).
-- `PATTERN_GAP` forma parte del formato (se lee y se guarda), pero el motor de generación actual no aplica la decoración: hoy no cambia el sonido. Se mantiene como campo heredado ([limitaciones](#10-limitaciones-conocidas-de-la-v1)).
+- `PATTERN_GAP` está **obsoleto**: se lee y se guarda por compatibilidad, pero no tiene efecto; la decoración del acorde se hace ahora con `DECORATION` ([limitaciones](#10-limitaciones-conocidas-de-la-v1)).
+- `DECORATION` adorna **cada nota del acorde/arpegio generado** (después de `WIDTH`/`GAP`/`INV`/`SHIFT`): cada item sustituye la nota por `{ nota + offset }` usando la duración del item (`4t` por defecto) como metadato de la nota, sin reescalar. Un item `0` conserva la nota original; sin ningún `0` desaparece. Los items son una lista plana (sin grupos en v1); con `PLAYMODE SINGLE` no hay acorde, así que no tiene efecto. `PATTERN` expande la nota primero y después se adorna el acorde de cada nota expandida. **El tiempo lo decide el playmode, no las duraciones de los items**: `CHORD` hace sonar todas las notas adornadas a la vez durante la duración del evento, y los arpegios reparten la duración del evento a partes iguales entre las notas emitidas (cada item añade una rebanada); hoy las duraciones de item son metadato ([limitaciones](#10-limitaciones-conocidas-de-la-v1)).
 
-Ejemplo con los doce comandos:
+Ejemplo con los trece comandos:
 
 ```mr
 song "Panel de control"
@@ -350,6 +352,7 @@ part Piano
       SHIFTVALUE 1
       PATTERN_GAP 1
       PATTERN 4t:0 4t:-1 4t:3
+      DECORATION 0 -2 6
 ```
 
 ---
@@ -502,11 +505,12 @@ En la vista `.mr`, los errores aparecen bajo el texto con su `línea, columna`; 
 4. **Grupos multilínea.** No se admiten en v1; el grupo debe abrirse y cerrarse en su línea.
 5. **Acordes y arpegios literales.** No se escriben en el texto; los genera `PLAYMODE` a partir de grados, escala y comandos.
 6. **Sidebar de variables.** Lista y edita los cuatro tipos (número, escala, playmode y string). Las variables string se editan como texto plano.
-7. **Decoración de patrón sin efecto audible.** `PATTERN_GAP` se lee y se guarda, pero el motor actual no aplica la decoración; hoy no cambia el sonido.
+7. **`PATTERN_GAP` obsoleto.** Se lee y se guarda por compatibilidad pero no tiene efecto; la decoración del acorde ya es posible con `DECORATION` (adorno por nota con duraciones literales).
 8. **Instrumentos.** Solo `PIANO` en v1.
 9. **`pulse` y `beatsPerBar`.** No se serializan.
 10. **Un error de parseo por vez.** El parser se detiene en el primer error; el diálogo está preparado para pintar más.
 11. **Sin autoguardado ni "Guardar como".** El `.mr` es el único formato y el nombre del fichero se deriva del nombre de la canción.
+12. **Las duraciones de item de `DECORATION` son metadato en la v1.** El tiempo lo decide el playmode: `CHORD` hace sonar todas las notas adornadas a la vez durante la duración del evento, y los arpegios reparten la duración del evento a partes iguales entre las notas emitidas (cada item añade una rebanada). Las duraciones explícitas (`4t:0`, `8t:-2`) se guardan en el modelo y en el `.mr`, pero hoy no cambian el sonido.
 
 ---
 

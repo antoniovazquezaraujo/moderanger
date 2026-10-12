@@ -18,6 +18,7 @@ import { MrParseError, MrSerializeError } from './mr.errors';
 import { DURATION_PATTERN, escapeMrString, formatName, IDENTIFIER_PATTERN } from './mr.text';
 import { MR_FORMAT_VERSION, SongDocument } from './mr.types';
 import { NoteEvent, parseNoteEvents, printNoteEvent } from './notes.parser';
+import { canonicalDecoration } from './decoration.parser';
 
 const INSTRUMENT_KEYS: ReadonlyArray<keyof typeof InstrumentType> = Object.keys(InstrumentType) as Array<
   keyof typeof InstrumentType
@@ -202,6 +203,17 @@ function formatCommand(command: Command, block: Block): string {
         throw wrapNotesError(block, error);
       }
     }
+    case CommandType.DECORATION: {
+      const decoration = String(command.value).trim();
+      if (decoration === '') {
+        throw new MrSerializeError(`DECORATION sin items en el bloque ${describeBlock(block)}`);
+      }
+      try {
+        return `DECORATION ${canonicalDecoration(decoration)}`;
+      } catch (error) {
+        throw wrapDecorationError(block, error);
+      }
+    }
     default: {
       const value = command.value;
       if (typeof value !== 'number' || !Number.isInteger(value)) {
@@ -257,4 +269,15 @@ function wrapNotesError(block: Block, error: unknown): MrSerializeError {
     );
   }
   return new MrSerializeError(`no se pudieron serializar las notas del bloque ${describeBlock(block)}: ${String(error)}`);
+}
+
+function wrapDecorationError(block: Block, error: unknown): MrSerializeError {
+  if (error instanceof MrParseError) {
+    return new MrSerializeError(
+      `los items de DECORATION del bloque ${describeBlock(block)} no son válidos: ${error.message} (${error.line}:${error.column})`
+    );
+  }
+  return new MrSerializeError(
+    `no se pudieron serializar los items de DECORATION del bloque ${describeBlock(block)}: ${String(error)}`
+  );
 }
