@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { VariableContext } from 'src/app/model/variable.context';
 import { getPlayModeNames } from 'src/app/model/play.mode';
 import { Scale } from 'src/app/model/scale';
@@ -33,12 +33,21 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
 
     private contextSubscription: Subscription | null = null;
 
-    constructor() {
+    constructor(private zone: NgZone, private cdr: ChangeDetectorRef) {
     }
 
     ngOnInit(): void {
        this.contextSubscription = VariableContext.onVariablesChange.subscribe(() => {
-           this.updateVariablesList();
+           // La restauración del snapshot al terminar la canción (fin natural
+           // o Stop) se emite desde un callback de Tone que corre en la zona
+           // de Angular pero sin tareas de zone.js, así que no se programa
+           // tick: `zone.run` reentra por si hiciera falta y `detectChanges`
+           // repinta el panel (el `<select>` mostraba el valor viejo hasta el
+           // siguiente ciclo de render).
+           this.zone.run(() => {
+               this.updateVariablesList();
+               this.cdr.detectChanges();
+           });
        });
         this.updateVariablesList();
     }
