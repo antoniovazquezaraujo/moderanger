@@ -72,17 +72,6 @@ export class Player {
         this.channel = channel;
         this.instrumentType = instrumentType;
         this.instrumentId = instrumentId;
-        this._registerAudioEngineStopListener();
-    }
-
-    private _registerAudioEngineStopListener(): void {
-        this.audioEngine.onTransportStop(() => {
-            if (this._playState !== PlayState.STOPPED) {
-                this.setPlayState(PlayState.STOPPED);
-                this.setPlayProgress(0);
-                this.stopEventSubject.next();
-            }
-        });
     }
 
     get playState(): PlayState { return this._playState; }
