@@ -22,9 +22,9 @@
 
 ## 2. Lenguaje visual (consistencia)
 
-- **Panel de biblioteca:** misma caja que el panel de Variables (borde `#ddd`, radio 4px, cabecera clicable con chevron, título y contador); filas compactas; acciones al hover/focus con reserva de espacio (sin saltos de layout).
+- **Panel de biblioteca:** misma caja que el panel de Variables (borde `#ddd`, radio 4px, cabecera clicable con chevron, título y contador); filas compactas; acciones al hover/focus con reserva de espacio (sin saltos de layout). El botón "+" de la cabecera vive **junto al contador** (`Blocks 3  +`), no flotando a la derecha, y se revela al hover/foco con su espacio ya reservado.
 - **Referencia:** ítem visualmente distinto (acento lateral `#90a4ae` + fondo tenue) frente al bloque inline; el aviso de huérfana usa acento rojo.
-- **Combo de añadir referencia:** select nativo sin flecha, coherente con el resto de combos de la app.
+- **Añadir referencia:** por defecto solo un botón; al pulsarlo se despliega el combo de definiciones (select nativo sin flecha, coherente con el resto) y al seleccionar una se añade la referencia y el combo vuelve a ocultarse.
 
 > Nota (validación de Bicho): `isBlockLabelAvailable` considera "vacío" con `trim` pero compara duplicados sin normalizar espacios (igual que el parser/serializador, que no normalizan labels); permite etiquetas con espacios colgantes, sin afectar al round-trip.
 
@@ -33,6 +33,8 @@
 | Tema | Decisión | Motivo |
 |---|---|---|
 | Renombrado | En vivo propaga en cascada cuando el nombre es válido; al salir del campo revierte si está vacío o duplicado, con aviso. | Evita dejar el modelo inválido (el parser exige labels únicos) sin bloquear la escritura. |
+| Añadir referencia | El botón despliega el combo bajo demanda (intenta `select.showPicker()` con fallback a `focus`, operable por teclado); seleccionar añade y oculta. Sin biblioteca, botón deshabilitado con pista. | Quita ruido de la cabecera de la part: el combo solo aparece cuando se necesita. |
+| Botón "+" de la biblioteca | Situado junto al contador (`Blocks 3  +`), visible al hover/foco con espacio reservado. | Cabecera más legible sin flotantes a la derecha; sin saltos de layout. |
 | Borrado en uso | Diálogo con la lista de partes que la usan y confirmación explícita; borra **también** las referencias. | Evita crear `use` huérfanos desde la GUI. |
 | Navegación | `Edit definition` expande el panel, despliega y resalta la definición ~1,6 s. | Localizar la definición sin perder contexto. |
 | Reordenar | Botones ↑/↓ en la referencia (los bloques conservan el drag & drop del `p-tree`). | Las referencias no viven en el `p-tree`; evita un rediseño mayor. Candidato a revisar. |
@@ -42,6 +44,7 @@
 ## 4. Accesibilidad
 
 - Chevrons con `aria-expanded` y `aria-label`; acciones con `aria-label` + tooltip.
+- El disparador de añadir referencia expone `aria-haspopup="listbox"` y `aria-expanded`; al abrir enfoca el select (`showPicker()` con fallback a `focus`).
 - Aviso de huérfana con `role="alert"`; foco visible heredado de los patrones existentes.
 
 ## 5. Comportamiento con referencias huérfanas
@@ -50,4 +53,4 @@ Si el modelo se construye a mano con un `use` sin definición, la referencia se 
 
 ## 6. Tests
 
-Suites nuevas: `song-blocks.jest.spec` (helpers de modelo), `block-library.jest.spec`, `block-reference.jest.spec`, `part-references-gui.jest.spec`, `block-library-mode.jest.spec` (bloque), `block-library-panel.jest.spec` (song-editor); Bicho añadió `part-references-integration.jest.spec` y ampliaciones (23 tests). Total: **826 tests en verde** (73 suites); cobertura sin bajar (`song-blocks.ts` ~98 % stmts). `npm run build` en verde.
+Suites nuevas: `song-blocks.jest.spec` (helpers de modelo), `block-library.jest.spec`, `block-reference.jest.spec`, `part-references-gui.jest.spec`, `block-library-mode.jest.spec` (bloque), `block-library-panel.jest.spec` (song-editor); Bicho añadió `part-references-integration.jest.spec` y ampliaciones. `part-references-gui` cubre además la interacción botón → combo → añadir. Total: **834 tests en verde** (73 suites); cobertura sin bajar (`song-blocks.ts` ~98 % stmts). `npm run build` en verde.
