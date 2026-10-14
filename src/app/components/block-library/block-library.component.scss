@@ -33,8 +33,18 @@
   font-size: 0.75rem;
 }
 
-.blocks-library-spacer {
-  flex: 1 1 auto;
+/* El botón "+" vive junto al contador (no flota a la derecha) y sigue el
+   patrón de acciones al hover/foco, con espacio reservado (sin saltos). */
+.blocks-library-add {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.blocks-library-header:hover .blocks-library-add,
+.blocks-library-header:focus-within .blocks-library-add {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .blocks-library-content {

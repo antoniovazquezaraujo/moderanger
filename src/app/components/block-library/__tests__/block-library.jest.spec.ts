@@ -31,6 +31,7 @@ import { Song } from 'src/app/model/song';
 import { BlockLibraryComponent } from '../block-library.component';
 
 const template = fs.readFileSync(path.resolve(__dirname, '../block-library.component.html'), 'utf8');
+const styles = fs.readFileSync(path.resolve(__dirname, '../block-library.component.scss'), 'utf8');
 
 function createComponent(song: Song): BlockLibraryComponent {
   const cdr = { detectChanges: jest.fn(), markForCheck: jest.fn() };
@@ -266,6 +267,33 @@ describe('BlockLibraryComponent · template', () => {
     expect(template).toContain('(click)="togglePanel()"');
     expect(template).toContain('>Blocks<');
     expect(template).toContain('(click)="$event.stopPropagation(); addBlock()"');
+  });
+
+  it('el botón "+" va justo después del contador, no flotando a la derecha', () => {
+    const header = template.slice(
+      template.indexOf('class="blocks-library-header"'),
+      template.indexOf('class="blocks-library-content"')
+    );
+    const countIndex = header.indexOf('blocks-library-count');
+    const addIndex = header.indexOf('blocks-library-add');
+    expect(countIndex).toBeGreaterThan(-1);
+    expect(addIndex).toBeGreaterThan(countIndex);
+    // Ya no hay separador que empuje el botón al extremo.
+    expect(header).not.toContain('blocks-library-spacer');
+    expect(styles).not.toContain('.blocks-library-spacer');
+  });
+
+  it('el "+" aparece al hover/foco con espacio reservado (sin saltos)', () => {
+    const rest = /\.blocks-library-add\s*\{([^}]*)\}/.exec(styles);
+    expect(rest).not.toBeNull();
+    expect(rest![1]).toContain('opacity: 0');
+    expect(rest![1]).toContain('pointer-events: none');
+    expect(rest![1]).toContain('transition: opacity');
+
+    const revealed = /\.blocks-library-header:hover \.blocks-library-add,\s*\n\.blocks-library-header:focus-within \.blocks-library-add\s*\{([^}]*)\}/.exec(styles);
+    expect(revealed).not.toBeNull();
+    expect(revealed![1]).toContain('opacity: 1');
+    expect(revealed![1]).toContain('pointer-events: auto');
   });
 
   it('cada definición reutiliza el editor de bloque ocultando su nombre/acciones de raíz', () => {
