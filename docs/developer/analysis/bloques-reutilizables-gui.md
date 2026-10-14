@@ -22,8 +22,9 @@
 
 ## 2. Lenguaje visual (consistencia)
 
-- **Panel de biblioteca:** misma caja que el panel de Variables (borde `#ddd`, radio 4px, cabecera clicable con chevron, título y contador); filas compactas; acciones al hover/focus con reserva de espacio (sin saltos de layout). El botón "+" de la cabecera vive **junto al contador** (`Blocks 3  +`), no flotando a la derecha, y se revela al hover/foco con su espacio ya reservado.
+- **Panel de biblioteca:** misma caja que el panel de Variables (borde `#ddd`, radio 4px, cabecera clicable con chevron, título y contador); filas compactas; acciones al hover/focus con reserva de espacio (sin saltos de layout). El botón "+" de la cabecera vive **junto al contador** (`Blocks 3  +`), no flotando a la derecha, y se revela al hover/foco con su espacio ya reservado. Las acciones de cada fila (duplicar/borrar) siguen al contenido (nombre → usos), sin `margin-left: auto`.
 - **Referencia:** ítem visualmente distinto (acento lateral `#90a4ae` + fondo tenue) frente al bloque inline; el aviso de huérfana usa acento rojo.
+- **Sección Notes:** el editor de melodía embebido no aporta `min-height` ni paddings verticales inferiores, de modo que el espaciado inferior queda alineado con las filas de Commands/Operations (aplica a bloques inline y a la biblioteca; mismo criterio que el PATTERN embebido).
 - **Añadir referencia:** por defecto solo un botón; al pulsarlo se despliega el combo de definiciones (select nativo sin flecha, coherente con el resto) y al seleccionar una se añade la referencia y el combo vuelve a ocultarse.
 
 > Nota (validación de Bicho): `isBlockLabelAvailable` considera "vacío" con `trim` pero compara duplicados sin normalizar espacios (igual que el parser/serializador, que no normalizan labels); permite etiquetas con espacios colgantes, sin afectar al round-trip.
@@ -53,4 +54,4 @@ Si el modelo se construye a mano con un `use` sin definición, la referencia se 
 
 ## 6. Tests
 
-Suites nuevas: `song-blocks.jest.spec` (helpers de modelo), `block-library.jest.spec`, `block-reference.jest.spec`, `part-references-gui.jest.spec`, `block-library-mode.jest.spec` (bloque), `block-library-panel.jest.spec` (song-editor); Bicho añadió `part-references-integration.jest.spec` y ampliaciones. `part-references-gui` cubre además la interacción botón → combo → añadir. Total: **834 tests en verde** (73 suites); cobertura sin bajar (`song-blocks.ts` ~98 % stmts). `npm run build` en verde.
+Suites nuevas: `song-blocks.jest.spec` (helpers de modelo), `block-library.jest.spec`, `block-reference.jest.spec`, `part-references-gui.jest.spec`, `block-library-mode.jest.spec` (bloque), `block-library-panel.jest.spec` (song-editor); Bicho añadió `part-references-integration.jest.spec` y ampliaciones. `part-references-gui` cubre además la interacción botón → combo → añadir. Total: **836 tests en verde** (73 suites); cobertura sin bajar (`song-blocks.ts` ~98 % stmts). `npm run build` en verde.
