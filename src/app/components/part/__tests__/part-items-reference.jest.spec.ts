@@ -50,7 +50,8 @@ jest.mock('@angular/core', () => {
     EventEmitter,
     Component: () => (target: unknown) => target,
     Input: propertyDecorator,
-    Output: propertyDecorator
+    Output: propertyDecorator,
+    ViewChild: propertyDecorator
   };
 });
 

@@ -9,26 +9,31 @@
         <div class="part-info">
             <input type="text" [(ngModel)]="part.name" class="part-name-input" placeholder="Part {{part.id}}">
         </div>
-        <!-- Añadir referencia: selector de definiciones de la biblioteca. Si no
-             hay definiciones, queda deshabilitado con pista. -->
+        <!-- Añadir referencia: solo un botón; al pulsarlo se despliega el combo
+             de definiciones y al seleccionar una se añade (el combo se oculta).
+             Sin biblioteca queda deshabilitado con pista. -->
         <div class="part-add-reference">
-            <select class="add-reference-select"
-                    [(ngModel)]="selectedDefinitionLabel"
-                    [disabled]="definitionOptions.length === 0"
-                    [pTooltip]="definitionOptions.length ? 'Choose a library block to reference' : 'Create a block in the library first'"
-                    tooltipPosition="top"
+            <p-button
+                [icon]="referencePickerOpen ? 'pi pi-times' : 'pi pi-link'"
+                [pTooltip]="definitionOptions.length ? 'Add block reference' : 'Create a block in the library first'"
+                tooltipPosition="top"
+                aria-haspopup="listbox"
+                [attr.aria-expanded]="referencePickerOpen"
+                aria-label="Add block reference"
+                [disabled]="definitionOptions.length === 0"
+                (click)="toggleReferencePicker()">
+            </p-button>
+            <select #referenceSelect
+                    *ngIf="referencePickerOpen"
+                    class="add-reference-select"
+                    [ngModel]="selectedDefinitionLabel"
+                    (ngModelChange)="onReferenceSelected($event)"
+                    (blur)="onReferencePickerBlur()"
+                    (keydown.escape)="closeReferencePicker()"
                     aria-label="Block reference">
                 <option [ngValue]="null" disabled>Reference…</option>
                 <option *ngFor="let option of definitionOptions" [value]="option.value">{{ option.label }}</option>
             </select>
-            <p-button
-                icon="pi pi-link"
-                pTooltip="Add block reference"
-                tooltipPosition="top"
-                aria-label="Add block reference"
-                [disabled]="definitionOptions.length === 0"
-                (click)="addReference()">
-            </p-button>
         </div>
         <div class="part-controls">
             <ng-container *ngFor="let block of blocks">

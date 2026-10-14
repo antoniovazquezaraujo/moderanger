@@ -1,5 +1,5 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { Block } from 'src/app/model/block';
 import { BlockReference } from 'src/app/model/block-reference';
 import { Command } from 'src/app/model/command';
@@ -42,6 +42,11 @@ export class PartComponent implements OnInit {
 
     /** Definición elegida en el selector para añadir una referencia. */
     selectedDefinitionLabel: string | null = null;
+
+    /** `true` mientras el combo de añadir referencia está desplegado. */
+    referencePickerOpen = false;
+
+    @ViewChild('referenceSelect') referenceSelectRef?: ElementRef<HTMLSelectElement>;
 
     constructor(private songPlayer: SongPlayer) {
         this.onDuplicatePart = new EventEmitter<Part>();
@@ -104,6 +109,67 @@ export class PartComponent implements OnInit {
             return;
         }
         this.part.items.push(createBlockReference(label));
+    }
+
+    /**
+     * Despliega/oculta el combo de definiciones. Al abrirlo se enfoca el select
+     * (y se intenta abrir el desplegable nativo con `showPicker`, con `focus`
+     * como fallback accesible por teclado).
+     */
+    toggleReferencePicker(): void {
+        if (this.definitionOptions.length === 0) {
+            return;
+        }
+        this.referencePickerOpen = !this.referencePickerOpen;
+        if (this.referencePickerOpen) {
+            // El select vive dentro de un `*ngIf`: espera al render antes de
+            // enfocarlo.
+            setTimeout(() => this.focusReferenceSelect(), 0);
+        }
+    }
+
+    /** Selección en el combo: añade la referencia y lo oculta. */
+    onReferenceSelected(label: string | null): void {
+        this.selectedDefinitionLabel = label;
+        if (label) {
+            this.addReference();
+        }
+        this.closeReferencePicker();
+    }
+
+    /**
+     * Cierra el combo al perder el foco (p. ej. tras cancelar el desplegable
+     * nativo). Se difiere un tick para no interferir con el `change` de la
+     * selección (que ya lo habrá cerrado).
+     */
+    onReferencePickerBlur(): void {
+        setTimeout(() => {
+            if (this.referencePickerOpen) {
+                this.closeReferencePicker();
+            }
+        }, 0);
+    }
+
+    closeReferencePicker(): void {
+        this.referencePickerOpen = false;
+        this.selectedDefinitionLabel = null;
+    }
+
+    private focusReferenceSelect(): void {
+        const select = this.referenceSelectRef?.nativeElement;
+        if (!select) {
+            return;
+        }
+        select.focus();
+        const picker = select as HTMLSelectElement & { showPicker?: () => void };
+        if (typeof picker.showPicker === 'function') {
+            try {
+                picker.showPicker();
+            } catch {
+                // `showPicker` puede requerir gesto de usuario o no estar
+                // soportado: el `focus` ya deja el control operable por teclado.
+            }
+        }
     }
 
     /** Elimina una referencia del cuerpo de la parte. */

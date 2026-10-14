@@ -32,7 +32,8 @@ jest.mock('@angular/core', () => {
     EventEmitter,
     Component: () => (target: unknown) => target,
     Input: propertyDecorator,
-    Output: propertyDecorator
+    Output: propertyDecorator,
+    ViewChild: propertyDecorator
   };
 });
 
@@ -179,6 +180,69 @@ describe('PartComponent · GUI de referencias (fase 2)', () => {
   });
 });
 
+describe('PartComponent · combo de añadir referencia (botón → combo → añadir)', () => {
+  function withLibrary(): { component: PartComponent; part: Part; song: Song } {
+    const song = new Song();
+    song.blocks = [definition('Riff'), definition('Coro')];
+    const part = new Part();
+    part.items = [];
+    return { component: createComponent(part, song), part, song };
+  }
+
+  it('toggleReferencePicker abre y cierra el combo; cerrado por defecto', () => {
+    const { component } = withLibrary();
+
+    expect(component.referencePickerOpen).toBe(false);
+
+    component.toggleReferencePicker();
+    expect(component.referencePickerOpen).toBe(true);
+
+    component.toggleReferencePicker();
+    expect(component.referencePickerOpen).toBe(false);
+  });
+
+  it('no abre el combo sin definiciones en la biblioteca', () => {
+    const component = createComponent(new Part(), new Song());
+
+    component.toggleReferencePicker();
+
+    expect(component.referencePickerOpen).toBe(false);
+  });
+
+  it('seleccionar una definición añade la referencia y oculta el combo', () => {
+    const { component, part } = withLibrary();
+    component.toggleReferencePicker();
+
+    component.onReferenceSelected('Coro');
+
+    expect((part.items[0] as BlockReference).targetLabel).toBe('Coro');
+    expect(component.referencePickerOpen).toBe(false);
+    expect(component.selectedDefinitionLabel).toBeNull();
+  });
+
+  it('onReferenceSelected sin label solo cierra el combo', () => {
+    const { component, part } = withLibrary();
+    component.toggleReferencePicker();
+
+    component.onReferenceSelected(null);
+
+    expect(part.items).toHaveLength(0);
+    expect(component.referencePickerOpen).toBe(false);
+  });
+
+  it('closeReferencePicker y el cierre diferido por blur ocultan el combo', () => {
+    jest.useFakeTimers();
+    const { component } = withLibrary();
+    component.toggleReferencePicker();
+
+    component.onReferencePickerBlur();
+    jest.runOnlyPendingTimers();
+
+    expect(component.referencePickerOpen).toBe(false);
+    jest.useRealTimers();
+  });
+});
+
 describe('PartComponent · template de referencias', () => {
   it('recorre part.items en orden y pinta app-block-reference', () => {
     expect(template).toContain('*ngFor="let item of part.items; trackBy: trackByItem"');
@@ -192,6 +256,19 @@ describe('PartComponent · template de referencias', () => {
     expect(template).toContain('Add block reference');
     expect(template).toContain('[disabled]="definitionOptions.length === 0"');
     expect(template).toContain('Create a block in the library first');
+  });
+
+  it('por defecto solo hay botón: el combo aparece al pulsarlo', () => {
+    // El select está guardado por `referencePickerOpen` y se enlaza al botón.
+    expect(template).toContain('*ngIf="referencePickerOpen"');
+    expect(template).toContain('#referenceSelect');
+    expect(template).toContain('(click)="toggleReferencePicker()"');
+    expect(template).toContain('(ngModelChange)="onReferenceSelected($event)"');
+    // Accesibilidad del disparador.
+    expect(template).toContain('aria-haspopup="listbox"');
+    expect(template).toContain('[attr.aria-expanded]="referencePickerOpen"');
+    // El select ya no vive siempre en la vista.
+    expect(template).not.toContain('[(ngModel)]="selectedDefinitionLabel"');
   });
 
   it('tiene empty state cuando la parte no tiene ítems', () => {
