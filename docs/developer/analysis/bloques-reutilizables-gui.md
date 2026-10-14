@@ -2,8 +2,8 @@
 
 - **Fecha:** 2026-10-14
 - **Autor:** JORGE (UI/UX)
-- **Rama:** `feature/reusable-blocks` (Fase 2 del ADR-002)
-- **Estado:** GUI implementada y en verde (`npm test`, `npm run test:cov`, `npm run build`)
+- **Rama:** `feature/reusable-blocks-gui` (Fase 2 del ADR-002; apilada sobre `feature/reusable-blocks`)
+- **Estado:** GUI implementada, validada por Bicho (sin bugs) y en verde (`npm test`, `npm run test:cov`, `npm run build`)
 - **Referencias:** `docs/developer/adr/ADR-002-bloques-reutilizables.md` §6, `docs/developer/design/propuesta-bloques-reutilizables.md` §9, `docs/developer/analysis/bloques-reutilizables-implementados.md` (fase 1)
 
 ---
@@ -25,6 +25,8 @@
 - **Panel de biblioteca:** misma caja que el panel de Variables (borde `#ddd`, radio 4px, cabecera clicable con chevron, título y contador); filas compactas; acciones al hover/focus con reserva de espacio (sin saltos de layout).
 - **Referencia:** ítem visualmente distinto (acento lateral `#90a4ae` + fondo tenue) frente al bloque inline; el aviso de huérfana usa acento rojo.
 - **Combo de añadir referencia:** select nativo sin flecha, coherente con el resto de combos de la app.
+
+> Nota (validación de Bicho): `isBlockLabelAvailable` considera "vacío" con `trim` pero compara duplicados sin normalizar espacios (igual que el parser/serializador, que no normalizan labels); permite etiquetas con espacios colgantes, sin afectar al round-trip.
 
 ## 3. Decisiones de UX (iterables en vivo)
 
@@ -48,4 +50,4 @@ Si el modelo se construye a mano con un `use` sin definición, la referencia se 
 
 ## 6. Tests
 
-Suites nuevas: `song-blocks.jest.spec` (helpers de modelo), `block-library.jest.spec`, `block-reference.jest.spec`, `part-references-gui.jest.spec`, `block-library-mode.jest.spec` (bloque), `block-library-panel.jest.spec` (song-editor). Total: **803 tests en verde**; cobertura sin bajar (`song-blocks.ts` ~96 % stmts). `npm run build` en verde.
+Suites nuevas: `song-blocks.jest.spec` (helpers de modelo), `block-library.jest.spec`, `block-reference.jest.spec`, `part-references-gui.jest.spec`, `block-library-mode.jest.spec` (bloque), `block-library-panel.jest.spec` (song-editor); Bicho añadió `part-references-integration.jest.spec` y ampliaciones (23 tests). Total: **826 tests en verde** (73 suites); cobertura sin bajar (`song-blocks.ts` ~98 % stmts). `npm run build` en verde.
