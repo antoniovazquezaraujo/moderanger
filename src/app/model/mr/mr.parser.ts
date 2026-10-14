@@ -11,6 +11,7 @@
  */
 import { InstrumentType } from '../../services/audio-engine.service';
 import { Block } from '../block';
+import { BlockReference } from '../block-reference';
 import { Command, CommandType } from '../command';
 import { AssignOperation, BaseOperation, VaryOperation } from '../operation';
 import { Part } from '../part';
@@ -176,6 +177,8 @@ class MrDocumentParser {
   private lastConsumed: SourceLine | undefined;
   private readonly document: SongDocument;
   private readonly sourceMap?: MrSourceMapEntry[];
+  /** Nombres de las definiciones de `blocks` (unicidad y resolución de `use`). */
+  private readonly blockLabels = new Set<string>();
 
   constructor(private readonly lines: SourceLine[], sourceMap?: MrSourceMapEntry[]) {
     this.sourceMap = sourceMap;
@@ -191,6 +194,9 @@ class MrDocumentParser {
     if (this.peek() && this.peek()!.indent === 0 && startsWithWord(this.peek()!.code, 'vars')) {
       this.parseVars();
     }
+    if (this.peek() && this.peek()!.indent === 0 && startsWithWord(this.peek()!.code, 'blocks')) {
+      this.parseBlocks();
+    }
     while (this.peek()) {
       const line = this.peek()!;
       if (line.indent !== 0) {
@@ -205,13 +211,19 @@ class MrDocumentParser {
       if (word === 'vars') {
         throw errorAt(line, line.indent + 1, `'vars' solo puede aparecer una vez y antes de la primera parte`);
       }
+      if (word === 'blocks') {
+        if (this.document.song.parts.length > 0) {
+          throw errorAt(line, line.indent + 1, `'blocks' debe ir antes de la primera parte`);
+        }
+        throw errorAt(line, line.indent + 1, `'blocks' ya está definido`);
+      }
       if (word === 'song' || word === 'version' || word === 'repeats' || word === 'bpm') {
         throw errorAt(line, line.indent + 1, `'${word}' debe ir en la cabecera, antes de 'vars' y de las partes`);
       }
       throw errorAt(
         line,
         line.indent + 1,
-        `clave desconocida '${word}' en el nivel raíz; se esperaba 'song', 'version', 'repeats', 'bpm', 'vars' o 'part'`
+        `clave desconocida '${word}' en el nivel raíz; se esperaba 'song', 'version', 'repeats', 'bpm', 'vars', 'blocks' o 'part'`
       );
     }
     // El bpm y las repeticiones canónicos viven en `Song`; la meta
@@ -383,27 +395,98 @@ class MrDocumentParser {
     return raw;
   }
 
+  // ----- biblioteca de bloques (`blocks`) ----------------------------------
+
+  /**
+   * Sección `blocks`: definiciones reutilizables, después de `vars` y antes de
+   * la primera `part`. Cada definición lleva nombre obligatorio y único.
+   */
+  private parseBlocks(): void {
+    const header = this.advance()!;
+    if (header.code !== 'blocks') {
+      throw errorAt(header, header.indent + 1, `'blocks' no admite argumentos`);
+    }
+    const defIndent = header.indent + 2;
+    for (;;) {
+      const line = this.peek();
+      if (!line || line.indent === 0) {
+        return;
+      }
+      if (line.indent !== defIndent) {
+        throw errorAt(line, 1, `indentación inesperada (${line.indent} espacios): las definiciones van con ${defIndent} espacios`);
+      }
+      if (!startsWithWord(line.code, 'block')) {
+        const word = firstWord(line.code);
+        if (word === 'use') {
+          throw this.nestedReferenceError(line);
+        }
+        throw errorAt(line, line.indent + 1, `clave desconocida '${word}' dentro de blocks; se esperaba 'block'`);
+      }
+      this.advance();
+      this.document.song.blocks.push(this.parseBlockDefinition(line, [this.document.song.blocks.length]));
+    }
+  }
+
+  private parseBlockDefinition(line: SourceLine, blockPath: readonly number[]): Block {
+    const block = new Block();
+    const words = splitLineWords(line.code, line.number, line.indent);
+    let i = 1;
+    const named = i < words.length && !(words[i].text === 'repeats' && !words[i].quoted);
+    if (!named) {
+      throw errorAt(line, line.indent + 1, `una definición requiere nombre (p. ej. block Riff)`);
+    }
+    const nameWord = words[i];
+    block.label = this.parseNameWord(nameWord, line, 'definición');
+    if (this.blockLabels.has(block.label)) {
+      throw errorAt(line, nameWord.column, `ya existe una definición con el nombre '${block.label}' en blocks`);
+    }
+    this.blockLabels.add(block.label);
+    i++;
+    if (i < words.length && words[i].text === 'repeats' && !words[i].quoted) {
+      i++;
+      if (i >= words.length) {
+        throw errorAt(line, words[i - 1].column, `'repeats' requiere un entero (p. ej. repeats 2)`);
+      }
+      const value = words[i].quoted ? null : parseCanonicalInteger(words[i].text);
+      if (value === null || value < 0) {
+        throw errorAt(line, words[i].column, `'repeats' de definición debe ser un entero >= 0 (recibido '${words[i].text}')`);
+      }
+      block.repeatingTimes = value;
+      i++;
+    }
+    if (i < words.length) {
+      throw errorAt(line, words[i].column, `texto inesperado '${words[i].text}' tras la cabecera de la definición`);
+    }
+    // Las definiciones no forman parte del source map de partes/bloques GUI.
+    this.parseBlockBody(block, line.indent + 2, -1, blockPath);
+    return block;
+  }
+
   // ----- partes y bloques --------------------------------------------------
 
   private parsePart(line: SourceLine, partIndex: number): void {
     const part = new Part();
-    part.blocks = [];
+    part.items = [];
     this.parsePartHeader(part, line);
     const bodyIndent = line.indent + 2;
     while (this.peek() && this.peek()!.indent >= bodyIndent) {
-      const blockLine = this.peek()!;
-      if (blockLine.indent !== bodyIndent) {
-        throw errorAt(blockLine, 1, `indentación inesperada (${blockLine.indent} espacios): se esperaban ${bodyIndent}`);
+      const itemLine = this.peek()!;
+      if (itemLine.indent !== bodyIndent) {
+        throw errorAt(itemLine, 1, `indentación inesperada (${itemLine.indent} espacios): se esperaban ${bodyIndent}`);
       }
-      if (!startsWithWord(blockLine.code, 'block')) {
+      if (startsWithWord(itemLine.code, 'block')) {
+        this.advance();
+        part.items.push(this.parseBlock(itemLine, partIndex, [part.items.length]));
+      } else if (startsWithWord(itemLine.code, 'use')) {
+        this.advance();
+        part.items.push(this.parseReference(itemLine));
+      } else {
         throw errorAt(
-          blockLine,
-          blockLine.indent + 1,
-          `clave desconocida '${firstWord(blockLine.code)}' dentro de una parte; se esperaba 'block'`
+          itemLine,
+          itemLine.indent + 1,
+          `clave desconocida '${firstWord(itemLine.code)}' dentro de una parte; se esperaba 'block' o 'use'`
         );
       }
-      this.advance();
-      part.blocks.push(this.parseBlock(blockLine, partIndex, [part.blocks.length]));
     }
     this.document.song.parts.push(part);
     this.recordSourceEntry('part', part, partIndex, [], line);
@@ -492,11 +575,100 @@ class MrDocumentParser {
       } else if (word === 'block') {
         this.advance();
         block.children.push(this.parseBlock(line, partIndex, [...blockPath, block.children.length]));
+      } else if (word === 'use') {
+        throw this.nestedReferenceError(line);
       } else {
         throw errorAt(
           line,
           line.indent + 1,
           `clave desconocida '${word}' dentro de un bloque; se esperaba 'notes', 'commands', 'operations' o 'block'`
+        );
+      }
+    }
+  }
+
+  private nestedReferenceError(line: SourceLine): MrParseError {
+    return errorAt(
+      line,
+      line.indent + 1,
+      'v1 no admite referencias anidadas: `use` solo puede ser un ítem directo de una parte'
+    );
+  }
+
+  // ----- referencias (`use`) -----------------------------------------------
+
+  /**
+   * Ítem `use <nombre> [repeats N]` de una parte: referencia a una definición
+   * de la biblioteca `blocks`, resuelta por nombre en tiempo de parseo. Solo
+   * admite `commands`/`operations` propios (sin `notes` ni hijos en v1).
+   */
+  private parseReference(line: SourceLine): BlockReference {
+    const words = splitLineWords(line.code, line.number, line.indent);
+    const reference = new BlockReference();
+    let i = 1;
+    if (i >= words.length || (!words[i].quoted && words[i].text === 'repeats')) {
+      throw errorAt(line, line.indent + 1, `'use' requiere el nombre de una definición (p. ej. use Riff)`);
+    }
+    const nameWord = words[i];
+    reference.targetLabel = this.parseNameWord(nameWord, line, 'referencia');
+    i++;
+    if (i < words.length && words[i].text === 'repeats' && !words[i].quoted) {
+      i++;
+      if (i >= words.length) {
+        throw errorAt(line, words[i - 1].column, `'repeats' requiere un entero (p. ej. repeats 2)`);
+      }
+      const value = words[i].quoted ? null : parseCanonicalInteger(words[i].text);
+      if (value === null || value < 0) {
+        throw errorAt(line, words[i].column, `'repeats' de referencia debe ser un entero >= 0 (recibido '${words[i].text}')`);
+      }
+      reference.repeatingTimes = value;
+      i++;
+    }
+    if (i < words.length) {
+      throw errorAt(line, words[i].column, `texto inesperado '${words[i].text}' tras la cabecera de la referencia`);
+    }
+    if (!this.blockLabels.has(reference.targetLabel)) {
+      const defined = [...this.blockLabels];
+      const list = defined.length > 0 ? `; definidas: ${defined.join(', ')}` : '; no hay definiciones en blocks';
+      throw errorAt(line, nameWord.column, `no existe la definición '${reference.targetLabel}' en blocks${list}`);
+    }
+    this.parseReferenceBody(reference, line.indent + 2);
+    return reference;
+  }
+
+  private parseReferenceBody(reference: BlockReference, bodyIndent: number): void {
+    const sections = new Set<string>();
+    for (;;) {
+      const line = this.peek();
+      if (!line || line.indent < bodyIndent) {
+        return;
+      }
+      if (line.indent > bodyIndent) {
+        throw errorAt(line, 1, `indentación inesperada (${line.indent} espacios): se esperaban ${bodyIndent}`);
+      }
+      const word = firstWord(line.code);
+      if (word === 'commands' || word === 'operations') {
+        if (sections.has(word)) {
+          throw errorAt(line, line.indent + 1, `la sección '${word}' ya existe en esta referencia`);
+        }
+        sections.add(word);
+        this.advance();
+        if (word === 'commands') {
+          this.parseCommandsSection(reference, line);
+        } else {
+          this.parseOperationsSection(reference, line);
+        }
+      } else if (word === 'notes') {
+        throw errorAt(line, line.indent + 1, `las notas vienen de la definición; 'use' no admite 'notes'`);
+      } else if (word === 'block') {
+        throw errorAt(line, line.indent + 1, `v1 no admite bloques hijos dentro de una referencia`);
+      } else if (word === 'use') {
+        throw this.nestedReferenceError(line);
+      } else {
+        throw errorAt(
+          line,
+          line.indent + 1,
+          `clave desconocida '${word}' dentro de una referencia; se esperaba 'commands' o 'operations'`
         );
       }
     }
@@ -569,7 +741,7 @@ class MrDocumentParser {
     return word.text.slice(1);
   }
 
-  private parseCommandsSection(block: Block, header: SourceLine): void {
+  private parseCommandsSection(target: { commands: Command[] }, header: SourceLine): void {
     const contentIndent = header.indent + 2;
     for (;;) {
       const line = this.peek();
@@ -580,7 +752,7 @@ class MrDocumentParser {
         throw errorAt(line, 1, `indentación inesperada (${line.indent} espacios): los comandos van con ${contentIndent} espacios`);
       }
       this.advance();
-      block.commands.push(this.parseCommand(line));
+      target.commands.push(this.parseCommand(line));
     }
   }
 
@@ -706,7 +878,7 @@ class MrDocumentParser {
     const duration = event.kind === 'group' ? event.duration : (event.duration ?? '16n');
     return Tone.Time(duration).toSeconds();
   }
-  private parseOperationsSection(block: Block, header: SourceLine): void {
+  private parseOperationsSection(target: { operations: BaseOperation[] }, header: SourceLine): void {
     const contentIndent = header.indent + 2;
     for (;;) {
       const line = this.peek();
@@ -717,7 +889,7 @@ class MrDocumentParser {
         throw errorAt(line, 1, `indentación inesperada (${line.indent} espacios): las operaciones van con ${contentIndent} espacios`);
       }
       this.advance();
-      block.operations.push(this.parseOperation(line));
+      target.operations.push(this.parseOperation(line));
     }
   }
 
@@ -820,7 +992,7 @@ class MrDocumentParser {
     blockPath: readonly number[],
     start: SourceLine
   ): void {
-    if (this.sourceMap === undefined) {
+    if (this.sourceMap === undefined || partIndex < 0) {
       return;
     }
     const end = this.lastConsumed ?? start;
