@@ -296,6 +296,16 @@ describe('BlockLibraryComponent · template', () => {
     expect(revealed![1]).toContain('pointer-events: auto');
   });
 
+  it('las acciones de cada fila siguen al contenido (no flotan a la derecha)', () => {
+    const controls = /\.library-entry-controls\s*\{([^}]*)\}/.exec(styles);
+    expect(controls).not.toBeNull();
+    // Sin `margin-left: auto`: quedan tras el nombre y el pill de usos.
+    expect(controls![1]).not.toContain('margin-left: auto');
+    // Sigue ocultándose al reposo con su espacio reservado.
+    expect(controls![1]).toContain('opacity: 0');
+    expect(controls![1]).toContain('pointer-events: none');
+  });
+
   it('cada definición reutiliza el editor de bloque ocultando su nombre/acciones de raíz', () => {
     expect(template).toContain('<app-block');
     expect(template).toContain('[hideLabel]="true"');

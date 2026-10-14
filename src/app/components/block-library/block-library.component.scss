@@ -127,11 +127,12 @@
   font-size: 0.7rem;
 }
 
-/* Acciones al hover/foco, sin saltos de layout (mismo patrón que bloques). */
+/* Acciones al hover/foco, sin saltos de layout (mismo patrón que bloques).
+   Siguen al nombre y al pill de usos (sin `margin-left: auto`): no flotan al
+   extremo derecho de la fila. */
 .library-entry-controls {
   display: flex;
   gap: 1px;
-  margin-left: auto;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.12s ease;
