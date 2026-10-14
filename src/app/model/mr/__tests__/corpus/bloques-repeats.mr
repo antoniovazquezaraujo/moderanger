@@ -1,0 +1,17 @@
+song Repeticiones
+version 1
+
+vars
+  $oct = 3
+
+blocks
+  block Eco repeats 2
+    notes
+      0
+    commands
+      OCT $oct
+
+part Voz
+  use Eco repeats 3
+    operations
+      VARY $oct 1

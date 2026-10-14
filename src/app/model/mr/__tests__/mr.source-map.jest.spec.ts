@@ -1,3 +1,4 @@
+import { Block } from '../../block';
 import { parseSong, parseSongWithSourceMap } from '../mr.parser';
 import { serializeSong } from '../mr.serializer';
 import { findSourceEntryAtLine, findSourceEntryForNode, MrSourceMapEntry } from '../mr.source-map';
@@ -62,12 +63,12 @@ describe('parseSongWithSourceMap: documento y ranges', () => {
     const uno = blockEntry(sourceMap, 0, [0]);
     expect(uno.range.start).toEqual({ line: 8, column: 3 });
     expect(uno.range.end.line).toBe(12);
-    expect(uno.node).toBe(partA.blocks[0]);
+    expect(uno.node).toBe(partA.items[0] as Block);
 
     const hijo = blockEntry(sourceMap, 0, [0, 0]);
     expect(hijo.range.start.line).toBe(11);
     expect(hijo.range.end.line).toBe(12);
-    expect(hijo.node).toBe(partA.blocks[0].children[0]);
+    expect(hijo.node).toBe((partA.items[0] as Block).children[0]);
 
     const repeats = blockEntry(sourceMap, 0, [1]);
     expect(repeats.range.start.line).toBe(13);
@@ -99,5 +100,49 @@ describe('parseSongWithSourceMap: documento y ranges', () => {
     expect(entries).toHaveLength(2);
     expect(entries.map((entry) => entry.range.start.line).sort((a, b) => a - b)).toEqual([2, 3]);
     expect(blockEntry(crlf.sourceMap, 0, [0, 0]).range.end.line).toBe(3);
+  });
+});
+
+describe('parseSongWithSourceMap: definiciones de `blocks` y referencias `use`', () => {
+  const SOURCE = `song Source
+version 1
+
+blocks
+  block Riff
+    notes
+      0
+    block Hijo
+      notes
+        1
+
+part P
+  use Riff
+    commands
+      OCT 2
+  block Inline
+    notes
+      3
+`;
+
+  it('no genera entradas para definiciones ni para sus hijos (partIndex = -1 documentado)', () => {
+    const { document, sourceMap } = parseSongWithSourceMap(SOURCE);
+    const definition = document.song.blocks[0];
+
+    expect(sourceMap.filter((entry) => entry.kind === 'block')).toHaveLength(1);
+    expect(findSourceEntryForNode(sourceMap, definition)).toBeUndefined();
+    expect(findSourceEntryForNode(sourceMap, definition.children[0])).toBeUndefined();
+  });
+
+  it('conserva las entradas de partes/bloques y el blockPath tras una referencia', () => {
+    const { document, sourceMap } = parseSongWithSourceMap(SOURCE);
+    const part = document.song.parts[0];
+
+    expect(sourceMap.filter((entry) => entry.kind === 'part')).toHaveLength(1);
+    // La referencia ocupa el ítem 0; el bloque inline posterior es el ítem 1.
+    const inline = blockEntry(sourceMap, 0, [1]);
+    expect(inline.node).toBe(part.items[1] as Block);
+    expect(inline.range.start.line).toBe(16);
+    // La línea de la referencia no es ningún bloque: devuelve la parte.
+    expect(findSourceEntryAtLine(sourceMap, 13)!.kind).toBe('part');
   });
 });

@@ -1,11 +1,12 @@
 import { BlockContent } from './block.content';
-import { Command } from './command';
-import { BaseOperation, VaryOperation, AssignOperation } from './operation';
-import { VariableContext } from './variable.context';
+import { cloneCommand, Command } from './command';
+import { AssignOperation, BaseOperation, cloneOperation, VaryOperation } from './operation';
 
 export class Block {
     static _id: number = 0;
     id: number = Block._id++;
+    /** Discriminador de la unión `PartItem` (`Block | BlockReference`). */
+    readonly kind: 'block' = 'block';
     label: string = '';
     pulse: number = 0;
     repeatingTimes: number = 1;
@@ -133,41 +134,11 @@ export class Block {
         clonedContent.defaultDuration = this.blockContent.defaultDuration;
         clonedBlock.blockContent = clonedContent;
 
-        clonedBlock.commands = this.commands.map(command => {
-            const clonedCommand = new Command({
-                type: command.type,
-                isVariable: command.isVariable
-            });
-            
-            // Si es una variable, usar el método getVariableName() para obtener el nombre de la variable
-            if (command.isVariable) {
-                const variableName = command.getVariableName();
-                if (variableName) {
-                    clonedCommand.setVariable(variableName);
-                }
-            } else {
-                clonedCommand.setValue(command.value);
-            }
-            
-            return clonedCommand;
-        });
+        clonedBlock.commands = this.commands.map(cloneCommand);
 
         clonedBlock.children = this.children.map(child => child.clone());
 
-        clonedBlock.operations = this.operations.map(operation => {
-            if (operation instanceof VaryOperation) {
-                // Ensure value is number (step)
-                const numValue = typeof operation.value === 'number' ? operation.value : 
-                    (parseInt(String(operation.value)) || 1);
-                return new VaryOperation(operation.variableName, numValue);
-            } else if (operation instanceof AssignOperation) {
-                return new AssignOperation(operation.variableName, operation.value);
-            } else {
-                console.error(`Cloning Error: Unknown operation type: ${operation.constructor.name}. Defaulting to Assign.`);
-                // Defaulting might be safer than throwing error during clone
-                return new AssignOperation(operation.variableName, operation.value);
-            }
-        });
+        clonedBlock.operations = this.operations.map(cloneOperation);
         return clonedBlock;
     }
 

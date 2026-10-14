@@ -92,6 +92,25 @@ const EXAMPLE = [
   ''
 ].join('\n');
 
+/** `.mr` canónico con biblioteca `blocks` y una referencia `use`. */
+const BLOCKS_EXAMPLE = [
+  'song Reutilizables',
+  'version 1',
+  '',
+  'blocks',
+  '  block Riff',
+  '    notes',
+  '      0',
+  '    commands',
+  '      OCT 4',
+  '',
+  'part Piano',
+  '  use Riff',
+  '    commands',
+  '      OCT 5',
+  ''
+].join('\n');
+
 /** Construye un `SimpleChange` sin depender del runtime de Angular. */
 const change = (previousValue: unknown, currentValue: unknown, firstChange: boolean): SimpleChange =>
   ({ previousValue, currentValue, firstChange } as SimpleChange);
@@ -156,6 +175,28 @@ describe('MrTextEditorComponent · aplicar .mr y refrescar tras la carrera de in
     expect(component.serializeError).toBeNull();
     expect(component.dirty).toBe(false);
     expect(VariableContext.getValue('motif')).toBe('4t:0');
+  });
+
+  it('aplica un .mr con biblioteca `blocks` y referencias `use` y refresca canónico', () => {
+    const { component } = createEditor();
+    const oldSong = new Song();
+    component.song = oldSong;
+    component.ngOnChanges({ song: change(undefined, oldSong, true) });
+    const applied: MrTextAppliedEvent[] = [];
+    component.applied.subscribe(event => applied.push(event));
+
+    component.text = BLOCKS_EXAMPLE;
+    component.apply();
+
+    expect(component.errors).toEqual([]);
+    expect(component.serializeError).toBeNull();
+    expect(applied).toHaveLength(1);
+    expect(applied[0].song.blocks.map(block => block.label)).toEqual(['Riff']);
+    expect(applied[0].song.parts[0].items[0].kind).toBe('reference');
+    // El texto se regenera canónico: la definición precede a la parte.
+    expect(component.text).toContain('blocks\n  block Riff');
+    expect(component.text).toContain('part Piano\n  use Riff');
+    expect(component.dirty).toBe(false);
   });
 
   it('no pisa ediciones sin aplicar cuando cambia la canción', () => {

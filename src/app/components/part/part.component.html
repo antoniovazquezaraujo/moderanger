@@ -10,7 +10,7 @@
             <input type="text" [(ngModel)]="part.name" class="part-name-input" placeholder="Part {{part.id}}">
         </div>
         <div class="part-controls">
-            <ng-container *ngFor="let block of part.blocks">
+            <ng-container *ngFor="let block of blocks">
                 <button pButton type="button" icon="pi pi-plus" (click)="onAddChild(block)" pTooltip="Add child block"></button>
             </ng-container>
             <button pButton type="button" icon="pi pi-times" (click)="removePart()" pTooltip="Remove part"></button>
@@ -20,7 +20,7 @@
         </div>
     </div>
     <div class="part-content" *ngIf="isExpanded">
-        <ng-container *ngFor="let block of part.blocks">
+        <ng-container *ngFor="let block of blocks">
             <app-block 
                 [block]="block" 
                 (onDuplicateBlock)="onDuplicateBlock($event)" 

@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { Player } from "./player";
 import { Song } from "./song";
 import { NoteData } from "./note";
-import { Part } from "./part";
+import { Part, PartItem } from "./part";
 import { Block } from "./block";
+import { BlockReference } from "./block-reference";
 import { PlayMode, arpeggiate } from "./play.mode";
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
 import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
@@ -39,6 +40,12 @@ export interface PlayingNoteSource {
 
 type ExecutionUnit = {
     block: Block;
+    /** Comandos a ejecutar en esta unidad (definición y/o llamada, según el caso). */
+    commands: Command[];
+    /** Operaciones a ejecutar en esta unidad (definición y/o llamada). */
+    operations: BaseOperation[];
+    /** `true` si esta unidad genera las notas de `block` (pasada de notas). */
+    includeNotes: boolean;
     repetitionIndex: number;
     childLevel: number;
     parentBlock?: Block;
@@ -279,16 +286,7 @@ export class SongPlayer {
         try {
             const instrumentId = await this.audioEngine.createInstrument(part.instrumentType);
             const player = new Player(0, part.instrumentType, instrumentId, this.audioEngine);
-            const executionUnits: ExecutionUnit[] = [];
-            const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
-                for (let i = 0; i < block.repeatingTimes; i++) {
-                    executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
-                    block.children?.forEach(childBlock => {
-                            addBlockAndChildren(childBlock, childLevel + 1, block);
-                    });
-                }
-            };
-            part.blocks.forEach(block => addBlockAndChildren(block));
+            const executionUnits: ExecutionUnit[] = this._buildExecutionUnits(part, song);
             partState = {
                 part, player, instrumentId, executionUnits,
                 currentUnitIndex: 0,
@@ -318,10 +316,10 @@ export class SongPlayer {
             const unit = state.executionUnits[state.currentUnitIndex];
             if (unit) {
                 const { block } = unit;
-                block.commands?.forEach((command: Command) => command.execute(state.player));
-                block.executeBlockOperations(); 
+                unit.commands.forEach((command: Command) => command.execute(state.player));
+                this._executeOperations(unit.operations);
 
-                if (block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
+                if (unit.includeNotes && block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
                     const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player);
                     state.extractedNotes = state.extractedNotes.concat(blockNotes);
                 }
@@ -385,19 +383,115 @@ export class SongPlayer {
     }
 
     private _substituteVariablesInSong(song: Song): void {
+        const processBlock = (block: Block) => {
+             if (block.blockContent?.isVariable && block.blockContent?.variableName) {
+                  const value = VariableContext.getValue(block.blockContent.variableName);
+                  if (typeof value === 'string') {
+                      block.blockContent.notes = value;
+                } else {
+                      console.warn(`Variable ${block.blockContent.variableName} not found or not a string for block ${block.id}`);
+                  }
+             }
+             block.children?.forEach(processBlock);
+        };
+        // La biblioteca `blocks` alimenta las referencias: sus definiciones
+        // también resuelven `notes $var`.
+        song.blocks?.forEach(processBlock);
         song.parts.forEach(part => {
-            const processBlock = (block: Block) => {
-                 if (block.blockContent?.isVariable && block.blockContent?.variableName) {
-                      const value = VariableContext.getValue(block.blockContent.variableName);
-                      if (typeof value === 'string') {
-                          block.blockContent.notes = value;
-                    } else {
-                          console.warn(`Variable ${block.blockContent.variableName} not found or not a string for block ${block.id}`);
-                      }
-                 }
-                 block.children?.forEach(processBlock);
-            };
-            part.blocks?.forEach(processBlock);
+            part.items?.forEach((item: PartItem) => {
+                if (item.kind === 'block') {
+                    processBlock(item);
+                }
+            });
+        });
+    }
+
+    /**
+     * Construye las unidades de ejecución de una parte en orden de reproducción.
+     * Los bloques inline se expanden con sus hijos y repeticiones como siempre;
+     * las referencias `use` se expanden con el orden de la propuesta §5.1:
+     * commands def → operations def → commands llamada → operations llamada →
+     * notes def → hijos def, repetido `repeats llamada × repeats definición`.
+     */
+    private _buildExecutionUnits(part: Part, song: Song): ExecutionUnit[] {
+        const units: ExecutionUnit[] = [];
+        const library = new Map<string, Block>();
+        (song.blocks ?? []).forEach(block => library.set(block.label, block));
+
+        const addBlockAndChildren = (block: Block, childLevel: number, parentBlock?: Block) => {
+            for (let i = 0; i < block.repeatingTimes; i++) {
+                units.push({
+                    block,
+                    commands: block.commands ?? [],
+                    operations: block.operations ?? [],
+                    includeNotes: true,
+                    repetitionIndex: i,
+                    childLevel,
+                    parentBlock
+                });
+                block.children?.forEach(child => addBlockAndChildren(child, childLevel + 1, block));
+            }
+        };
+
+        const addReference = (reference: BlockReference, childLevel: number) => {
+            const definition = library.get(reference.targetLabel);
+            if (!definition) {
+                // El parser garantiza la resolución; el guardia evita un crash
+                // si el modelo se construye a mano.
+                console.warn(`[SongPlayer] La referencia '${reference.targetLabel}' no tiene definición en blocks.`);
+                return;
+            }
+            const passes = reference.repeatingTimes * definition.repeatingTimes;
+            for (let i = 0; i < passes; i++) {
+                // 1-2. commands + operations de la definición.
+                units.push({
+                    block: definition,
+                    commands: definition.commands ?? [],
+                    operations: definition.operations ?? [],
+                    includeNotes: false,
+                    repetitionIndex: i,
+                    childLevel
+                });
+                // 3-4. commands + operations de la llamada (pisan a la definición).
+                units.push({
+                    block: definition,
+                    commands: reference.commands ?? [],
+                    operations: reference.operations ?? [],
+                    includeNotes: false,
+                    repetitionIndex: i,
+                    childLevel
+                });
+                // 5. notes de la definición con el estado resultante.
+                units.push({
+                    block: definition,
+                    commands: [],
+                    operations: [],
+                    includeNotes: true,
+                    repetitionIndex: i,
+                    childLevel
+                });
+                // 6. hijos de la definición.
+                definition.children?.forEach(child => addBlockAndChildren(child, childLevel + 1, definition));
+            }
+        };
+
+        part.items?.forEach(item => {
+            if (item.kind === 'reference') {
+                addReference(item, 0);
+            } else {
+                addBlockAndChildren(item, 0);
+            }
+        });
+        return units;
+    }
+
+    private _executeOperations(operations: readonly BaseOperation[]): void {
+        operations.forEach(operation => {
+            try {
+                operation.execute();
+            } catch (error) {
+                console.error(`Error executing operation:`, error);
+            }
         });
     }
 
@@ -405,16 +499,7 @@ export class SongPlayer {
          const partStatePromises = song.parts.map(async (part, index): Promise<PartExecutionState> => {
             const instrumentId = await this.audioEngine.createInstrument(part.instrumentType);
             const player = new Player(index, part.instrumentType, instrumentId, this.audioEngine);
-            const executionUnits: ExecutionUnit[] = [];
-            const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
-                for (let i = 0; i < block.repeatingTimes; i++) {
-                    executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
-                    block.children?.forEach(childBlock => {
-                            addBlockAndChildren(childBlock, childLevel + 1, block);
-                    });
-                }
-            };
-            part.blocks.forEach(block => addBlockAndChildren(block));
+            const executionUnits: ExecutionUnit[] = this._buildExecutionUnits(part, song);
             const initialState = {
                 part, player, instrumentId, executionUnits,
                 currentUnitIndex: 0,
@@ -438,11 +523,11 @@ export class SongPlayer {
                 if (unit) {
                     const { block } = unit;
                     // Apply commands and operations FIRST
-                    block.commands?.forEach((command: Command) => command.execute(state.player));
-                    block.executeBlockOperations(); 
+                    unit.commands.forEach((command: Command) => command.execute(state.player));
+                    this._executeOperations(unit.operations);
 
                     // Check if notes exist before calling generation
-                    if (block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
+                    if (unit.includeNotes && block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
                          const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player); // Call the service
                          state.extractedNotes = state.extractedNotes.concat(blockNotes);
                     }

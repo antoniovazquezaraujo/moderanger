@@ -1,4 +1,5 @@
 import { DEFAULT_BPM, DEFAULT_REPEATS, Song } from '../song';
+import { Block } from '../block';
 
 describe('Song: bpm canónico', () => {
   it('usa 120 por defecto', () => {
@@ -23,7 +24,21 @@ describe('Song: bpm canónico', () => {
     const song = new Song();
     song.bpm = 108;
 
-    expect(song.toJSON()).toEqual({ name: 'Untitled Song', bpm: 108, repeats: 1, parts: [] });
+    expect(song.toJSON()).toEqual({ name: 'Untitled Song', bpm: 108, repeats: 1, parts: [], blocks: [] });
+  });
+
+  it('clone copia la biblioteca de bloques', () => {
+    const song = new Song();
+    song.name = 'Con biblioteca';
+    const block = new Block();
+    block.label = 'Riff';
+    song.blocks = [block];
+
+    const clone = song.clone();
+
+    expect(clone.blocks).toHaveLength(1);
+    expect(clone.blocks[0]).not.toBe(block);
+    expect(clone.blocks[0].label).toBe('Riff');
   });
 });
 
@@ -50,6 +65,6 @@ describe('Song: repeats canónico', () => {
     const song = new Song();
     song.repeats = 2;
 
-    expect(song.toJSON()).toEqual({ name: 'Untitled Song', bpm: 120, repeats: 2, parts: [] });
+    expect(song.toJSON()).toEqual({ name: 'Untitled Song', bpm: 120, repeats: 2, parts: [], blocks: [] });
   });
 });

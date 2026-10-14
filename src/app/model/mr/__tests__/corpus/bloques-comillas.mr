@@ -1,0 +1,10 @@
+song Comillas
+version 1
+
+blocks
+  block "Con espacios" repeats 0
+    notes
+      4
+
+part Coro
+  use "Con espacios" repeats 2

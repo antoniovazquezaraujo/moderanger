@@ -8,6 +8,7 @@
  */
 import { InstrumentType } from '../../services/audio-engine.service';
 import { Block } from '../block';
+import { BlockReference } from '../block-reference';
 import { Command, CommandType } from '../command';
 import { AssignOperation, BaseOperation, VaryOperation } from '../operation';
 import { Part } from '../part';
@@ -59,17 +60,64 @@ export function serializeSong(document: SongDocument): string {
       lines.push(`  $${name} = ${formatValue(value, `la variable $${name}`)}`);
     }
   }
+  emitBlocksSection(lines, document.song.blocks);
   for (const part of document.song.parts) {
     lines.push('');
     lines.push(formatPartLine(part));
-    part.blocks.forEach((block, blockIndex) => {
-      if (blockIndex > 0) {
+    part.items.forEach((item, itemIndex) => {
+      if (itemIndex > 0) {
         lines.push('');
       }
-      emitBlock(lines, block, 1);
+      if (item.kind === 'reference') {
+        emitReference(lines, item, 1);
+      } else {
+        emitBlock(lines, item, 1);
+      }
     });
   }
   return `${lines.join('\n')}\n`;
+}
+
+/** Sección `blocks`: biblioteca de definiciones con nombre obligatorio y único. */
+function emitBlocksSection(lines: string[], blocks: readonly Block[]): void {
+  if (blocks.length === 0) {
+    return;
+  }
+  lines.push('');
+  lines.push('blocks');
+  const seen = new Set<string>();
+  blocks.forEach((block, index) => {
+    if (block.label.trim() === '') {
+      throw new MrSerializeError(`una definición de blocks requiere nombre (bloque #${block.id})`);
+    }
+    if (seen.has(block.label)) {
+      throw new MrSerializeError(`nombre de definición duplicado en blocks: '${block.label}'`);
+    }
+    seen.add(block.label);
+    if (index > 0) {
+      lines.push('');
+    }
+    emitBlock(lines, block, 1);
+  });
+}
+
+/** Ítem `use`: cabecera + `commands`/`operations` propios (sin notas ni hijos). */
+function emitReference(lines: string[], reference: BlockReference, level: number): void {
+  const indent = '  '.repeat(level);
+  lines.push(`${indent}${formatReferenceLine(reference)}`);
+  const bodyIndent = `${indent}  `;
+  if (reference.commands.length > 0) {
+    lines.push(`${bodyIndent}commands`);
+    for (const command of reference.commands) {
+      lines.push(`${bodyIndent}  ${formatCommand(command, reference)}`);
+    }
+  }
+  if (reference.operations.length > 0) {
+    lines.push(`${bodyIndent}operations`);
+    for (const operation of reference.operations) {
+      lines.push(`${bodyIndent}  ${formatOperation(operation, reference)}`);
+    }
+  }
 }
 
 function emitBlock(lines: string[], block: Block, level: number): void {
@@ -164,7 +212,21 @@ function formatBlockLine(block: Block): string {
   return words.join(' ');
 }
 
-function formatCommand(command: Command, block: Block): string {
+function formatReferenceLine(reference: BlockReference): string {
+  if (reference.targetLabel.trim() === '') {
+    throw new MrSerializeError(`una referencia ${describeBlock(reference)} no tiene un nombre de definición`);
+  }
+  const words = ['use', formatName(reference.targetLabel)];
+  if (reference.repeatingTimes !== 1) {
+    if (!Number.isInteger(reference.repeatingTimes) || reference.repeatingTimes < 0) {
+      throw new MrSerializeError(`la referencia ${describeBlock(reference)} tiene 'repeats' inválido: ${String(reference.repeatingTimes)}`);
+    }
+    words.push('repeats', String(reference.repeatingTimes));
+  }
+  return words.join(' ');
+}
+
+function formatCommand(command: Command, block: Block | BlockReference): string {
   const type = command.type;
   if (command.isVariable) {
     const name = command.getVariableName();
@@ -224,7 +286,7 @@ function formatCommand(command: Command, block: Block): string {
   }
 }
 
-function formatOperation(operation: BaseOperation, block: Block): string {
+function formatOperation(operation: BaseOperation, block: Block | BlockReference): string {
   if (!IDENTIFIER_PATTERN.test(operation.variableName)) {
     throw new MrSerializeError(`operación con nombre de variable inválido '${operation.variableName}' en el bloque ${describeBlock(block)}`);
   }
@@ -258,11 +320,14 @@ function formatValue(value: string | number, context: string): string {
   return `"${escapeMrString(value)}"`;
 }
 
-function describeBlock(block: Block): string {
+function describeBlock(block: Block | BlockReference): string {
+  if (block.kind === 'reference') {
+    return block.targetLabel !== '' ? `"${block.targetLabel}"` : `#${block.id}`;
+  }
   return block.label !== '' ? `"${block.label}"` : `#${block.id}`;
 }
 
-function wrapNotesError(block: Block, error: unknown): MrSerializeError {
+function wrapNotesError(block: Block | BlockReference, error: unknown): MrSerializeError {
   if (error instanceof MrParseError) {
     return new MrSerializeError(
       `las notas del bloque ${describeBlock(block)} no son válidas: ${error.message} (${error.line}:${error.column})`
@@ -271,7 +336,7 @@ function wrapNotesError(block: Block, error: unknown): MrSerializeError {
   return new MrSerializeError(`no se pudieron serializar las notas del bloque ${describeBlock(block)}: ${String(error)}`);
 }
 
-function wrapDecorationError(block: Block, error: unknown): MrSerializeError {
+function wrapDecorationError(block: Block | BlockReference, error: unknown): MrSerializeError {
   if (error instanceof MrParseError) {
     return new MrSerializeError(
       `los items de DECORATION del bloque ${describeBlock(block)} no son válidos: ${error.message} (${error.line}:${error.column})`

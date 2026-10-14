@@ -21,6 +21,12 @@ export class Song {
     name: string = "Untitled Song";
     parts: Part[] = [];
     /**
+     * Biblioteca de bloques reutilizables (sección `blocks` del `.mr`). Cada
+     * definición tiene nombre obligatorio y único (invariante del parser); las
+     * parts la referencian con `use`. Ver ADR-002.
+     */
+    blocks: Block[] = [];
+    /**
      * Tempo canónico de la canción (BPM). Es la fuente de verdad en memoria:
      * el `.mr` lo guarda en su cabecera (`bpm`) y `SongPlayer` lo aplica al
      * Transport al iniciar la reproducción (mismo rango que el parser).
@@ -42,6 +48,7 @@ export class Song {
         clonedSong.bpm = this.bpm;
         clonedSong.repeats = this.repeats;
         clonedSong.parts = this.parts.map(part => part.clone());
+        clonedSong.blocks = this.blocks.map(block => block.clone());
         return clonedSong;
     }
 
@@ -61,7 +68,8 @@ export class Song {
             name: this.name,
             bpm: this.bpm,
             repeats: this.repeats,
-            parts: this.parts.map(part => part.blocks)
+            parts: this.parts.map(part => part.items),
+            blocks: this.blocks
         };
     }
 }

@@ -124,8 +124,10 @@ export class NoteSchedulerService {
         };
 
         // Process all blocks in the part
-        for (const block of part.blocks) {
-          addBlockAndChildren(block);
+        for (const item of part.items) {
+          if (item.kind === 'block') {
+            addBlockAndChildren(item);
+          }
         }
 
         const partState: PartExecutionState = {
