@@ -1,13 +1,21 @@
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { Block } from 'src/app/model/block';
+import { BlockReference } from 'src/app/model/block-reference';
 import { Command } from 'src/app/model/command';
-import { Part } from 'src/app/model/part';
+import { Part, PartItem } from 'src/app/model/part';
 import { VariableContext } from 'src/app/model/variable.context';
 import { SongPlayer } from 'src/app/model/song.player';
 import { InstrumentType } from 'src/app/services/audio-engine.service';
 import { Song } from 'src/app/model/song';
 import { Player } from 'src/app/model/player';
+import { blockDefinitions, createBlockReference } from 'src/app/model/song-blocks';
+
+/** Opción del selector de definiciones al añadir una referencia. */
+interface DefinitionOption {
+    label: string;
+    value: string;
+}
 
 @Component({
     selector: 'app-part',
@@ -26,9 +34,14 @@ export class PartComponent implements OnInit {
     @Output() addChildEvent = new EventEmitter<{ parentBlock: Block | null, partId: number }>();
     @Output() playPartEvent = new EventEmitter<number>();
     @Output() stopPartEvent = new EventEmitter<number>();
+    /** Navegación a una definición de la biblioteca (desde una referencia). */
+    @Output() editDefinitionEvent = new EventEmitter<string>();
 
     currentBlock: Block = new Block();
     isExpanded: boolean = true;
+
+    /** Definición elegida en el selector para añadir una referencia. */
+    selectedDefinitionLabel: string | null = null;
 
     constructor(private songPlayer: SongPlayer) {
         this.onDuplicatePart = new EventEmitter<Part>();
@@ -40,11 +53,33 @@ export class PartComponent implements OnInit {
     }
 
     /**
-     * Bloques inline de la parte (sin las referencias `use`). La GUI de la fase
-     * 1 pinta solo bloques; las referencias se representarán en la fase 2.
+     * Bloques inline de la parte (sin las referencias `use`). Se conserva para
+     * los consumidores que solo operan sobre bloques; el render recorre
+     * `part.items` para respetar el orden real.
      */
     get blocks(): Block[] {
         return this.part.items.filter((item): item is Block => item.kind === 'block');
+    }
+
+    /** Definiciones de la biblioteca seleccionables al añadir una referencia. */
+    get definitionOptions(): DefinitionOption[] {
+        return blockDefinitions(this.song).map(definition => ({
+            label: definition.label,
+            value: definition.label
+        }));
+    }
+
+    /** Casts para el template (la unión `PartItem` se discrimina por `kind`). */
+    asBlock(item: PartItem): Block {
+        return item as Block;
+    }
+
+    asReference(item: PartItem): BlockReference {
+        return item as BlockReference;
+    }
+
+    trackByItem(_index: number, item: PartItem): number {
+        return item.id;
     }
 
     ensureUniqueBlocks() {
@@ -60,6 +95,43 @@ export class PartComponent implements OnInit {
             seen.add(item.id);
             return true;
         });
+    }
+
+    /** Añade una referencia `use` a la definición elegida en el selector. */
+    addReference(): void {
+        const label = this.selectedDefinitionLabel ?? this.definitionOptions[0]?.value;
+        if (!label) {
+            return;
+        }
+        this.part.items.push(createBlockReference(label));
+    }
+
+    /** Elimina una referencia del cuerpo de la parte. */
+    removeReference(reference: BlockReference): void {
+        this.part.removeItem(reference);
+    }
+
+    /** Duplica una referencia justo detrás de la original (mismo destino). */
+    duplicateReference(reference: BlockReference): void {
+        const index = this.part.items.indexOf(reference);
+        if (index !== -1) {
+            this.part.items.splice(index + 1, 0, reference.clone());
+        }
+    }
+
+    /** Reordena un ítem (`offset` -1 arriba / +1 abajo) dentro de la parte. */
+    moveItem(item: PartItem, offset: number): void {
+        const index = this.part.items.indexOf(item);
+        const target = index + offset;
+        if (index === -1 || target < 0 || target >= this.part.items.length) {
+            return;
+        }
+        this.part.items.splice(index, 1);
+        this.part.items.splice(target, 0, item);
+    }
+
+    onEditDefinition(label: string): void {
+        this.editDefinitionEvent.emit(label);
     }
 
     onDuplicateBlock(block: Block) {

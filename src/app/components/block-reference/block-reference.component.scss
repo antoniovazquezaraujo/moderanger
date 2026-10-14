@@ -1,0 +1,119 @@
+/*
+ * Referencia `use`: se distingue del bloque inline con un acento lateral y un
+ * fondo tenue, manteniendo el mismo lenguaje visual (borde, radio, densidad).
+ */
+.block-reference {
+  position: relative;
+  margin-bottom: 2px;
+  padding: 2px 6px;
+  border: 1px solid #d7dee5;
+  border-left: 3px solid #90a4ae;
+  border-radius: 4px;
+  background-color: #f5f7fa;
+}
+
+.block-reference--orphan {
+  border-left-color: #e57373;
+  background-color: #fdf3f3;
+}
+
+.reference-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 24px;
+  gap: 4px;
+}
+
+.reference-toggler-button {
+  width: 2rem;
+  flex: 0 0 auto;
+}
+
+.reference-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background-color: #e3ebf2;
+  color: #37474f;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.block-reference--orphan .reference-chip {
+  background-color: #f3d9d9;
+  color: #8a2b2b;
+}
+
+.reference-chip .pi {
+  font-size: 0.75rem;
+}
+
+.reference-name {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reference-repetitions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 2px;
+}
+
+.reference-repetitions .repetitions-label {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.reference-repetitions .repetitions-input {
+  width: 30px;
+  height: 18px;
+  padding: 0 1px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background-color: transparent;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  color: inherit;
+}
+
+.reference-repetitions .repetitions-input:focus {
+  outline: none;
+  border-color: #90a4ae;
+  background-color: #fff;
+}
+
+/* Mismo patrón que los controles de bloque/part: reservan su espacio y se
+   revelan al hover o al enfocar la referencia (sin layout shift). */
+.reference-controls {
+  display: flex;
+  gap: 1px;
+  margin-left: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.reference-header:hover .reference-controls,
+.reference-header:focus-within .reference-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.reference-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 2px 0.5rem;
+  color: #8a2b2b;
+  font-size: 0.85rem;
+}
+
+.reference-body {
+  margin-left: 0.75rem;
+}

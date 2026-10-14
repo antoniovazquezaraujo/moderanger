@@ -9,6 +9,27 @@
         <div class="part-info">
             <input type="text" [(ngModel)]="part.name" class="part-name-input" placeholder="Part {{part.id}}">
         </div>
+        <!-- Añadir referencia: selector de definiciones de la biblioteca. Si no
+             hay definiciones, queda deshabilitado con pista. -->
+        <div class="part-add-reference">
+            <select class="add-reference-select"
+                    [(ngModel)]="selectedDefinitionLabel"
+                    [disabled]="definitionOptions.length === 0"
+                    [pTooltip]="definitionOptions.length ? 'Choose a library block to reference' : 'Create a block in the library first'"
+                    tooltipPosition="top"
+                    aria-label="Block reference">
+                <option [ngValue]="null" disabled>Reference…</option>
+                <option *ngFor="let option of definitionOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+            <p-button
+                icon="pi pi-link"
+                pTooltip="Add block reference"
+                tooltipPosition="top"
+                aria-label="Add block reference"
+                [disabled]="definitionOptions.length === 0"
+                (click)="addReference()">
+            </p-button>
+        </div>
         <div class="part-controls">
             <ng-container *ngFor="let block of blocks">
                 <button pButton type="button" icon="pi pi-plus" (click)="onAddChild(block)" pTooltip="Add child block"></button>
@@ -20,13 +41,26 @@
         </div>
     </div>
     <div class="part-content" *ngIf="isExpanded">
-        <ng-container *ngFor="let block of blocks">
-            <app-block 
-                [block]="block" 
-                (onDuplicateBlock)="onDuplicateBlock($event)" 
+        <!-- Ítems en orden real: bloques inline y referencias `use`. -->
+        <ng-container *ngFor="let item of part.items; trackBy: trackByItem">
+            <app-block
+                *ngIf="item.kind === 'block'"
+                [block]="asBlock(item)"
+                (onDuplicateBlock)="onDuplicateBlock($event)"
                 (onRemoveBlock)="onRemoveBlock($event)"
                 (onAddChild)="onAddChild($event)">
             </app-block>
+            <app-block-reference
+                *ngIf="item.kind === 'reference'"
+                [reference]="asReference(item)"
+                [song]="song"
+                (editDefinition)="onEditDefinition($event)"
+                (removeReference)="removeReference($event)"
+                (duplicateReference)="duplicateReference($event)"
+                (moveUp)="moveItem($event, -1)"
+                (moveDown)="moveItem($event, 1)">
+            </app-block-reference>
         </ng-container>
+        <p class="part-empty" *ngIf="part.items.length === 0">No blocks yet.</p>
     </div>
 </div>

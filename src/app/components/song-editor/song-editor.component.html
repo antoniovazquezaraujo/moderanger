@@ -67,10 +67,12 @@
                 <app-variable-declaration></app-variable-declaration>
             </div>
         </div>
+        <app-block-library [song]="song" #blockLibrary></app-block-library>
         <app-song 
             [song]="song" 
             (removePartEvent)="removePartFromSong($event)"
-            (onDuplicatePartEvent)="duplicatePart($event)">
+            (onDuplicatePartEvent)="duplicatePart($event)"
+            (editDefinitionEvent)="focusBlockDefinition($event)">
         </app-song>
     </div>
 

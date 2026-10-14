@@ -1,0 +1,56 @@
+<!--
+  Referencia `use`: ítem distinto de un bloque inline. Chip con nombre + `×N`,
+  controles de reordenado/borrado y, desplegada, la edición de sus comandos y
+  operaciones de llamada (reutiliza `app-block-commands`).
+-->
+<div class="block-reference" [class.block-reference--orphan]="isOrphan">
+    <div class="reference-header">
+        <p-button
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+            (click)="toggleExpansion()"
+            styleClass="p-button-text p-button-sm reference-toggler-button"
+            [attr.aria-expanded]="expanded"
+            [attr.aria-label]="(expanded ? 'Collapse' : 'Expand') + ' reference ' + reference.targetLabel">
+        </p-button>
+
+        <span class="reference-chip"
+              [pTooltip]="isOrphan ? 'Missing block definition' : 'Reference to library block'"
+              tooltipPosition="top">
+            <i class="pi pi-link" aria-hidden="true"></i>
+            <span class="reference-name">{{ reference.targetLabel }}</span>
+            <span class="reference-repetitions">
+                <span class="repetitions-label" aria-hidden="true">×</span>
+                <input type="number"
+                       class="repetitions-input"
+                       [(ngModel)]="reference.repeatingTimes"
+                       min="0" max="99" step="1"
+                       [attr.aria-label]="'Repeats for reference ' + reference.targetLabel"
+                       pTooltip="Repeats"
+                       tooltipPosition="top">
+            </span>
+        </span>
+
+        <span class="reference-controls">
+            <p-button icon="pi pi-arrow-up" pTooltip="Move reference up" tooltipPosition="top"
+                      aria-label="Move reference up" (click)="moveUp.emit(reference)"></p-button>
+            <p-button icon="pi pi-arrow-down" pTooltip="Move reference down" tooltipPosition="top"
+                      aria-label="Move reference down" (click)="moveDown.emit(reference)"></p-button>
+            <p-button icon="pi pi-pencil" pTooltip="Edit block definition" tooltipPosition="top"
+                      aria-label="Edit block definition" (click)="onEditDefinition()"></p-button>
+            <p-button icon="pi pi-copy" pTooltip="Duplicate reference" tooltipPosition="top"
+                      aria-label="Duplicate reference" (click)="duplicateReference.emit(reference)"></p-button>
+            <p-button icon="pi pi-times" pTooltip="Remove reference" tooltipPosition="top"
+                      aria-label="Remove reference" (click)="removeReference.emit(reference)"></p-button>
+        </span>
+    </div>
+
+    <!-- Aviso degradado: el label no existe en la biblioteca (modelo a mano). -->
+    <div class="reference-warning" *ngIf="isOrphan" role="alert">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <span>Missing block definition &laquo;{{ reference.targetLabel }}&raquo;. It is ignored on playback.</span>
+    </div>
+
+    <div class="reference-body" *ngIf="expanded && !isOrphan">
+        <app-block-commands [block]="reference"></app-block-commands>
+    </div>
+</div>

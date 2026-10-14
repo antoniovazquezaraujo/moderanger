@@ -20,6 +20,8 @@ export class PartsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() song!: Song;
     @Output() onRemovePart: EventEmitter<Part>;
     @Output() onDuplicatePart: EventEmitter<Part>;
+    /** Navegación a una definición de la biblioteca (burbujea desde las parts). */
+    @Output() editDefinitionEvent = new EventEmitter<string>();
 
     /** Ancho mínimo por part; debe coincidir con el `min-width` del CSS. */
     readonly minPartWidth = MIN_PART_WIDTH;

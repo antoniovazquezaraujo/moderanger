@@ -71,6 +71,16 @@ export class BlockComponent implements OnInit, OnDestroy {
     return this._block;
   }
 
+  /**
+   * Oculta la caja de nombre del bloque **raíz** (los hijos conservan la suya):
+   * la biblioteca gestiona el nombre de sus definiciones para poder validarlo y
+   * propagar el renombrado en cascada a las referencias.
+   */
+  @Input() hideLabel = false;
+
+  /** Oculta las acciones del header (+, ×, copiar) del bloque **raíz**. */
+  @Input() hideControls = false;
+
   @Output() blockChange = new EventEmitter<Block>();
   @Output() delete = new EventEmitter<void>();
   @Output() onDuplicateBlock: EventEmitter<any> = new EventEmitter();
