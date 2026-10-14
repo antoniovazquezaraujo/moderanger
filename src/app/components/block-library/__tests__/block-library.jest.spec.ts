@@ -168,6 +168,91 @@ describe('BlockLibraryComponent · CRUD de definiciones', () => {
     expect(component.isHighlighted(definition)).toBe(false);
     jest.useRealTimers();
   });
+
+  it('onRenameBlur revierte un nombre vacío y avisa de que falta', () => {
+    const song = new Song();
+    const definition = new Block();
+    definition.label = 'Riff';
+    song.blocks = [definition];
+    const component = createComponent(song);
+
+    definition.label = '';
+    component.onRenameInput(definition);
+    component.onRenameBlur(definition);
+
+    expect(definition.label).toBe('Riff');
+    expect(component.renameWarning).toBe('A block needs a name.');
+  });
+
+  it('requestDelete en uso no borra hasta confirmar y cancelDelete conserva todo', () => {
+    const song = new Song();
+    const definition = new Block();
+    definition.label = 'Riff';
+    song.blocks = [definition];
+    const part = new Part();
+    part.items = [referenceTo('Riff')];
+    song.parts = [part];
+    const component = createComponent(song);
+
+    component.requestDelete(definition);
+    expect(song.blocks).toContain(definition);
+    expect(part.items).toHaveLength(1);
+
+    component.cancelDelete();
+    expect(song.blocks).toContain(definition);
+    expect(part.items).toHaveLength(1);
+    expect(component.deleteVisible).toBe(false);
+    expect(component.deleteCandidate).toBeNull();
+    expect(component.deleteUsages).toEqual([]);
+  });
+
+  it('duplicateDefinition evita colisiones de label con copias existentes', () => {
+    const song = new Song();
+    const first = new Block();
+    first.label = 'Riff';
+    const alreadyCopied = new Block();
+    alreadyCopied.label = 'Riff copy';
+    song.blocks = [first, alreadyCopied];
+    const component = createComponent(song);
+
+    component.duplicateDefinition(first);
+
+    expect(song.blocks.map(block => block.label)).toEqual(['Riff', 'Riff copy 2', 'Riff copy']);
+  });
+
+  it('focusDefinition con un label inexistente no rompe ni resalta nada', () => {
+    jest.useFakeTimers();
+    const song = new Song();
+    const definition = new Block();
+    definition.label = 'Riff';
+    song.blocks = [definition];
+    const component = createComponent(song);
+
+    expect(() => component.focusDefinition('Fantasma')).not.toThrow();
+    expect(component.expanded).toBe(true);
+    expect(component.isHighlighted(definition)).toBe(false);
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  it('el CRUD completo no emite ruido por consola', () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const song = new Song();
+    const component = createComponent(song);
+
+    component.addBlock();
+    component.duplicateDefinition(song.blocks[0]);
+    song.blocks[0].label = 'Riff';
+    component.onRenameInput(song.blocks[0]);
+    component.onRenameBlur(song.blocks[0]);
+    component.requestDelete(song.blocks[0]);
+
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+    error.mockRestore();
+    warn.mockRestore();
+  });
 });
 
 describe('BlockLibraryComponent · template', () => {

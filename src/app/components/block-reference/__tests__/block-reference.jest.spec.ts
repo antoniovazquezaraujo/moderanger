@@ -102,4 +102,30 @@ describe('BlockReferenceComponent', () => {
     expect(template).toContain('aria-label="Remove reference"');
     expect(template).toContain('role="alert"');
   });
+
+  it('toggleExpansion vuelve a expandir el cuerpo', () => {
+    const component = createComponent(new BlockReference(), new Song());
+
+    component.toggleExpansion();
+    component.toggleExpansion();
+
+    expect(component.expanded).toBe(true);
+  });
+
+  it('isOrphan es true con biblioteca vacía o label vacío', () => {
+    const song = new Song();
+    const empty = new BlockReference();
+    const blank = new BlockReference();
+    blank.targetLabel = '';
+
+    expect(createComponent(empty, song).isOrphan).toBe(true);
+    expect(createComponent(blank, song).isOrphan).toBe(true);
+  });
+
+  it('el input ×N esta acotado y etiquetado, y el chip expone tooltip', () => {
+    expect(template).toContain('min="0" max="99" step="1"');
+    expect(template).toContain("'Repeats for reference ' + reference.targetLabel");
+    expect(template).toContain('aria-label="Duplicate reference"');
+    expect(template).toContain('[pTooltip]="isOrphan ?');
+  });
 });

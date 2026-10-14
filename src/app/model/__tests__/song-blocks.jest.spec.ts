@@ -3,6 +3,7 @@ import { BlockReference } from '../block-reference';
 import { Part } from '../part';
 import { Song } from '../song';
 import {
+  blockDefinitions,
   blockUsages,
   createBlockDefinition,
   createBlockReference,
@@ -121,5 +122,92 @@ describe('song-blocks · biblioteca de definiciones (fase 2)', () => {
     expect(song.blocks.map(block => block.label)).toEqual(['Coro']);
     expect(part.items).toHaveLength(1);
     expect((part.items[0] as BlockReference).targetLabel).toBe('Coro');
+  });
+
+  it('renameBlockDefinition admite nombres con espacios (comillados en .mr) y propaga en cascada', () => {
+    const song = songWith('Riff');
+    const part = new Part();
+    part.items = [referenceTo('Riff')];
+    song.parts = [part];
+
+    const ok = renameBlockDefinition(song, song.blocks[0], 'Riff', 'Riff principal (v2)');
+
+    expect(ok).toBe(true);
+    expect(song.blocks[0].label).toBe('Riff principal (v2)');
+    expect((part.items[0] as BlockReference).targetLabel).toBe('Riff principal (v2)');
+  });
+
+  it('renameBlockDefinition es idempotente con el mismo label', () => {
+    const song = songWith('Riff');
+    const part = new Part();
+    part.items = [referenceTo('Riff')];
+    song.parts = [part];
+
+    expect(renameBlockDefinition(song, song.blocks[0], 'Riff', 'Riff')).toBe(true);
+    expect(song.blocks[0].label).toBe('Riff');
+    expect((part.items[0] as BlockReference).targetLabel).toBe('Riff');
+  });
+
+  it('renameBlockDefinition no renombra una definición a un label ya usado por otra', () => {
+    const song = songWith('Riff', 'Coro');
+    const part = new Part();
+    part.items = [referenceTo('Coro')];
+    song.parts = [part];
+
+    expect(renameBlockDefinition(song, song.blocks[1], 'Coro', 'Riff')).toBe(false);
+    expect(song.blocks[1].label).toBe('Coro');
+    expect((part.items[0] as BlockReference).targetLabel).toBe('Coro');
+  });
+
+  it('renameBlockDefinition solo propaga a referencias que apuntan al label anterior', () => {
+    const song = songWith('Riff');
+    const part = new Part();
+    part.items = [referenceTo('Coro')];
+    song.parts = [part];
+
+    expect(renameBlockDefinition(song, song.blocks[0], 'Riff', 'Nuevo')).toBe(true);
+    expect((part.items[0] as BlockReference).targetLabel).toBe('Coro');
+  });
+
+  it('createBlockDefinition cae al siguiente label libre si el sugerido está duplicado o vacío', () => {
+    const song = songWith('Riff');
+
+    expect(createBlockDefinition(song, 'Riff').label).toBe('Block 2');
+    expect(createBlockDefinition(song, '   ').label).toBe('Block 2');
+    expect(createBlockDefinition(song, '').label).toBe('Block 2');
+  });
+
+  it('nextBlockLabel salta los números ya ocupados', () => {
+    const song = songWith('Block 1', 'Block 2');
+
+    expect(nextBlockLabel(song)).toBe('Block 3');
+  });
+
+  it('blockUsages devuelve vacío para un label inexistente o un label vacío', () => {
+    const song = songWith('Riff');
+    const part = new Part();
+    part.items = [referenceTo('Riff')];
+    song.parts = [part];
+
+    expect(blockUsages(song, 'Fantasma')).toEqual([]);
+    expect(blockUsages(song, '')).toEqual([]);
+  });
+
+  it('removeBlockDefinition no falla si la definición no pertenece a la biblioteca', () => {
+    const song = songWith('Riff');
+    const stray = new Block();
+    stray.label = 'Fantasma';
+
+    expect(removeBlockDefinition(song, stray)).toBe(0);
+    expect(song.blocks.map(block => block.label)).toEqual(['Riff']);
+  });
+
+  it('blockDefinitions y blockUsages toleran una canción sin biblioteca', () => {
+    const song = new Song();
+    song.blocks = undefined as unknown as Block[];
+
+    expect(blockDefinitions(song)).toEqual([]);
+    expect(blockUsages(song, 'Riff')).toEqual([]);
+    expect(findBlockDefinition(song, 'Riff')).toBeUndefined();
   });
 });

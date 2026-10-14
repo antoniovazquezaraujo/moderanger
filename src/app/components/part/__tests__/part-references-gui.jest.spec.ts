@@ -139,6 +139,44 @@ describe('PartComponent · GUI de referencias (fase 2)', () => {
     expect(component.asReference(reference)).toBe(reference);
     expect(component.trackByItem(0, reference as PartItem)).toBe(reference.id);
   });
+
+  it('moveItem no mueve el primer ítem hacia arriba ni el último hacia abajo', () => {
+    const part = new Part();
+    const first = new Block();
+    const reference = new BlockReference();
+    part.items = [first, reference];
+    const component = createComponent(part, new Song());
+
+    component.moveItem(first, -1);
+    expect(part.items).toEqual([first, reference]);
+
+    component.moveItem(reference, 1);
+    expect(part.items).toEqual([first, reference]);
+  });
+
+  it('duplicateReference inserta una copia con id propio y mismos datos', () => {
+    const part = new Part();
+    const reference = new BlockReference();
+    reference.targetLabel = 'Riff';
+    reference.repeatingTimes = 3;
+    part.items = [reference];
+    const component = createComponent(part, new Song());
+
+    component.duplicateReference(reference);
+
+    expect(part.items.map(item => item.kind)).toEqual(['reference', 'reference']);
+    const copy = part.items[1] as BlockReference;
+    expect(copy).not.toBe(reference);
+    expect(copy.id).not.toBe(reference.id);
+    expect(copy.targetLabel).toBe('Riff');
+    expect(copy.repeatingTimes).toBe(3);
+  });
+
+  it('definitionOptions vacío con biblioteca vacía (affordance deshabilitada)', () => {
+    const component = createComponent(new Part(), new Song());
+
+    expect(component.definitionOptions).toEqual([]);
+  });
 });
 
 describe('PartComponent · template de referencias', () => {
