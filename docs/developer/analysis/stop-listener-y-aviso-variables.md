@@ -45,7 +45,7 @@ Con `applyDocumentVariables(document)` (usado por Cargar `.mr` y por Aplicar):
 1. primero **elimina** las variables del contexto que no están en el documento (`removeValue` → `onVariablesChange`);
 2. después fija las del documento (`setValue` → `onVariablesChange`).
 
-En ese momento los `BlockCommandsComponent` del **documento anterior** siguen vivos y suscritos (Angular aún no ha repintado la canción nueva), así que sus comandos `$var` veían la variable ausente y avisaban. Son avisos falsos: el modelo viejo está a punto de desaparecer y el getter luego resuelve bien. Repro mínimo en `block-commands-variable-warning.jest.spec.ts` (sin el arreglo, el escenario A avisa una vez; B y C no).
+En ese momento los `BlockCommandsComponent` del **documento anterior** siguen vivos y suscritos (Angular aún no ha repintado la canción nueva), así que sus comandos `$var` veían la variable ausente y avisaban. Son avisos falsos: el modelo viejo está a punto de desaparecer y el getter luego resuelve bien. Repro mínimo en `block-commands-variable-warning.jest.spec.ts` (mutación verificada en la validación de Bicho: sin el arreglo, los escenarios A y B —carga normal y componente reutilizado— avisan en falso).
 
 ### Arreglo (elegido)
 
@@ -69,5 +69,5 @@ Alternativas descartadas: batchear `applyDocumentVariables` (no evita el aviso, 
 
 ## 3. Resultados
 
-- `npm test`: **697/697** (63 suites; 683 base + 13 de esta rama + 1 del fix del panel de Jorge, ya commiteado en la rama).
-- `npm run test:cov`: umbrales en verde. `npm run build`: OK.
+- `npm test`: **700/700** (63 suites; 696 en el commit original — 683 base + 13 de esta rama — más 4 tests de contabilidad añadidos en la validación de Bicho). El borrador contaba 697 porque incluía 1 test del fix del panel de Jorge, que vive en su PR #116.
+- `npm run test:cov`: umbrales en verde (84,6 / 76,28 / 81,03 / 84,85). `npm run build`: OK.
