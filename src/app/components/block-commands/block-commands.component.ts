@@ -38,6 +38,8 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     scaleNames: string[];
     availableVariables: VariableOption[] = [];
     private variablesSubscription?: Subscription;
+    private variableWarningScheduled = false;
+    private destroyed = false;
     operationTypes = OperationType;
     operationTypeNames: string[] = Object.values(OperationType);
     selectedVariable: string | null = null;
@@ -79,6 +81,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.destroyed = true;
         this.variablesSubscription?.unsubscribe();
         this.durationSubscription?.unsubscribe();
     }
@@ -87,19 +90,56 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         this.variablesSubscription?.unsubscribe();
         this.variablesSubscription = VariableContext.onVariablesChange.subscribe(() => {
             this.updateAvailableVariables();
-            if (this.block.commands) {
-                this.block.commands.forEach(command => {
-                    if (command.isVariable && command.getVariableName()) {
-                        const currentVarName = command.getVariableName();
-                        if (currentVarName && VariableContext.context.has(currentVarName)) {
-                            command.setVariable(currentVarName);
-                        } else {
-                             console.warn(`Variable ${currentVarName} used by command ${command.type} no longer exists or is inaccessible.`);
-                        }
-                    }
-                });
-            }
+            this.syncVariableCommands();
+            this.scheduleMissingVariableWarningCheck();
             this.cdr.detectChanges();
+        });
+    }
+
+    /** Re-vincula los comandos `$` cuya variable sigue existiendo (sin avisar). */
+    private syncVariableCommands(): void {
+        if (!this.block.commands) {
+            return;
+        }
+        this.block.commands.forEach(command => {
+            const name = command.isVariable ? command.getVariableName() : null;
+            if (name && VariableContext.context.has(name)) {
+                command.setVariable(name);
+            }
+        });
+    }
+
+    /**
+     * El aviso de referencias huérfanas se difiere un tick y se reevalúa con el
+     * modelo ya asentado: al cargar un `.mr`, las variables del documento
+     * anterior se eliminan antes de que la GUI repinte la canción nueva, así
+     * que los comandos viejos avisaban en falso. Si la referencia sigue
+     * huérfana con el modelo nuevo (variable borrada desde el panel, `$nombre`
+     * inexistente), el aviso aparece igual.
+     */
+    private scheduleMissingVariableWarningCheck(): void {
+        if (this.variableWarningScheduled) {
+            return;
+        }
+        this.variableWarningScheduled = true;
+        setTimeout(() => {
+            this.variableWarningScheduled = false;
+            if (this.destroyed) {
+                return;
+            }
+            this.warnMissingCommandVariables();
+        }, 0);
+    }
+
+    private warnMissingCommandVariables(): void {
+        if (!this.block.commands) {
+            return;
+        }
+        this.block.commands.forEach(command => {
+            const name = command.isVariable ? command.getVariableName() : null;
+            if (name && !VariableContext.context.has(name)) {
+                console.warn(`Variable ${name} used by command ${command.type} no longer exists or is inaccessible.`);
+            }
         });
     }
 

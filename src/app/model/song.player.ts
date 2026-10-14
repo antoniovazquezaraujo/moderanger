@@ -139,10 +139,7 @@ export class SongPlayer {
             this.audioEngine.disposeLoop(this.currentLoopId);
             this.currentLoopId = null;
         }
-        if (this.currentStopListenerId) {
-            this.audioEngine.offTransportStop(this.currentStopListenerId);
-            this.currentStopListenerId = null;
-        }
+        this._unregisterStopListener();
         this._restoreVariablesSnapshot();
         this._clearPlayingSources();
         
@@ -165,6 +162,18 @@ export class SongPlayer {
         }
         VariableContext.restore(this.variablesSnapshot);
         this.variablesSnapshot = null;
+    }
+
+    /**
+     * Desregistra el listener de stop del Transport (parada manual, fin
+     * natural o playback vacío). Sin esto, el listener quedaba registrado para
+     * siempre: `_handleTransportStop` solo anulaba el id.
+     */
+    private _unregisterStopListener(): void {
+        if (this.currentStopListenerId) {
+            this.audioEngine.offTransportStop(this.currentStopListenerId);
+            this.currentStopListenerId = null;
+        }
     }
 
     // --- Resaltado de la nota-origen que suena ---
@@ -244,7 +253,7 @@ export class SongPlayer {
              this._clearPlayingSources();
              this._restoreVariablesSnapshot();
              this.currentLoopId = null;
-             this.currentStopListenerId = null;
+             this._unregisterStopListener();
          }
      };
 
@@ -467,6 +476,7 @@ export class SongPlayer {
             this.globalState.setIsPlaying(false);
             this._clearPlayingSources();
             this._restoreVariablesSnapshot();
+            this._unregisterStopListener();
             return;
         }
         // Reset beat count and repetition for new playback
