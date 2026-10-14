@@ -442,4 +442,27 @@ part Piano
     part.items = [reference];
     expect(expectSerializeError(emptyReference).message).toContain('no tiene un nombre de definición');
   });
+
+  it('emite `repeats 0` en definición y referencia y omite `repeats 1`', () => {
+    const document = createDocument();
+    const zeroDefinition = createBlock('Zero');
+    zeroDefinition.repeatingTimes = 0;
+    const oneDefinition = createBlock('One'); // repeats 1 por defecto → omitido
+    document.song.blocks = [zeroDefinition, oneDefinition];
+    const part = addPart(document, 'P', []);
+
+    const zeroReference = new BlockReference();
+    zeroReference.targetLabel = 'Zero';
+    zeroReference.repeatingTimes = 0;
+    const oneReference = new BlockReference();
+    oneReference.targetLabel = 'One';
+    part.items = [zeroReference, oneReference];
+
+    const text = serializeSong(document);
+    expect(text).toContain('  block Zero repeats 0\n');
+    expect(text).toContain('  block One\n');
+    expect(text).toContain('  use Zero repeats 0\n');
+    expect(text).toContain('  use One\n');
+    expect(text).not.toContain('repeats 1');
+  });
 });

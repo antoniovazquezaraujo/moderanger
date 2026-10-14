@@ -20,10 +20,13 @@ import { Part } from '../part';
 import { Song } from '../song';
 import { SongPlayer } from '../song.player';
 import { VariableContext } from '../variable.context';
+import { parseSong } from '../mr/mr.parser';
 
 interface NoteGenCall {
   blockId: number;
+  label: string;
   octave: number;
+  notes: string;
 }
 
 const createEngineStub = (): AudioEngineService => ({
@@ -57,7 +60,7 @@ const createRecordingPlayer = (): Recorder => {
   jest
     .spyOn(noteGeneration, 'generateNotesForBlock')
     .mockImplementation((block: Block, player: Player): NoteData[] => {
-      calls.push({ blockId: block.id, octave: player.octave });
+      calls.push({ blockId: block.id, label: block.label, octave: player.octave, notes: block.blockContent.notes });
       return [new NoteData({ type: 'note', note: 60, duration: '4n' })];
     });
   const player = new SongPlayer(createEngineStub(), noteGeneration, new GlobalStateService());
@@ -166,6 +169,114 @@ describe('SongPlayer · referencias `use` (orden §5.1)', () => {
     await player.playPart(song.parts[0], song);
 
     expect(calls.filter(call => call.blockId === definition.id)).toHaveLength(0);
+    player.stop();
+  });
+
+  it('vuelve a ejecutar los encabezados en cada pasada (el VARY de la llamada se acumula)', async () => {
+    const { song, definition, reference } = buildFixture();
+    definition.commands = [];
+    definition.operations = [];
+    reference.commands = [];
+    reference.operations = [new VaryOperation('oct', 1)];
+    reference.repeatingTimes = 2;
+    const { player, calls } = createRecordingPlayer();
+
+    await player.playPart(song.parts[0], song);
+
+    // El `VARY` de la llamada corre una vez por pasada: 3 → 4 → 5.
+    expect(VariableContext.getValue('oct')).toBe(5);
+    // Y las notas de la definición se generan en cada pasada.
+    expect(calls.filter(call => call.blockId === definition.id)).toHaveLength(2);
+    player.stop();
+  });
+
+  it('repite los hijos de la definición en cada pasada (N × R)', async () => {
+    const { song, definition, child, reference } = buildFixture();
+    definition.repeatingTimes = 2;
+    reference.repeatingTimes = 1;
+    const { player, calls } = createRecordingPlayer();
+
+    await player.playPart(song.parts[0], song);
+
+    expect(calls.filter(call => call.blockId === definition.id)).toHaveLength(2);
+    expect(calls.filter(call => call.blockId === child.id)).toHaveLength(2);
+    player.stop();
+  });
+
+  it('con repeats 0 en la referencia no se ejecuta nada, ni los encabezados de la llamada', async () => {
+    const { song, definition, after, reference } = buildFixture();
+    reference.repeatingTimes = 0;
+    reference.operations = [new VaryOperation('oct', 1)];
+    const { player, calls } = createRecordingPlayer();
+
+    await player.playPart(song.parts[0], song);
+
+    expect(calls.some(call => call.blockId === definition.id)).toBe(false);
+    expect(calls.every(call => call.blockId === after.id)).toBe(true);
+    // Ni el `VARY` de la llamada: el estado queda como estaba.
+    expect(VariableContext.getValue('oct')).toBe(3);
+    player.stop();
+  });
+
+  it('resuelve `notes $variable` en una definición al reproducir', async () => {
+    const { song, definition } = buildFixture();
+    definition.blockContent.setVariableReference('motif');
+    definition.blockContent.notes = '';
+    VariableContext.setValue('motif', '4t:0 4t:2');
+    const { player, calls } = createRecordingPlayer();
+
+    await player.playPart(song.parts[0], song);
+
+    const definitionCall = calls.find(call => call.blockId === definition.id);
+    expect(definitionCall?.notes).toBe('4t:0 4t:2');
+    player.stop();
+  });
+
+  it('propaga `OCT $oct` de la llamada al hijo de la definición con un valor ≠ octava por defecto', async () => {
+    const text = [
+      'song Caso',
+      'version 1',
+      '',
+      'vars',
+      '  $oct = 5',
+      '',
+      'blocks',
+      '  block Base',
+      '    notes',
+      '      0',
+      '    block Hijo',
+      '      notes',
+      '        1',
+      '',
+      'part Piano',
+      '  use Base',
+      '    commands',
+      '      OCT $oct',
+      ''
+    ].join('\n');
+    const document = parseSong(text);
+    VariableContext.setValue('oct', 5);
+    const { player, calls } = createRecordingPlayer();
+
+    await player.playPart(document.song.parts[0], document.song);
+
+    // La octava por defecto del player es 2; el `OCT $oct` de la llamada (5)
+    // debe llegar a las notas de la definición y al hijo.
+    expect(calls.map(call => call.label)).toEqual(['Base', 'Hijo']);
+    expect(calls.map(call => call.octave)).toEqual([5, 5]);
+    player.stop();
+  });
+
+  it('no emite console.error/warn en una reproducción normal de una referencia', async () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { song } = buildFixture();
+    const { player } = createRecordingPlayer();
+
+    await player.playPart(song.parts[0], song);
+
+    expect(errorSpy).not.toHaveBeenCalled();
+    expect(warnSpy).not.toHaveBeenCalled();
     player.stop();
   });
 });

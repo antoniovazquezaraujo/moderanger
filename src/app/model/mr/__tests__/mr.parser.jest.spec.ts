@@ -733,4 +733,94 @@ part Cuerdas
 
     expect(document.song.blocks[0].label).toBe('use');
   });
+
+  it('acepta `use` tras un bloque inline, nombres con . y - y `use` sin cuerpo', () => {
+    const document = parseSong(`song X
+version 1
+
+blocks
+  block A.b-c
+    notes
+      0
+
+part P
+  block Inline
+    notes
+      1
+  use A.b-c
+
+  use A.b-c repeats 0
+`);
+    const part = document.song.parts[0];
+
+    expect(part.items.map(item => item.kind)).toEqual(['block', 'reference', 'reference']);
+    expect((part.items[1] as BlockReference).targetLabel).toBe('A.b-c');
+    expect((part.items[1] as BlockReference).repeatingTimes).toBe(1);
+    expect((part.items[1] as BlockReference).commands).toEqual([]);
+    expect((part.items[2] as BlockReference).repeatingTimes).toBe(0);
+  });
+
+  it('rechaza `use` dentro del cuerpo de un bloque inline', () => {
+    const error = expectParseError(`blocks
+  block Riff
+
+part P
+  block B
+    use Riff
+`);
+
+    expect(error.message).toContain('referencias anidadas');
+  });
+
+  it('rechaza `use` dentro de un hijo de una definición', () => {
+    const error = expectParseError(`blocks
+  block Padre
+    block Hijo
+      use Padre
+`);
+
+    expect(error.message).toContain('referencias anidadas');
+  });
+
+  it('exige el nombre en `use`', () => {
+    expect(expectParseError('blocks\n  block Riff\n\npart P\n  use repeats 2\n').message).toContain(
+      `'use' requiere el nombre`
+    );
+    expect(expectParseError('blocks\n  block Riff\n\npart P\n  use\n').message).toContain(
+      `'use' requiere el nombre`
+    );
+  });
+
+  it('resuelve `use` solo contra la biblioteca, no contra bloques inline con el mismo label', () => {
+    const error = expectParseError(`part P
+  block Riff
+    notes
+      0
+  use Riff
+`);
+
+    expect(error.message).toContain(`no existe la definición 'Riff'`);
+  });
+
+  it('rechaza la cabecera de definición con repeats o texto inválidos', () => {
+    expect(expectParseError('blocks\n  block Riff repeats\n').message).toContain(`'repeats' requiere un entero`);
+    expect(expectParseError('blocks\n  block Riff repeats -1\n').message).toContain(`'repeats' de definición`);
+    expect(expectParseError('blocks\n  block Riff repeats x\n').message).toContain(`'repeats' de definición`);
+    expect(expectParseError('blocks\n  block Riff extra\n').message).toContain('texto inesperado');
+  });
+
+  it('rechaza argumentos/claves inválidas en la sección blocks y su indentación', () => {
+    expect(expectParseError('blocks all\n  block Riff\n').message).toContain(`'blocks' no admite argumentos`);
+    expect(expectParseError('blocks\n  foo Riff\n').message).toContain(`clave desconocida 'foo' dentro de blocks`);
+    expect(expectParseError('blocks\n    block Riff\n').message).toContain('indentación inesperada');
+  });
+
+  it('rechaza texto o claves inválidas en la cabecera/cuerpo de una referencia', () => {
+    expect(expectParseError('blocks\n  block Riff\n\npart P\n  use Riff foo\n').message).toContain(
+      'texto inesperado'
+    );
+    expect(expectParseError('blocks\n  block Riff\n\npart P\n  use Riff\n    foo\n').message).toContain(
+      `clave desconocida 'foo' dentro de una referencia`
+    );
+  });
 });

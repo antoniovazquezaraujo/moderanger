@@ -197,6 +197,47 @@ part P
       expect(twice).toBe(once);
     }
   });
+
+  it('normaliza comillas sobrantes y el orden de secciones en blocks y use', () => {
+    const nonCanonical = `song X
+version 1
+
+blocks
+  block "Riff"
+    commands
+      OCT 1
+    notes
+      0
+
+part P
+  use "Riff"
+    operations
+      VARY $oct 1
+    commands
+      OCT 2
+`;
+
+    const canonical = serializeSong(parseSong(nonCanonical));
+
+    expect(canonical).toBe(`song X
+version 1
+
+blocks
+  block Riff
+    notes
+      0
+    commands
+      OCT 1
+
+part P
+  use Riff
+    commands
+      OCT 2
+    operations
+      VARY $oct 1
+`);
+    expect(serializeSong(parseSong(canonical))).toBe(canonical);
+  });
 });
 
 describe('round-trip: comandos de shift', () => {
