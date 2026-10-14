@@ -3,6 +3,7 @@
  * listarse y editarse igual que número/escala/playmode. Antes se filtraban y
  * `$motif` no aparecía tras cargar un `.mr`.
  */
+import type { ChangeDetectorRef, NgZone } from '@angular/core';
 import { VariableContext } from 'src/app/model/variable.context';
 import { AudioEngineService } from 'src/app/services/audio-engine.service';
 import { NoteGenerationService } from 'src/app/services/note-generation.service';
@@ -50,6 +51,13 @@ jest.mock('@angular/core', () => {
   };
 });
 
+/** NgZone de pruebas: ejecuta el callback como haría la zona real. */
+const fakeZone = (): NgZone => ({ run: (fn: () => void) => fn() } as unknown as NgZone);
+
+/** ChangeDetectorRef de pruebas: espía para comprobar el repintado directo. */
+const fakeCdr = (): { detectChanges: jest.Mock; markForCheck: jest.Mock } =>
+  ({ detectChanges: jest.fn(), markForCheck: jest.fn() });
+
 interface DeclaredVariable {
   name: string;
   value: string | number;
@@ -72,7 +80,7 @@ describe('VariableDeclarationComponent · variables string', () => {
   });
 
   it('clasifica una variable string que no es playmode ni escala como tipo string', () => {
-    const component = new VariableDeclarationComponent();
+    const component = new VariableDeclarationComponent(fakeZone(), fakeCdr() as unknown as ChangeDetectorRef);
     VariableContext.setValue('motif', '4t:0 4t:2 4t:-1');
 
     rebuildList(component);
@@ -83,7 +91,7 @@ describe('VariableDeclarationComponent · variables string', () => {
   });
 
   it('sigue clasificando número, escala y playmode', () => {
-    const component = new VariableDeclarationComponent();
+    const component = new VariableDeclarationComponent(fakeZone(), fakeCdr() as unknown as ChangeDetectorRef);
     VariableContext.setValue('oct', 2);
     VariableContext.setValue('scale', 'WHITE');
     VariableContext.setValue('mode', 'RANDOM');
@@ -97,7 +105,7 @@ describe('VariableDeclarationComponent · variables string', () => {
   });
 
   it('updateVariable escribe el texto editado en VariableContext', () => {
-    const component = new VariableDeclarationComponent();
+    const component = new VariableDeclarationComponent(fakeZone(), fakeCdr() as unknown as ChangeDetectorRef);
     VariableContext.setValue('motif', '4t:0');
     rebuildList(component);
 
@@ -107,8 +115,28 @@ describe('VariableDeclarationComponent · variables string', () => {
     expect(VariableContext.getValue('motif')).toBe('4n:0 4n:2');
   });
 
+  it('la suscripción reentra en la zona y repinta el panel (select al terminar)', () => {
+    // Arrange: zona y cdr espiados (ejecutan/aplican como en la app real).
+    const run = jest.fn((fn: () => void) => fn());
+    const cdr = fakeCdr();
+    const component = new VariableDeclarationComponent({ run } as unknown as NgZone, cdr as unknown as ChangeDetectorRef);
+    component.ngOnInit();
+    run.mockClear();
+    cdr.detectChanges.mockClear();
+
+    // Act: la restauración del snapshot notifica el cambio de variables.
+    VariableContext.setValue('mode', 'RANDOM');
+
+    // Assert: la notificación reentra en la zona, actualiza la lista y fuerza
+    // el repintado del panel sin esperar a otro ciclo de render.
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(cdr.detectChanges).toHaveBeenCalledTimes(1);
+    expect(declaredVariables(component)).toEqual([{ name: 'mode', value: 'RANDOM', type: 'playmode' }]);
+    component.ngOnDestroy();
+  });
+
   it('addVariable crea una variable de texto con el valor indicado', () => {
-    const component = new VariableDeclarationComponent();
+    const component = new VariableDeclarationComponent(fakeZone(), fakeCdr() as unknown as ChangeDetectorRef);
     component.newVariable = { name: 'motivo', value: '4t:0', type: 'string' };
 
     component.addVariable();
@@ -174,7 +202,7 @@ describe('VariableDeclarationComponent · restauración al parar (snapshot/resto
 
   it('el panel refleja los valores restaurados al parar (suscripción a onVariablesChange)', async () => {
     // Arrange
-    const component = new VariableDeclarationComponent();
+    const component = new VariableDeclarationComponent(fakeZone(), fakeCdr() as unknown as ChangeDetectorRef);
     component.ngOnInit();
     VariableContext.setValue('mode', 'RANDOM');
     VariableContext.setValue('oct', 2);
@@ -206,7 +234,7 @@ describe('VariableDeclarationComponent · restauración al parar (snapshot/resto
 
   it('el panel también refleja la restauración tras el fin natural (stop del transporte)', async () => {
     // Arrange
-    const component = new VariableDeclarationComponent();
+    const component = new VariableDeclarationComponent(fakeZone(), fakeCdr() as unknown as ChangeDetectorRef);
     component.ngOnInit();
     VariableContext.setValue('mode', 'RANDOM');
     VariableContext.setValue('oct', 2);
