@@ -16,6 +16,7 @@ interface EngineStub {
   engine: AudioEngineService;
   listenerCount(): number;
   emitTransportStop(): void;
+  getLoopCallback(): (time: number) => void;
 }
 
 /** Stub que lleva la cuenta real de listeners registrados en el motor. */
@@ -58,6 +59,12 @@ const createEngineStub = (): EngineStub => {
     emitTransportStop: (): void => {
       // Copia: el handler desregistra su listener durante el aviso.
       [...listeners.values()].forEach(listener => listener());
+    },
+    getLoopCallback: (): ((time: number) => void) => {
+      if (!loopCallback) {
+        throw new Error('scheduleLoop no se ha llamado todavía');
+      }
+      return loopCallback;
     }
   };
 };
@@ -147,5 +154,77 @@ describe('SongPlayer · listener de stop del Transport', () => {
 
     expect(stub.engine.onTransportStop).not.toHaveBeenCalled();
     expect(stub.engine.offTransportStop).not.toHaveBeenCalled();
+  });
+
+  it('playSong registra un único listener y Stop lo desregistra', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    const song = new Song();
+    song.parts = [createPart('4n:0')];
+
+    await player.playSong(song);
+    expect(stub.engine.onTransportStop).toHaveBeenCalledTimes(1);
+    expect(stub.listenerCount()).toBe(1);
+
+    player.stop();
+
+    expect(stub.listenerCount()).toBe(0);
+    expect(stub.engine.offTransportStop).toHaveBeenCalledTimes(1);
+  });
+
+  it('playSong con playback vacío no deja el listener registrado', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+
+    await player.playSong(new Song()); // sin partes
+
+    expect(stub.listenerCount()).toBe(0);
+    expect(player.isPlaying).toBe(false);
+  });
+
+  it('repetir Play → fin natural ×N no acumula listeners', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    const cycles = 5;
+
+    for (let cycle = 0; cycle < cycles; cycle++) {
+      await player.playPart(createPart('4n:0'), new Song());
+      expect(stub.listenerCount()).toBe(1);
+
+      stub.emitTransportStop();
+
+      expect(stub.listenerCount()).toBe(0);
+      expect(player.isPlaying).toBe(false);
+    }
+
+    expect(stub.engine.onTransportStop).toHaveBeenCalledTimes(cycles);
+    expect(stub.engine.offTransportStop).toHaveBeenCalledTimes(cycles);
+  });
+
+  it('el fin natural de la última repetición de canción desregistra el listener', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    const song = new Song();
+    song.repeats = 2;
+    song.parts = [createPart('4n:0')];
+
+    await player.playSong(song);
+    expect(stub.listenerCount()).toBe(1);
+
+    stub.getLoopCallback()(0); // primera vuelta: quedan repeticiones
+    expect(stub.engine.stopLoop).not.toHaveBeenCalled();
+    expect(stub.listenerCount()).toBe(1);
+
+    stub.getLoopCallback()(0); // última repetición: programa el stop del transporte
+    expect(stub.engine.stopLoop).toHaveBeenCalledTimes(1);
+    expect(stub.engine.stopTransport).toHaveBeenCalled();
+    // El listener sigue vivo hasta que Tone dispara el stop programado.
+    expect(stub.listenerCount()).toBe(1);
+
+    stub.emitTransportStop();
+
+    expect(stub.listenerCount()).toBe(0);
+    expect(stub.engine.offTransportStop).toHaveBeenCalledTimes(1);
+    expect(player.isPlaying).toBe(false);
   });
 });
