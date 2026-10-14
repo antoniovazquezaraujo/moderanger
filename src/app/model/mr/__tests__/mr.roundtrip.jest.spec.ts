@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Block } from '../../block';
+import { BlockReference } from '../../block-reference';
 import { Command, CommandType } from '../../command';
 import { AssignOperation, VaryOperation } from '../../operation';
 import { Part } from '../../part';
@@ -57,11 +58,35 @@ function documentSnapshot(document: SongDocument): unknown {
     repeats: document.meta.repeats ?? 1,
     bpm: document.meta.bpm ?? 120,
     variables: Array.from(document.variables.entries()),
+    blocks: document.song.blocks.map(blockSnapshot),
     parts: document.song.parts.map((part) => ({
       name: part.name,
       instrument: part.instrumentType,
-      blocks: part.blocks.map(blockSnapshot)
+      items: part.items.map((item) => (item.kind === 'reference' ? referenceSnapshot(item) : blockSnapshot(item)))
     }))
+  };
+}
+
+function referenceSnapshot(reference: BlockReference): unknown {
+  return {
+    kind: 'reference',
+    targetLabel: reference.targetLabel,
+    repeats: reference.repeatingTimes,
+    commands: reference.commands.map((command) => ({
+      type: command.type,
+      isVariable: command.isVariable,
+      variableName: command.getVariableName(),
+      value: command.isVariable ? null : command.value
+    })),
+    operations: reference.operations.map((operation) => {
+      if (operation instanceof VaryOperation) {
+        return { type: 'VARY', variableName: operation.variableName, value: operation.value };
+      }
+      if (operation instanceof AssignOperation) {
+        return { type: 'ASSIGN', variableName: operation.variableName, value: operation.value };
+      }
+      return { type: operation.constructor.name };
+    })
   };
 }
 
@@ -269,7 +294,7 @@ describe('round-trip: modelo construido a mano', () => {
     child.blockContent.setVariableReference('motif');
     block.children = [child];
 
-    part.blocks = [block];
+    part.items = [block];
     song.parts = [part];
 
     const variables = new Map<string, VariableValue>([

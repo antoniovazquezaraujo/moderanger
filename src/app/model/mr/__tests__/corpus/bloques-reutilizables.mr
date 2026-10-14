@@ -1,0 +1,40 @@
+song Reutilizables
+version 1
+
+blocks
+  block Riff
+    notes
+      0
+      3
+      5
+    commands
+      OCT 4
+      SCALE WHITE
+    operations
+      VARY $oct 1
+
+  block "Coro principal"
+    notes
+      0
+      4n:( 4 6 )
+      2
+    commands
+      PLAYMODE CHORD
+
+    block Intro
+      notes
+        s
+
+part Piano
+  use Riff repeats 2
+    commands
+      OCT 5
+
+  block Puente
+    notes
+      4
+      4
+      4
+
+part Cuerdas
+  use "Coro principal"

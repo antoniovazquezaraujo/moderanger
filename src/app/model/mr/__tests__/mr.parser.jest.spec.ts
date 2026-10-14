@@ -1,5 +1,8 @@
 import { CommandType } from '../../command';
 import { AssignOperation, VaryOperation } from '../../operation';
+import { Block } from '../../block';
+import { BlockReference } from '../../block-reference';
+import { Part } from '../../part';
 import { InstrumentType } from '../../../services/audio-engine.service';
 import { PlayMode } from '../../play.mode';
 import { VariableContext } from '../../variable.context';
@@ -7,6 +10,16 @@ import { MrParseError } from '../mr.errors';
 import { parseSong } from '../mr.parser';
 import { serializeSong } from '../mr.serializer';
 import { SongDocument } from '../mr.types';
+
+/** Primer ítem de una parte como bloque inline (los tests no usan referencias). */
+function firstBlock(part: Part): Block {
+  return part.items[0] as Block;
+}
+
+/** Primer bloque de la primera parte del texto `.mr` dado. */
+function firstBlockOfSong(text: string): Block {
+  return firstBlock(parseSong(text).song.parts[0]);
+}
 
 function expectParseError(text: string): MrParseError {
   try {
@@ -39,12 +52,13 @@ describe('parseSong: documento mínimo', () => {
     const part = document.song.parts[0];
     expect(part.name).toBe('Piano');
     expect(part.instrumentType).toBe(InstrumentType.PIANO);
-    expect(part.blocks).toHaveLength(1);
-    expect(part.blocks[0].label).toBe('Origen');
-    expect(part.blocks[0].blockContent.notes).toBe('4n:0 4n:2');
-    expect(part.blocks[0].commands).toEqual([]);
-    expect(part.blocks[0].operations).toEqual([]);
-    expect(part.blocks[0].children).toEqual([]);
+    expect(part.items).toHaveLength(1);
+    const partBlock = firstBlock(part);
+    expect(partBlock.label).toBe('Origen');
+    expect(partBlock.blockContent.notes).toBe('4n:0 4n:2');
+    expect(partBlock.commands).toEqual([]);
+    expect(partBlock.operations).toEqual([]);
+    expect(partBlock.children).toEqual([]);
   });
 
   it('admite documentos vacíos (modelo serializable de ida y vuelta)', () => {
@@ -188,7 +202,7 @@ describe('parseSong: partes y bloques', () => {
     const document = parseSong('part "Piano de cola" instrument PIANO\n  block "repeats"\n');
 
     expect(document.song.parts[0].name).toBe('Piano de cola');
-    expect(document.song.parts[0].blocks[0].label).toBe('repeats');
+    expect(firstBlock(document.song.parts[0]).label).toBe('repeats');
   });
 
   it('exige comillas para nombres con espacios o reservados', () => {
@@ -220,7 +234,7 @@ describe('parseSong: partes y bloques', () => {
 `;
 
     const document = parseSong(text);
-    const [a, b] = document.song.parts[0].blocks;
+    const [a, b] = document.song.parts[0].items as Block[];
 
     expect(a.label).toBe('A');
     expect(a.repeatingTimes).toBe(2);
@@ -242,13 +256,13 @@ describe('parseSong: secciones de notas', () => {
   it('une las líneas y canoniza espacios', () => {
     const document = parseSong('part "P"\n  block\n    notes\n      4n:1   4n:2\n      4n:(  0    2 )\n');
 
-    expect(document.song.parts[0].blocks[0].blockContent.notes).toBe('4n:1 4n:2 4n:( 0 2 )');
+    expect(firstBlock(document.song.parts[0]).blockContent.notes).toBe('4n:1 4n:2 4n:( 0 2 )');
   });
 
   it('lee notes default <duración> (Q6a)', () => {
     const document = parseSong('part "P"\n  block\n    notes default 8n\n      0\n      2\n');
 
-    const content = document.song.parts[0].blocks[0].blockContent;
+    const content = firstBlock(document.song.parts[0]).blockContent;
     expect(content.defaultDuration).toBe('8n');
     expect(content.notes).toBe('0 2');
   });
@@ -256,7 +270,7 @@ describe('parseSong: secciones de notas', () => {
   it('lee notes $variable con la bandera, sin resolver el contexto', () => {
     const document = parseSong('part "P"\n  block\n    notes $motif\n');
 
-    const content = document.song.parts[0].blocks[0].blockContent;
+    const content = firstBlock(document.song.parts[0]).blockContent;
     expect(content.isVariable).toBe(true);
     expect(content.variableName).toBe('motif');
     expect(content.notes).toBe('');
@@ -281,7 +295,7 @@ describe('parseSong: secciones de notas', () => {
       4n:0
 `);
 
-    const block = document.song.parts[0].blocks[0];
+    const block = firstBlock(document.song.parts[0]);
     expect(block.commands).toHaveLength(1);
     expect(block.operations).toHaveLength(1);
     expect(block.blockContent.notes).toBe('4n:0');
@@ -314,7 +328,7 @@ describe('parseSong: comandos (todos los CommandType)', () => {
 `;
 
   it('parsea los 13 comandos en orden', () => {
-    const commands = parseSong(ALL_COMMANDS).song.parts[0].blocks[0].commands;
+    const commands = firstBlock(parseSong(ALL_COMMANDS).song.parts[0]).commands;
 
     expect(commands.map((command) => command.type)).toEqual([
       CommandType.OCT,
@@ -339,25 +353,25 @@ describe('parseSong: comandos (todos los CommandType)', () => {
   });
 
   it('acepta INVERSION como alias y lo normaliza a INV', () => {
-    const commands = parseSong('part "P"\n  block\n    commands\n      INVERSION 2\n').song.parts[0].blocks[0].commands;
+    const commands = firstBlockOfSong('part "P"\n  block\n    commands\n      INVERSION 2\n').commands;
 
     expect(commands[0].type).toBe(CommandType.INV);
     expect(commands[0].value).toBe(2);
   });
 
   it('lee comandos con variable', () => {
-    const commands = parseSong(
+    const commands = firstBlockOfSong(
       'part "P"\n  block\n    commands\n      OCT $oct\n      SCALE $scale\n      PLAYMODE $mode\n'
-    ).song.parts[0].blocks[0].commands;
+    ).commands;
 
     expect(commands.map((command) => command.isVariable)).toEqual([true, true, true]);
     expect(commands.map((command) => command.getVariableName())).toEqual(['oct', 'scale', 'mode']);
   });
 
   it('acepta el DSL completo en PATTERN con silencios y grupos', () => {
-    const commands = parseSong(
+    const commands = firstBlockOfSong(
       'part "P"\n  block\n    commands\n      PATTERN 4n:( 0 2 ) 8n:s 4t:-1\n'
-    ).song.parts[0].blocks[0].commands;
+    ).commands;
 
     expect(commands[0].value).toBe('4n:( 0 2 ) 8n:s 4t:-1');
   });
@@ -381,7 +395,7 @@ describe('parseSong: comandos (todos los CommandType)', () => {
 
 describe('parseSong: operaciones y azúcar (brecha §3.2 / Q4a)', () => {
   function operationsOf(text: string) {
-    return parseSong(text).song.parts[0].blocks[0].operations;
+    return firstBlockOfSong(text).operations;
   }
 
   it('parsea VARY y ASSIGN canónicos', () => {
@@ -497,7 +511,7 @@ describe('PATTERN con variable', () => {
     ].join('\n');
 
     const doc = parseSong(text);
-    const command = doc.song.parts[0].blocks[0].commands[0];
+    const command = firstBlock(doc.song.parts[0]).commands[0];
 
     expect(command.type).toBe(CommandType.PATTERN);
     expect(command.isVariable).toBe(true);
@@ -511,7 +525,7 @@ describe('DECORATION: lista de items', () => {
     ['song P', 'version 1', '', 'part Piano', '  block B', '    notes', '      4n:0', '    commands', `      DECORATION ${decoration}`, ''].join('\n');
 
   it('parsea offsets y duración:offset y canoniza la forma', () => {
-    const command = parseSong(songWithDecoration(' 4t:0   0   -2 ')).song.parts[0].blocks[0].commands[0];
+    const command = firstBlockOfSong(songWithDecoration(' 4t:0   0   -2 ')).commands[0];
 
     expect(command.type).toBe(CommandType.DECORATION);
     expect(command.value).toBe('4t:0 0 -2');
@@ -519,7 +533,7 @@ describe('DECORATION: lista de items', () => {
 
   it('acepta DECORATION $variable y lo serializa como variable', () => {
     const doc = parseSong(songWithDecoration('$deco'));
-    const command = doc.song.parts[0].blocks[0].commands[0];
+    const command = firstBlock(doc.song.parts[0]).commands[0];
 
     expect(command.type).toBe(CommandType.DECORATION);
     expect(command.isVariable).toBe(true);
@@ -555,7 +569,7 @@ describe('PATTERN: grupos con subdivisión', () => {
   it('acepta un grupo cuyo contenido cabe', () => {
     const doc = parseSong(songWithPattern('4n:( 0 8n:2 )'));
 
-    expect(doc.song.parts[0].blocks[0].commands[0].value).toBe('4n:( 0 8n:2 )');
+    expect(firstBlock(doc.song.parts[0]).commands[0].value).toBe('4n:( 0 8n:2 )');
   });
 
   it('rechaza un grupo cuyo contenido no cabe', () => {
@@ -568,5 +582,155 @@ describe('PATTERN: grupos con subdivisión', () => {
     const error = expectParseError(songWithPattern('4n:( 4n:1 0 )'));
 
     expect(error.message).toContain('no queda tiempo');
+  });
+});
+
+describe('parseSong: biblioteca de bloques (`blocks`) y referencias (`use`)', () => {
+  const LIBRARY = `song Reutilizables
+version 1
+
+blocks
+  block Riff
+    notes
+      0
+      3
+    commands
+      OCT 4
+    operations
+      VARY $oct 1
+
+  block "Coro principal"
+    notes
+      0
+    commands
+      PLAYMODE CHORD
+
+    block Intro
+      notes
+        s
+
+part Piano
+  use Riff repeats 2
+    commands
+      OCT 5
+
+  block Puente
+    notes
+      4
+
+part Cuerdas
+  use "Coro principal"
+`;
+
+  it('construye Song.blocks con nombre, comandos, operaciones e hijos', () => {
+    const song = parseSong(LIBRARY).song;
+
+    expect(song.blocks.map(block => block.label)).toEqual(['Riff', 'Coro principal']);
+    const riff = song.blocks[0];
+    expect(riff.blockContent.notes).toBe('0 3');
+    expect(riff.commands).toHaveLength(1);
+    expect(riff.operations).toHaveLength(1);
+    const coro = song.blocks[1];
+    expect(coro.commands).toHaveLength(1);
+    expect(coro.children.map(child => child.label)).toEqual(['Intro']);
+  });
+
+  it('crea referencias como ítems de la parte, con llamada y repeats', () => {
+    const part = parseSong(LIBRARY).song.parts[0];
+
+    expect(part.items).toHaveLength(2);
+    const reference = part.items[0];
+    expect(reference).toBeInstanceOf(BlockReference);
+    expect((reference as BlockReference).kind).toBe('reference');
+    expect((reference as BlockReference).targetLabel).toBe('Riff');
+    expect((reference as BlockReference).repeatingTimes).toBe(2);
+    expect((reference as BlockReference).commands).toHaveLength(1);
+    // El bloque inline posterior sigue siendo un Block.
+    expect((part.items[1] as Block).kind).toBe('block');
+  });
+
+  it('resuelve nombres comillados con espacios', () => {
+    const part = parseSong(LIBRARY).song.parts[1];
+    const reference = part.items[0] as BlockReference;
+
+    expect(reference.targetLabel).toBe('Coro principal');
+    expect(reference.repeatingTimes).toBe(1);
+    expect(reference.commands).toEqual([]);
+  });
+
+  it('tolera la sección blocks vacía y `use` sin cuerpo (round-trip total)', () => {
+    const document = parseSong('song X\nversion 1\n\nblocks\n\npart P\n  block\n');
+
+    expect(document.song.blocks).toEqual([]);
+  });
+
+  it('exige que blocks vaya antes de la primera parte', () => {
+    const error = expectParseError('part P\n  block\n\nblocks\n  block Riff\n');
+
+    expect(error.message).toContain(`'blocks' debe ir antes de la primera parte`);
+  });
+
+  it('rechaza blocks repetida', () => {
+    const error = expectParseError('blocks\n  block A\nblocks\n  block B\n');
+
+    expect(error.message).toContain(`'blocks' ya está definido`);
+  });
+
+  it('exige nombre en una definición', () => {
+    const error = expectParseError('blocks\n  block repeats 2\n');
+
+    expect(error.message).toContain('una definición requiere nombre');
+  });
+
+  it('señala la segunda definición duplicada', () => {
+    const error = expectParseError('blocks\n  block Riff\n  block Riff\n');
+
+    expect(error.message).toContain(`ya existe una definición con el nombre 'Riff'`);
+    expect(error.position.line).toBe(3);
+  });
+
+  it('falla con posición si `use` referencia un nombre inexistente', () => {
+    const error = expectParseError('blocks\n  block Riff\n\npart P\n  use Nope\n');
+
+    expect(error.message).toContain(`no existe la definición 'Nope' en blocks`);
+    expect(error.message).toContain('Riff');
+    expect(error.position).toEqual({ line: 5, column: 7 });
+  });
+
+  it('rechaza notes dentro de use', () => {
+    const error = expectParseError('blocks\n  block Riff\n\npart P\n  use Riff\n    notes\n      0\n');
+
+    expect(error.message).toContain(`'use' no admite 'notes'`);
+  });
+
+  it('rechaza bloques hijos dentro de use', () => {
+    const error = expectParseError('blocks\n  block Riff\n\npart P\n  use Riff\n    block Hijo\n');
+
+    expect(error.message).toContain('no admite bloques hijos dentro de una referencia');
+  });
+
+  it('rechaza use dentro de blocks y dentro de otro use (v1)', () => {
+    expect(expectParseError('blocks\n  use Riff\n').message).toContain('referencias anidadas');
+    expect(
+      expectParseError('blocks\n  block Riff\n\npart P\n  use Riff\n    use Riff\n').message
+    ).toContain('referencias anidadas');
+  });
+
+  it('rechaza repeats inválidos y secciones duplicadas en una referencia', () => {
+    expect(expectParseError('blocks\n  block Riff\n\npart P\n  use Riff repeats -1\n').message).toContain('repeats');
+    expect(
+      expectParseError('blocks\n  block Riff\n\npart P\n  use Riff\n    commands\n      OCT 1\n    commands\n      OCT 2\n').message
+    ).toContain(`la sección 'commands' ya existe`);
+  });
+
+  it('exige comillas para `use`/`blocks` como nombre', () => {
+    expect(expectParseError('blocks\n  block use\n').message).toContain('palabra reservada');
+    expect(expectParseError('blocks\n  block blocks\n').message).toContain('palabra reservada');
+  });
+
+  it('acepta `block "use"` comillado como nombre de definición', () => {
+    const document = parseSong('blocks\n  block "use"\n\npart P\n  use "use"\n');
+
+    expect(document.song.blocks[0].label).toBe('use');
   });
 });

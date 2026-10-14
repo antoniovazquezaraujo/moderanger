@@ -1,4 +1,5 @@
 import { Block } from '../../block';
+import { BlockReference } from '../../block-reference';
 import { Command, CommandType } from '../../command';
 import { AssignOperation, VaryOperation } from '../../operation';
 import { Part } from '../../part';
@@ -18,7 +19,7 @@ function createDocument(name = 'X'): SongDocument {
 function addPart(document: SongDocument, name: string, blocks: Block[]): Part {
   const part = new Part();
   part.name = name;
-  part.blocks = blocks;
+  part.items = blocks;
   document.song.parts.push(part);
   return part;
 }
@@ -342,5 +343,103 @@ describe('serializeSong: operaciones y variables', () => {
     const badRepeats = createDocument();
     badRepeats.song.repeats = 0;
     expect(() => serializeSong(badRepeats)).toThrow(MrSerializeError);
+  });
+});
+
+describe('serializeSong: biblioteca `blocks` y referencias `use`', () => {
+  it('emite la sección blocks antes de las partes, separando definiciones', () => {
+    const document = createDocument('Biblioteca');
+    const riff = createBlock('Riff');
+    riff.blockContent.notes = '0 3';
+    const coro = createBlock('Coro principal');
+    coro.blockContent.notes = '0';
+    document.song.blocks = [riff, coro];
+    addPart(document, 'Piano', []);
+
+    expect(serializeSong(document)).toBe(
+      `song Biblioteca
+version 1
+
+blocks
+  block Riff
+    notes
+      0
+      3
+
+  block "Coro principal"
+    notes
+      0
+
+part Piano
+`
+    );
+  });
+
+  it('emite una definición con repeats', () => {
+    const document = createDocument();
+    const eco = createBlock('Eco');
+    eco.repeatingTimes = 2;
+    eco.blockContent.notes = '0';
+    document.song.blocks = [eco];
+    addPart(document, 'P', []);
+
+    expect(serializeSong(document)).toContain('  block Eco repeats 2\n');
+  });
+
+  it('emite una referencia `use` con repeats y secciones propias', () => {
+    const document = createDocument();
+    const riff = createBlock('Riff');
+    riff.blockContent.notes = '0';
+    document.song.blocks = [riff];
+    const part = addPart(document, 'P', []);
+    const reference = new BlockReference();
+    reference.targetLabel = 'Riff';
+    reference.repeatingTimes = 2;
+    reference.commands = [new Command({ type: CommandType.OCT, value: 5 })];
+    reference.operations = [new VaryOperation('oct', 1)];
+    part.items = [reference];
+
+    expect(serializeSong(document)).toContain(
+      `part P
+  use Riff repeats 2
+    commands
+      OCT 5
+    operations
+      VARY $oct 1
+`
+    );
+  });
+
+  it('omite `repeats 1` y comilla los nombres con espacios', () => {
+    const document = createDocument();
+    const def = createBlock('Con espacios');
+    document.song.blocks = [def];
+    const part = addPart(document, 'P', []);
+    const reference = new BlockReference();
+    reference.targetLabel = 'Con espacios';
+    part.items = [reference];
+
+    const text = serializeSong(document);
+    expect(text).toContain('  block "Con espacios"\n');
+    expect(text).toContain('  use "Con espacios"\n');
+    expect(text).not.toContain('repeats 1');
+  });
+
+  it('falla con definiciones sin nombre o duplicadas y referencias sin nombre', () => {
+    const withoutName = createDocument();
+    withoutName.song.blocks = [createBlock('')];
+    expect(expectSerializeError(withoutName).message).toContain('requiere nombre');
+
+    const duplicated = createDocument();
+    duplicated.song.blocks = [createBlock('Riff'), createBlock('Riff')];
+    expect(expectSerializeError(duplicated).message).toContain('duplicado');
+
+    const emptyReference = createDocument();
+    const emptyDef = createBlock('Riff');
+    emptyReference.song.blocks = [emptyDef];
+    const part = addPart(emptyReference, 'P', []);
+    const reference = new BlockReference();
+    part.items = [reference];
+    expect(expectSerializeError(emptyReference).message).toContain('no tiene un nombre de definición');
   });
 });

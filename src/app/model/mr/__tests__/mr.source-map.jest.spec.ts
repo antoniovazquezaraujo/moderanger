@@ -1,3 +1,4 @@
+import { Block } from '../../block';
 import { parseSong, parseSongWithSourceMap } from '../mr.parser';
 import { serializeSong } from '../mr.serializer';
 import { findSourceEntryAtLine, findSourceEntryForNode, MrSourceMapEntry } from '../mr.source-map';
@@ -62,12 +63,12 @@ describe('parseSongWithSourceMap: documento y ranges', () => {
     const uno = blockEntry(sourceMap, 0, [0]);
     expect(uno.range.start).toEqual({ line: 8, column: 3 });
     expect(uno.range.end.line).toBe(12);
-    expect(uno.node).toBe(partA.blocks[0]);
+    expect(uno.node).toBe(partA.items[0] as Block);
 
     const hijo = blockEntry(sourceMap, 0, [0, 0]);
     expect(hijo.range.start.line).toBe(11);
     expect(hijo.range.end.line).toBe(12);
-    expect(hijo.node).toBe(partA.blocks[0].children[0]);
+    expect(hijo.node).toBe((partA.items[0] as Block).children[0]);
 
     const repeats = blockEntry(sourceMap, 0, [1]);
     expect(repeats.range.start.line).toBe(13);
