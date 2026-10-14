@@ -6,10 +6,12 @@ Bienvenido a la documentación técnica de **Mode Ranger**. Está pensada para n
 - [[analysis/MODERANGER-ARCHITECTURE-GUIDE|Guía de arquitectura del proyecto]]
 - [[design/propuesta-sintaxis-mr|Propuesta de sintaxis `.mr` (aprobada)]]
 - [[analysis/sintaxis-mr-implementada|Sintaxis `.mr` implementada y contrato de round-trip]]
+- [[design/propuesta-bloques-reutilizables|Propuesta: bloques reutilizables (`blocks` + `use`)]]
 - [[analysis/codigo-v2-sin-cablear|Inventario del código v2 sin cablear]]
 
 ## 🎯 Decisiones
 - [[adr/ADR-001-texto-canonico-y-sintaxis-mr|ADR-001: Texto canónico y sintaxis `.mr`]]
+- [[adr/ADR-002-bloques-reutilizables|ADR-002: Bloques reutilizables (`blocks` + `use`)]]
 
 ## ✨ Fases y estado
 - [[analysis/mr-fase2-vista-texto|Fase 2: vista de texto en la app]]
