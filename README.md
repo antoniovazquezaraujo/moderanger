@@ -20,6 +20,8 @@ npm test      # Jest suite (core, no browser)
 npm run build # production build
 ```
 
+Or just `./scripts/dev.sh`: it sets up Node 16, runs `npm ci` when `node_modules` is missing and then starts the dev server.
+
 ## The `.mr` language
 
 A minimal song:
