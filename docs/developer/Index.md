@@ -16,6 +16,9 @@ Bienvenido a la documentación técnica de **Mode Ranger**. Está pensada para n
 ## ✨ Fases y estado
 - [[analysis/mr-fase2-vista-texto|Fase 2: vista de texto en la app]]
 - [[analysis/mr-fase3-guardar-cargar|Fase 3: guardar/cargar `.mr`]]
+- [[analysis/bloques-reutilizables-implementados|Bloques reutilizables: núcleo implementado (fase 1)]]
+- [[analysis/bloques-reutilizables-gui|Bloques reutilizables: GUI (fase 2)]]
+- [[analysis/scheduler-rejilla-96n|Scheduler: rejilla 96n para tresillos exactos]]
 - [[analysis/duracion-de-grupos|Duración de grupos y `useDefaultDuration`]]
 - [[analysis/pulido-bpm-variables|BPM canónico, `$var` y repeticiones]]
 - [[analysis/BACKLOG|Backlog del proyecto]]
