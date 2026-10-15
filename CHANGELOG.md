@@ -21,6 +21,7 @@ All notable changes to **Mode Ranger**. Format based on
 - Inherited note duration is visible/editable with the mouse wheel (hover); cycle includes returning to "empty".
 - Block tree hierarchy guides: a subtle vertical line per nesting level and a short horizontal connector toward each block (file-explorer style, neutral and with no active-branch highlight).
 - Project infrastructure: CI (tests + coverage + build), `develop`/`main` PR workflow, releases with a web artifact and automatic user-docs publishing.
+- Reusable blocks: a song-level `blocks` library with `use` references from parts (editing a definition updates every reference; references carry their own `repeats` and call `commands`/`operations`, applied after the definition's) plus the GUI (Blocks panel, reference chips, change-target from the chip icon and orphan repair).
 
 ### Changed
 
@@ -62,6 +63,7 @@ All notable changes to **Mode Ranger**. Format based on
 - The operation variable select lost its selection during playback (VARY).
 - String variables were missing from the sidebar.
 - The melody editor failed to render `$var` string tokens.
+- Triplet durations (`4t`, `8t`, ...) now schedule on a 96n grid: triplet groups play even and gap-free (previously quantized to the 16n grid, causing silences or uneven notes).
 
 ### Internal
 
