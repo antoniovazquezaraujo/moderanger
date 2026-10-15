@@ -23,7 +23,7 @@
 ## 2. Lenguaje visual (consistencia)
 
 - **Panel de biblioteca:** misma caja que el panel de Variables (borde `#ddd`, radio 4px, cabecera clicable con chevron, título y contador); filas compactas; acciones al hover/focus con reserva de espacio (sin saltos de layout). El botón "+" de la cabecera vive **junto al contador** (`Blocks 3  +`), no flotando a la derecha, y se revela al hover/foco con su espacio ya reservado. Las acciones de cada fila (duplicar/borrar) siguen al contenido (nombre → usos), sin `margin-left: auto`.
-- **Referencia:** ítem visualmente distinto (acento lateral `#90a4ae` + fondo tenue) frente al bloque inline; el aviso de huérfana usa acento rojo.
+- **Referencia:** ítem visualmente distinto (acento lateral `#90a4ae` + fondo tenue) frente al bloque inline; el aviso de huérfana usa acento rojo. El icono de enlace del chip es clicable y cambia el bloque destino (mismo patrón de combo que el botón de añadir referencia).
 - **Sección Notes:** el editor de melodía embebido no aporta `min-height` ni paddings verticales inferiores, de modo que el espaciado inferior queda alineado con las filas de Commands/Operations (aplica a bloques inline y a la biblioteca; mismo criterio que el PATTERN embebido).
 - **Añadir referencia:** por defecto solo un botón; al pulsarlo se despliega el combo de definiciones (select nativo sin flecha, coherente con el resto) y al seleccionar una se añade la referencia y el combo vuelve a ocultarse.
 
@@ -35,6 +35,7 @@
 |---|---|---|
 | Renombrado | En vivo propaga en cascada cuando el nombre es válido; al salir del campo revierte si está vacío o duplicado, con aviso. | Evita dejar el modelo inválido (el parser exige labels únicos) sin bloquear la escritura. |
 | Añadir referencia | El botón despliega el combo bajo demanda (intenta `select.showPicker()` con fallback a `focus`, operable por teclado); seleccionar añade y oculta. Sin biblioteca, botón deshabilitado con pista. | Quita ruido de la cabecera de la part: el combo solo aparece cuando se necesita. |
+| Cambiar destino | El icono de enlace del chip despliega el combo de definiciones; elegir otra cambia el `targetLabel` conservando `×N`, comandos y operaciones de la llamada. Mismo label = no-op; `Escape`/blur cierran. | Hace fácil reasignar una referencia sin borrarla y recrearla. |
 | Botón "+" de la biblioteca | Situado junto al contador (`Blocks 3  +`), visible al hover/foco con espacio reservado. | Cabecera más legible sin flotantes a la derecha; sin saltos de layout. |
 | Borrado en uso | Diálogo con la lista de partes que la usan y confirmación explícita; borra **también** las referencias. | Evita crear `use` huérfanos desde la GUI. |
 | Navegación | `Edit definition` expande el panel, despliega y resalta la definición ~1,6 s. | Localizar la definición sin perder contexto. |
@@ -50,8 +51,8 @@
 
 ## 5. Comportamiento con referencias huérfanas
 
-Si el modelo se construye a mano con un `use` sin definición, la referencia se pinta en modo degradado (chip rojo + aviso "Missing block definition"), oculta la edición de la llamada y **no** rompe la app. El player ya la ignora (fase 1).
+Si el modelo se construye a mano con un `use` sin definición, la referencia se pinta en modo degradado (chip rojo + aviso "Missing block definition"), oculta la edición de la llamada y **no** rompe la app. El player ya la ignora (fase 1). El icono de enlace sigue operativo: permite **repararla** eligiendo una definición existente (el `targetLabel` pasa a ser válido y la referencia sale del modo degradado).
 
 ## 6. Tests
 
-Suites nuevas: `song-blocks.jest.spec` (helpers de modelo), `block-library.jest.spec`, `block-reference.jest.spec`, `part-references-gui.jest.spec`, `block-library-mode.jest.spec` (bloque), `block-library-panel.jest.spec` (song-editor); Bicho añadió `part-references-integration.jest.spec` y ampliaciones. `part-references-gui` cubre además la interacción botón → combo → añadir. Total: **836 tests en verde** (73 suites); cobertura sin bajar (`song-blocks.ts` ~98 % stmts). `npm run build` en verde.
+Suites nuevas: `song-blocks.jest.spec` (helpers de modelo), `block-library.jest.spec`, `block-reference.jest.spec`, `part-references-gui.jest.spec`, `block-library-mode.jest.spec` (bloque), `block-library-panel.jest.spec` (song-editor); Bicho añadió `part-references-integration.jest.spec` y ampliaciones. `part-references-gui` cubre la interacción botón → combo → añadir y `block-reference` el cambio de destino desde el chip (incluida la reparación de huérfanas). Total: **845 tests en verde** (73 suites); cobertura sin bajar (`song-blocks.ts` ~98 % stmts). `npm run build` en verde.
