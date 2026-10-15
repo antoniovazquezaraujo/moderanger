@@ -24,7 +24,8 @@ jest.mock('@angular/core', () => {
     EventEmitter,
     Component: () => (target: unknown) => target,
     Input: propertyDecorator,
-    Output: propertyDecorator
+    Output: propertyDecorator,
+    ViewChild: propertyDecorator
   };
 });
 
@@ -126,6 +127,122 @@ describe('BlockReferenceComponent', () => {
     expect(template).toContain('min="0" max="99" step="1"');
     expect(template).toContain("'Repeats for reference ' + reference.targetLabel");
     expect(template).toContain('aria-label="Duplicate reference"');
-    expect(template).toContain('[pTooltip]="isOrphan ?');
+    expect(template).toContain('pTooltip="Change block"');
+  });
+});
+
+describe('BlockReferenceComponent · cambio de bloque destino', () => {
+  function songWith(...labels: string[]): Song {
+    const song = new Song();
+    song.blocks = labels.map(label => {
+      const block = new Block();
+      block.label = label;
+      return block;
+    });
+    return song;
+  }
+
+  it('toggleTargetPicker abre y cierra el combo; cerrado por defecto', () => {
+    const song = songWith('Riff', 'Coro');
+    const reference = new BlockReference();
+    reference.targetLabel = 'Riff';
+    const component = createComponent(reference, song);
+
+    expect(component.targetPickerOpen).toBe(false);
+
+    component.toggleTargetPicker();
+    expect(component.targetPickerOpen).toBe(true);
+
+    component.toggleTargetPicker();
+    expect(component.targetPickerOpen).toBe(false);
+  });
+
+  it('no abre el combo sin definiciones en la biblioteca', () => {
+    const component = createComponent(new BlockReference(), new Song());
+
+    component.toggleTargetPicker();
+
+    expect(component.targetPickerOpen).toBe(false);
+  });
+
+  it('elegir otro bloque cambia el targetLabel y cierra; conserva ×N', () => {
+    const song = songWith('Riff', 'Coro');
+    const reference = new BlockReference();
+    reference.targetLabel = 'Riff';
+    reference.repeatingTimes = 4;
+    const component = createComponent(reference, song);
+    component.toggleTargetPicker();
+
+    component.onTargetSelected('Coro');
+
+    expect(reference.targetLabel).toBe('Coro');
+    expect(reference.repeatingTimes).toBe(4);
+    expect(component.targetPickerOpen).toBe(false);
+  });
+
+  it('elegir el mismo bloque es un no-op (solo cierra)', () => {
+    const song = songWith('Riff', 'Coro');
+    const reference = new BlockReference();
+    reference.targetLabel = 'Riff';
+    const component = createComponent(reference, song);
+    component.toggleTargetPicker();
+
+    component.onTargetSelected('Riff');
+
+    expect(reference.targetLabel).toBe('Riff');
+    expect(component.targetPickerOpen).toBe(false);
+  });
+
+  it('repara una referencia huérfana eligiendo una definición válida', () => {
+    const song = songWith('Riff');
+    const reference = new BlockReference();
+    reference.targetLabel = 'Fantasma';
+    const component = createComponent(reference, song);
+    expect(component.isOrphan).toBe(true);
+    expect(component.hasTargetOption).toBe(false);
+
+    component.toggleTargetPicker();
+    component.onTargetSelected('Riff');
+
+    expect(reference.targetLabel).toBe('Riff');
+    expect(component.isOrphan).toBe(false);
+  });
+
+  it('onTargetSelected sin label solo cierra el combo', () => {
+    const song = songWith('Riff');
+    const reference = new BlockReference();
+    reference.targetLabel = 'Riff';
+    const component = createComponent(reference, song);
+    component.toggleTargetPicker();
+
+    component.onTargetSelected(null);
+
+    expect(reference.targetLabel).toBe('Riff');
+    expect(component.targetPickerOpen).toBe(false);
+  });
+
+  it('el cierre diferido por blur oculta el combo', () => {
+    jest.useFakeTimers();
+    const song = songWith('Riff');
+    const reference = new BlockReference();
+    reference.targetLabel = 'Riff';
+    const component = createComponent(reference, song);
+    component.toggleTargetPicker();
+
+    component.onTargetPickerBlur();
+    jest.runOnlyPendingTimers();
+
+    expect(component.targetPickerOpen).toBe(false);
+    jest.useRealTimers();
+  });
+
+  it('el template expone el icono como disparador accesible', () => {
+    expect(template).toContain('#targetSelect');
+    expect(template).toContain('*ngIf="targetPickerOpen"');
+    expect(template).toContain('(click)="toggleTargetPicker()"');
+    expect(template).toContain('(ngModelChange)="onTargetSelected($event)"');
+    expect(template).toContain('aria-haspopup="listbox"');
+    expect(template).toContain('[attr.aria-expanded]="targetPickerOpen"');
+    expect(template).toContain('reference-target-button');
   });
 });

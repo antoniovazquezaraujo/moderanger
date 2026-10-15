@@ -33,6 +33,25 @@ part Piano
       7
 `;
 
+const SOURCE_TWO_BLOCKS = `song Demo
+version 1
+
+blocks
+  block Riff
+    notes
+      0
+      3
+
+  block Coro
+    notes
+      5
+
+part Piano
+  use Riff repeats 2
+    commands
+      OCT 5
+`;
+
 describe('Integración `.mr` → GUI de bloques reutilizables', () => {
   it('aplicar un .mr con blocks/use produce biblioteca y chip de referencia en la part', () => {
     const result = prepareSongText(SOURCE);
@@ -80,5 +99,22 @@ describe('Integración `.mr` → GUI de bloques reutilizables', () => {
 
     expect(findBlockDefinition(song, reference.targetLabel)).toBeUndefined();
     expect(blockUsages(song, 'Fantasma')).toHaveLength(1);
+  });
+
+  it('cambiar el bloque destino desde el chip re-serializa use con el nuevo label conservando repeats y comandos', () => {
+    const song = prepareSongText(SOURCE_TWO_BLOCKS).document!.song;
+    const reference = song.parts[0].items[0] as BlockReference;
+    expect(reference.targetLabel).toBe('Riff');
+    expect(reference.repeatingTimes).toBe(2);
+
+    // Simula el cambio de destino desde `app-block-reference` (icono del chip):
+    // solo cambia `targetLabel`; `×N` y comandos de llamada se conservan.
+    reference.targetLabel = 'Coro';
+
+    const text = serializeSong({ song, variables: new Map(), meta: { version: 1 } });
+
+    expect(text).toContain('  use Coro repeats 2\n');
+    expect(text).toContain('      OCT 5\n');
+    expect(text).not.toContain('use Riff');
   });
 });

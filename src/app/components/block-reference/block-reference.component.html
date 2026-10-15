@@ -13,10 +13,17 @@
             [attr.aria-label]="(expanded ? 'Collapse' : 'Expand') + ' reference ' + reference.targetLabel">
         </p-button>
 
-        <span class="reference-chip"
-              [pTooltip]="isOrphan ? 'Missing block definition' : 'Reference to library block'"
-              tooltipPosition="top">
-            <i class="pi pi-link" aria-hidden="true"></i>
+        <span class="reference-chip">
+            <button type="button"
+                    class="reference-target-button"
+                    pTooltip="Change block"
+                    tooltipPosition="top"
+                    aria-haspopup="listbox"
+                    [attr.aria-expanded]="targetPickerOpen"
+                    [attr.aria-label]="'Change block for reference ' + reference.targetLabel"
+                    (click)="toggleTargetPicker()">
+                <i class="pi pi-link" aria-hidden="true"></i>
+            </button>
             <span class="reference-name">{{ reference.targetLabel }}</span>
             <span class="reference-repetitions">
                 <span class="repetitions-label" aria-hidden="true">×</span>
@@ -29,6 +36,20 @@
                        tooltipPosition="top">
             </span>
         </span>
+
+        <select #targetSelect
+                *ngIf="targetPickerOpen"
+                class="reference-target-select"
+                [ngModel]="reference.targetLabel"
+                (ngModelChange)="onTargetSelected($event)"
+                (blur)="onTargetPickerBlur()"
+                (keydown.escape)="closeTargetPicker()"
+                aria-label="Block definition">
+            <option *ngIf="!hasTargetOption" [ngValue]="reference.targetLabel" disabled>
+                {{ reference.targetLabel || 'Choose…' }}
+            </option>
+            <option *ngFor="let option of definitionOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
 
         <span class="reference-controls">
             <p-button icon="pi pi-arrow-up" pTooltip="Move reference up" tooltipPosition="top"
