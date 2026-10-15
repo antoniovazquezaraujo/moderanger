@@ -26,6 +26,12 @@ type PartSoundInfo = {
     instrumentId: InstrumentId;
     noteDataIndex: number;
     pendingTurnsToPlay: number;
+    /**
+     * Error fraccionario (en ticks) pendiente de repartir entre notas. Evita
+     * que la cuantización al grid de 16n acumule huecos: con 4t cada nota dura
+     * 2,667 ticks y el reparto alterna 3/2/3 ticks (8 por grupo = 2 pulsos).
+     */
+    fractionalTurns: number;
 }
 
 /**
@@ -341,7 +347,8 @@ export class SongPlayer {
                 player: state.player,
                 instrumentId: state.instrumentId,
                 noteDataIndex: 0,
-                pendingTurnsToPlay: 0
+                pendingTurnsToPlay: 0,
+                fractionalTurns: 0
             }];
         } 
         return result;
@@ -548,7 +555,8 @@ export class SongPlayer {
                     player: state.player,
                     instrumentId: state.instrumentId,
                     noteDataIndex: 0,
-                    pendingTurnsToPlay: 0 // Assuming this resets or is handled later
+                    pendingTurnsToPlay: 0, // Assuming this resets or is handled later
+                    fractionalTurns: 0
                 });
             }
         }); // End forEach
@@ -616,6 +624,7 @@ export class SongPlayer {
                 partSoundInfo.forEach(psi => {
                     psi.noteDataIndex = 0;
                     psi.pendingTurnsToPlay = 0;
+                    psi.fractionalTurns = 0;
                 });
                 // Do not stop the loop, it continues for the next repetition
             } else {
@@ -653,8 +662,19 @@ export class SongPlayer {
                     const durationToUse = noteData.duration ?? '16n'; // Default to 16n if undefined
                     const durationInSeconds = this.audioEngine.timeToSeconds(durationToUse);
                     if (interval > 0) {
-                        // Calculate turns based on 16th note interval, subtract 1 because the current tick plays the note
-                        calculatedPendingTurns = Math.max(0, Math.round(durationInSeconds / interval) - 1);
+                        // Duración exacta en ticks del loop (16n). Se redondea a
+                        // un número entero de ticks pero arrastrando el error
+                        // fraccionario (`fractionalTurns`), de modo que la
+                        // secuencia de spans suma la duración ideal: p. ej. 4t
+                        // (2,667 ticks) se reparte 3/2/3 y un grupo de tres
+                        // ocupa 8 ticks (2 pulsos) sin hueco. Sin el acarreo,
+                        // Math.round(duration/interval) alargaba cada 4t a 3
+                        // ticks y dejaba un silencio de 1 tick por grupo.
+                        const idealTurns = durationInSeconds / interval;
+                        const targetTurns = idealTurns + partSoundInfo.fractionalTurns;
+                        const spanTurns = Math.max(1, Math.round(targetTurns));
+                        partSoundInfo.fractionalTurns = targetTurns - spanTurns;
+                        calculatedPendingTurns = spanTurns - 1;
                     }
                  } catch (e) {
                     console.error("[SongPlayer] Error calculating duration:", noteData.duration, e);
