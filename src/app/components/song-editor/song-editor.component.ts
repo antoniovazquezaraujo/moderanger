@@ -29,6 +29,7 @@ import {
   SongDocument
 } from 'src/app/model/mr';
 import { downloadTextFile, readFileAsText } from 'src/app/model/mr/mr.file.browser';
+import { BlockLibraryComponent } from '../block-library/block-library.component';
 
 @Component({
     selector: 'app-song-editor',
@@ -53,6 +54,7 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     mrErrorLines: string[] = [];
 
     @ViewChild('mrFileInput') mrFileInputRef?: ElementRef<HTMLInputElement>;
+    @ViewChild('blockLibrary') blockLibraryRef?: BlockLibraryComponent;
 
     selectedDefaultDuration: NoteDuration = '4n';
     readonly availableDurations: NoteDuration[] = ['1n', '2n', '4n', '8n', '16n', '4t', '8t'];
@@ -86,6 +88,11 @@ export class SongEditorComponent implements OnInit, OnDestroy {
 
     toggleVariablesPanel(): void {
         this.variablesExpanded = !this.variablesExpanded;
+    }
+
+    /** Navegación desde una referencia: expande y resalta su definición. */
+    focusBlockDefinition(label: string): void {
+        this.blockLibraryRef?.focusDefinition(label);
     }
 
     toggleMrTextEditor(): void {

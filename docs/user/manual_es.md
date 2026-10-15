@@ -64,7 +64,12 @@ bpm <n>                # opcional: tempo (30–240)
 vars                   # opcional: variables declaradas
   $nombre = valor
 
+blocks                 # opcional: definiciones de bloques reutilizables
+  block <nombre>
+    notes
+
 part <nombre> instrument <tipo>   # una o más partes
+  use <nombre> repeats <n>        # referencia a un bloque de la biblioteca (o bloques inline)
   block <nombre> repeats <n>      # bloques; pueden anidar bloques
     notes                         # contenido: notas…
     commands                      # …comandos…
@@ -84,7 +89,7 @@ Reglas generales:
 | Orden de secciones | Al leer se aceptan en cualquier orden (una vez cada una); al escribir siempre `notes` → `commands` → `operations` → bloques hijos. |
 | Extensión | Ficheros `.mr`; el nombre se propone al guardar a partir del nombre de la canción. |
 
-Palabras reservadas (hay que comillarlas si se usan como nombre): `song`, `version`, `repeats`, `bpm`, `vars`, `part`, `block`, `instrument`, `notes`, `commands`, `operations`.
+Palabras reservadas (hay que comillarlas si se usan como nombre): `song`, `version`, `repeats`, `bpm`, `vars`, `part`, `block`, `instrument`, `notes`, `commands`, `operations`, `blocks`, `use`.
 
 ### 3.1. Cabecera
 
@@ -186,6 +191,58 @@ Dentro de un bloque puede haber, como máximo una vez cada una:
 - **`operations`** — cambios sobre variables (sección 6).
 
 Cada línea de una sección usa 2 espacios más de indentación que su cabecera. Un bloque puede tener solo hijos, solo secciones o ambas cosas.
+
+### 3.6. Bloques reutilizables (`blocks` y `use`)
+
+Un bloque que se repite en varias partes (un riff, un coro) no hace falta copiarlo: se define una vez en la **biblioteca** de la canción `blocks` y se referencia desde cualquier parte con `use`. Editar la definición actualiza **todas** las referencias a la vez.
+
+Colocación y contenido:
+
+- `blocks` va **después de `vars`** y **antes de la primera `part`**; es opcional y aparece como máximo una vez.
+- Dentro, cada definición es un `block <nombre>` con **nombre obligatorio y único**. Una definición admite `notes`, `commands`, `operations` y bloques hijos como cualquier bloque (dentro no puede haber `use`; ver más abajo).
+- En una parte, `use <nombre> repeats <n>` es un **ítem directo** de la parte, al mismo nivel que un `block` inline. Referencia una definición por nombre, y solo cuentan las definiciones de `blocks`.
+- Una referencia **no** admite `notes` (las notas vienen de la definición) ni bloques hijos; puede llevar sus propios `commands` y `operations`. Las referencias no se anidan en la v1.
+
+Cómo suena, por pasada:
+
+1. `commands` de la definición → 2. `operations` de la definición → 3. `commands` de la llamada → 4. `operations` de la llamada → 5. `notes` de la definición → 6. bloques hijos de la definición.
+
+Los ajustes de la llamada corren **después** de los de la definición, así que ganan en lo que definan (`OCT 5` en la llamada pisa el `OCT` de la definición). El total de pasadas es `repeats` de la llamada × `repeats` de la definición. Como en los bloques inline, los comandos y operaciones **persisten** tras la referencia (Stop y el fin natural restauran las variables).
+
+En la GUI, el panel **Blocks** (encima de la fila de parts, como Variables) lista las definiciones: añadir, renombrar (el renombrado se propaga a todas las referencias), duplicar y borrar (con un diálogo que indica dónde se usa). Para añadir una referencia, el botón de la part abre el combo de definiciones y al elegir una se inserta el `use`. Cada referencia se pinta como un chip con su nombre y `×N`; el icono de enlace del chip cambia su bloque destino, y una referencia colgante (un `use` cuya definición ya no existe) se muestra degradada y se puede reparar desde el mismo icono.
+
+```mr
+song Reusable
+version 1
+
+vars
+  $oct = 3
+
+blocks
+  block Riff
+    notes
+      4n:0
+      4n:3
+      4n:5
+    commands
+      OCT 4
+    operations
+      VARY $oct 1
+
+  block Coro
+    notes
+      4n:4
+      4n:6
+
+part Piano
+  use Riff repeats 2
+    commands
+      OCT 5
+
+  block Puente
+    notes
+      4n:2
+```
 
 ---
 
@@ -478,6 +535,12 @@ Formato de presentación: `fichero.mr:línea:columna  error: mensaje`. Ejemplos:
 | `version 9` | versión de formato no soportada; este parser admite la versión 1 |
 | `bpm 20` | `bpm` debe estar entre 30 y 240 |
 | `notes $motif` con líneas debajo | `notes $motif` no admite líneas de eventos |
+| `use Riff` sin `block Riff` en `blocks` | no existe la definición `Riff` en `blocks`; no se puede resolver |
+| `blocks` colocado después de una `part` | `blocks` debe ir antes de la primera parte |
+| `notes` dentro de un `use` | las notas vienen de la definición; `use` no admite `notes` |
+| un `block` hijo dentro de un `use` | la v1 no admite bloques hijos dentro de una referencia |
+| `use` dentro de una definición de `blocks` | la v1 no admite referencias anidadas |
+| dos definiciones con el mismo nombre | ya existe una definición con ese nombre en `blocks` |
 
 Ejemplo de fichero inválido y sus dos primeros errores (el parser se detiene en el primero):
 
@@ -722,6 +785,10 @@ part
 - **Guía de validación manual de la v1:** [`docs/developer/testing/validacion-manual-v1.md`](../developer/testing/validacion-manual-v1.md).
 - **Decisión y contexto:** [`docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`](../developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md).
 - **Propuesta aprobada (todas las preguntas resueltas):** [`docs/developer/design/propuesta-sintaxis-mr.md`](../developer/design/propuesta-sintaxis-mr.md).
+- **Bloques reutilizables (diseño y ADR):** [`docs/developer/design/propuesta-bloques-reutilizables.md`](../developer/design/propuesta-bloques-reutilizables.md) · [`docs/developer/adr/ADR-002-bloques-reutilizables.md`](../developer/adr/ADR-002-bloques-reutilizables.md).
+- **Bloques reutilizables — núcleo (Fase 1):** [`docs/developer/analysis/bloques-reutilizables-implementados.md`](../developer/analysis/bloques-reutilizables-implementados.md).
+- **Bloques reutilizables — GUI (Fase 2):** [`docs/developer/analysis/bloques-reutilizables-gui.md`](../developer/analysis/bloques-reutilizables-gui.md).
+- **Tresillos en el scheduler (rejilla 96n):** [`docs/developer/analysis/scheduler-rejilla-96n.md`](../developer/analysis/scheduler-rejilla-96n.md).
 - **Sintaxis implementada y contrato de round-trip:** [`docs/developer/analysis/sintaxis-mr-implementada.md`](../developer/analysis/sintaxis-mr-implementada.md).
 - **Vista de texto (Fase 2):** [`docs/developer/analysis/mr-fase2-vista-texto.md`](../developer/analysis/mr-fase2-vista-texto.md).
 - **Guardar/cargar (Fase 3):** [`docs/developer/analysis/mr-fase3-guardar-cargar.md`](../developer/analysis/mr-fase3-guardar-cargar.md).

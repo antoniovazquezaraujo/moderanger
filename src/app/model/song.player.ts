@@ -26,6 +26,12 @@ type PartSoundInfo = {
     instrumentId: InstrumentId;
     noteDataIndex: number;
     pendingTurnsToPlay: number;
+    /**
+     * Error fraccionario (en ticks) pendiente de repartir entre notas. Evita
+     * que la cuantización al grid de 16n acumule huecos: con 4t cada nota dura
+     * 2,667 ticks y el reparto alterna 3/2/3 ticks (8 por grupo = 2 pulsos).
+     */
+    fractionalTurns: number;
 }
 
 /**
@@ -69,6 +75,21 @@ export class SongPlayer {
 
     /** Mínimo visible de un origen (evita parpadeos en pasajes rápidos). */
     private static readonly MIN_PLAYING_SOURCE_MS = 100;
+
+    /**
+     * Resolución del scheduler en notación de Tone: `96n` = 1/24 de negra.
+     * Es múltiplo común de las subdivisiones binarias (hasta 32n) y ternarias
+     * (4t/8t/16t), así que toda duración del dominio cae en un número entero de
+     * ticks y los tresillos salen **parejos**: 4t=16, 8t=8, 16t=4, 16n=6, 32n=3.
+     * Con la rejilla anterior (16n) los tresillos había que aproximarlos por
+     * redondeo (4t→3/n o 3-2-3 con acarreo) y sonaban desiguales.
+     */
+    private static readonly SCHEDULER_INTERVAL = '96n';
+    /** Ticks de scheduler por cada 16n (96n = 6 × 16n). Cadencia del metrónomo/beatCount. */
+    private static readonly TICKS_PER_SIXTEENTH = 6;
+
+    /** Contador de ticks del scheduler (resetea en cada reproducción). */
+    private schedulerTick = 0;
 
     private readonly _playingSources = new Map<string, { source: PlayingNoteSource; untilMs: number }>();
     private readonly _playingSourcesSubject = new BehaviorSubject<PlayingNoteSource[]>([]);
@@ -149,6 +170,7 @@ export class SongPlayer {
         this._unregisterStopListener();
         this._restoreVariablesSnapshot();
         this._clearPlayingSources();
+        this.schedulerTick = 0;
         
         // Update global state
         this.globalState.setIsPlaying(false);
@@ -341,7 +363,8 @@ export class SongPlayer {
                 player: state.player,
                 instrumentId: state.instrumentId,
                 noteDataIndex: 0,
-                pendingTurnsToPlay: 0
+                pendingTurnsToPlay: 0,
+                fractionalTurns: 0
             }];
         } 
         return result;
@@ -548,7 +571,8 @@ export class SongPlayer {
                     player: state.player,
                     instrumentId: state.instrumentId,
                     noteDataIndex: 0,
-                    pendingTurnsToPlay: 0 // Assuming this resets or is handled later
+                    pendingTurnsToPlay: 0, // Assuming this resets or is handled later
+                    fractionalTurns: 0
                 });
             }
         }); // End forEach
@@ -567,6 +591,7 @@ export class SongPlayer {
         // Reset beat count and repetition for new playback
         this.globalState.setBeatCount(0);
         this.globalState.resetRepetition();
+        this.schedulerTick = 0;
 
         const loopCallback = (time: number) => {
             this._loopTick(time, partSoundInfo);
@@ -575,7 +600,7 @@ export class SongPlayer {
         if (this.currentLoopId) {
             this.audioEngine.disposeLoop(this.currentLoopId);
         }
-        this.currentLoopId = this.audioEngine.scheduleLoop(loopCallback, '16n');
+        this.currentLoopId = this.audioEngine.scheduleLoop(loopCallback, SongPlayer.SCHEDULER_INTERVAL);
         
         try {
              await this.audioEngine.startTransport();
@@ -587,20 +612,27 @@ export class SongPlayer {
     }
     
     private _loopTick(time: number, partSoundInfo: PartSoundInfo[]): void {
-        const currentBeatCount = this.globalState.beatCount;
-        const beatsPerBar = this.globalState.getCurrentPlaybackState().beatsPerBar;
-        this._metronome.next(currentBeatCount % beatsPerBar); // Use modulo for metronome display
+        // El loop corre a la resolución del scheduler (96n). El metrónomo y el
+        // `beatCount` mantienen la cadencia de 16n (cada 6 ticks) para no alterar
+        // la UI ni el estado de compases.
+        const isSixteenthTick = this.schedulerTick % SongPlayer.TICKS_PER_SIXTEENTH === 0;
+        if (isSixteenthTick) {
+            const currentBeatCount = this.globalState.beatCount;
+            const beatsPerBar = this.globalState.getCurrentPlaybackState().beatsPerBar;
+            this._metronome.next(currentBeatCount % beatsPerBar); // Use modulo for metronome display
+            this.globalState.setBeatCount(currentBeatCount + 1);
+        }
         // El resaltado de origen se revisa una vez por tick: los puntos que ya
         // cumplieron su mínimo visible/duración se apagan.
         this._prunePlayingSources();
         let turnPlayed = false;
-        const sixteenthNoteDuration = this.audioEngine.timeToSeconds('16n');
+        const tickInterval = this.audioEngine.timeToSeconds(SongPlayer.SCHEDULER_INTERVAL);
 
         partSoundInfo.forEach(psi => {
-            turnPlayed = this._playTurn(psi, sixteenthNoteDuration, time) || turnPlayed;
+            turnPlayed = this._playTurn(psi, tickInterval, time) || turnPlayed;
         });
 
-        this.globalState.setBeatCount(currentBeatCount + 1); // Increment beat count unconditionally per tick
+        this.schedulerTick++;
         
         const allPartsFinishedCurrentRep = partSoundInfo.every(psi => 
             psi.noteDataIndex >= psi.noteDatas.length && psi.pendingTurnsToPlay <= 0 // Use <= 0 for pending turns
@@ -612,10 +644,12 @@ export class SongPlayer {
             if (repetitionState.canAdvance) {
                 this.globalState.nextRepetition();
                 this.globalState.setBeatCount(0); // Reset beat count for new repetition
+                this.schedulerTick = 0;
                 // Reset each part's state for the next repetition
                 partSoundInfo.forEach(psi => {
                     psi.noteDataIndex = 0;
                     psi.pendingTurnsToPlay = 0;
+                    psi.fractionalTurns = 0;
                 });
                 // Do not stop the loop, it continues for the next repetition
             } else {
@@ -653,8 +687,19 @@ export class SongPlayer {
                     const durationToUse = noteData.duration ?? '16n'; // Default to 16n if undefined
                     const durationInSeconds = this.audioEngine.timeToSeconds(durationToUse);
                     if (interval > 0) {
-                        // Calculate turns based on 16th note interval, subtract 1 because the current tick plays the note
-                        calculatedPendingTurns = Math.max(0, Math.round(durationInSeconds / interval) - 1);
+                        // Duración en ticks del scheduler (96n). Con esta rejilla
+                        // toda duración del dominio da un número entero de ticks
+                        // (4t=16, 8t=8, 16n=6…), así que los tresillos salen
+                        // parejos. El acarreo del error fraccionario
+                        // (`fractionalTurns`) queda como red de seguridad para
+                        // duraciones no representables (p. ej. 5n o 64n), de modo
+                        // que la secuencia de spans sume siempre la duración ideal
+                        // sin huecos.
+                        const idealTurns = durationInSeconds / interval;
+                        const targetTurns = idealTurns + partSoundInfo.fractionalTurns;
+                        const spanTurns = Math.max(1, Math.round(targetTurns));
+                        partSoundInfo.fractionalTurns = targetTurns - spanTurns;
+                        calculatedPendingTurns = spanTurns - 1;
                     }
                  } catch (e) {
                     console.error("[SongPlayer] Error calculating duration:", noteData.duration, e);

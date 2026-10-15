@@ -4,6 +4,7 @@
         [parts] = "getParts() || []" 
         [song] = "song"
         (onRemovePart)="emitRemovePart($event)"
-        (onDuplicatePart)="handleDuplicatePart($event)">
+        (onDuplicatePart)="handleDuplicatePart($event)"
+        (editDefinitionEvent)="editDefinitionEvent.emit($event)">
     </app-parts>
 </div>

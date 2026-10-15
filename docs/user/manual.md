@@ -64,7 +64,12 @@ bpm <n>                # optional: tempo (30-240)
 vars                   # optional: declared variables
   $name = value
 
+blocks                 # optional: reusable block definitions
+  block <name>
+    notes
+
 part <name> instrument <type>   # one or more parts
+  use <name> repeats <n>        # reference to a library block (or inline blocks)
   block <name> repeats <n>      # blocks; they can nest blocks
     notes                       # content: notes...
     commands                    # ...commands...
@@ -84,7 +89,7 @@ General rules:
 | Section order | Any order when reading (each section at most once); always written `notes` → `commands` → `operations` → child blocks. |
 | Extension | `.mr` files; the file name is proposed when saving from the song name. |
 
-Reserved words (quote them if used as a name): `song`, `version`, `repeats`, `bpm`, `vars`, `part`, `block`, `instrument`, `notes`, `commands`, `operations`.
+Reserved words (quote them if used as a name): `song`, `version`, `repeats`, `bpm`, `vars`, `part`, `block`, `instrument`, `notes`, `commands`, `operations`, `blocks`, `use`.
 
 ### 3.1. Header
 
@@ -186,6 +191,58 @@ Inside a block there can be, at most once each:
 - **`operations`** — changes to variables (section 6).
 
 Each line of a section is indented 2 spaces beyond its header. A block can have only children, only sections, or both.
+
+### 3.6. Reusable blocks (`blocks` and `use`)
+
+A block that repeats across parts (a riff, a chorus) does not need to be copied: define it once in the song-level **library** `blocks` and reference it from any part with `use`. Editing the definition updates **every** reference at once.
+
+Placement and contents:
+
+- `blocks` goes **after `vars`** and **before the first `part`**; it is optional and appears at most once.
+- Inside it, each definition is a `block <name>` whose **name is mandatory and unique**. A definition admits the usual `notes`, `commands`, `operations` and child blocks (no `use` inside — see below).
+- In a part, `use <name> repeats <n>` is a **direct item** of the part, at the same level as an inline `block`. It references a definition by name, and only definitions in `blocks` count.
+- A reference does **not** admit `notes` (the notes come from the definition) nor child blocks; it can carry its own `commands` and `operations`. References are not nestable in v1.
+
+How it sounds, per pass:
+
+1. definition `commands` → 2. definition `operations` → 3. call `commands` → 4. call `operations` → 5. definition `notes` → 6. definition child blocks.
+
+The call's settings run **after** the definition's, so they win for whatever they set (`OCT 5` on the call overrides the definition's `OCT`). The total number of passes is the call's `repeats` × the definition's `repeats`. As with inline blocks, commands and operations **persist** after the reference (Stop and the natural end restore the variables).
+
+In the GUI, the **Blocks** panel (above the parts row, like Variables) lists the definitions: add, rename (renaming cascades to every reference), duplicate, and delete (with a dialog listing where it is used). To add a reference, use the add-reference button in a part: it opens the definition combo, and picking one inserts the `use`. Each reference shows as a chip with its name and `×N`; the link icon on the chip changes its target block, and a dangling reference (a `use` whose definition no longer exists) is shown degraded and can be repaired from the same icon.
+
+```mr
+song Reusable
+version 1
+
+vars
+  $oct = 3
+
+blocks
+  block Riff
+    notes
+      4n:0
+      4n:3
+      4n:5
+    commands
+      OCT 4
+    operations
+      VARY $oct 1
+
+  block Coro
+    notes
+      4n:4
+      4n:6
+
+part Piano
+  use Riff repeats 2
+    commands
+      OCT 5
+
+  block Puente
+    notes
+      4n:2
+```
 
 ---
 
@@ -478,6 +535,12 @@ Presentation format: `file.mr:line:column  error: message`. Examples:
 | `version 9` | unsupported format version; this parser supports version 1 |
 | `bpm 20` | `bpm` must be between 30 and 240 |
 | `notes $motif` with lines below | `notes $motif` does not accept event lines |
+| `use Riff` with no `block Riff` in `blocks` | no definition named `Riff` in `blocks`; cannot be resolved |
+| `blocks` placed after a `part` | `blocks` must come before the first part |
+| `notes` inside a `use` | the notes come from the definition; `use` does not accept `notes` |
+| a child `block` inside a `use` | v1 does not allow child blocks inside a reference |
+| `use` inside a `blocks` definition | v1 does not allow nested references |
+| two definitions with the same name | a definition with that name already exists in `blocks` |
 
 > ⚠️ Parser messages are currently emitted in **Spanish** (`line:column error: ...`); translating them is tracked as a follow-up.
 
@@ -724,6 +787,10 @@ part
 - **Manual validation guide for v1:** [`docs/developer/testing/validacion-manual-v1.md`](../developer/testing/validacion-manual-v1.md).
 - **Decision and context:** [`docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`](../developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md).
 - **Approved proposal (all questions resolved):** [`docs/developer/design/propuesta-sintaxis-mr.md`](../developer/design/propuesta-sintaxis-mr.md).
+- **Reusable blocks (design and ADR):** [`docs/developer/design/propuesta-bloques-reutilizables.md`](../developer/design/propuesta-bloques-reutilizables.md) · [`docs/developer/adr/ADR-002-bloques-reutilizables.md`](../developer/adr/ADR-002-bloques-reutilizables.md).
+- **Reusable blocks — core (Phase 1):** [`docs/developer/analysis/bloques-reutilizables-implementados.md`](../developer/analysis/bloques-reutilizables-implementados.md).
+- **Reusable blocks — GUI (Phase 2):** [`docs/developer/analysis/bloques-reutilizables-gui.md`](../developer/analysis/bloques-reutilizables-gui.md).
+- **Triplet scheduling (96n grid):** [`docs/developer/analysis/scheduler-rejilla-96n.md`](../developer/analysis/scheduler-rejilla-96n.md).
 - **Implemented syntax and round-trip contract:** [`docs/developer/analysis/sintaxis-mr-implementada.md`](../developer/analysis/sintaxis-mr-implementada.md).
 - **Text view (Phase 2):** [`docs/developer/analysis/mr-fase2-vista-texto.md`](../developer/analysis/mr-fase2-vista-texto.md).
 - **Save/load (Phase 3):** [`docs/developer/analysis/mr-fase3-guardar-cargar.md`](../developer/analysis/mr-fase3-guardar-cargar.md).
