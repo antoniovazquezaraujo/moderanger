@@ -9,6 +9,7 @@ import { NoteGenerationService } from '../../services/note-generation.service';
 import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
 import { GlobalStateService } from '../../shared/services/global-state.service';
 import { AssignOperation, VaryOperation } from '../operation';
+import { Block } from '../block';
 import { Part } from '../part';
 import { Song } from '../song';
 import { SongPlayer } from '../song.player';
@@ -73,8 +74,9 @@ const createPlayer = (stub: EngineStub): SongPlayer =>
 
 const createPart = (notes: string, operations: Array<VaryOperation | AssignOperation> = []): Part => {
   const part = new Part();
-  part.blocks[0].blockContent.notes = notes;
-  part.blocks[0].operations = operations;
+  const block = part.items[0] as Block;
+  block.blockContent.notes = notes;
+  block.operations = operations;
   return part;
 };
 

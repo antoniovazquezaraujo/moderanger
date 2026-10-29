@@ -9,6 +9,7 @@ import { NoteGenerationService } from '../../services/note-generation.service';
 import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
 import { GlobalStateService } from '../../shared/services/global-state.service';
 import { Command, CommandType } from '../command';
+import { Block } from '../block';
 import { NoteData } from '../note';
 import { Part } from '../part';
 import { Song } from '../song';
@@ -68,7 +69,7 @@ const createEngineStub = (): EngineStub => {
 
 const createPart = (notes: string): Part => {
   const part = new Part();
-  part.blocks[0].blockContent.notes = notes;
+  (part.items[0] as Block).blockContent.notes = notes;
   return part;
 };
 
@@ -103,12 +104,12 @@ describe('SongPlayer · playingSources$ (resaltado de la nota-origen)', () => {
     await player.playPart(part, new Song());
 
     stub.getLoopCallback()(0);
-    expect(last(emissions)).toEqual([{ blockId: part.blocks[0].id, sourcePath: [0] }]);
+    expect(last(emissions)).toEqual([{ blockId: (part.items[0] as Block).id, sourcePath: [0] }]);
 
     // A los 60 ms la nota ya terminó (50 ms), pero sigue visible (mínimo 100 ms).
     jest.advanceTimersByTime(60);
     stub.getLoopCallback()(0.05);
-    expect(last(emissions)).toEqual([{ blockId: part.blocks[0].id, sourcePath: [0] }]);
+    expect(last(emissions)).toEqual([{ blockId: (part.items[0] as Block).id, sourcePath: [0] }]);
 
     // A los 120 ms el mínimo ya venció: se apaga.
     jest.advanceTimersByTime(60);
@@ -119,7 +120,7 @@ describe('SongPlayer · playingSources$ (resaltado de la nota-origen)', () => {
   it('activa el origen de un acorde generado con comandos (WIDTH/GAP)', async () => {
     const { player, stub, emissions } = setup();
     const part = createPart('4n:0');
-    part.blocks[0].commands = [
+    (part.items[0] as Block).commands = [
       new Command({ type: CommandType.WIDTH, value: 1 }),
       new Command({ type: CommandType.GAP, value: 2 })
     ];
@@ -127,7 +128,7 @@ describe('SongPlayer · playingSources$ (resaltado de la nota-origen)', () => {
 
     stub.getLoopCallback()(0);
 
-    expect(last(emissions)).toEqual([{ blockId: part.blocks[0].id, sourcePath: [0] }]);
+    expect(last(emissions)).toEqual([{ blockId: (part.items[0] as Block).id, sourcePath: [0] }]);
   });
 
   it('al parar limpia todos los orígenes', async () => {

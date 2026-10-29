@@ -1,0 +1,98 @@
+<!--
+  Biblioteca de bloques reutilizables (`blocks`): panel plegable, encima de las
+  parts, con las definiciones y su edición. Mismo lenguaje visual que Variables.
+-->
+<div class="blocks-library-panel">
+    <div class="blocks-library-header" (click)="togglePanel()" #panelHeader>
+        <p-button
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+            styleClass="p-button-text p-button-sm blocks-library-toggler"
+            [attr.aria-expanded]="expanded"
+            aria-label="Toggle block library">
+        </p-button>
+        <span class="blocks-library-title">Blocks</span>
+        <span class="blocks-library-count" *ngIf="song.blocks?.length">{{ song.blocks.length }}</span>
+        <p-button
+            class="blocks-library-add"
+            icon="pi pi-plus"
+            pTooltip="Add block"
+            tooltipPosition="top"
+            aria-label="Add block"
+            (click)="$event.stopPropagation(); addBlock()">
+        </p-button>
+    </div>
+
+    <div class="blocks-library-content" *ngIf="expanded">
+        <!-- Empty state: claro y accionable. -->
+        <p class="blocks-library-empty" *ngIf="!song.blocks?.length">
+            No reusable blocks yet. Add one to reuse the same material across parts.
+        </p>
+
+        <p class="blocks-library-warning" *ngIf="renameWarning" role="alert">
+            <i class="pi pi-exclamation-triangle" aria-hidden="true"></i> {{ renameWarning }}
+        </p>
+
+        <div class="library-entry"
+             *ngFor="let definition of song.blocks; trackBy: trackByDefinition"
+             [class.library-entry--highlight]="isHighlighted(definition)">
+            <div class="library-entry-header">
+                <p-button
+                    [icon]="isExpanded(definition) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                    styleClass="p-button-text p-button-sm library-entry-toggler"
+                    [attr.aria-expanded]="isExpanded(definition)"
+                    [attr.aria-label]="(isExpanded(definition) ? 'Collapse' : 'Expand') + ' block ' + definition.label"
+                    (click)="toggleDefinition(definition)">
+                </p-button>
+
+                <input type="text"
+                       class="library-block-name"
+                       [(ngModel)]="definition.label"
+                       (ngModelChange)="onRenameInput(definition)"
+                       (blur)="onRenameBlur(definition)"
+                       placeholder="Block name"
+                       aria-label="Block name">
+
+                <span class="library-usage"
+                      *ngIf="usageCount(definition) > 0"
+                      [pTooltip]="usageTooltip(definition)"
+                      tooltipPosition="top">
+                    <i class="pi pi-link" aria-hidden="true"></i>×{{ usageCount(definition) }}
+                </span>
+
+                <span class="library-entry-controls">
+                    <p-button icon="pi pi-copy" pTooltip="Duplicate block" tooltipPosition="top"
+                              aria-label="Duplicate block" (click)="duplicateDefinition(definition)"></p-button>
+                    <p-button icon="pi pi-times" pTooltip="Delete block" tooltipPosition="top"
+                              aria-label="Delete block" (click)="requestDelete(definition)"></p-button>
+                </span>
+            </div>
+
+            <div class="library-entry-body" *ngIf="isExpanded(definition)">
+                <app-block [block]="definition" [hideLabel]="true" [hideControls]="true"></app-block>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Borrado en uso: lista dónde se usa y avisa de que se borrarán sus `use`. -->
+<p-dialog
+    header="Delete block"
+    [(visible)]="deleteVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '32rem', maxWidth: '95vw' }"
+    styleClass="library-delete-dialog">
+    <p class="library-delete-intro" *ngIf="deleteCandidate">
+        The block <strong>&laquo;{{ deleteCandidate.label }}&raquo;</strong> is used by
+        {{ deleteUsages.length }} reference{{ deleteUsages.length === 1 ? '' : 's' }}:
+    </p>
+    <ul class="library-delete-usages">
+        <li *ngFor="let usage of deleteUsages">{{ usageLabel(usage) }}</li>
+    </ul>
+    <p class="library-delete-hint">Deleting it also removes those references.</p>
+    <div class="library-delete-actions">
+        <p-button label="Cancel" styleClass="p-button-text" (click)="cancelDelete()"></p-button>
+        <p-button label="Delete block and references" styleClass="p-button-danger" (click)="confirmDelete()"></p-button>
+    </div>
+</p-dialog>

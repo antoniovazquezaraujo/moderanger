@@ -23,13 +23,23 @@ interface VariableOption {
     value: string;
 }
 
+/**
+ * Vista de un bloque que puede editarse con este componente: un `Block` inline,
+ * una definición de la biblioteca o una `BlockReference` (`use`). Solo necesita
+ * los comandos y operaciones propios; el editor no accede a nada más.
+ */
+export interface BlockCommandHost {
+    commands: Command[];
+    operations: BaseOperation[];
+}
+
 @Component({
     selector: 'app-block-commands',
     templateUrl: './block-commands.component.html',
     styleUrls: ['./block-commands.component.scss']
 })
 export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
-    @Input() block: Block = new Block();
+    @Input() block: BlockCommandHost = new Block();
     public PlayMode = PlayMode;
 
     commandTypeNames: string[] = [];

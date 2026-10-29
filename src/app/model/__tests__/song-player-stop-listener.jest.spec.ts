@@ -78,7 +78,11 @@ const createPlayer = (stub: EngineStub): SongPlayer =>
 
 const createPart = (notes: string): Part => {
   const part = new Part();
-  part.blocks[0].blockContent.notes = notes;
+  const block = part.items[0];
+  if (block.kind !== 'block') {
+    throw new Error('expected an inline block');
+  }
+  block.blockContent.notes = notes;
   return part;
 };
 

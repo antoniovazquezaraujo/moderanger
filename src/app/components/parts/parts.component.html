@@ -10,7 +10,8 @@
             [style.flex]="flexFor(i)"
             [style.width.px]="widthFor(i)"
             (onDuplicatePart)="handleDuplicatePart($event)"
-            (onRemovePart)="removePart($event)">
+            (onRemovePart)="removePart($event)"
+            (editDefinitionEvent)="editDefinitionEvent.emit($event)">
         </app-part>
         <div *ngIf="!last"
              class="parts-splitter"

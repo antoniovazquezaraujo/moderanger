@@ -16,7 +16,9 @@ export const MR_RESERVED_WORDS: ReadonlySet<string> = new Set([
   'instrument',
   'notes',
   'commands',
-  'operations'
+  'operations',
+  'blocks',
+  'use'
 ]);
 
 /** Nombre sin comillas: letras, dígitos, `_`, `.` y `-`. */

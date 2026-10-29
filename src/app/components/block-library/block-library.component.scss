@@ -1,0 +1,173 @@
+/* Biblioteca de bloques: mismo lenguaje visual que el panel de Variables
+   (borde, radio, padding y margen) y filas compactas como las parts. */
+.blocks-library-panel {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-bottom: 10px;
+  background-color: transparent;
+}
+
+.blocks-library-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  cursor: pointer;
+}
+
+.blocks-library-title {
+  font-weight: bold;
+}
+
+.blocks-library-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background-color: #e3ebf2;
+  color: #37474f;
+  font-size: 0.75rem;
+}
+
+/* El botón "+" vive junto al contador (no flota a la derecha) y sigue el
+   patrón de acciones al hover/foco, con espacio reservado (sin saltos). */
+.blocks-library-add {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.blocks-library-header:hover .blocks-library-add,
+.blocks-library-header:focus-within .blocks-library-add {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.blocks-library-content {
+  margin-left: 0.75rem;
+}
+
+.blocks-library-empty {
+  margin: 4px 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.blocks-library-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  color: #8a2b2b;
+  font-size: 0.85rem;
+}
+
+.library-entry {
+  border-top: 1px solid #eee;
+}
+
+.library-entry--highlight {
+  animation: library-highlight 1.6s ease-out;
+  border-radius: 4px;
+}
+
+@keyframes library-highlight {
+  0% { background-color: #fff3cd; }
+  100% { background-color: transparent; }
+}
+
+.library-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  flex-wrap: wrap;
+}
+
+.library-entry-toggler {
+  width: 2rem;
+  flex: 0 0 auto;
+}
+
+.library-block-name {
+  flex: 0 1 12rem;
+  min-width: 6rem;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background-color: transparent;
+  font-weight: bold;
+  transition: border-color 0.2s;
+}
+
+.library-block-name:focus {
+  outline: none;
+  border-color: #ccc;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.library-usage {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background-color: #e3ebf2;
+  color: #37474f;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.library-usage .pi {
+  font-size: 0.7rem;
+}
+
+/* Acciones al hover/foco, sin saltos de layout (mismo patrón que bloques).
+   Siguen al nombre y al pill de usos (sin `margin-left: auto`): no flotan al
+   extremo derecho de la fila. */
+.library-entry-controls {
+  display: flex;
+  gap: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.library-entry-header:hover .library-entry-controls,
+.library-entry-header:focus-within .library-entry-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.library-entry-body {
+  margin-left: 0.75rem;
+}
+
+/* Diálogo de borrado */
+:host ::ng-deep .library-delete-dialog .library-delete-intro {
+  margin: 0 0 0.5rem 0;
+}
+
+:host ::ng-deep .library-delete-dialog .library-delete-usages {
+  margin: 0 0 0.5rem 1rem;
+  padding: 0;
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
+:host ::ng-deep .library-delete-dialog .library-delete-hint {
+  margin: 0 0 0.75rem 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+:host ::ng-deep .library-delete-dialog .library-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

@@ -207,3 +207,21 @@ export class Command {
     }
 }
 
+/**
+ * Copia independiente de un comando: conserva el tipo y, según corresponda,
+ * la variable referenciada o el valor. Compartido por `Block.clone` y
+ * `BlockReference.clone`.
+ */
+export function cloneCommand(command: Command): Command {
+    const cloned = new Command({ type: command.type, isVariable: command.isVariable });
+    if (command.isVariable) {
+        const variableName = command.getVariableName();
+        if (variableName) {
+            cloned.setVariable(variableName);
+        }
+    } else {
+        cloned.setValue(command.value);
+    }
+    return cloned;
+}
+

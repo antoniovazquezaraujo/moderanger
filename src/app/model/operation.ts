@@ -70,3 +70,22 @@ export class AssignOperation extends BaseOperation {
         VariableContext.setValue(this.variableName, this.value);
     }
 }
+
+/**
+ * Copia independiente de una operación. Compartido por `Block.clone` y
+ * `BlockReference.clone`; ante un tipo desconocido cae a `ASSIGN` (mismo
+ * comportamiento tolerante que el clonado de bloques).
+ */
+export function cloneOperation(operation: BaseOperation): BaseOperation {
+    if (operation instanceof VaryOperation) {
+        const numValue = typeof operation.value === 'number'
+            ? operation.value
+            : (parseInt(String(operation.value)) || 1);
+        return new VaryOperation(operation.variableName, numValue);
+    }
+    if (operation instanceof AssignOperation) {
+        return new AssignOperation(operation.variableName, operation.value);
+    }
+    console.error(`Cloning Error: Unknown operation type: ${operation.constructor.name}. Defaulting to Assign.`);
+    return new AssignOperation(operation.variableName, operation.value);
+}

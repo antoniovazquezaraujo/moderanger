@@ -1,6 +1,6 @@
 # 📋 Backlog de Mode Ranger
 
-- **Actualizado:** 2026-10-03
+- **Actualizado:** 2026-10-14
 - **Contexto:** tras la consolidación del repositorio (merge de `testing-things`, limpieza, fix de duraciones de grupo y archivado de ramas históricas), la sintaxis `.mr` (Fase 1 + Fase 2: vista de texto en la app + Fase 3: guardar/cargar ficheros) y los fixes de integración (recarga tras Aplicar, bloques raíz visibles).
 
 > Estado del repo: una sola rama (`main`), 5 ramas históricas archivadas como tags `archive/*` y auditorías en `docs/developer/audits/`.
@@ -38,6 +38,7 @@
 | 27 | **Mezcla por parte (volumen/pan/ADSR)** | Control de nivel y paneo por parte; envolventes configurables en los sintets. Prácticamente imprescindible en cuanto entre la percusión. | S | Bajo | conversación 2026-10-05 |
 | 28 | **Modo live / hot-swap (aparcado)** | Cambios audibles sin parar ni reiniciar: niveles estimados (1) bucle + Aplicar en caliente S/M, (2) edición GUI en vivo M, (3) swap al siguiente compás M, (4) por bloque/patterns M/L, (5) live coding real L. **No se aborda por ahora** (decisión 2026-10-05). | — | — | conversación 2026-10-05 |
 | 29 | **CLI “Carmen” sin navegador (aparcado)** | Rutas estudiadas para un cliente de escritorio que tome `.mr` y suene: MIDI + FluidSynth (S/M), render WAV offline con `node-web-audio-api` (M), Electron (M), headless Chrome (S/M). El núcleo `.mr` ya es TS puro; solo el motor de audio depende de Web Audio. **Aparcado** (2026-10-05). | M | Medio | conversación 2026-10-05 |
+| 30 | **Bloques reutilizables (`blocks` + `use`)** | En diseño (2026-10-14, rama `feature/reusable-blocks`): biblioteca de bloques con nombre a nivel de canción + referencias desde las parts con `repeats`, `commands` y `operations` de llamada (la llamada se ejecuta después y pisa a la definición). Fase 1 (núcleo) en curso; fase 2 (GUI) y fase 3 futura (anidamiento) planificadas. | M/L | Medio | `docs/developer/design/propuesta-bloques-reutilizables.md`, `docs/developer/adr/ADR-002-bloques-reutilizables.md` |
 
 ## Ramas archivadas (tags)
 

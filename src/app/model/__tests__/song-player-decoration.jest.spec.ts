@@ -14,6 +14,7 @@ import { NoteGenerationService } from '../../services/note-generation.service';
 import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
 import { GlobalStateService } from '../../shared/services/global-state.service';
 import { Command, CommandType } from '../command';
+import { Block } from '../block';
 import { Part } from '../part';
 import { Song } from '../song';
 import { SongPlayer } from '../song.player';
@@ -81,8 +82,9 @@ const firstEventCalls = async (commands: Command[]): Promise<unknown[][]> => {
     new GlobalStateService()
   );
   const part = new Part();
-  part.blocks[0].blockContent.notes = '4n:0';
-  part.blocks[0].commands = commands;
+  const block = part.items[0] as Block;
+  block.blockContent.notes = '4n:0';
+  block.commands = commands;
 
   await player.playPart(part, new Song());
   stub.getLoopCallback()(0);

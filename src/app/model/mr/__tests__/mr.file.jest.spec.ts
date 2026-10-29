@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { Song } from '../../song';
+import { Block } from '../../block';
 import { createNodeMrFileSystem } from '../mr.file.node';
 import { hasMrExtension, MrFileError, MrFileService, MrFileSystem, normalizeMrText } from '../mr.file';
 import { serializeSong } from '../mr.serializer';
@@ -74,7 +75,7 @@ describe('MrFileService con filesystem en memoria', () => {
     const document = await service.read('semilla.mr');
 
     expect(document.song.name).toBe('Semilla');
-    expect(document.song.parts[0].blocks[0].label).toBe('Origen');
+    expect((document.song.parts[0].items[0] as Block).label).toBe('Origen');
   });
 
   it('rechaza rutas sin extensión .mr', async () => {

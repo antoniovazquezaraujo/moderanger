@@ -174,8 +174,10 @@ export class SongStateManagerService {
 
     // Process all parts
     for (const part of song.parts) {
-      for (const block of part.blocks) {
-        processBlock(block);
+      for (const item of part.items) {
+        if (item.kind === 'block') {
+          processBlock(item);
+        }
       }
     }
     

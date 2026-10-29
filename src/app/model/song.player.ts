@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { Player } from "./player";
 import { Song } from "./song";
 import { NoteData } from "./note";
-import { Part } from "./part";
+import { Part, PartItem } from "./part";
 import { Block } from "./block";
+import { BlockReference } from "./block-reference";
 import { PlayMode, arpeggiate } from "./play.mode";
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
 import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
@@ -25,6 +26,12 @@ type PartSoundInfo = {
     instrumentId: InstrumentId;
     noteDataIndex: number;
     pendingTurnsToPlay: number;
+    /**
+     * Error fraccionario (en ticks) pendiente de repartir entre notas. Evita
+     * que la cuantización al grid de 16n acumule huecos: con 4t cada nota dura
+     * 2,667 ticks y el reparto alterna 3/2/3 ticks (8 por grupo = 2 pulsos).
+     */
+    fractionalTurns: number;
 }
 
 /**
@@ -39,6 +46,12 @@ export interface PlayingNoteSource {
 
 type ExecutionUnit = {
     block: Block;
+    /** Comandos a ejecutar en esta unidad (definición y/o llamada, según el caso). */
+    commands: Command[];
+    /** Operaciones a ejecutar en esta unidad (definición y/o llamada). */
+    operations: BaseOperation[];
+    /** `true` si esta unidad genera las notas de `block` (pasada de notas). */
+    includeNotes: boolean;
     repetitionIndex: number;
     childLevel: number;
     parentBlock?: Block;
@@ -62,6 +75,21 @@ export class SongPlayer {
 
     /** Mínimo visible de un origen (evita parpadeos en pasajes rápidos). */
     private static readonly MIN_PLAYING_SOURCE_MS = 100;
+
+    /**
+     * Resolución del scheduler en notación de Tone: `96n` = 1/24 de negra.
+     * Es múltiplo común de las subdivisiones binarias (hasta 32n) y ternarias
+     * (4t/8t/16t), así que toda duración del dominio cae en un número entero de
+     * ticks y los tresillos salen **parejos**: 4t=16, 8t=8, 16t=4, 16n=6, 32n=3.
+     * Con la rejilla anterior (16n) los tresillos había que aproximarlos por
+     * redondeo (4t→3/n o 3-2-3 con acarreo) y sonaban desiguales.
+     */
+    private static readonly SCHEDULER_INTERVAL = '96n';
+    /** Ticks de scheduler por cada 16n (96n = 6 × 16n). Cadencia del metrónomo/beatCount. */
+    private static readonly TICKS_PER_SIXTEENTH = 6;
+
+    /** Contador de ticks del scheduler (resetea en cada reproducción). */
+    private schedulerTick = 0;
 
     private readonly _playingSources = new Map<string, { source: PlayingNoteSource; untilMs: number }>();
     private readonly _playingSourcesSubject = new BehaviorSubject<PlayingNoteSource[]>([]);
@@ -142,6 +170,7 @@ export class SongPlayer {
         this._unregisterStopListener();
         this._restoreVariablesSnapshot();
         this._clearPlayingSources();
+        this.schedulerTick = 0;
         
         // Update global state
         this.globalState.setIsPlaying(false);
@@ -279,16 +308,7 @@ export class SongPlayer {
         try {
             const instrumentId = await this.audioEngine.createInstrument(part.instrumentType);
             const player = new Player(0, part.instrumentType, instrumentId, this.audioEngine);
-            const executionUnits: ExecutionUnit[] = [];
-            const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
-                for (let i = 0; i < block.repeatingTimes; i++) {
-                    executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
-                    block.children?.forEach(childBlock => {
-                            addBlockAndChildren(childBlock, childLevel + 1, block);
-                    });
-                }
-            };
-            part.blocks.forEach(block => addBlockAndChildren(block));
+            const executionUnits: ExecutionUnit[] = this._buildExecutionUnits(part, song);
             partState = {
                 part, player, instrumentId, executionUnits,
                 currentUnitIndex: 0,
@@ -318,10 +338,10 @@ export class SongPlayer {
             const unit = state.executionUnits[state.currentUnitIndex];
             if (unit) {
                 const { block } = unit;
-                block.commands?.forEach((command: Command) => command.execute(state.player));
-                block.executeBlockOperations(); 
+                unit.commands.forEach((command: Command) => command.execute(state.player));
+                this._executeOperations(unit.operations);
 
-                if (block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
+                if (unit.includeNotes && block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
                     const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player);
                     state.extractedNotes = state.extractedNotes.concat(blockNotes);
                 }
@@ -343,7 +363,8 @@ export class SongPlayer {
                 player: state.player,
                 instrumentId: state.instrumentId,
                 noteDataIndex: 0,
-                pendingTurnsToPlay: 0
+                pendingTurnsToPlay: 0,
+                fractionalTurns: 0
             }];
         } 
         return result;
@@ -385,19 +406,115 @@ export class SongPlayer {
     }
 
     private _substituteVariablesInSong(song: Song): void {
+        const processBlock = (block: Block) => {
+             if (block.blockContent?.isVariable && block.blockContent?.variableName) {
+                  const value = VariableContext.getValue(block.blockContent.variableName);
+                  if (typeof value === 'string') {
+                      block.blockContent.notes = value;
+                } else {
+                      console.warn(`Variable ${block.blockContent.variableName} not found or not a string for block ${block.id}`);
+                  }
+             }
+             block.children?.forEach(processBlock);
+        };
+        // La biblioteca `blocks` alimenta las referencias: sus definiciones
+        // también resuelven `notes $var`.
+        song.blocks?.forEach(processBlock);
         song.parts.forEach(part => {
-            const processBlock = (block: Block) => {
-                 if (block.blockContent?.isVariable && block.blockContent?.variableName) {
-                      const value = VariableContext.getValue(block.blockContent.variableName);
-                      if (typeof value === 'string') {
-                          block.blockContent.notes = value;
-                    } else {
-                          console.warn(`Variable ${block.blockContent.variableName} not found or not a string for block ${block.id}`);
-                      }
-                 }
-                 block.children?.forEach(processBlock);
-            };
-            part.blocks?.forEach(processBlock);
+            part.items?.forEach((item: PartItem) => {
+                if (item.kind === 'block') {
+                    processBlock(item);
+                }
+            });
+        });
+    }
+
+    /**
+     * Construye las unidades de ejecución de una parte en orden de reproducción.
+     * Los bloques inline se expanden con sus hijos y repeticiones como siempre;
+     * las referencias `use` se expanden con el orden de la propuesta §5.1:
+     * commands def → operations def → commands llamada → operations llamada →
+     * notes def → hijos def, repetido `repeats llamada × repeats definición`.
+     */
+    private _buildExecutionUnits(part: Part, song: Song): ExecutionUnit[] {
+        const units: ExecutionUnit[] = [];
+        const library = new Map<string, Block>();
+        (song.blocks ?? []).forEach(block => library.set(block.label, block));
+
+        const addBlockAndChildren = (block: Block, childLevel: number, parentBlock?: Block) => {
+            for (let i = 0; i < block.repeatingTimes; i++) {
+                units.push({
+                    block,
+                    commands: block.commands ?? [],
+                    operations: block.operations ?? [],
+                    includeNotes: true,
+                    repetitionIndex: i,
+                    childLevel,
+                    parentBlock
+                });
+                block.children?.forEach(child => addBlockAndChildren(child, childLevel + 1, block));
+            }
+        };
+
+        const addReference = (reference: BlockReference, childLevel: number) => {
+            const definition = library.get(reference.targetLabel);
+            if (!definition) {
+                // El parser garantiza la resolución; el guardia evita un crash
+                // si el modelo se construye a mano.
+                console.warn(`[SongPlayer] La referencia '${reference.targetLabel}' no tiene definición en blocks.`);
+                return;
+            }
+            const passes = reference.repeatingTimes * definition.repeatingTimes;
+            for (let i = 0; i < passes; i++) {
+                // 1-2. commands + operations de la definición.
+                units.push({
+                    block: definition,
+                    commands: definition.commands ?? [],
+                    operations: definition.operations ?? [],
+                    includeNotes: false,
+                    repetitionIndex: i,
+                    childLevel
+                });
+                // 3-4. commands + operations de la llamada (pisan a la definición).
+                units.push({
+                    block: definition,
+                    commands: reference.commands ?? [],
+                    operations: reference.operations ?? [],
+                    includeNotes: false,
+                    repetitionIndex: i,
+                    childLevel
+                });
+                // 5. notes de la definición con el estado resultante.
+                units.push({
+                    block: definition,
+                    commands: [],
+                    operations: [],
+                    includeNotes: true,
+                    repetitionIndex: i,
+                    childLevel
+                });
+                // 6. hijos de la definición.
+                definition.children?.forEach(child => addBlockAndChildren(child, childLevel + 1, definition));
+            }
+        };
+
+        part.items?.forEach(item => {
+            if (item.kind === 'reference') {
+                addReference(item, 0);
+            } else {
+                addBlockAndChildren(item, 0);
+            }
+        });
+        return units;
+    }
+
+    private _executeOperations(operations: readonly BaseOperation[]): void {
+        operations.forEach(operation => {
+            try {
+                operation.execute();
+            } catch (error) {
+                console.error(`Error executing operation:`, error);
+            }
         });
     }
 
@@ -405,16 +522,7 @@ export class SongPlayer {
          const partStatePromises = song.parts.map(async (part, index): Promise<PartExecutionState> => {
             const instrumentId = await this.audioEngine.createInstrument(part.instrumentType);
             const player = new Player(index, part.instrumentType, instrumentId, this.audioEngine);
-            const executionUnits: ExecutionUnit[] = [];
-            const addBlockAndChildren = (block: Block, childLevel: number = 0, parentBlock?: Block) => {
-                for (let i = 0; i < block.repeatingTimes; i++) {
-                    executionUnits.push({ block, repetitionIndex: i, childLevel, parentBlock });
-                    block.children?.forEach(childBlock => {
-                            addBlockAndChildren(childBlock, childLevel + 1, block);
-                    });
-                }
-            };
-            part.blocks.forEach(block => addBlockAndChildren(block));
+            const executionUnits: ExecutionUnit[] = this._buildExecutionUnits(part, song);
             const initialState = {
                 part, player, instrumentId, executionUnits,
                 currentUnitIndex: 0,
@@ -438,11 +546,11 @@ export class SongPlayer {
                 if (unit) {
                     const { block } = unit;
                     // Apply commands and operations FIRST
-                    block.commands?.forEach((command: Command) => command.execute(state.player));
-                    block.executeBlockOperations(); 
+                    unit.commands.forEach((command: Command) => command.execute(state.player));
+                    this._executeOperations(unit.operations);
 
                     // Check if notes exist before calling generation
-                    if (block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
+                    if (unit.includeNotes && block.blockContent && block.blockContent.notes && block.blockContent.notes.trim() !== '') {
                          const blockNotes = this.noteGenerationService.generateNotesForBlock(block, state.player); // Call the service
                          state.extractedNotes = state.extractedNotes.concat(blockNotes);
                     }
@@ -463,7 +571,8 @@ export class SongPlayer {
                     player: state.player,
                     instrumentId: state.instrumentId,
                     noteDataIndex: 0,
-                    pendingTurnsToPlay: 0 // Assuming this resets or is handled later
+                    pendingTurnsToPlay: 0, // Assuming this resets or is handled later
+                    fractionalTurns: 0
                 });
             }
         }); // End forEach
@@ -482,6 +591,7 @@ export class SongPlayer {
         // Reset beat count and repetition for new playback
         this.globalState.setBeatCount(0);
         this.globalState.resetRepetition();
+        this.schedulerTick = 0;
 
         const loopCallback = (time: number) => {
             this._loopTick(time, partSoundInfo);
@@ -490,7 +600,7 @@ export class SongPlayer {
         if (this.currentLoopId) {
             this.audioEngine.disposeLoop(this.currentLoopId);
         }
-        this.currentLoopId = this.audioEngine.scheduleLoop(loopCallback, '16n');
+        this.currentLoopId = this.audioEngine.scheduleLoop(loopCallback, SongPlayer.SCHEDULER_INTERVAL);
         
         try {
              await this.audioEngine.startTransport();
@@ -502,20 +612,27 @@ export class SongPlayer {
     }
     
     private _loopTick(time: number, partSoundInfo: PartSoundInfo[]): void {
-        const currentBeatCount = this.globalState.beatCount;
-        const beatsPerBar = this.globalState.getCurrentPlaybackState().beatsPerBar;
-        this._metronome.next(currentBeatCount % beatsPerBar); // Use modulo for metronome display
+        // El loop corre a la resolución del scheduler (96n). El metrónomo y el
+        // `beatCount` mantienen la cadencia de 16n (cada 6 ticks) para no alterar
+        // la UI ni el estado de compases.
+        const isSixteenthTick = this.schedulerTick % SongPlayer.TICKS_PER_SIXTEENTH === 0;
+        if (isSixteenthTick) {
+            const currentBeatCount = this.globalState.beatCount;
+            const beatsPerBar = this.globalState.getCurrentPlaybackState().beatsPerBar;
+            this._metronome.next(currentBeatCount % beatsPerBar); // Use modulo for metronome display
+            this.globalState.setBeatCount(currentBeatCount + 1);
+        }
         // El resaltado de origen se revisa una vez por tick: los puntos que ya
         // cumplieron su mínimo visible/duración se apagan.
         this._prunePlayingSources();
         let turnPlayed = false;
-        const sixteenthNoteDuration = this.audioEngine.timeToSeconds('16n');
+        const tickInterval = this.audioEngine.timeToSeconds(SongPlayer.SCHEDULER_INTERVAL);
 
         partSoundInfo.forEach(psi => {
-            turnPlayed = this._playTurn(psi, sixteenthNoteDuration, time) || turnPlayed;
+            turnPlayed = this._playTurn(psi, tickInterval, time) || turnPlayed;
         });
 
-        this.globalState.setBeatCount(currentBeatCount + 1); // Increment beat count unconditionally per tick
+        this.schedulerTick++;
         
         const allPartsFinishedCurrentRep = partSoundInfo.every(psi => 
             psi.noteDataIndex >= psi.noteDatas.length && psi.pendingTurnsToPlay <= 0 // Use <= 0 for pending turns
@@ -527,10 +644,12 @@ export class SongPlayer {
             if (repetitionState.canAdvance) {
                 this.globalState.nextRepetition();
                 this.globalState.setBeatCount(0); // Reset beat count for new repetition
+                this.schedulerTick = 0;
                 // Reset each part's state for the next repetition
                 partSoundInfo.forEach(psi => {
                     psi.noteDataIndex = 0;
                     psi.pendingTurnsToPlay = 0;
+                    psi.fractionalTurns = 0;
                 });
                 // Do not stop the loop, it continues for the next repetition
             } else {
@@ -568,8 +687,19 @@ export class SongPlayer {
                     const durationToUse = noteData.duration ?? '16n'; // Default to 16n if undefined
                     const durationInSeconds = this.audioEngine.timeToSeconds(durationToUse);
                     if (interval > 0) {
-                        // Calculate turns based on 16th note interval, subtract 1 because the current tick plays the note
-                        calculatedPendingTurns = Math.max(0, Math.round(durationInSeconds / interval) - 1);
+                        // Duración en ticks del scheduler (96n). Con esta rejilla
+                        // toda duración del dominio da un número entero de ticks
+                        // (4t=16, 8t=8, 16n=6…), así que los tresillos salen
+                        // parejos. El acarreo del error fraccionario
+                        // (`fractionalTurns`) queda como red de seguridad para
+                        // duraciones no representables (p. ej. 5n o 64n), de modo
+                        // que la secuencia de spans sume siempre la duración ideal
+                        // sin huecos.
+                        const idealTurns = durationInSeconds / interval;
+                        const targetTurns = idealTurns + partSoundInfo.fractionalTurns;
+                        const spanTurns = Math.max(1, Math.round(targetTurns));
+                        partSoundInfo.fractionalTurns = targetTurns - spanTurns;
+                        calculatedPendingTurns = spanTurns - 1;
                     }
                  } catch (e) {
                     console.error("[SongPlayer] Error calculating duration:", noteData.duration, e);
