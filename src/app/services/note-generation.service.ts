@@ -12,7 +12,7 @@ import { VariableContext } from '../model/variable.context';
 import { parseBlockNotes, parseBlockNotesForEditor } from '../model/mr/notes.parser';
 import { MrParseError } from '../model/mr/mr.errors';
 import { DEFAULT_DECORATION_DURATION, DecorationItem } from '../model/mr/decoration.parser';
-import * as Tone from 'tone'; // Import Tone
+import { durationToSeconds } from '../model/duration';
 // Import unified note generation service
 import { 
   NoteGenerationUnifiedService, 
@@ -161,7 +161,7 @@ export class NoteGenerationService {
           return [new NoteData({ type: 'rest', duration })];
       }
 
-      const originalSeconds = duration ? Tone.Time(duration).toSeconds() : Tone.Time('16n').toSeconds();
+      const originalSeconds = duration ? durationToSeconds(duration) : durationToSeconds('16n');
       let patternSeconds = 0;
       pattern.forEach(patternNote => {
           patternSeconds += this.patternItemSeconds(patternNote);
@@ -170,7 +170,7 @@ export class NoteGenerationService {
 
       return this.flattenPatternItems(pattern, baseGrade).map(item => {
           const scaled = JSON.parse(JSON.stringify(item)) as NoteData;
-          const itemSeconds = Tone.Time(item.duration ?? '16n').toSeconds();
+          const itemSeconds = durationToSeconds(item.duration ?? '16n');
           scaled.duration = `${itemSeconds * scaleFactor}s`;
           return scaled;
       });
@@ -179,7 +179,7 @@ export class NoteGenerationService {
   /** Segundos de un item de nivel superior del patrón (un grupo dura lo declarado). */
   private patternItemSeconds(item: NoteData): number {
       const itemDuration = item.type === 'group' ? item.duration : (item.duration ?? '16n');
-      return Tone.Time(itemDuration ?? '16n').toSeconds();
+      return durationToSeconds(itemDuration ?? '16n');
   }
 
   /**
@@ -205,7 +205,7 @@ export class NoteGenerationService {
   }
 
   private flattenPatternGroup(group: NoteData, baseGrade: number): NoteData[] {
-      const groupSeconds = Tone.Time(group.duration ?? '16n').toSeconds();
+      const groupSeconds = durationToSeconds(group.duration ?? '16n');
       const children = group.children ?? [];
       const explicitChildren = children.filter(child => this.hasExplicitDuration(child));
       const implicitChildren = children.filter(child => !this.hasExplicitDuration(child));
@@ -258,7 +258,7 @@ export class NoteGenerationService {
   }
 
   private itemDurationSeconds(item: NoteData): number {
-      return Tone.Time(item.duration ?? '16n').toSeconds();
+      return durationToSeconds(item.duration ?? '16n');
   }
 
   /**

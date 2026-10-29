@@ -32,7 +32,7 @@ import { MrParsedSong, MrSourceMapEntry, MrSourceNode, MrSourceNodeKind } from '
 import { MR_FORMAT_VERSION, SongDocument } from './mr.types';
 import { NoteEvent, parseNoteEvents, printNoteEvent } from './notes.parser';
 import { canonicalDecoration } from './decoration.parser';
-import * as Tone from 'tone';
+import { durationToSeconds } from '../duration';
 
 // ---------------------------------------------------------------------------
 // Léxico estructural
@@ -842,7 +842,7 @@ class MrDocumentParser {
       if (event.kind !== 'group') {
         continue;
       }
-      const groupSeconds = Tone.Time(event.duration).toSeconds();
+      const groupSeconds = durationToSeconds(event.duration);
       let explicitSeconds = 0;
       let implicitCount = 0;
       for (const child of event.children) {
@@ -876,7 +876,7 @@ class MrDocumentParser {
 
   private eventDurationSeconds(event: NoteEvent): number {
     const duration = event.kind === 'group' ? event.duration : (event.duration ?? '16n');
-    return Tone.Time(duration).toSeconds();
+    return durationToSeconds(duration);
   }
   private parseOperationsSection(target: { operations: BaseOperation[] }, header: SourceLine): void {
     const contentIndent = header.indent + 2;
