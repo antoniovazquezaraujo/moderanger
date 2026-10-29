@@ -113,6 +113,20 @@ describe('SongPlayer · listener de stop del Transport', () => {
     expect(stub.engine.disposeLoop).toHaveBeenCalledWith('loop-1');
   });
 
+  it('un stop tardío del Play anterior no cancela el reinicio', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    await player.playPart(createPart('4n:0'), new Song());
+    const staleStop = (stub.engine.onTransportStop as jest.Mock).mock.calls[0][0] as () => void;
+
+    player.stop();
+    await player.playPart(createPart('4n:0'), new Song());
+    staleStop();
+
+    expect(player.isPlaying).toBe(true);
+    expect(stub.listenerCount()).toBe(1);
+  });
+
   it('Play → fin natural → Play no acumula listeners', async () => {
     const stub = createEngineStub();
     const player = createPlayer(stub);
