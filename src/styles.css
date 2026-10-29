@@ -2076,16 +2076,6 @@ p-inputnumber .p-inputnumber-button-group > * + * {
 }
 
 /* ====== COMMANDS/OPERATIONS COMO TEXTO LIBRE ====== */
-/* Comas entre comandos/operaciones dentro de su propia caja, para que el
-   wrap de la fila no las separe del elemento anterior. */
-.command:has(+ .command)::after,
-.operation-item:has(+ .operation-item)::after {
-  content: ',';
-  margin: 0 1px;
-  color: #777;
-  pointer-events: none;
-}
-
 /* `$` y `✕`: siempre visibles, sin chrome en reposo; al hover del comando
    (o al editar) recuperan el aspecto de botón. Conservan sus tooltips. */
 .command-actions .p-button,
@@ -2117,21 +2107,14 @@ p-inputnumber .p-inputnumber-button-group > * + * {
   outline-offset: 1px;
 }
 
-/* Notas en cualquier melody editor (header del bloque y PATTERN): comas
-   entre elementos (incluidos grupos), `+` de añadir excluido y hosts
-   inline-flex para que la coma quede centrada en la línea. El chrome de la
-   nota (borde/fondo al hover o al seleccionar) vive en melody-note. */
+/* Notas en cualquier melody editor (header del bloque y PATTERN): hosts
+   inline-flex para que las cajas queden centradas en la línea. Sin comas
+   decorativas entre elementos. El chrome de la nota (borde/fondo al hover o
+   al seleccionar) vive en melody-note. */
 app-melody-editor .notes-container > app-melody-note,
 app-melody-editor .notes-container > app-melody-group {
   display: inline-flex;
   align-items: center;
-}
-
-app-melody-editor .notes-container > * + *:not(.add-note)::before {
-  content: ',';
-  margin-right: 2px;
-  color: #777;
-  pointer-events: none;
 }
 
 /* ====== COMMANDS/OPERATIONS COMPACTOS ====== */
@@ -2232,13 +2215,6 @@ html body .operations-row .add-wrapper {
   height: 20px !important;
   min-height: 20px !important;
   align-items: center;
-}
-
-/* La coma comparte la tipografía de la fila y queda centrada como flex item. */
-html body .commands-row .command:has(+ .command)::after,
-html body .operations-row .operation-item:has(+ .operation-item)::after {
-  font-size: 12px !important;
-  line-height: 1 !important;
 }
 
 /* ====== ACCIONES `$`/`✕` COMO SUPERÍNDICES ====== */

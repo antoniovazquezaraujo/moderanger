@@ -22,8 +22,17 @@
                     <input type="number" id="bpm" class="number-input" style="width:45px !important; max-width:45px !important;"
                            [ngModel]="song.bpm" (ngModelChange)="onBpmChange($event)" min="30" max="240" step="1"
                            pTooltip="Tempo (BPM)" tooltipPosition="top" aria-label="BPM">
-                    <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
-                    <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>
+                    <!-- El botón conmuta: Play cuando está parado y Stop cuando
+                         suena, sin obligar a pasar por el botón Stop. -->
+                    <button pButton type="button"
+                            [icon]="isPlaying ? 'pi pi-stop' : 'pi pi-play'"
+                            (click)="togglePlaySong()"
+                            class="p-ml-2"
+                            [pTooltip]="isPlaying ? 'Stop' : 'Play'"
+                            tooltipPosition="top"
+                            [attr.aria-label]="isPlaying ? 'Stop song' : 'Play song'"></button>
+                    <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"
+                            pTooltip="Stop" tooltipPosition="top" aria-label="Stop song"></button>
                     <!-- Dropdown para Default Duration -->
                     <select 
                         id="defaultDurationSelect" 
