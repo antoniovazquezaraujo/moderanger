@@ -92,6 +92,69 @@
   margin-left: 0.75rem;
 }
 
+/* Panel de Parts: misma caja plegable que Variables/Blocks. Es el último de
+   la pila y contiene la fila de parts. */
+.parts-panel {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-bottom: 10px;
+  background-color: transparent;
+}
+
+.parts-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  cursor: pointer;
+}
+
+.parts-panel-title {
+  font-weight: bold;
+}
+
+.parts-panel-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background-color: #e3ebf2;
+  color: #37474f;
+  font-size: 0.75rem;
+}
+
+/* El "+" vive en la cabecera, junto al contador; aparece al hover/foco sin
+   desplazar el contenido (mismo patrón que Blocks). */
+.parts-panel-add {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.parts-panel-header:hover .parts-panel-add,
+.parts-panel-header:focus-within .parts-panel-add {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.parts-panel-content {
+  margin-left: 0.75rem;
+}
+
+.parts-panel-empty {
+  margin: 4px 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.parts-panel-content app-song {
+  display: block;
+}
+
 /* El formulario/lista de variables ya trae su propio espaciado: dentro del
    panel se recorta el padding vertical para no duplicarlo. */
 :host ::ng-deep .variables-panel app-variable-declaration .variables-container {

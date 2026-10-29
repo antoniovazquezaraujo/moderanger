@@ -152,6 +152,8 @@ part Piano
 - `instrument` is omitted for the default value. In v1 the only instrument is `PIANO`.
 - A part contains one or more blocks; each part sounds with its own instrument.
 
+In the GUI, parts live in the collapsible **Parts** panel, below Variables and Blocks. The `+` in its header adds a part; the panel opens automatically when one is added.
+
 ### 3.4. Blocks (`block`)
 
 `block <name> repeats <n>`, both parts optional:

@@ -45,6 +45,8 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     public metronome$: Observable<number>;
     /** Panel de Variables plegable (encima de las parts); plegado al inicio. */
     variablesExpanded: boolean = false;
+    /** Panel de Parts plegable (debajo de Variables y Blocks); abierto al inicio. */
+    partsExpanded: boolean = true;
     mrTextVisible: boolean = false;
     isPlaying: boolean = false;
 
@@ -88,6 +90,10 @@ export class SongEditorComponent implements OnInit, OnDestroy {
 
     toggleVariablesPanel(): void {
         this.variablesExpanded = !this.variablesExpanded;
+    }
+
+    togglePartsPanel(): void {
+        this.partsExpanded = !this.partsExpanded;
     }
 
     /** Navegación desde una referencia: expande y resalta su definición. */
@@ -227,6 +233,9 @@ export class SongEditorComponent implements OnInit, OnDestroy {
             this.song.parts = [];
         }
         this.song.parts.push(new Part());
+        // La parts se crean desde la cabecera del panel: si estuviera plegado,
+        // se abre para que la nueva part quede visible.
+        this.partsExpanded = true;
         this.cdr.detectChanges();
     }
 

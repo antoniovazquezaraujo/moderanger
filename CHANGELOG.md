@@ -25,6 +25,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- Parts move into a collapsible **Parts** panel below Variables and Blocks. The panel header carries the count and the `+` that adds a part (the old `+` in the song toolbar is gone); it is open by default and opens automatically after adding a part.
 - Notes read as plain continuous text: note values, durations and group symbols now share the commands' typography (12px, normal weight) — the note value is no longer 1.2em bold, the group brackets are no longer 1em bold and the group duration drops monospace. The duration keeps #666 to tell it apart while staying the same size/weight as the value; the 20px note box and the compact metrics are unchanged (only text widths shrink with the smaller glyphs).
 - The variables sidebar is now a collapsible **Variables** panel above the parts row: same visual language as a part (border, radius, padding, bottom margin), a chevron toggler in its header and collapsed by default. The `$` toolbar button and the right-side sidebar are gone; expanding the panel shows the declaration form and the list (numbers, scale, playmode and string values).
 - Parts can grow past the container: the splitter keeps the constant-sum pair only until the shrinking neighbour reaches its 260px minimum; from then on the dragged part keeps growing without a cap and the row scrolls horizontally. Dragging near a container edge auto-scrolls the row in the same gesture, and double click still resets to the equal share.
