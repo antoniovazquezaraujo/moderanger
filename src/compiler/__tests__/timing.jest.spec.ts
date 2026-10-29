@@ -5,6 +5,7 @@ describe('compilador MIDI · duraciones y ticks', () => {
         expect(durationToSeconds('4n', 120)).toBeCloseTo(0.5);
         expect(durationToSeconds('4t', 120)).toBeCloseTo(1 / 3);
         expect(durationToSeconds('8t', 120)).toBeCloseTo(1 / 6);
+        expect(durationToSeconds('1m', 120)).toBeCloseTo(2);
         expect(durationToSeconds('0.25s', 120)).toBeCloseTo(0.25);
     });
 
@@ -13,6 +14,7 @@ describe('compilador MIDI · duraciones y ticks', () => {
         expect(durationToTicks('4t', 120, 960)).toBe(640);
         expect(durationToTicks('8t', 120, 960)).toBe(320);
         expect(durationToTicks('16n', 120, 960)).toBe(240);
+        expect(durationToTicks('1m', 120, 960)).toBe(3840);
         expect(durationToTicks('0.25s', 120, 960)).toBe(480);
     });
 

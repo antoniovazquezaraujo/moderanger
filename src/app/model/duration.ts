@@ -28,7 +28,7 @@ export function durationToSeconds(value: string | number, bpm: number = DEFAULT_
         return parseFloat(secondsMatch[1]);
     }
 
-    const noteMatch = /^([\d.]+)(n|t)$/.exec(trimmed);
+    const noteMatch = /^([\d.]+)(n|t|m)$/.exec(trimmed);
     if (!noteMatch) {
         return 0;
     }
@@ -39,6 +39,12 @@ export function durationToSeconds(value: string | number, bpm: number = DEFAULT_
     }
 
     const quarterSeconds = 60 / bpm;
-    const beats = (4 / amount) * (noteMatch[2] === 't' ? 2 / 3 : 1);
+    const unit = noteMatch[2];
+    // `m` = compás (4 negras en 4/4), igual que Tone.Time con el Transport
+    // por defecto. La v1 lo acepta en la gramática aunque el motor no lo
+    // valide; aquí se mantiene la conversión para no romper el parser.
+    const beats = unit === 'm'
+        ? amount * 4
+        : (4 / amount) * (unit === 't' ? 2 / 3 : 1);
     return beats * quarterSeconds;
 }
