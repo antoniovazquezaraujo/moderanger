@@ -87,7 +87,7 @@ const createPart = (notes: string): Part => {
 };
 
 describe('SongPlayer · listener de stop del Transport', () => {
-  it('el fin natural desregistra el listener', async () => {
+  it('el fin natural desregistra el listener y suelta el loop del scheduler', async () => {
     const stub = createEngineStub();
     const player = createPlayer(stub);
     await player.playPart(createPart('4n:0'), new Song());
@@ -97,10 +97,11 @@ describe('SongPlayer · listener de stop del Transport', () => {
 
     expect(stub.listenerCount()).toBe(0);
     expect(stub.engine.offTransportStop).toHaveBeenCalledTimes(1);
+    expect(stub.engine.disposeLoop).toHaveBeenCalledWith('loop-1');
     expect(player.isPlaying).toBe(false);
   });
 
-  it('Stop desregistra el listener', async () => {
+  it('Stop desregistra el listener y suelta el loop del scheduler', async () => {
     const stub = createEngineStub();
     const player = createPlayer(stub);
     await player.playPart(createPart('4n:0'), new Song());
@@ -109,6 +110,7 @@ describe('SongPlayer · listener de stop del Transport', () => {
 
     expect(stub.listenerCount()).toBe(0);
     expect(stub.engine.offTransportStop).toHaveBeenCalledTimes(1);
+    expect(stub.engine.disposeLoop).toHaveBeenCalledWith('loop-1');
   });
 
   it('Play → fin natural → Play no acumula listeners', async () => {

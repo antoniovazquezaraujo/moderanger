@@ -163,10 +163,9 @@ export class SongPlayer {
     stop(): void {
         this.audioEngine.cancelTransportEvents();
         this.audioEngine.stopTransport();
-        if (this.currentLoopId) {
-            this.audioEngine.disposeLoop(this.currentLoopId);
-            this.currentLoopId = null;
-        }
+        // En el motor real, `stopTransport()` emite el evento `stop` y
+        // `_handleTransportStop` ya habrá soltado el loop; si no, se suelta aquí.
+        this._disposeCurrentLoop();
         this._unregisterStopListener();
         this._restoreVariablesSnapshot();
         this._clearPlayingSources();
@@ -203,6 +202,19 @@ export class SongPlayer {
             this.audioEngine.offTransportStop(this.currentStopListenerId);
             this.currentStopListenerId = null;
         }
+    }
+
+    /**
+     * Suelta el loop del scheduler y limpia su id. Imprescindible antes de un
+     * nuevo Play: si el loop anterior queda registrado en el motor, al volver
+     * a arrancar el Transport suenan las dos reproducciones a la vez.
+     */
+    private _disposeCurrentLoop(): void {
+        if (!this.currentLoopId) {
+            return;
+        }
+        this.audioEngine.disposeLoop(this.currentLoopId);
+        this.currentLoopId = null;
     }
 
     // --- Resaltado de la nota-origen que suena ---
@@ -281,7 +293,7 @@ export class SongPlayer {
              this._metronome.next(0);
              this._clearPlayingSources();
              this._restoreVariablesSnapshot();
-             this.currentLoopId = null;
+             this._disposeCurrentLoop();
              this._unregisterStopListener();
          }
      };
@@ -597,14 +609,18 @@ export class SongPlayer {
             this._loopTick(time, partSoundInfo);
         };
 
-        if (this.currentLoopId) {
-            this.audioEngine.disposeLoop(this.currentLoopId);
-        }
-        this.currentLoopId = this.audioEngine.scheduleLoop(loopCallback, SongPlayer.SCHEDULER_INTERVAL);
-        
+        this._disposeCurrentLoop();
+        const loopId = this.audioEngine.scheduleLoop(loopCallback, SongPlayer.SCHEDULER_INTERVAL);
+        this.currentLoopId = loopId;
+
         try {
              await this.audioEngine.startTransport();
-             this.audioEngine.startLoop(this.currentLoopId, 0);
+             // Otro Stop/Play pudo adelantarse mientras `startTransport()`
+             // esperaba a Tone: no arrancar un loop que ya no es el actual.
+             if (this.currentLoopId !== loopId) {
+                 return;
+             }
+             this.audioEngine.startLoop(loopId, 0);
         } catch (e) {
             console.error("[SongPlayer] Error starting transport or loop via AudioEngine:", e);
             this.stop();
