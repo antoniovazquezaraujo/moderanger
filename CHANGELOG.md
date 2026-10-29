@@ -25,6 +25,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- Song toolbar controls (name, Repeat, BPM, Play/Stop, default duration, metronome, text view and save/load) now share a **30px height**; the `.mr` text button uses a document icon and keeps its tooltip.
 - Pressing **Play** while the song is already playing now restarts it from the beginning (internally Stop + Play) instead of requiring the Stop button first. The icon stays Play; the dedicated Stop button remains.
 - Removed the decorative commas between commands, operations and melody notes; the free-text rows keep their spacing and typography without separator glyphs.
 - Parts move into a collapsible **Parts** panel below Variables and Blocks. The panel header carries the count and the `+` that adds a part (the old `+` in the song toolbar is gone); it is open by default and opens automatically after adding a part.
