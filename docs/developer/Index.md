@@ -7,6 +7,7 @@ Bienvenido a la documentación técnica de **Mode Ranger**. Está pensada para n
 - [[design/propuesta-sintaxis-mr|Propuesta de sintaxis `.mr` (aprobada)]]
 - [[analysis/sintaxis-mr-implementada|Sintaxis `.mr` implementada y contrato de round-trip]]
 - [[design/propuesta-bloques-reutilizables|Propuesta: bloques reutilizables (`blocks` + `use`)]]
+- [[design/compilador-mr-a-midi|Propuesta: compilador `.mr` → MIDI (CLI)]]
 - [[analysis/codigo-v2-sin-cablear|Inventario del código v2 sin cablear]]
 
 ## 🎯 Decisiones
