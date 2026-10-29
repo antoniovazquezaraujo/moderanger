@@ -240,17 +240,17 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * El botón principal conmuta: si la canción está sonando la detiene; si
-     * no, la reproduce. `SongPlayer` aplica `Song.repeats` y `Song.bpm` al
-     * iniciar (no hay copia de sesión que asignar aquí).
+     * Play siempre empieza desde el principio: si la canción ya está sonando,
+     * la para y la vuelve a lanzar (equivalente a Stop + Play, pero en un solo
+     * clic). `SongPlayer` aplica `Song.repeats` y `Song.bpm` al iniciar (no hay
+     * copia de sesión que asignar aquí).
      */
-    togglePlaySong(): void {
+    playSong(): void {
         if (this.songPlayer.isPlaying) {
             this.songPlayer.stop();
-        } else {
-            this.songPlayer.playSong(this.song);
         }
-        // Refleja el cambio ya (sin esperar al siguiente tick del metrónomo).
+        this.songPlayer.playSong(this.song);
+        // Refleja el nuevo estado ya (sin esperar al siguiente tick del metrónomo).
         this.isPlaying = this.songPlayer.isPlaying;
         this.cdr.markForCheck();
     }

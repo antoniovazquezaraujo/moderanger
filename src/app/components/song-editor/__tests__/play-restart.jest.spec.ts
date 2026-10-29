@@ -1,6 +1,7 @@
 /**
- * El botón principal de reproducción conmuta: Play en parado y Stop mientras
- * suena, para no tener que pulsar Stop y luego Play.
+ * Play siempre reproduce desde el principio. Si la canción ya está sonando,
+ * la reinicia en un solo clic (Stop + Play interno), sin cambiar el icono a
+ * Stop ni obligar a usar el botón Stop.
  */
 import type { ChangeDetectorRef } from '@angular/core';
 import * as fs from 'fs';
@@ -80,11 +81,11 @@ const createSongEditor = (isPlaying: boolean) => {
   return { component, player, cdr };
 };
 
-describe('SongEditorComponent · botón Play/Stop', () => {
+describe('SongEditorComponent · Play reinicia si ya está sonando', () => {
   it('con la canción parada reproduce y refleja el estado sonando', () => {
     const { component, player, cdr } = createSongEditor(false);
 
-    component.togglePlaySong();
+    component.playSong();
 
     expect(player.playSong).toHaveBeenCalledTimes(1);
     expect(player.playSong).toHaveBeenCalledWith(component.song);
@@ -93,19 +94,22 @@ describe('SongEditorComponent · botón Play/Stop', () => {
     expect(cdr.markForCheck).toHaveBeenCalled();
   });
 
-  it('con la canción sonando detiene sin pasar por el botón Stop', () => {
+  it('con la canción sonando para y vuelve a empezar en el mismo clic', () => {
     const { component, player } = createSongEditor(true);
 
-    component.togglePlaySong();
+    component.playSong();
 
     expect(player.stop).toHaveBeenCalledTimes(1);
-    expect(player.playSong).not.toHaveBeenCalled();
-    expect(component.isPlaying).toBe(false);
+    expect(player.playSong).toHaveBeenCalledTimes(1);
+    expect(player.stop.mock.invocationCallOrder[0])
+      .toBeLessThan(player.playSong.mock.invocationCallOrder[0]);
+    expect(component.isPlaying).toBe(true);
   });
 
-  it('el template usa el icono y el tooltip según el estado', () => {
-    expect(template).toContain("[icon]=\"isPlaying ? 'pi pi-stop' : 'pi pi-play'\"");
-    expect(template).toContain('(click)="togglePlaySong()"');
-    expect(template).toContain("[pTooltip]=\"isPlaying ? 'Stop' : 'Play'\"");
+  it('el botón sigue siendo Play (no cambia a Stop)', () => {
+    expect(template).toContain('icon="pi pi-play" (click)="playSong()"');
+    expect(template).toContain('pTooltip="Play"');
+    expect(template).not.toContain("[icon]=\"isPlaying ? 'pi pi-stop' : 'pi pi-play'\"");
+    expect(template).not.toContain('togglePlaySong()');
   });
 });
