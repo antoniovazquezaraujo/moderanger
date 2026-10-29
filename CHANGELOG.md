@@ -8,6 +8,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Added
 
+- Experimental **`.mr` → MIDI compiler**: `npm run midi -- song.mr` writes a Standard MIDI File type 1 (960 PPQ, one track per part) without a browser. It reuses the player's musical semantics (parts, `use` references, repeats, commands, operations, `PATTERN`, chords and arpeggios). `--json` exposes the compiled event model. WAV rendering is out of scope.
 - Complete `.mr` language v1: parser, serializer, stable round-trip, `line:column` errors and `.mr` file support (Phase 1).
 - In-app `.mr` text view (Phase 2): live validation, apply/revert and per-part/block source map.
 - Save/load `.mr` from the UI (Phase 3).

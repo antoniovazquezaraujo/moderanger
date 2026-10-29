@@ -13,12 +13,14 @@ Bienvenido a la documentación técnica de **Mode Ranger**. Está pensada para n
 ## 🎯 Decisiones
 - [[adr/ADR-001-texto-canonico-y-sintaxis-mr|ADR-001: Texto canónico y sintaxis `.mr`]]
 - [[adr/ADR-002-bloques-reutilizables|ADR-002: Bloques reutilizables (`blocks` + `use`)]]
+- [[adr/ADR-003-compilador-midi|ADR-003: Compilador `.mr` → MIDI (MVP)]]
 
 ## ✨ Fases y estado
 - [[analysis/mr-fase2-vista-texto|Fase 2: vista de texto en la app]]
 - [[analysis/mr-fase3-guardar-cargar|Fase 3: guardar/cargar `.mr`]]
 - [[analysis/bloques-reutilizables-implementados|Bloques reutilizables: núcleo implementado (fase 1)]]
 - [[analysis/bloques-reutilizables-gui|Bloques reutilizables: GUI (fase 2)]]
+- [[analysis/compilador-midi-mvp|Compilador `.mr` → MIDI: MVP implementado]]
 - [[analysis/scheduler-rejilla-96n|Scheduler: rejilla 96n para tresillos exactos]]
 - [[analysis/duracion-de-grupos|Duración de grupos y `useDefaultDuration`]]
 - [[analysis/pulido-bpm-variables|BPM canónico, `$var` y repeticiones]]

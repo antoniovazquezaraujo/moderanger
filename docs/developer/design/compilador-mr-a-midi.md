@@ -1,16 +1,20 @@
 # Propuesta: compilador `.mr` → MIDI (CLI)
 
-- **Estado:** borrador para discutir. No hay código ni decisión tomada.
+- **Estado:** aprobado (2026-10-29) e implementado como MVP. Decisiones congeladas en `ADR-003`; límites y deuda técnica en `analysis/compilador-midi-mvp.md`.
 - **Fecha:** 2026-10-29
 - **Autor:** DANI (coordinación y arquitectura)
 - **Decisores:** el usuario (producto) + DANI (arquitectura)
-- **Alcance:** definir el MVP de un programa de línea de comandos que lea un `.mr` y escriba un `.mid`, sin navegador. Este documento no implementa nada.
+- **Alcance:** definir el MVP de un programa de línea de comandos que lea un `.mr` y escriba un `.mid`, sin navegador.
 - **Relacionado:**
   - `docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
+  - `docs/developer/adr/ADR-003-compilador-midi.md` (decisiones del MVP)
+  - `docs/developer/analysis/compilador-midi-mvp.md` (implementación del MVP)
   - `docs/user/manual.md` (gramática y semántica vigentes)
   - `src/app/model/mr/` (parser y serializador)
   - `src/app/model/song.player.ts` (orden de ejecución y reproducción)
   - `src/app/services/note-generation.service.ts` (generación de notas)
+
+> **Implementación (2026-10-29):** el MVP está implementado con un `CaptureAudioEngine` que reutiliza `SongPlayer`; ver `docs/developer/analysis/compilador-midi-mvp.md`. La extracción de un `compileSong()` puro sigue siendo la deuda técnica principal.
 
 ---
 
