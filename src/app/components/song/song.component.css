@@ -1,3 +1,8 @@
+/* Host de bloque: las parts se integran en el flujo del panel Parts. */
+:host {
+    display: block;
+}
+
 /* Remove styles related to the header, now handled by song-editor.component.scss */
 
 /* Keep styles for PrimeNG overrides if still needed within app-song/app-parts */

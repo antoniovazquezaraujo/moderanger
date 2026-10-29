@@ -1,10 +1,9 @@
-<!-- The song-header div and its contents are removed -->
-<div style="height: calc(100vh - 91px); overflow-y: auto;"> <!-- Updated total header height -->
-    <app-parts 
-        [parts] = "getParts() || []" 
-        [song] = "song"
-        (onRemovePart)="emitRemovePart($event)"
-        (onDuplicatePart)="handleDuplicatePart($event)"
-        (editDefinitionEvent)="editDefinitionEvent.emit($event)">
-    </app-parts>
-</div>
+<!-- Las parts viven dentro del panel plegable Parts del song-editor; el
+     scroll vertical lo gestiona .content-section (sin contenedor anidado). -->
+<app-parts
+    [parts]="getParts() || []"
+    [song]="song"
+    (onRemovePart)="emitRemovePart($event)"
+    (onDuplicatePart)="handleDuplicatePart($event)"
+    (editDefinitionEvent)="editDefinitionEvent.emit($event)">
+</app-parts>
