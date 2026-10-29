@@ -8,9 +8,13 @@
     "watch": "ng build --watch --configuration development",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "midi": "node src/cli/main.js"
   },
   "private": true,
+  "bin": {
+    "moderanger-mid": "src/cli/main.js"
+  },
   "dependencies": {
     "@angular/animations": "~13.1.0",
     "@angular/cdk": "^13.3.3",

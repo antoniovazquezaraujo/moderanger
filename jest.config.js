@@ -36,8 +36,10 @@ module.exports = {
     'src/app/services/note-generation.service.ts',
     'src/app/shared/services/note-generation-unified.service.ts',
     'src/app/features/generation/note-pattern-processor.service.ts',
+    'src/compiler/**/*.ts',
     '!src/app/**/__tests__/**',
-    '!src/app/**/__mocks__/**'
+    '!src/app/**/__mocks__/**',
+    '!src/compiler/**/__tests__/**'
   ],
   coverageDirectory: 'coverage',
   // Umbral global ligeramente por debajo de la cobertura real (2026-10-03:
