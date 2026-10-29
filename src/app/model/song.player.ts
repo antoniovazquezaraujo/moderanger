@@ -187,6 +187,43 @@ export class SongPlayer {
     }
 
     /**
+     * Para y resuelve cuando el Transport ha emitido `stop`. El evento llega
+     * ~30 ms después de `stopTransport()`; arrancar antes hace que ese mismo
+     * evento pare la reproducción nueva. El timeout es solo una red de
+     * seguridad por si el Transport ya estaba parado y no emite nada.
+     */
+    private _stopAndWaitForTransportStop(): Promise<void> {
+        return new Promise<void>(resolve => {
+            let settled = false;
+            let listenerId: ListenerId | null = null;
+            let fallback: ReturnType<typeof setTimeout> | null = null;
+
+            const finish = () => {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                if (fallback !== null) {
+                    clearTimeout(fallback);
+                }
+                if (listenerId) {
+                    this.audioEngine.offTransportStop(listenerId);
+                }
+                resolve();
+            };
+
+            fallback = setTimeout(finish, 200);
+            listenerId = this.audioEngine.onTransportStop(finish);
+            this.stop();
+            // Si el stub/Transport emitió `stop` de forma síncrona antes de
+            // tener el id, desregistrar ahora.
+            if (settled && listenerId) {
+                this.audioEngine.offTransportStop(listenerId);
+            }
+        });
+    }
+
+    /**
      * Restaura las variables al estado previo al Play y consume el snapshot
      * (una sola vez por reproducción). Sin snapshot, o si `stop()` ya lo
      * consumió, no hace nada.
@@ -316,6 +353,19 @@ export class SongPlayer {
         const partStates = await this._buildPartExecutionStates(song);
         const partSoundInfo = this._extractNotesFromStates(partStates); 
         await this._schedulePlayback(partSoundInfo); 
+    }
+
+    /**
+     * Play desde cero: si ya hay una reproducción en curso, la para y espera
+     * al evento `stop` del Transport antes de arrancar la nueva. Sin esa
+     * espera, el stop de la reproducción anterior llega tarde y cancela la
+     * recién lanzada.
+     */
+    async playSongFromStart(song: Song): Promise<void> {
+        if (this.globalState.isPlaying) {
+            await this._stopAndWaitForTransportStop();
+        }
+        await this.playSong(song);
     }
 
     async playPart(part: Part, song: Song): Promise<void> {

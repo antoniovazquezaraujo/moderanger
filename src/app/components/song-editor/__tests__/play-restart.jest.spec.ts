@@ -54,19 +54,15 @@ const template = fs.readFileSync(path.resolve(__dirname, '../song-editor.compone
 interface PlayerStub {
   metronome$: Subject<number>;
   isPlaying: boolean;
-  playSong: jest.Mock;
-  stop: jest.Mock;
+  playSongFromStart: jest.Mock;
 }
 
 const createSongEditor = (isPlaying: boolean) => {
   const player: PlayerStub = {
     metronome$: new Subject<number>(),
     isPlaying,
-    playSong: jest.fn(() => {
+    playSongFromStart: jest.fn(async () => {
       player.isPlaying = true;
-    }),
-    stop: jest.fn(() => {
-      player.isPlaying = false;
     })
   };
   const cdr = {
@@ -82,27 +78,23 @@ const createSongEditor = (isPlaying: boolean) => {
 };
 
 describe('SongEditorComponent · Play reinicia si ya está sonando', () => {
-  it('con la canción parada reproduce y refleja el estado sonando', () => {
+  it('delega en el arranque desde cero y refleja el estado sonando', async () => {
     const { component, player, cdr } = createSongEditor(false);
 
-    component.playSong();
+    await component.playSong();
 
-    expect(player.playSong).toHaveBeenCalledTimes(1);
-    expect(player.playSong).toHaveBeenCalledWith(component.song);
-    expect(player.stop).not.toHaveBeenCalled();
+    expect(player.playSongFromStart).toHaveBeenCalledTimes(1);
+    expect(player.playSongFromStart).toHaveBeenCalledWith(component.song);
     expect(component.isPlaying).toBe(true);
     expect(cdr.markForCheck).toHaveBeenCalled();
   });
 
-  it('con la canción sonando para y vuelve a empezar en el mismo clic', () => {
+  it('en un solo clic también usa el arranque desde cero', async () => {
     const { component, player } = createSongEditor(true);
 
-    component.playSong();
+    await component.playSong();
 
-    expect(player.stop).toHaveBeenCalledTimes(1);
-    expect(player.playSong).toHaveBeenCalledTimes(1);
-    expect(player.stop.mock.invocationCallOrder[0])
-      .toBeLessThan(player.playSong.mock.invocationCallOrder[0]);
+    expect(player.playSongFromStart).toHaveBeenCalledTimes(1);
     expect(component.isPlaying).toBe(true);
   });
 

@@ -127,6 +127,25 @@ describe('SongPlayer · listener de stop del Transport', () => {
     expect(stub.listenerCount()).toBe(1);
   });
 
+  it('playSongFromStart espera al stop del Transport antes de arrancar de nuevo', async () => {
+    const stub = createEngineStub();
+    const player = createPlayer(stub);
+    const song = new Song();
+    song.parts = [createPart('4n:0')];
+    await player.playSong(song);
+
+    // El Transport real emite `stop` ~30 ms después de stopTransport().
+    (stub.engine.stopTransport as jest.Mock).mockImplementationOnce(() => {
+      setTimeout(() => stub.emitTransportStop(), 0);
+    });
+
+    await player.playSongFromStart(song);
+
+    expect(player.isPlaying).toBe(true);
+    expect(stub.listenerCount()).toBe(1);
+    expect(stub.engine.scheduleLoop).toHaveBeenCalledTimes(2);
+  });
+
   it('Play → fin natural → Play no acumula listeners', async () => {
     const stub = createEngineStub();
     const player = createPlayer(stub);
