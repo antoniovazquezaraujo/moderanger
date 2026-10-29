@@ -7,12 +7,12 @@ import { Block } from "./block";
 import { BlockReference } from "./block-reference";
 import { PlayMode, arpeggiate } from "./play.mode";
 import { Subject, Observable, BehaviorSubject } from 'rxjs';
-import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
+import { AudioEngineService } from "../services/audio-engine.service";
+import { InstrumentType } from "./instrument-type";
 import { NoteGenerationService } from '../services/note-generation.service';
 import { VariableContext, VariableValue } from './variable.context';
 import { BaseOperation, VaryOperation, AssignOperation } from './operation';
 import { Command } from './command';
-import * as Tone from 'tone';
 import { NoteDuration } from './melody';
 import { GlobalStateService } from '../shared/services/global-state.service';
 

@@ -5,8 +5,8 @@
  * CLI del compilador `.mr` → MIDI.
  *
  * Este entrypoint es JavaScript puro para poder instalar el cargador de
- * TypeScript y el shim de Angular ANTES de importar el núcleo. El compilador
- * reutiliza el motor existente; no necesita navegador ni un build de Angular.
+ * TypeScript ANTES de importar el núcleo. El compilador no usa Angular, Tone
+ * ni navegador; solo el modelo y la generación de notas.
  */
 
 const fs = require('fs');
@@ -18,16 +18,6 @@ const root = path.resolve(__dirname, '..', '..');
 // Resolver los imports absolutos `src/...` del proyecto.
 process.env.NODE_PATH = [root, process.env.NODE_PATH].filter(Boolean).join(path.delimiter);
 Module._initPaths();
-
-// Angular no se arranca en el CLI: decoradores no-op.
-const angularShim = require('./angular-core-shim');
-const originalLoad = Module._load;
-Module._load = function load(request) {
-  if (request === '@angular/core') {
-    return angularShim;
-  }
-  return originalLoad.apply(this, arguments);
-};
 
 // Cargador TS en memoria: el CLI funciona sobre las fuentes, sin paso de build.
 const ts = require(path.join(root, 'node_modules', 'typescript'));

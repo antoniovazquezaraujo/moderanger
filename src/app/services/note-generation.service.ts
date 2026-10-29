@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import { Block } from '../model/block';
 import { Player } from '../model/player';
 import { NoteData } from '../model/note';
@@ -31,9 +30,6 @@ function isStringVariableNoteError(error: unknown): boolean {
   return error instanceof MrParseError && error.message.includes('no contiene un número');
 }
 
-@Injectable({
-  providedIn: 'root'
-})
 export class NoteGenerationService {
 
   constructor(private noteGenUnified: NoteGenerationUnifiedService) { }

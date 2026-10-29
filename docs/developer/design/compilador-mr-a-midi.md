@@ -14,7 +14,7 @@
   - `src/app/model/song.player.ts` (orden de ejecución y reproducción)
   - `src/app/services/note-generation.service.ts` (generación de notas)
 
-> **Implementación (2026-10-29):** el MVP está implementado con un `CaptureAudioEngine` que reutiliza `SongPlayer`; ver `docs/developer/analysis/compilador-midi-mvp.md`. La extracción de un `compileSong()` puro sigue siendo la deuda técnica principal.
+> **Implementación (2026-10-29):** el MVP está implementado con un núcleo puro (`src/compiler/compile-core.ts`) que replica la orquestación de `SongPlayer` sin Angular, Tone ni motor de audio; ver `docs/developer/analysis/compilador-midi-mvp.md`. La separación física en `packages/core` + `packages/compiler` sigue pendiente.
 
 ---
 

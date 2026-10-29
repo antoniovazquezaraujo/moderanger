@@ -1,11 +1,7 @@
-import type { AudioEngineService } from 'src/app/services/audio-engine.service';
 import { applyDocumentVariables, parseSong, SongDocument } from 'src/app/model/mr';
-import { SongPlayer } from 'src/app/model/song.player';
-import { NoteGenerationService } from 'src/app/services/note-generation.service';
-import { NoteGenerationUnifiedService } from 'src/app/shared/services/note-generation-unified.service';
-import { GlobalStateService } from 'src/app/shared/services/global-state.service';
-import { CaptureAudioEngine } from './capture-engine';
-import { DEFAULT_PPQ, durationToTicks, secondsToTicks } from './timing';
+import { VariableContext } from 'src/app/model/variable.context';
+import { compilePart, substituteVariablesInSong } from './compile-core';
+import { DEFAULT_PPQ, secondsToTicks } from './timing';
 import { CompiledNote, CompiledPart, CompiledSong } from './types';
 
 export interface CompileOptions {
@@ -13,16 +9,9 @@ export interface CompileOptions {
     ppq?: number;
     /** Velocidad MIDI fija; por defecto 90. */
     velocity?: number;
-    /**
-     * Tope de ticks del scheduler para evitar bucles infinitos si el motor
-     * quedara atascado. No debería alcanzarse en canciones normales.
-     */
-    maxSchedulerTicks?: number;
 }
 
 const DEFAULT_VELOCITY = 90;
-/** 96n por tick del scheduler; 200k ticks son muchas horas de música. */
-const DEFAULT_MAX_SCHEDULER_TICKS = 200_000;
 
 /** Compila texto `.mr` a un modelo listo para MIDI. */
 export async function compileSongText(text: string, options: CompileOptions = {}): Promise<CompiledSong> {
@@ -32,86 +21,66 @@ export async function compileSongText(text: string, options: CompileOptions = {}
 /**
  * Compila un documento `.mr` ya parseado.
  *
- * Usa el `SongPlayer` real con un motor de captura: la expansión de partes,
- * referencias, repeticiones, comandos, operaciones, acordes, arpegios,
- * `PATTERN` y `DECORATION` es exactamente la del reproductor web. El resultado
- * se convierte a ticks y se empaqueta en `CompiledSong`.
+ * El núcleo es puro: no usa Angular, Tone, ni un motor de audio. Reutiliza el
+ * modelo, `Player` (estado musical) y `NoteGenerationService` (notas) con la
+ * misma secuencia de ejecución que `SongPlayer`.
  */
 export async function compileDocument(document: SongDocument, options: CompileOptions = {}): Promise<CompiledSong> {
     const ppq = options.ppq ?? DEFAULT_PPQ;
     const velocity = options.velocity ?? DEFAULT_VELOCITY;
-    const maxSchedulerTicks = options.maxSchedulerTicks ?? DEFAULT_MAX_SCHEDULER_TICKS;
+    const song = document.song;
+    const bpm = song.bpm;
     const warnings: string[] = [];
+    const variablesSnapshot = VariableContext.snapshot();
 
-    applyDocumentVariables(document);
+    try {
+        applyDocumentVariables(document);
+        substituteVariablesInSong(song);
 
-    const engine = new CaptureAudioEngine();
-    engine.bpm = document.song.bpm;
-    const player = new SongPlayer(
-        engine as unknown as AudioEngineService,
-        new NoteGenerationService(new NoteGenerationUnifiedService()),
-        new GlobalStateService()
-    );
+        const rawParts = song.parts.map((part, index) => compilePart(part, song, index));
+        const songDuration = rawParts.reduce((max, raw) => Math.max(max, raw.duration), 0);
+        const repeats = Math.max(1, song.repeats);
 
-    await player.playSong(document.song);
+        const parts: CompiledPart[] = rawParts.map((raw, index) => {
+            const notes: CompiledNote[] = [];
+            for (let repetition = 0; repetition < repeats; repetition++) {
+                const offset = repetition * songDuration;
+                raw.events.forEach(event => {
+                    const midi = foldIntoMidiRange(event.midi);
+                    if (midi !== event.midi) {
+                        warnings.push(
+                            `La nota MIDI ${event.midi} de '${raw.part.name || `Part ${index + 1}`}' está fuera de 0–127; se ha transportado a ${midi}.`
+                        );
+                    }
+                    notes.push({
+                        tick: secondsToTicks(event.time + offset, bpm, ppq),
+                        durationTicks: Math.max(1, secondsToTicks(event.duration, bpm, ppq)),
+                        midi,
+                        velocity
+                    });
+                });
+            }
+            notes.sort((a, b) => a.tick - b.tick || a.midi - b.midi);
+            return {
+                name: raw.part.name,
+                program: 0,
+                channel: index,
+                notes
+            };
+        });
 
-    const schedulerSeconds = engine.timeToSeconds('96n');
-    let schedulerTick = 0;
-    while (!engine.stopped && engine.hasLoop() && schedulerTick < maxSchedulerTicks) {
-        engine.runLoopTick(schedulerTick * schedulerSeconds);
-        schedulerTick++;
-    }
-
-    if (schedulerTick >= maxSchedulerTicks) {
-        warnings.push(`Se alcanzó el tope de ${maxSchedulerTicks} ticks del scheduler; la compilación puede estar incompleta.`);
-    }
-
-    const partIndexByInstrument = new Map<string, number>();
-    engine.instrumentIds.forEach((instrumentId, index) => partIndexByInstrument.set(instrumentId, index));
-
-    const parts: CompiledPart[] = document.song.parts.map((part, index) => ({
-        name: part.name,
-        program: 0,
-        channel: index,
-        notes: []
-    }));
-
-    engine.notes.forEach(event => {
-        const partIndex = partIndexByInstrument.get(event.instrumentId);
-        if (partIndex === undefined || parts[partIndex] === undefined) {
-            warnings.push(`Se descartó una nota de un instrumento desconocido (${event.instrumentId}).`);
-            return;
-        }
-        const midi = foldIntoMidiRange(event.midi);
-        if (midi !== event.midi) {
-            warnings.push(
-                `La nota MIDI ${event.midi} de '${parts[partIndex].name || `Part ${partIndex + 1}`}' está fuera de 0–127; se ha transportado a ${midi}.`
-            );
-        }
-        const note: CompiledNote = {
-            tick: secondsToTicks(event.time, document.song.bpm, ppq),
-            durationTicks: durationToTicks(event.duration, document.song.bpm, ppq),
-            midi,
-            velocity
+        return {
+            title: song.name,
+            bpm,
+            ppq,
+            parts,
+            warnings
         };
-        parts[partIndex].notes.push(note);
-    });
-
-    parts.forEach(part => {
-        part.notes.sort((a, b) => a.tick - b.tick || a.midi - b.midi);
-    });
-
-    // Restaura las variables al estado previo al Play (el player guarda el
-    // snapshot) y libera el loop de captura.
-    player.stop();
-
-    return {
-        title: document.song.name,
-        bpm: document.song.bpm,
-        ppq,
-        parts,
-        warnings
-    };
+    } finally {
+        // El compilador no debe dejar variables de la canción en el contexto
+        // global si se usa como librería.
+        VariableContext.restore(variablesSnapshot);
+    }
 }
 
 /**

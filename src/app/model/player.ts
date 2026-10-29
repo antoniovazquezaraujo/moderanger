@@ -1,10 +1,10 @@
-import { Frequency, NormalRange, Time } from "tone/build/esm/core/type/Units";
 import { NoteData } from "./note";
 import { PlayMode } from "./play.mode";
 import { Scale, ScaleTypes, Tonality } from "./scale";
 import { Block } from "./block";
 import { Command } from "./command";
-import { InstrumentType, AudioEngineService } from "../services/audio-engine.service";
+import type { AudioEngineService } from "../services/audio-engine.service";
+import { InstrumentType } from "./instrument-type";
 import { PlayState } from "./play.state";
 import { BehaviorSubject, Subject } from "rxjs";
 import { OctavedGrade } from "./octaved-grade";

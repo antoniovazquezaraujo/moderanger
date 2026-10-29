@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import { NoteDuration, MusicElement, SingleNote, CompositeNote, GenericGroup } from '../../model/melody';
 import { NoteData } from '../../model/note';
 
@@ -70,9 +69,6 @@ export interface NoteValidationResult {
 
 // ============= MAIN SERVICE =============
 
-@Injectable({
-  providedIn: 'root'
-})
 export class NoteGenerationUnifiedService {
   
   // ============= DEFAULT CONFIGURATIONS =============

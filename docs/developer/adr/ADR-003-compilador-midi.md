@@ -1,6 +1,6 @@
-# ADR-003: Compilador `.mr` → MIDI (MVP)
+# ADR-003: Compilador `.mr` → MIDI
 
-- **Estado:** Aceptado (2026-10-29). Implementación MVP en la rama `feat/midi-compiler`.
+- **Estado:** Aceptado (2026-10-29). MVP y núcleo puro implementados en la rama `docs/midi-compiler`.
 - **Fecha:** 2026-10-29
 - **Autor:** DANI (coordinación y arquitectura)
 - **Decisores:** el usuario (producto) + DANI (arquitectura)
@@ -29,19 +29,20 @@ La propuesta de diseño concluyó que:
 4. **Instrumento:** programa 0 (Acoustic Grand Piano), canal = índice de part. Máximo 16 partes.
 5. **Velocidad fija 90** en el MVP; la dinámica es otra feature.
 6. **CLI `moderanger-mid`** con `-o/--output`, `--ppq`, `--json`, `--quiet`, `--help` y `--version`. Entrada por fichero o stdin (`-`).
-7. **Semántica compartida:** el MVP reutiliza `SongPlayer` con un `CaptureAudioEngine` que captura `triggerAttackRelease` y avanza el loop del scheduler manualmente. No se duplica la lógica de partes, `use`, repeticiones, comandos, operaciones, patrones, acordes ni arpeggios.
-8. **Duraciones puras:** se sustituye `Tone.Time` por `src/app/model/duration.ts` en parser y generación de notas, para que el núcleo funcione en Node sin contexto de audio.
+7. **Núcleo puro:** `src/compiler/compile-core.ts` replica la secuencia de `SongPlayer` (unidades de ejecución, comandos, operaciones, notas, acordes y arpegios) sin Angular, Tone ni motor de audio. `Player` y `NoteGenerationService` se han desacoplado para poder usarse en Node.
+8. **Duraciones puras:** se sustituye `Tone.Time` por `src/app/model/duration.ts` en parser y generación de notas.
 9. **Notas fuera de 0–127:** se transportan por octavas y se emite un warning; no se descartan ni rompen la compilación.
-10. **Paridad con el player:** el MIDI representa lo que sonaría Play, incluidas las limitaciones v1 (`PATTERN_GAP` sin efecto, duraciones de `DECORATION` como metadato, variables string no expandidas como nota).
+10. **Paridad con el player:** el MIDI representa la misma semántica musical, incluidas las limitaciones v1 (`PATTERN_GAP` sin efecto, duraciones de `DECORATION` como metadato, variables string no expandidas como nota). El compilador usa duraciones exactas; el scheduler web redondea a 96n, así que patrones con duraciones no representables pueden diferir unos ticks.
 11. **`--json`** expone el modelo compilado para tests y depuración.
-12. **Deuda aceptada:** el MVP usa un shim de Angular y un cargador TS en runtime. La extracción de un `compileSong()` puro y un build propio del CLI quedan como siguientes pasos.
+12. **Deuda aceptada:** el CLI aún transpila TypeScript en runtime. La separación física en `packages/core` + `packages/compiler` y un build propio quedan como siguientes pasos.
 
 ## 3. Alternativas consideradas
 
 | Alternativa | Motivo del descarte |
 |---|---|
 | **WAV primero** | Requiere síntesis, muestras o dependencia de FluidSynth; no valida antes la semántica musical. |
-| **Duplicar la lógica de `SongPlayer` en un compilador puro desde el día 1** | Más limpio, pero retrasa el MVP y arriesga divergencias; se hará como refactor posterior. |
+| **Reutilizar `SongPlayer` con un motor de captura** | Fue el primer MVP, pero obligaba a un shim de Angular y a un cargador TS. Se sustituyó por un núcleo puro. |
+| **Duplicar toda la lógica de `SongPlayer`** | Se reutilizan `Player` y `NoteGenerationService`; solo se replica la orquestación de unidades. |
 | **Renderizar con headless Chrome** | Incumple “sin navegador” y es frágil. |
 | **Una pista por instrumento** | Con v1 solo hay piano; una pista por part conserva la estructura y es más legible. |
 | **MIDI tipo 0** | Menos legible para inspeccionar partes; tipo 1 es el estándar para varias pistas. |
@@ -53,6 +54,7 @@ La propuesta de diseño concluyó que:
 ### Positivas
 
 - Un `.mr` se convierte en `.mid` sin navegador ni red.
+- El compilador no depende de Angular, Tone ni del motor de audio.
 - La semántica musical es la del player desde el primer día.
 - El MIDI se puede abrir en DAWs, VLC o renderizar con FluidSynth.
 - `--json` facilita tests de ticks y depuración.
@@ -60,8 +62,8 @@ La propuesta de diseño concluyó que:
 
 ### Negativas / costes
 
-- El compilador depende del shim de Angular y del cargador TS en runtime.
-- Sigue acoplado a `SongPlayer` y a su scheduler; el refactor a un núcleo puro queda pendiente.
+- El CLI aún depende de un cargador TS en runtime.
+- `src/compiler` y el modelo siguen en el mismo árbol que la app; falta la separación en paquetes.
 - El MIDI no incluye dinámica, articulaciones ni cambios de tempo; son features futuras.
 - Las limitaciones v1 del formato se heredan y hay que documentarlas.
 
@@ -69,12 +71,13 @@ La propuesta de diseño concluyó que:
 
 | Riesgo | Mitigación |
 |---|---|
-| Divergencia entre player y compilador | El MVP usa el propio player; cuando se extraiga `compileSong`, tests de paridad. |
+| Divergencia entre player y compilador | La orquestación replica `SongPlayer`; tests de compilación sobre corpus. |
+| Diferencias de redondeo en patrones | Documentadas; el compilador usa duraciones exactas. |
 | Notas fuera de rango | Transporte por octavas + warning visible. |
-| Cambios en `SongPlayer` rompen el CLI | Tests de compilación sobre corpus y tests del CLI en CI. |
+| Cambios en `SongPlayer` rompen el CLI | `compile-core` es independiente; tests propios. |
 | Dependencia de TypeScript en runtime | Documentado; siguiente fase: `tsconfig.cli` o bundle. |
 
-## 5. Criterios de aceptación del MVP
+## 5. Criterios de aceptación
 
 - `npm run midi -- cancion.mr` genera un `.mid` válido.
 - El `.mid` se abre/carga en un reproductor MIDI (validado con FluidSynth).
@@ -86,9 +89,10 @@ La propuesta de diseño concluyó que:
 
 | Fase | Contenido | Estado |
 |---|---|---|
-| **1. MVP** | Captura del player, conversión a ticks, escritor MIDI, CLI, tests, docs | Hecho |
-| **2. Núcleo puro** | Extraer `buildExecutionUnits` y generación de eventos; eliminar shim/cargador TS | Pendiente |
-| **3. WAV opcional** | FluidSynth o sintetizador propio | Futuro |
+| **1. MVP** | Compilador, conversión a ticks, escritor MIDI, CLI, tests, docs | Hecho |
+| **2. Núcleo puro** | Eliminar Angular/Tone del camino del compilador; `compile-core` | Hecho |
+| **3. Paquetes** | `packages/core` + `packages/compiler`; build del CLI | Pendiente |
+| **4. WAV opcional** | FluidSynth o sintetizador propio | Futuro |
 
 ## 7. Referencias
 

@@ -6,7 +6,7 @@
  * - Los bloques con `isVariable` se emiten como `notes $variable`, nunca con
  *   el valor cacheado (brecha §3.2 #8).
  */
-import { InstrumentType } from '../../services/audio-engine.service';
+import { InstrumentType } from '../instrument-type';
 import { Block } from '../block';
 import { BlockReference } from '../block-reference';
 import { Command, CommandType } from '../command';

@@ -1,6 +1,6 @@
 import { Block } from './block';
 import { BlockReference } from './block-reference';
-import { InstrumentType } from "../services/audio-engine.service";
+import { InstrumentType } from "./instrument-type";
 
 /**
  * Ítem directo del cuerpo de una `Part`: un bloque inline o una referencia a
