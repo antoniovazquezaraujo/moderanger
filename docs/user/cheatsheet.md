@@ -12,7 +12,16 @@ vars
   $oct = 2
   $motif = "4t:0 4t:2"
 
+blocks
+  block Riff
+    notes
+      4n:0
+      4n:3
+
 part Piano instrument PIANO
+  use Riff repeats 2      # reference to a library block
+    commands
+      OCT $oct
   block Theme repeats 2
     notes default 8n     # block default duration
       4n:0
@@ -29,6 +38,12 @@ part Piano instrument PIANO
     block Answer
       notes $motif
 ```
+
+## Reusable blocks
+
+- `blocks` (after `vars`, before the first `part`) defines a library: `block <name>` with a **mandatory, unique** name; admits `notes`/`commands`/`operations` and child blocks (no `use` inside).
+- `use <name> repeats <n>` in a part references a definition; it is a **direct item** of the part (not nestable) and admits only its own `commands`/`operations` (no `notes`, no children).
+- Per pass: definition `commands` → definition `operations` → call `commands` → call `operations` → definition `notes` → definition child blocks; the call wins on what it sets. Passes = call `repeats` × definition `repeats`.
 
 ## Notes
 

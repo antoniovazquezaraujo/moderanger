@@ -51,6 +51,36 @@
     gap: 4px;
 }
 
+/* Añadir referencia: combo compacto (sin flecha, como el resto) + botón. */
+.part-add-reference {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.add-reference-select {
+    max-width: 7rem;
+    height: 24px;
+    padding: 0 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    font-size: 0.85rem;
+}
+
+.add-reference-select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.part-empty {
+    margin: 4px 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
 .part-content {
     margin-left: 0.75rem;
 }

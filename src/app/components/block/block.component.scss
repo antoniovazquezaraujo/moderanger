@@ -200,6 +200,36 @@ input[type="number"]#repeatingTimes {
   }
 }
 
+/* La sección Notes pega su espaciado inferior al de las filas de
+   Commands/Operations: el editor de melodía embebido no debe aportar su
+   `min-height` ni los paddings verticales inferiores (mismo criterio que el
+   PATTERN embebido en block-commands). Aplica por igual a bloques inline y a
+   definiciones de la biblioteca. */
+.notes-section {
+  .melody-editor-container {
+    min-height: 0;
+    padding-bottom: 0;
+  }
+
+  ::ng-deep {
+    .melody-editor {
+      min-height: 0;
+    }
+
+    .editor-content {
+      padding-bottom: 0;
+    }
+
+    .notes-container-wrapper {
+      padding-bottom: 0;
+    }
+
+    .notes-container {
+      padding-bottom: 0;
+    }
+  }
+}
+
 /* Add styles here to hide the default p-tree toggler */
 /* Corrected selector: Target the toggler directly within the node content */
 ::ng-deep .p-treenode-content .p-tree-toggler {

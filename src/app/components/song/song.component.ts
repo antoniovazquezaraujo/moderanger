@@ -12,6 +12,8 @@ export class SongComponent implements OnInit {
     @Input() song: Song = new Song();
     @Output() removePartEvent = new EventEmitter<Part>();
     @Output() onDuplicatePartEvent = new EventEmitter<Part>();
+    /** Navegación a una definición de la biblioteca (burbujea desde las parts). */
+    @Output() editDefinitionEvent = new EventEmitter<string>();
     
     constructor() {
     }

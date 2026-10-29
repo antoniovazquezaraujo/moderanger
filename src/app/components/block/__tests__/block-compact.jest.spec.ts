@@ -95,4 +95,14 @@ describe('bloque compacto (template/CSS)', () => {
     expect(styles).toMatch(/html body app-block-commands \.commands-row,\s*\nhtml body app-block-commands \.operations-row \{/);
     expect(styles).toContain('padding-left: 4px !important');
   });
+
+  it('la sección Notes no añade aire inferior extra (mismo espaciado que Commands/Operations)', () => {
+    // El editor de melodía embebido no aporta su min-height ni paddings
+    // verticales inferiores (mismo criterio que el PATTERN embebido).
+    expect(scss).toMatch(/\.notes-section[\s\S]*?\.melody-editor-container\s*\{[^}]*min-height:\s*0/);
+    expect(scss).toMatch(/\.notes-section[\s\S]*?\.melody-editor-container\s*\{[^}]*padding-bottom:\s*0/);
+    expect(scss).toMatch(/\.notes-section[\s\S]*?\.melody-editor\s*\{[^}]*min-height:\s*0/);
+    expect(scss).toMatch(/\.notes-section[\s\S]*?\.editor-content\s*\{[^}]*padding-bottom:\s*0/);
+    expect(scss).toMatch(/\.notes-section[\s\S]*?\.notes-container-wrapper\s*\{[^}]*padding-bottom:\s*0/);
+  });
 });

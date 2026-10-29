@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 // Componentes relacionados con la edición
 import { BlockComponent } from '../block/block.component';
 import { BlockCommandsComponent } from '../block-commands/block-commands.component';
+import { BlockReferenceComponent } from '../block-reference/block-reference.component';
+import { BlockLibraryComponent } from '../block-library/block-library.component';
 import { SongEditorComponent } from '../song-editor/song-editor.component';
 import { PartsComponent } from '../parts/parts.component';
 import { PartComponent } from '../part/part.component';
@@ -43,6 +45,8 @@ import { SharedModule } from 'primeng/api';
   declarations: [
     BlockComponent,
     BlockCommandsComponent,
+    BlockReferenceComponent,
+    BlockLibraryComponent,
     SongEditorComponent,
     PartsComponent,
     PartComponent,
