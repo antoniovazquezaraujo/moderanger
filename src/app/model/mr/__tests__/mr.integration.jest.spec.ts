@@ -10,8 +10,8 @@ import {
   validateSongText
 } from '../mr.integration';
 import { parseSong } from '../mr.parser';
-import * as serializer from '../mr.serializer';
-import { serializeSong } from '../mr.serializer';
+import * as serializer from '@moderanger/core/mr/mr.serializer';
+import { serializeSong } from '@moderanger/core/mr/mr.serializer';
 
 beforeEach(() => {
   VariableContext.context.clear();

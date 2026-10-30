@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { VariableContext } from 'src/app/model/variable.context';
+import { VariableContext } from '@moderanger/core/variable.context';
 import { compileSongText } from '../compile-midi';
 
 interface CompileFixture {
@@ -64,7 +64,7 @@ describe('compilador MIDI · eventos musicales', () => {
 
     it('compila el corpus de bloques reutilizables y transporta notas fuera de rango MIDI', async () => {
         const corpus = fs.readFileSync(
-            path.resolve(__dirname, '../../app/model/mr/__tests__/corpus/bloques-repeats.mr'),
+            path.resolve(process.cwd(), 'src/app/model/mr/__tests__/corpus/bloques-repeats.mr'),
             'utf8'
         );
         const song = await compileSongText(corpus);

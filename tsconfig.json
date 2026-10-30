@@ -5,6 +5,10 @@
       "types": ["jest", "jasmine", "node"],
       "typeRoots": ["../node_modules/@types","./src/types", "./types"],
     "baseUrl": "./",
+    "paths": {
+      "@moderanger/core": ["packages/core/src/index.ts"],
+      "@moderanger/core/*": ["packages/core/src/*"]
+    },
     "outDir": "./dist",
     "forceConsistentCasingInFileNames": true,
     "strict": true,

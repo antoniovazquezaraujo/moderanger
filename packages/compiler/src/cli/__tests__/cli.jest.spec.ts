@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { spawnSync } from 'child_process';
 
-const root = path.resolve(__dirname, '../../..');
+const root = path.resolve(__dirname, '../../../../..');
 const cli = path.resolve(__dirname, '../main.js');
 
 /** `fs.rmSync` existe en Node 16, pero @types/node 12 aún no lo declara. */

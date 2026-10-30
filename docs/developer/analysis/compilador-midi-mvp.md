@@ -8,7 +8,7 @@
   - `docs/developer/design/compilador-mr-a-midi.md` (propuesta)
   - `docs/developer/adr/ADR-003-compilador-midi.md` (decisiones)
   - `docs/developer/adr/ADR-001-texto-canonico-y-sintaxis-mr.md`
-  - `src/compiler/`, `src/cli/`
+  - `packages/core/`, `packages/compiler/`
 
 ---
 
@@ -20,7 +20,7 @@ Un CLI que lee un `.mr`, lo compila con la semántica del reproductor y escribe 
 npm run midi -- cancion.mr
 npm run midi -- cancion.mr -o salida.mid
 npm run midi -- cancion.mr --json
-cat cancion.mr | node src/cli/main.js - -o salida.mid
+cat cancion.mr | node packages/compiler/src/cli/main.js - -o salida.mid
 ```
 
 También queda declarado como `bin` (`moderanger-mid`), aunque el paquete sigue siendo privado; para usarlo como comando global haría falta `npm link` o publicarlo.
@@ -71,12 +71,12 @@ El compilador es un núcleo puro: **no importa Angular, Tone ni el motor de audi
 
 | Fichero | Responsabilidad |
 |---|---|
-| `src/compiler/compile-core.ts` | Expansión de unidades, ejecución de comandos/operaciones, generación de notas y conversión a eventos en segundos. Sin audio. |
-| `src/compiler/compile-midi.ts` | Orquesta parseo, variables, partes, repeticiones de canción y conversión a `CompiledSong`. |
-| `src/compiler/midi-writer.ts` | Escritor SMF tipo 1 (header, conductor track, una pista por part, tempo, compás, programa, note on/off). |
-| `src/compiler/timing.ts` | Conversión pura de duraciones/segundos a ticks. |
-| `src/compiler/types.ts` | Modelo compilado (`CompiledSong`, `CompiledPart`, `CompiledNote`). |
-| `src/cli/main.js` | Entrypoint Node: argumentos, stdin/stdout, carga TS y códigos de salida. |
+| `packages/compiler/src/compile-core.ts` | Expansión de unidades, ejecución de comandos/operaciones, generación de notas y conversión a eventos en segundos. Sin audio. |
+| `packages/compiler/src/compile-midi.ts` | Orquesta parseo, variables, partes, repeticiones de canción y conversión a `CompiledSong`. |
+| `packages/compiler/src/midi-writer.ts` | Escritor SMF tipo 1 (header, conductor track, una pista por part, tempo, compás, programa, note on/off). |
+| `packages/compiler/src/timing.ts` | Conversión pura de duraciones/segundos a ticks. |
+| `packages/compiler/src/types.ts` | Modelo compilado (`CompiledSong`, `CompiledPart`, `CompiledNote`). |
+| `packages/compiler/src/cli/main.js` | Entrypoint Node: argumentos, stdin/stdout, carga TS y códigos de salida. |
 
 ### 2.2. Semántica compartida sin reutilizar el player de audio
 
@@ -90,10 +90,10 @@ El compilador es un núcleo puro: **no importa Angular, Tone ni el motor de audi
 
 `Player` y `NoteGenerationService` se han vuelto puros:
 
-- `InstrumentType` vive en `src/app/model/instrument-type.ts`.
+- `InstrumentType` vive en `packages/core/src/instrument-type.ts`.
 - `Player` importa `AudioEngineService` solo como tipo.
 - `NoteGenerationService` y `NoteGenerationUnifiedService` ya no llevan `@Injectable`; la app los provee con factories en `AppModule`.
-- El parser y la generación usan `src/app/model/duration.ts` en vez de `Tone.Time`.
+- El parser y la generación usan `packages/core/src/duration.ts` en vez de `Tone.Time`.
 
 ### 2.3. Precisión frente al scheduler web
 
@@ -122,10 +122,10 @@ El player web avanza con un scheduler de **96n** y redondea duraciones no repres
 
 Suites nuevas:
 
-- `src/compiler/__tests__/timing.jest.spec.ts`: duraciones, compás, tresillos y conversión a ticks.
-- `src/compiler/__tests__/midi-writer.jest.spec.ts`: cabecera SMF, tempo, programa, note on/off y límite de 16 partes.
-- `src/compiler/__tests__/compile-midi.jest.spec.ts`: notas, acordes, arpegios, repeticiones, `use`/corpus y transporte de notas fuera de rango.
-- `src/cli/__tests__/cli.jest.spec.ts`: CLI real (spawn de Node) con `.mr` válido e inválido.
+- `packages/compiler/src/__tests__/timing.jest.spec.ts`: duraciones, compás, tresillos y conversión a ticks.
+- `packages/compiler/src/__tests__/midi-writer.jest.spec.ts`: cabecera SMF, tempo, programa, note on/off y límite de 16 partes.
+- `packages/compiler/src/__tests__/compile-midi.jest.spec.ts`: notas, acordes, arpegios, repeticiones, `use`/corpus y transporte de notas fuera de rango.
+- `packages/compiler/src/cli/__tests__/cli.jest.spec.ts`: CLI real (spawn de Node) con `.mr` válido e inválido.
 
 Validación manual:
 
@@ -140,7 +140,7 @@ Suite completa: **873 tests / 80 suites**, cobertura por encima del umbral y `np
 ## 5. Limitaciones y deuda técnica
 
 1. **El CLI transpila TypeScript en runtime.** Funciona sin build, pero requiere `typescript` (dev dependency) y es más lento que un binario compilado. Un `tsconfig.cli` o un bundle eliminarían el cargador en memoria.
-2. **Separación física pendiente.** El núcleo puro está listo, pero `src/compiler`, `src/cli` y el modelo siguen en el mismo árbol que la app. El siguiente paso es `packages/core` + `packages/compiler`.
+2. **Separación física pendiente.** El núcleo puro está listo, pero `packages/compiler`, `packages/core` y la app siguen en el mismo árbol que la app. El siguiente paso es `packages/core` + `packages/compiler`.
 3. **Duraciones exactas vs scheduler web.** Ver §2.3; es una diferencia deliberada y documentada.
 4. **MIDI no es audio.** Para oírlo hace falta un sintetizador/DAW. La fase WAV queda fuera del MVP.
 5. **Warnings del motor** (por ejemplo, variables indefinidas) se imprimen por `console.warn`; con `--quiet` se silencian, pero no se convierten en errores.
@@ -150,7 +150,7 @@ Suite completa: **873 tests / 80 suites**, cobertura por encima del umbral y `np
 ## 6. Próximos pasos
 
 1. Validación manual del maintainer con canciones reales (incluido abrir el `.mid` en un DAW).
-2. Separar `packages/core` (modelo + `.mr` + compiler core) y `packages/compiler` (CLI + MIDI writer).
+2. Sustituir el cargador TS por un build de `packages/compiler`.
 3. Sustituir el cargador TS en runtime por un build `tsconfig.cli` o un bundle.
 4. Decidir si el CLI se publica como `bin` del repo o como paquete aparte.
 5. Fase opcional: WAV con FluidSynth o sintetizador propio.

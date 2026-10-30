@@ -1,5 +1,5 @@
-import { applyDocumentVariables, parseSong, SongDocument } from 'src/app/model/mr';
-import { VariableContext } from 'src/app/model/variable.context';
+import { applyDocumentVariables, parseSong, SongDocument } from '@moderanger/core/mr';
+import { VariableContext } from '@moderanger/core/variable.context';
 import { compilePart, substituteVariablesInSong } from './compile-core';
 import { DEFAULT_PPQ, secondsToTicks } from './timing';
 import { CompiledNote, CompiledPart, CompiledSong } from './types';

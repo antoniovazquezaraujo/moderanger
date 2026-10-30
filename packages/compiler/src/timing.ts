@@ -1,4 +1,4 @@
-import { durationToSeconds } from 'src/app/model/duration';
+import { durationToSeconds } from '@moderanger/core/duration';
 
 export { durationToSeconds };
 

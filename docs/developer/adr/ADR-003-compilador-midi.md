@@ -29,8 +29,8 @@ La propuesta de diseño concluyó que:
 4. **Instrumento:** programa 0 (Acoustic Grand Piano), canal = índice de part. Máximo 16 partes.
 5. **Velocidad fija 90** en el MVP; la dinámica es otra feature.
 6. **CLI `moderanger-mid`** con `-o/--output`, `--ppq`, `--json`, `--quiet`, `--help` y `--version`. Entrada por fichero o stdin (`-`).
-7. **Núcleo puro:** `src/compiler/compile-core.ts` replica la secuencia de `SongPlayer` (unidades de ejecución, comandos, operaciones, notas, acordes y arpegios) sin Angular, Tone ni motor de audio. `Player` y `NoteGenerationService` se han desacoplado para poder usarse en Node.
-8. **Duraciones puras:** se sustituye `Tone.Time` por `src/app/model/duration.ts` en parser y generación de notas.
+7. **Núcleo puro:** `packages/compiler/src/compile-core.ts` replica la secuencia de `SongPlayer` (unidades de ejecución, comandos, operaciones, notas, acordes y arpegios) sin Angular, Tone ni motor de audio. `Player` y `NoteGenerationService` se han desacoplado para poder usarse en Node.
+8. **Duraciones puras:** se sustituye `Tone.Time` por `packages/core/src/duration.ts` en parser y generación de notas.
 9. **Notas fuera de 0–127:** se transportan por octavas y se emite un warning; no se descartan ni rompen la compilación.
 10. **Paridad con el player:** el MIDI representa la misma semántica musical, incluidas las limitaciones v1 (`PATTERN_GAP` sin efecto, duraciones de `DECORATION` como metadato, variables string no expandidas como nota). El compilador usa duraciones exactas; el scheduler web redondea a 96n, así que patrones con duraciones no representables pueden diferir unos ticks.
 11. **`--json`** expone el modelo compilado para tests y depuración.
@@ -63,7 +63,7 @@ La propuesta de diseño concluyó que:
 ### Negativas / costes
 
 - El CLI aún depende de un cargador TS en runtime.
-- `src/compiler` y el modelo siguen en el mismo árbol que la app; falta la separación en paquetes.
+- `packages/compiler` y el modelo siguen en el mismo árbol que la app; falta la separación en paquetes.
 - El MIDI no incluye dinámica, articulaciones ni cambios de tempo; son features futuras.
 - Las limitaciones v1 del formato se heredan y hay que documentarlas.
 
@@ -91,11 +91,11 @@ La propuesta de diseño concluyó que:
 |---|---|---|
 | **1. MVP** | Compilador, conversión a ticks, escritor MIDI, CLI, tests, docs | Hecho |
 | **2. Núcleo puro** | Eliminar Angular/Tone del camino del compilador; `compile-core` | Hecho |
-| **3. Paquetes** | `packages/core` + `packages/compiler`; build del CLI | Pendiente |
+| **3. Paquetes** | `packages/core` + `packages/compiler`; build del CLI | Paquetes hechos; build pendiente |
 | **4. WAV opcional** | FluidSynth o sintetizador propio | Futuro |
 
 ## 7. Referencias
 
 - `docs/developer/design/compilador-mr-a-midi.md`
 - `docs/developer/analysis/compilador-midi-mvp.md`
-- `src/compiler/`, `src/cli/`
+- `packages/core/`, `packages/compiler/`

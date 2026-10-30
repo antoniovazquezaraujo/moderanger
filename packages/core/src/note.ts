@@ -1,0 +1,84 @@
+export interface NoteData {
+    id?: string;
+    type?: 'note' | 'rest' | 'arpeggio' | 'chord' | 'silence' | 'group';
+    duration?: string;
+    note?: number | undefined;
+    /**
+     * Referencia sin resolver a una variable de notas (p. ej. `motif` para
+     * `$motif`). La usa el editor visual para no perder los tokens que no
+     * resuelven a un número; la reproducción sigue resolviendo variables
+     * numéricas en `parseBlockNotes`.
+     */
+    variable?: string;
+    /**
+     * Metadato interno de reproducción: ruta de índices del evento original
+     * dentro del árbol de notas del bloque (p. ej. `[0, 2]` = tercer hijo del
+     * primer evento). Lo rellena `NoteGenerationService` al generar; el `.mr`
+     * no lo serializa y la reproducción no lo necesita.
+     */
+    sourcePath?: number[];
+    /** Bloque del que procede el evento original (metadato interno). */
+    sourceBlockId?: number;
+    children?: NoteData[];
+    noteDatas?: NoteData[]; // Para Arpeggios y Acordes
+}
+
+export class NoteData implements NoteData {
+    id?: string;
+    type?: 'note' | 'rest' | 'arpeggio' | 'chord' | 'silence' | 'group';
+    duration?: string;
+    note?: number | undefined;
+    variable?: string;
+    sourcePath?: number[];
+    sourceBlockId?: number;
+    children?: NoteData[];
+    noteDatas?: NoteData[]; // Para Arpeggios y Acordes
+
+    constructor(data: Partial<NoteData>) {
+        Object.assign(this, data);
+    }
+    
+    toString(): string {
+        let durationPrefix = '';
+        // Añadir prefijo de duración SOLO si existe
+        if (this.duration) {
+            durationPrefix = `${this.duration}:`;
+        }
+        
+        switch (this.type) {
+            case 'note':
+            case 'rest':
+            case 'silence':
+                // Una referencia a variable se imprime tal cual (`$nombre`),
+                // con o sin duración, para conservarla en el editor.
+                if (this.variable !== undefined) {
+                    return `${durationPrefix}$${this.variable}`;
+                }
+                // Usar el prefijo (puede ser vacío si no había duración)
+                return `${durationPrefix}${this.note ?? 's'}`;
+            
+            case 'arpeggio': 
+                const arpeggioNotes = this.noteDatas?.map(note => note.toString()).join(' ') ?? '';
+                // Usar el prefijo (el grupo siempre debería tener duración?)
+                return `${durationPrefix}[${arpeggioNotes}]`; 
+            
+            case 'chord': 
+                 const chordNotes = this.noteDatas?.map(note => note.toString()).join(' ') ?? '';
+                 // Usar el prefijo
+                 return `${durationPrefix}{${chordNotes}}`; 
+            
+            case 'group': 
+                const groupNotes = this.children?.map(note => note.toString()).join(' ') ?? '';
+                // Canoniza con espacios como el DSL: `4n:( 0 2 )`; vacío: `()`.
+                return groupNotes === '' ? `${durationPrefix}()` : `${durationPrefix}( ${groupNotes} )`; 
+            
+            default:
+                console.warn(`NoteData.toString: Unknown type ${this.type}`);
+                return ''; 
+        }
+    }
+
+    static toStringArray(notes: NoteData[]): string {
+        return notes.map(note => note.toString()).join(' ');
+    }
+}

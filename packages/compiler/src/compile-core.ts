@@ -1,16 +1,15 @@
-import type { AudioEngineService } from 'src/app/services/audio-engine.service';
-import { Block } from 'src/app/model/block';
-import { BlockReference } from 'src/app/model/block-reference';
-import { Command } from 'src/app/model/command';
-import { durationToSeconds } from 'src/app/model/duration';
-import { NoteData } from 'src/app/model/note';
-import { BaseOperation } from 'src/app/model/operation';
-import { Part, PartItem } from 'src/app/model/part';
-import { Player } from 'src/app/model/player';
-import { Song } from 'src/app/model/song';
-import { VariableContext } from 'src/app/model/variable.context';
-import { NoteGenerationService } from 'src/app/services/note-generation.service';
-import { NoteGenerationUnifiedService } from 'src/app/shared/services/note-generation-unified.service';
+import { Block } from '@moderanger/core/block';
+import { BlockReference } from '@moderanger/core/block-reference';
+import { Command } from '@moderanger/core/command';
+import { durationToSeconds } from '@moderanger/core/duration';
+import { NoteData } from '@moderanger/core/note';
+import { BaseOperation } from '@moderanger/core/operation';
+import { Part, PartItem } from '@moderanger/core/part';
+import { Player } from '@moderanger/core/player';
+import { Song } from '@moderanger/core/song';
+import { VariableContext } from '@moderanger/core/variable.context';
+import { NoteGenerationService } from '@moderanger/core/services/note-generation.service';
+import { NoteGenerationUnifiedService } from '@moderanger/core/services/note-generation-unified.service';
 
 /** Unidad de ejecución musical: comandos/operaciones y, opcionalmente, notas. */
 interface ExecutionUnit {
@@ -36,7 +35,7 @@ export interface RawPart {
 /** Motor nulo: `Player` solo lo usa para `setBpm`, que el compilador no llama. */
 const NULL_AUDIO_ENGINE = {
     setTransportBpm: () => undefined
-} as unknown as AudioEngineService;
+};
 
 /**
  * Genera los eventos de una parte con la misma secuencia que `SongPlayer`:

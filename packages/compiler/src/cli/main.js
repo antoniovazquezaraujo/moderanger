@@ -13,11 +13,33 @@ const fs = require('fs');
 const path = require('path');
 const Module = require('module');
 
-const root = path.resolve(__dirname, '..', '..');
+const root = path.resolve(__dirname, '..', '..', '..', '..');
 
 // Resolver los imports absolutos `src/...` del proyecto.
 process.env.NODE_PATH = [root, process.env.NODE_PATH].filter(Boolean).join(path.delimiter);
 Module._initPaths();
+
+// Resolver `@moderanger/core` en las fuentes del workspace, sin build ni
+// instalación de paquetes.
+const coreSrc = path.join(root, 'packages', 'core', 'src');
+const originalResolve = Module._resolveFilename;
+Module._resolveFilename = function resolve(request, parent, isMain, options) {
+  if (request === '@moderanger/core') {
+    return path.join(coreSrc, 'index.ts');
+  }
+  if (request.startsWith('@moderanger/core/')) {
+    const relative = request.slice('@moderanger/core/'.length);
+    const direct = path.join(coreSrc, `${relative}.ts`);
+    if (fs.existsSync(direct)) {
+      return direct;
+    }
+    const index = path.join(coreSrc, relative, 'index.ts');
+    if (fs.existsSync(index)) {
+      return index;
+    }
+  }
+  return originalResolve.call(this, request, parent, isMain, options);
+};
 
 // Cargador TS en memoria: el CLI funciona sobre las fuentes, sin paso de build.
 const ts = require(path.join(root, 'node_modules', 'typescript'));
@@ -37,8 +59,8 @@ require.extensions['.ts'] = function loadTs(module, filename) {
   module._compile(output, filename);
 };
 
-const { compileSongText } = require('../compiler/compile-midi');
-const { buildMidi } = require('../compiler/midi-writer');
+const { compileSongText } = require('../compile-midi');
+const { buildMidi } = require('../midi-writer');
 
 const VERSION = readVersion();
 

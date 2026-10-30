@@ -10,11 +10,11 @@
   - `docs/developer/adr/ADR-003-compilador-midi.md` (decisiones del MVP)
   - `docs/developer/analysis/compilador-midi-mvp.md` (implementación del MVP)
   - `docs/user/manual.md` (gramática y semántica vigentes)
-  - `src/app/model/mr/` (parser y serializador)
-  - `src/app/model/song.player.ts` (orden de ejecución y reproducción)
-  - `src/app/services/note-generation.service.ts` (generación de notas)
+  - `packages/core/src/mr/` (parser y serializador)
+  - `src/app/model/song.player.ts` (reproducción web)
+  - `packages/core/src/services/note-generation.service.ts` (generación de notas)
 
-> **Implementación (2026-10-29):** el MVP está implementado con un núcleo puro (`src/compiler/compile-core.ts`) que replica la orquestación de `SongPlayer` sin Angular, Tone ni motor de audio; ver `docs/developer/analysis/compilador-midi-mvp.md`. La separación física en `packages/core` + `packages/compiler` sigue pendiente.
+> **Implementación (2026-10-29):** el MVP está implementado con un núcleo puro (`packages/compiler/src/compile-core.ts`) que replica la orquestación de `SongPlayer` sin Angular, Tone ni motor de audio; ver `docs/developer/analysis/compilador-midi-mvp.md`. La separación física en `packages/core` + `packages/compiler` sigue pendiente.
 
 ---
 
@@ -318,12 +318,12 @@ Para distribuirlo:
 Propuesta para el MVP:
 
 ```text
-src/compiler/
-  compiled-song.ts       # interfaces del modelo compilado
-  compile-song.ts        # parser + variables + ejecución + notas + ticks
-  midi-writer.ts         # SMF tipo 1
-src/cli/
-  main.ts                # argumentos, stdin/stdout, códigos de salida
+packages/core/src/          # modelo, .mr y generación de notas
+packages/compiler/src/
+  compile-core.ts           # ejecución musical pura
+  compile-midi.ts           # orquestación y ticks
+  midi-writer.ts            # SMF tipo 1
+  cli/main.js               # argumentos, stdin/stdout, códigos de salida
 ```
 
 con un `tsconfig.cli.json` que compile a CommonJS en `dist/cli/` y un script:
