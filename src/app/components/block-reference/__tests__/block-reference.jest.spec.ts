@@ -35,6 +35,7 @@ import { Song } from 'src/app/model/song';
 import { BlockReferenceComponent } from '../block-reference.component';
 
 const template = fs.readFileSync(path.resolve(__dirname, '../block-reference.component.html'), 'utf8');
+const styles = fs.readFileSync(path.resolve(__dirname, '../block-reference.component.scss'), 'utf8');
 
 function createComponent(reference: BlockReference, song: Song): BlockReferenceComponent {
   const component = new BlockReferenceComponent();
@@ -90,6 +91,17 @@ describe('BlockReferenceComponent', () => {
     expect(template).toContain('reference-warning');
     expect(template).toContain('Missing block definition');
     expect(template).toContain('*ngIf="expanded && !isOrphan"');
+  });
+
+  it('los controles quedan junto al ×N, sin empujarlos al borde derecho', () => {
+    const repetitionsIndex = template.indexOf('class="reference-repetitions"');
+    const controlsIndex = template.indexOf('class="reference-controls"');
+    const controlsRule = /\.reference-controls\s*\{([^}]*)\}/.exec(styles);
+
+    expect(repetitionsIndex).toBeGreaterThan(-1);
+    expect(controlsIndex).toBeGreaterThan(repetitionsIndex);
+    expect(controlsRule).not.toBeNull();
+    expect(controlsRule![1]).not.toContain('margin-left: auto');
   });
 
   it('reutiliza app-block-commands para editar la llamada', () => {
