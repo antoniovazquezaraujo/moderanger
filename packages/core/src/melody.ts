@@ -1,0 +1,163 @@
+import { NoteData } from './note';
+
+// Tipos básicos
+export type NoteDuration = '1n' | '2n' | '4n' | '8n' | '16n' | '4t' | '8t';
+export type NoteType = 'note' | 'rest' | 'arpeggio' | 'chord' | 'group';
+
+// Modelo base de nota
+export interface BaseElement {
+    id: string;              // Identificador único para cada nota
+    type: NoteType;
+    time?: number; // Time in seconds relative to the start of the transport
+    ticks?: number; // Time in ticks relative to the start of the transport
+    duration?: NoteDuration; // Make duration optional
+}
+
+// Nota simple
+export interface SingleNote extends BaseElement {
+    type: 'note' | 'rest';
+    value: number | null;    // null para silencios
+    /**
+     * Referencia a una variable de notas no resuelta (`$motif`). El editor la
+     * muestra como token y la conserva al emitir; no es editable por valor.
+     */
+    variableName?: string;
+}
+
+// Grupo compuesto (Arpegio o Acorde)
+export interface CompositeNote extends BaseElement {
+    type: 'arpeggio' | 'chord';
+    notes: SingleNote[]; // ENFORCE: Solo notas simples dentro
+}
+
+// NUEVO: Grupo genérico (paréntesis con duración)
+export interface GenericGroup extends BaseElement {
+    type: 'group';
+    children: MusicElement[]; // Puede contener notas o subgrupos
+}
+
+// Tipo unión para cualquier elemento musical
+export type MusicElement = SingleNote | CompositeNote | GenericGroup;
+
+
+// Clase utilitaria para generar IDs únicos
+export class NoteIdGenerator {
+    private static counter = 0;
+    
+    static generateId(): string {
+        return `note_${Date.now()}_${this.counter++}`;
+    }
+}
+
+// Factory para crear notas
+/**
+ * @deprecated Use NoteGenerationUnifiedService instead for consistent note creation
+ * This factory will be removed in future versions
+ */
+export class NoteFactory {
+    /**
+     * @deprecated Use NoteGenerationUnifiedService.createSingleNote() instead
+     */
+    static createSingleNote(value: number | null, duration: NoteDuration = '4n'): SingleNote {
+        return {
+            id: NoteIdGenerator.generateId(),
+            type: value === null ? 'rest' : 'note',
+            duration,
+            value
+        };
+    }
+    
+    /**
+     * @deprecated Use NoteGenerationUnifiedService.createCompositeNote() instead
+     */
+    static createCompositeNote(type: 'arpeggio' | 'chord', notes: SingleNote[], duration: NoteDuration = '4n'): CompositeNote {
+        return {
+            id: NoteIdGenerator.generateId(),
+            type,
+            duration,
+            notes
+        };
+    }
+
+    /**
+     * @deprecated Use NoteGenerationUnifiedService.createGenericGroup() instead
+     */
+    static createGenericGroup(children: MusicElement[], duration: NoteDuration): GenericGroup {
+        return {
+            id: NoteIdGenerator.generateId(),
+            type: 'group',
+            duration, // La duración es obligatoria para el grupo
+            children
+        };
+    }
+}
+
+// Convertidor entre el nuevo modelo y NoteData
+export class NoteConverter {
+    static toNoteData(element: MusicElement, defaultDuration: NoteDuration = '4n'): NoteData {
+        if (element.type === 'note' || element.type === 'rest') {
+            // Sin duración explícita se emite SIN duración (los grupos la
+            // heredan al generar); no se materializa el default.
+            if (element.variableName !== undefined) {
+                return new NoteData({
+                    type: 'note',
+                    duration: element.duration,
+                    variable: element.variableName
+                });
+            }
+            return new NoteData({
+                type: element.type,
+                duration: element.duration,
+                note: element.value ?? undefined
+            });
+        } else if (element.type === 'group') { // Manejar GenericGroup
+            const group = element as GenericGroup;
+            return new NoteData({
+                type: 'group',
+                duration: group.duration,
+                children: group.children.map(child => this.toNoteData(child, defaultDuration))
+            });
+        } else { // Manejar CompositeNote (arpegio/acorde)
+            const group = element as CompositeNote;
+            return new NoteData({
+                type: group.type,
+                duration: group.duration ?? defaultDuration,
+                noteDatas: group.notes.map(note => this.toNoteData(note, defaultDuration))
+            });
+        }
+    }
+    
+    static fromNoteData(noteData: NoteData): MusicElement {
+        if (noteData.type === 'note' || noteData.type === 'rest') {
+            // La duración se conserva SOLO si era explícita: un hijo de grupo
+            // sin duración propia se queda sin ella y la hereda al generar
+            // (antes se materializaba el default `4n` en cada hijo).
+            const note: SingleNote = {
+                id: NoteIdGenerator.generateId(),
+                type: noteData.type,
+                value: noteData.note ?? null
+            };
+            if (noteData.duration !== undefined) {
+                note.duration = noteData.duration as NoteDuration;
+            }
+            if (noteData.variable !== undefined) {
+                // El token es un evento de nota (`$var`), no un silencio.
+                note.type = 'note';
+                note.variableName = noteData.variable;
+                note.value = null;
+            }
+            return note;
+        } else if (noteData.type === 'group') { // Manejar nuestro tipo 'group'
+            return NoteFactory.createGenericGroup(
+                noteData.children?.map(child => this.fromNoteData(child)) ?? [],
+                noteData.duration as NoteDuration
+            );
+        } else { // Asumir CompositeNote (arpegio/acorde)
+            return NoteFactory.createCompositeNote(
+                noteData.type as 'arpeggio' | 'chord',
+                noteData.noteDatas?.map(note => this.fromNoteData(note) as SingleNote) ?? [], // Asumir SingleNote dentro?
+                noteData.duration as NoteDuration
+            );
+        }
+    }
+} 

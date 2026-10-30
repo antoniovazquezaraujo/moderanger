@@ -1,0 +1,12 @@
+{
+  "name": "@moderanger/compiler",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/compile-midi.ts",
+  "bin": {
+    "moderanger-mid": "src/cli/main.js"
+  },
+  "dependencies": {
+    "@moderanger/core": "0.0.0"
+  }
+}

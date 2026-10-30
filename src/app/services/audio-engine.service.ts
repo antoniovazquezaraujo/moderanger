@@ -3,11 +3,9 @@ import * as Tone from 'tone';
 // Quitar import de MusicalInstrument, ya no se usa
 // import { MusicalInstrument } from '../model/instrument'; // Y MusicalInstrument
 import { Time, Frequency, NormalRange } from 'tone/build/esm/core/type/Units';
+import { InstrumentType } from '../model/instrument-type';
 
-// Define InstrumentType enum here or import from a central location if needed elsewhere
-export enum InstrumentType {
-    PIANO = 'Piano'
-}
+export { InstrumentType };
 
 // Tipos para identificadores únicos
 type InstrumentId = string;

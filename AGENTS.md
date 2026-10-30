@@ -16,9 +16,12 @@ Este proyecto usa un equipo de agentes (configuración de OpenCode):
 ## Estructura del Proyecto
 
 ```
+packages/
+├── core/         # Modelo puro, .mr y generación de notas (sin Angular/Tone)
+└── compiler/     # Compilador .mr -> MIDI y CLI
 src/app/
-├── model/        # Modelo y núcleo .mr (parser, serializador, fichero)
-├── services/     # Generación de notas y audio
+├── model/        # song.player + shims de compatibilidad hacia packages/core
+├── services/     # Audio y servicios de la app
 ├── components/   # GUI Angular
 └── shared/       # Servicios compartidos
 docs/

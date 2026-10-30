@@ -58,8 +58,10 @@ Este documento fija los estándares de código, comandos de build y flujo de tra
 
 ## Estructura del Proyecto
 
-- `src/app/model/` — modelo de dominio y núcleo `.mr`.
-- `src/app/services/` — generación de notas, motor de audio.
+- `packages/core/` — modelo de dominio puro, núcleo `.mr` y generación de notas.
+- `packages/compiler/` — compilador `.mr` → MIDI y CLI.
+- `src/app/model/` — `song.player.ts` y shims de compatibilidad hacia `packages/core`.
+- `src/app/services/` — audio y servicios de la app.
 - `src/app/components/` — GUI.
 - `src/app/features/` — código v2 sin cablear (no tocar sin decisión).
 - `docs/user/` — documentación pública; `docs/developer/` — wiki interna.

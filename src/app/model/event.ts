@@ -1,3 +1,1 @@
-export interface SongEvent{
-    process():void;
-}
+export * from '@moderanger/core/event';

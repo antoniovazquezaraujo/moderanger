@@ -28,8 +28,10 @@ Run a single test: `npm test -- -t "test name"`.
 
 ## Project layout
 
-- `src/app/model/` — domain model (`Song`, `Part`, `Block`, `Command`, operations, variables) and the `.mr` core (`mr/`: parser, serializer, file service).
-- `src/app/services/` — note generation and audio.
+- `packages/core/` — pure domain model (`Song`, `Part`, `Block`, `Command`, operations, variables), the `.mr` core and note generation.
+- `packages/compiler/` — browser-free `.mr` → MIDI compiler and CLI.
+- `src/app/model/` — app-only `song.player.ts` plus compatibility re-exports of `packages/core`.
+- `src/app/services/` — audio and app services.
 - `src/app/components/` — Angular GUI (song editor, parts, blocks, melody editor, `.mr` view).
 - `src/app/model/mr/__tests__/corpus/` — canonical `.mr` songs.
 - `docs/user/` — public user documentation (published to GitHub Pages).

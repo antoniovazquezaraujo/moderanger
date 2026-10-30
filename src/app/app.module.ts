@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { EditorModule } from './components/editor/editor.module';
 import { TreeDragDropService } from 'primeng/api';
 import { SongPlayer } from './model/song.player';
+import { NoteGenerationService } from './services/note-generation.service';
+import { NoteGenerationUnifiedService } from './shared/services/note-generation-unified.service';
 
 @NgModule({
     declarations: [
@@ -19,7 +21,14 @@ import { SongPlayer } from './model/song.player';
     ],
     providers: [
         TreeDragDropService,
-        SongPlayer
+        SongPlayer,
+        // Servicios puros (sin @Injectable) instanciados por factory.
+        { provide: NoteGenerationUnifiedService, useFactory: () => new NoteGenerationUnifiedService() },
+        {
+            provide: NoteGenerationService,
+            useFactory: (unified: NoteGenerationUnifiedService) => new NoteGenerationService(unified),
+            deps: [NoteGenerationUnifiedService]
+        }
     ],
     bootstrap: [AppComponent]
 })

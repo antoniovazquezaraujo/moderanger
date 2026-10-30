@@ -22,6 +22,19 @@ npm run build # production build
 
 Or just `./scripts/dev.sh`: it sets up Node 16, runs `npm ci` when `node_modules` is missing and then starts the dev server.
 
+## MIDI compiler (experimental)
+
+The repository ships a browser-free CLI that compiles a `.mr` song to a Standard MIDI File:
+
+```sh
+npm run midi -- cancion.mr                 # writes cancion.mid
+npm run midi -- cancion.mr -o salida.mid
+npm run midi -- cancion.mr --json          # inspect the compiled events
+cat cancion.mr | node packages/compiler/src/cli/main.js - -o salida.mid
+```
+
+It uses the same playback semantics as the app (parts, references, repeats, commands, operations, patterns, chords and arpeggios). MIDI is not audio: open the `.mid` in a DAW or render it with a synthesizer such as FluidSynth. See [`docs/developer/analysis/compilador-midi-mvp.md`](docs/developer/analysis/compilador-midi-mvp.md) for the current limitations and the follow-up refactor.
+
 ## The `.mr` language
 
 A minimal song:
@@ -62,8 +75,10 @@ Edit it in the GUI, in the advanced text view (`.mr` button) or with any editor;
 
 | Path | Content |
 |---|---|
-| `src/app/model/mr/` | Parser, serializer, errors, file service and the `.mr` contract. |
+| `packages/core/src/mr/` | Parser, serializer, errors and the `.mr` contract. |
 | `src/app/model/mr/__tests__/corpus/` | Canonical `.mr` songs used by the tests. |
+| `packages/core/` | Pure model, `.mr` parser/serializer and note generation (no Angular/Tone). |
+| `packages/compiler/src/` | Browser-free `.mr` → MIDI compiler and CLI. |
 | `src/app/components/` | GUI (song editor, parts, blocks, melody editor, `.mr` view). |
 | `docs/user/` | Public documentation (published to GitHub Pages). |
 | `docs/developer/` | Internal wiki: ADR, analysis, audits, design, release (Spanish). |
