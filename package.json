@@ -9,7 +9,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "midi": "npm run build:cli --silent && node packages/compiler/dist/cli/main.js",
+    "midi": "npm run build:cli --silent && node packages/compiler/dist/cli/main.js compile",
     "build:core": "tsc -p packages/core/tsconfig.build.json",
     "build:compiler": "tsc -p packages/compiler/tsconfig.build.json",
     "build:cli": "npm run build:core && npm run build:compiler"

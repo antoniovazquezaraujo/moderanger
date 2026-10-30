@@ -3,7 +3,7 @@
 - **Fecha:** 2026-10-29
 - **Autor:** DANI (coordinación y arquitectura)
 - **Rama:** `docs/midi-compiler`
-- **Estado:** MVP funcional con **núcleo puro** (sin Angular ni Tone). Pendiente de validación manual, separación física en paquetes y build propio del CLI.
+- **Estado:** MVP funcional con **núcleo puro** (sin Angular ni Tone), paquetes `@moderanger/core` + `@moderanger/cli` y CLI compilado. Pendiente de publicación npm y validación manual.
 - **Referencias:**
   - `docs/developer/design/compilador-mr-a-midi.md` (propuesta)
   - `docs/developer/adr/ADR-003-compilador-midi.md` (decisiones)
@@ -17,13 +17,17 @@
 Un CLI que lee un `.mr`, lo compila con la semántica del reproductor y escribe un **Standard MIDI File tipo 1**:
 
 ```sh
-npm run midi -- cancion.mr
-npm run midi -- cancion.mr -o salida.mid
-npm run midi -- cancion.mr --json
-cat cancion.mr | node packages/compiler/dist/cli/main.js - -o salida.mid
+moderanger compile cancion.mr
+moderanger compile cancion.mr -o salida.mid
+moderanger compile cancion.mr --json
+moderanger check cancion.mr
+moderanger version
+cat cancion.mr | moderanger compile - -o salida.mid
 ```
 
-También queda declarado como `bin` (`moderanger-mid`), aunque el paquete sigue siendo privado; para usarlo como comando global haría falta `npm link` o publicarlo.
+Desde el repo, sin instalar el paquete global, se usa `node packages/compiler/dist/cli/main.js <comando>`; `npm run midi -- cancion.mr` sigue siendo el atajo de desarrollo que compila antes de ejecutar.
+
+El paquete `@moderanger/cli` declara los `bin` `moderanger` y `moderanger-mid` (alias de compatibilidad). La instalación global (`npm install -g @moderanger/cli`) queda pendiente de publicar el paquete y `@moderanger/core`.
 
 ### Opciones
 
@@ -33,8 +37,9 @@ También queda declarado como `bin` (`moderanger-mid`), aunque el paquete sigue 
 | `--ppq <n>` | Ticks por negra (por defecto 960) |
 | `--json` | Escribe el modelo compilado en JSON en vez de MIDI |
 | `--quiet` | Silencia el resumen y los warnings |
-| `-h, --help` | Ayuda |
-| `-v, --version` | Versión |
+| `-h, --help` | Ayuda de `compile` |
+
+`moderanger check <song.mr>` valida el documento y admite `--quiet` y `-h/--help`. `moderanger version` (o `--version`) muestra la versión global.
 
 ### Códigos de salida
 
@@ -133,13 +138,13 @@ Validación manual:
 - Un `.mid` generado se cargó en **FluidSynth** y produjo un WAV válido de duración coherente.
 - `--json` permite inspeccionar tick, duración y nota sin parsear bytes MIDI.
 
-Suite completa: **880 tests / 82 suites**, cobertura por encima del umbral y `npm run build` en verde.
+Suite completa en verde (82 suites), cobertura por encima del umbral y `npm run build` en verde.
 
 ---
 
 ## 5. Limitaciones y deuda técnica
 
-1. **Hay que compilar el CLI.** `npm run midi` ejecuta `npm run build:cli` automáticamente; para usar el binario directo hay que compilar antes. El `bin` apunta a `dist/cli/main.js`.
+1. **Hay que compilar el CLI.** `npm run midi` ejecuta `npm run build:cli` automáticamente; para usar el binario directo hay que compilar antes. Los `bin` apuntan a `dist/cli/main.js` y `dist/cli/legacy.js`.
 2. **Duraciones exactas vs scheduler web.** Ver §2.3; es una diferencia deliberada y documentada.
 3. **MIDI no es audio.** Para oírlo hace falta un sintetizador/DAW. La fase WAV queda fuera del MVP.
 4. **Warnings del motor** (por ejemplo, variables indefinidas) se imprimen por `console.warn`; con `--quiet` se silencian, pero no se convierten en errores.
@@ -149,5 +154,5 @@ Suite completa: **880 tests / 82 suites**, cobertura por encima del umbral y `np
 ## 6. Próximos pasos
 
 1. Validación manual del maintainer con canciones reales (incluido abrir el `.mid` en un DAW).
-2. Decidir si el CLI se publica como paquete npm (`@moderanger/compiler`) o solo como `bin` del repo.
+2. Publicar `@moderanger/core` y `@moderanger/cli` en npm (scope `@moderanger`) y comprobar `npm install -g @moderanger/cli`.
 3. Fase opcional: WAV con FluidSynth o sintetizador propio.

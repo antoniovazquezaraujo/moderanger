@@ -1,7 +1,6 @@
 {
   "name": "@moderanger/core",
   "version": "0.0.0",
-  "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -13,5 +12,24 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json"
+  },
+  "description": "Pure Mode Ranger core: model, .mr language and note generation.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antoniovazquezaraujo/moderanger.git",
+    "directory": "packages/core"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "dist/**/*.js.map"
+  ],
+  "dependencies": {
+    "tslib": "^2.8.1",
+    "rxjs": "~7.8.2"
   }
 }

@@ -22,7 +22,21 @@ const runCli = (args: string[], input?: string) =>
         timeout: 120000
     });
 
-describe('CLI moderanger-mid', () => {
+const writeSong = (file: string): void => {
+    fs.writeFileSync(file, [
+        'song CLI',
+        'version 1',
+        '',
+        'part Piano',
+        '  block Tema',
+        '    notes',
+        '      4n:0',
+        '      4n:2',
+        ''
+    ].join('\n'));
+};
+
+describe('CLI moderanger', () => {
     let dir: string;
 
     beforeAll(() => {
@@ -34,29 +48,19 @@ describe('CLI moderanger-mid', () => {
     });
 
     beforeEach(() => {
-        dir = fs.mkdtempSync(path.join(os.tmpdir(), 'moderanger-mid-'));
+        dir = fs.mkdtempSync(path.join(os.tmpdir(), 'moderanger-cli-'));
     });
 
     afterEach(() => {
         removeDirectory(dir);
     });
 
-    it('compila un .mr a un .mid válido', () => {
+    it('compila un .mr a un .mid válido con el subcomando compile', () => {
         const input = path.join(dir, 'cancion.mr');
         const output = path.join(dir, 'cancion.mid');
-        fs.writeFileSync(input, [
-            'song CLI',
-            'version 1',
-            '',
-            'part Piano',
-            '  block Tema',
-            '    notes',
-            '      4n:0',
-            '      4n:2',
-            ''
-        ].join('\n'));
+        writeSong(input);
 
-        const result = runCli([input, '-o', output, '--quiet']);
+        const result = runCli(['compile', input, '-o', output, '--quiet']);
 
         expect(result.status).toBe(0);
         const midi = fs.readFileSync(output);
@@ -77,7 +81,7 @@ describe('CLI moderanger-mid', () => {
             ''
         ].join('\n'));
 
-        const result = runCli([input, '-o', path.join(dir, 'roto.mid')]);
+        const result = runCli(['compile', input, '-o', path.join(dir, 'roto.mid')]);
 
         expect(result.status).toBe(1);
         expect(result.stderr).toContain(`${input}:7:`);
@@ -102,10 +106,84 @@ describe('CLI moderanger-mid', () => {
             ''
         ].join('\n'));
 
-        const result = runCli([input, '-o', path.join(dir, 'decoracion.mid')]);
+        const result = runCli(['compile', input, '-o', path.join(dir, 'decoracion.mid')]);
 
         expect(result.status).toBe(1);
         expect(result.stderr).toContain('DECORATION $x no es válido');
         expect(result.stderr).toContain("item de DECORATION inválido '-0'");
+    });
+
+    it('valida un .mr correcto con el subcomando check', () => {
+        const input = path.join(dir, 'cancion.mr');
+        writeSong(input);
+
+        const result = runCli(['check', input]);
+
+        expect(result.status).toBe(0);
+        expect(result.stdout.trim()).toBe(`OK ${input}`);
+        expect(result.stderr).toBe('');
+    });
+
+    it('check devuelve código 1 con un .mr inválido', () => {
+        const input = path.join(dir, 'roto.mr');
+        fs.writeFileSync(input, 'song Roto\nversion 1\n\npart Piano\n  block Tema\n    notes\n      4n:( 0 2\n');
+
+        const result = runCli(['check', input]);
+
+        expect(result.status).toBe(1);
+        expect(result.stderr).toContain(`${input}:7:`);
+    });
+
+    it('muestra la versión', () => {
+        const result = runCli(['version']);
+
+        expect(result.status).toBe(0);
+        expect(result.stdout.trim()).toMatch(/^moderanger \d+\.\d+\.\d+/);
+    });
+
+    it('muestra la ayuda global', () => {
+        const result = runCli(['help']);
+
+        expect(result.status).toBe(0);
+        expect(result.stdout).toContain('compile <song.mr>');
+        expect(result.stdout).toContain('check <song.mr>');
+        expect(result.stdout).toContain('version');
+    });
+
+    it('mantiene moderanger-mid como alias de compile', () => {
+        const input = path.join(dir, 'cancion.mr');
+        const output = path.join(dir, 'legacy.mid');
+        const alias = path.resolve(__dirname, '../../../dist/cli/legacy.js');
+        writeSong(input);
+
+        const result = spawnSync(process.execPath, [alias, input, '-o', output, '--quiet'], {
+            cwd: root,
+            encoding: 'utf8',
+            timeout: 120000
+        });
+
+        expect(result.status).toBe(0);
+        const midi = fs.readFileSync(output);
+        expect(midi.subarray(0, 4).toString('ascii')).toBe('MThd');
+    });
+
+    it('mantiene --version en el alias moderanger-mid', () => {
+        const alias = path.resolve(__dirname, '../../../dist/cli/legacy.js');
+
+        const result = spawnSync(process.execPath, [alias, '--version'], {
+            cwd: root,
+            encoding: 'utf8',
+            timeout: 120000
+        });
+
+        expect(result.status).toBe(0);
+        expect(result.stdout.trim()).toMatch(/^moderanger \d+\.\d+\.\d+/);
+    });
+
+    it('rechaza un comando desconocido', () => {
+        const result = runCli(['frobnicate']);
+
+        expect(result.status).toBe(2);
+        expect(result.stderr).toContain("unknown command 'frobnicate'");
     });
 });

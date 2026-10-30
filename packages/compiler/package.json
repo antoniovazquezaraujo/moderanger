@@ -1,10 +1,10 @@
 {
-  "name": "@moderanger/compiler",
+  "name": "@moderanger/cli",
   "version": "0.0.0",
-  "private": true,
   "main": "dist/compile-midi.js",
   "bin": {
-    "moderanger-mid": "dist/cli/main.js"
+    "moderanger": "dist/cli/main.js",
+    "moderanger-mid": "dist/cli/legacy.js"
   },
   "dependencies": {
     "@moderanger/core": "0.0.0"
@@ -12,5 +12,23 @@
   "types": "dist/compile-midi.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.build.json"
+  },
+  "description": "Browser-free .mr to MIDI compiler and CLI.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antoniovazquezaraujo/moderanger.git",
+    "directory": "packages/compiler"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "dist/**/*.js.map"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }
