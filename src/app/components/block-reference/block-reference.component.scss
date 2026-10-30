@@ -127,11 +127,13 @@
 }
 
 /* Mismo patrón que los controles de bloque/part: reservan su espacio y se
-   revelan al hover o al enfocar la referencia (sin layout shift). */
+   revelan al hover o al enfocar la referencia (sin layout shift). Sin
+   `margin-left: auto`: quedan justo después del `×N` de la referencia, no
+   pegados al borde derecho. */
 .reference-controls {
   display: flex;
+  flex: 0 0 auto;
   gap: 1px;
-  margin-left: auto;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.12s ease;
