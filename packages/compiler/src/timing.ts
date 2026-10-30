@@ -1,4 +1,4 @@
-import { durationToSeconds } from '@moderanger/core/duration';
+import { durationToSeconds } from '@moderanger/core';
 
 export { durationToSeconds };
 

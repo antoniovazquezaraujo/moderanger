@@ -9,3 +9,6 @@ dist/**
 
 package-lock.json
 out-tsc/**
+
+# Package build outputs
+packages/*/dist/**

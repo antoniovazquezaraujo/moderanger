@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { VariableContext } from '@moderanger/core/variable.context';
+import { VariableContext } from '@moderanger/core';
 import { compileSongText } from '../compile-midi';
 
 interface CompileFixture {

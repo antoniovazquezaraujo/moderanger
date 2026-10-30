@@ -20,7 +20,7 @@ Un CLI que lee un `.mr`, lo compila con la semántica del reproductor y escribe 
 npm run midi -- cancion.mr
 npm run midi -- cancion.mr -o salida.mid
 npm run midi -- cancion.mr --json
-cat cancion.mr | node packages/compiler/src/cli/main.js - -o salida.mid
+cat cancion.mr | node packages/compiler/dist/cli/main.js - -o salida.mid
 ```
 
 También queda declarado como `bin` (`moderanger-mid`), aunque el paquete sigue siendo privado; para usarlo como comando global haría falta `npm link` o publicarlo.
@@ -76,7 +76,7 @@ El compilador es un núcleo puro: **no importa Angular, Tone ni el motor de audi
 | `packages/compiler/src/midi-writer.ts` | Escritor SMF tipo 1 (header, conductor track, una pista por part, tempo, compás, programa, note on/off). |
 | `packages/compiler/src/timing.ts` | Conversión pura de duraciones/segundos a ticks. |
 | `packages/compiler/src/types.ts` | Modelo compilado (`CompiledSong`, `CompiledPart`, `CompiledNote`). |
-| `packages/compiler/src/cli/main.js` | Entrypoint Node: argumentos, stdin/stdout, carga TS y códigos de salida. |
+| `packages/compiler/src/cli/main.ts` | Entrypoint Node: argumentos, stdin/stdout y códigos de salida. Se compila a `dist/cli/main.js`. |
 
 ### 2.2. Semántica compartida sin reutilizar el player de audio
 
@@ -133,24 +133,21 @@ Validación manual:
 - Un `.mid` generado se cargó en **FluidSynth** y produjo un WAV válido de duración coherente.
 - `--json` permite inspeccionar tick, duración y nota sin parsear bytes MIDI.
 
-Suite completa: **873 tests / 80 suites**, cobertura por encima del umbral y `npm run build` en verde.
+Suite completa: **880 tests / 82 suites**, cobertura por encima del umbral y `npm run build` en verde.
 
 ---
 
 ## 5. Limitaciones y deuda técnica
 
-1. **El CLI transpila TypeScript en runtime.** Funciona sin build, pero requiere `typescript` (dev dependency) y es más lento que un binario compilado. Un `tsconfig.cli` o un bundle eliminarían el cargador en memoria.
-2. **Separación física pendiente.** El núcleo puro está listo, pero `packages/compiler`, `packages/core` y la app siguen en el mismo árbol que la app. El siguiente paso es `packages/core` + `packages/compiler`.
-3. **Duraciones exactas vs scheduler web.** Ver §2.3; es una diferencia deliberada y documentada.
-4. **MIDI no es audio.** Para oírlo hace falta un sintetizador/DAW. La fase WAV queda fuera del MVP.
-5. **Warnings del motor** (por ejemplo, variables indefinidas) se imprimen por `console.warn`; con `--quiet` se silencian, pero no se convierten en errores.
+1. **Hay que compilar el CLI.** `npm run midi` ejecuta `npm run build:cli` automáticamente; para usar el binario directo hay que compilar antes. El `bin` apunta a `dist/cli/main.js`.
+2. **Duraciones exactas vs scheduler web.** Ver §2.3; es una diferencia deliberada y documentada.
+3. **MIDI no es audio.** Para oírlo hace falta un sintetizador/DAW. La fase WAV queda fuera del MVP.
+4. **Warnings del motor** (por ejemplo, variables indefinidas) se imprimen por `console.warn`; con `--quiet` se silencian, pero no se convierten en errores.
 
 ---
 
 ## 6. Próximos pasos
 
 1. Validación manual del maintainer con canciones reales (incluido abrir el `.mid` en un DAW).
-2. Sustituir el cargador TS por un build de `packages/compiler`.
-3. Sustituir el cargador TS en runtime por un build `tsconfig.cli` o un bundle.
-4. Decidir si el CLI se publica como `bin` del repo o como paquete aparte.
-5. Fase opcional: WAV con FluidSynth o sintetizador propio.
+2. Decidir si el CLI se publica como paquete npm (`@moderanger/compiler`) o solo como `bin` del repo.
+3. Fase opcional: WAV con FluidSynth o sintetizador propio.

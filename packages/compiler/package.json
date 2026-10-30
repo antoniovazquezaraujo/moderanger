@@ -2,11 +2,15 @@
   "name": "@moderanger/compiler",
   "version": "0.0.0",
   "private": true,
-  "main": "src/compile-midi.ts",
+  "main": "dist/compile-midi.js",
   "bin": {
-    "moderanger-mid": "src/cli/main.js"
+    "moderanger-mid": "dist/cli/main.js"
   },
   "dependencies": {
     "@moderanger/core": "0.0.0"
+  },
+  "types": "dist/compile-midi.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
   }
 }

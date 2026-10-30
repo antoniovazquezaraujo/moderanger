@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { spawnSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
 
 const root = path.resolve(__dirname, '../../../../..');
-const cli = path.resolve(__dirname, '../main.js');
+const cli = path.resolve(__dirname, '../../../dist/cli/main.js');
 
 /** `fs.rmSync` existe en Node 16, pero @types/node 12 aún no lo declara. */
 const removeDirectory = (directory: string): void => {
@@ -24,6 +24,14 @@ const runCli = (args: string[], input?: string) =>
 
 describe('CLI moderanger-mid', () => {
     let dir: string;
+
+    beforeAll(() => {
+        execFileSync('npm', ['run', 'build:cli', '--silent'], {
+            cwd: root,
+            stdio: 'ignore',
+            timeout: 120000
+        });
+    });
 
     beforeEach(() => {
         dir = fs.mkdtempSync(path.join(os.tmpdir(), 'moderanger-mid-'));

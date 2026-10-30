@@ -37,7 +37,8 @@ Mode Ranger es una app **Angular 13 + TypeScript** (Node 16):
 - **Desarrollo**: `npm start` (http://localhost:4200)
 - **Tests**: `npm test` (Jest, `*.jest.spec.ts`) o `npm test -- -t "nombre"`
 - **Cobertura**: `npm run test:cov` (umbral configurado en `jest.config.js`)
-- **Build**: `npm run build`
+- **Build**: `npm run build` (app + CLI)
+- **CLI MIDI**: `npm run build:cli` / `npm run midi -- cancion.mr`
 
 ## Convenciones de Código
 

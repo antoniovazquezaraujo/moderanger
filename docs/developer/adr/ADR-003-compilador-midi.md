@@ -34,7 +34,7 @@ La propuesta de diseño concluyó que:
 9. **Notas fuera de 0–127:** se transportan por octavas y se emite un warning; no se descartan ni rompen la compilación.
 10. **Paridad con el player:** el MIDI representa la misma semántica musical, incluidas las limitaciones v1 (`PATTERN_GAP` sin efecto, duraciones de `DECORATION` como metadato, variables string no expandidas como nota). El compilador usa duraciones exactas; el scheduler web redondea a 96n, así que patrones con duraciones no representables pueden diferir unos ticks.
 11. **`--json`** expone el modelo compilado para tests y depuración.
-12. **Deuda aceptada:** el CLI aún transpila TypeScript en runtime. La separación física en `packages/core` + `packages/compiler` y un build propio quedan como siguientes pasos.
+12. **CLI compilado:** `npm run build:cli` genera `dist` para `packages/core` y `packages/compiler`; el `bin` apunta al JS compilado y no hay cargador TS en runtime.
 
 ## 3. Alternativas consideradas
 
@@ -62,7 +62,6 @@ La propuesta de diseño concluyó que:
 
 ### Negativas / costes
 
-- El CLI aún depende de un cargador TS en runtime.
 - `packages/compiler` y el modelo siguen en el mismo árbol que la app; falta la separación en paquetes.
 - El MIDI no incluye dinámica, articulaciones ni cambios de tempo; son features futuras.
 - Las limitaciones v1 del formato se heredan y hay que documentarlas.
@@ -75,7 +74,7 @@ La propuesta de diseño concluyó que:
 | Diferencias de redondeo en patrones | Documentadas; el compilador usa duraciones exactas. |
 | Notas fuera de rango | Transporte por octavas + warning visible. |
 | Cambios en `SongPlayer` rompen el CLI | `compile-core` es independiente; tests propios. |
-| Dependencia de TypeScript en runtime | Documentado; siguiente fase: `tsconfig.cli` o bundle. |
+| Build del CLI desactualizado | `npm run midi` compila antes de ejecutar. |
 
 ## 5. Criterios de aceptación
 
@@ -91,7 +90,7 @@ La propuesta de diseño concluyó que:
 |---|---|---|
 | **1. MVP** | Compilador, conversión a ticks, escritor MIDI, CLI, tests, docs | Hecho |
 | **2. Núcleo puro** | Eliminar Angular/Tone del camino del compilador; `compile-core` | Hecho |
-| **3. Paquetes** | `packages/core` + `packages/compiler`; build del CLI | Paquetes hechos; build pendiente |
+| **3. Paquetes + build** | `packages/core` + `packages/compiler`; build del CLI | Hecho |
 | **4. WAV opcional** | FluidSynth o sintetizador propio | Futuro |
 
 ## 7. Referencias
