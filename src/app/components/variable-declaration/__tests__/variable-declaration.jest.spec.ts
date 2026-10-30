@@ -4,6 +4,8 @@
  * `$motif` no aparecía tras cargar un `.mr`.
  */
 import type { ChangeDetectorRef, NgZone } from '@angular/core';
+import * as fs from 'fs';
+import * as path from 'path';
 import { VariableContext } from 'src/app/model/variable.context';
 import { AudioEngineService } from 'src/app/services/audio-engine.service';
 import { NoteGenerationService } from 'src/app/services/note-generation.service';
@@ -134,6 +136,14 @@ describe('VariableDeclarationComponent · variables string', () => {
     expect(cdr.detectChanges).toHaveBeenCalledTimes(1);
     expect(declaredVariables(component)).toEqual([{ name: 'mode', value: 'RANDOM', type: 'playmode' }]);
     component.ngOnDestroy();
+  });
+
+  it('trackBy usa el nombre para conservar el input al teclear', () => {
+    const component = new VariableDeclarationComponent(fakeZone(), fakeCdr() as unknown as ChangeDetectorRef);
+    const template = fs.readFileSync(path.resolve(__dirname, '../variable-declaration.component.html'), 'utf8');
+
+    expect(component.trackByVariable(0, { name: 'motif', value: '4t:0', type: 'string' })).toBe('motif');
+    expect(template).toContain('trackBy: trackByVariable');
   });
 
   it('addVariable crea una variable de texto con el valor indicado', () => {
