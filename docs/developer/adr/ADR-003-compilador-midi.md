@@ -98,3 +98,21 @@ La propuesta de diseño concluyó que:
 - `docs/developer/design/compilador-mr-a-midi.md`
 - `docs/developer/analysis/compilador-midi-mvp.md`
 - `packages/core/`, `packages/compiler/`
+
+## 8. Addendum (2026-10-30): CLI unificado y distribución npm
+
+La decisión 6 se amplía para que el producto tenga un comando único y deje sitio a futuros subcomandos:
+
+- Binario principal: **`moderanger`**, con subcomandos `compile`, `check`, `version` y `help`.
+- `moderanger compile` sustituye a la interfaz plana de `moderanger-mid`; `moderanger-mid` se mantiene como alias de compatibilidad.
+- `moderanger check` valida el `.mr` sin generar salida (parseo + serializabilidad).
+- El paquete npm pasa a llamarse **`@moderanger/cli`**; `@moderanger/core` se publica como dependencia.
+- La instalación prevista es global (`npm install -g @moderanger/cli`), sin binarios por plataforma ni firma. El binario autocontenido queda fuera de alcance por ahora.
+
+Criterios de aceptación añadidos:
+
+- `moderanger compile cancion.mr` genera un `.mid` válido.
+- `moderanger check cancion.mr` devuelve 0 con un `.mr` válido y 1 con uno inválido.
+- `moderanger version` y `moderanger help` funcionan sin argumentos adicionales.
+- `moderanger-mid cancion.mr` sigue funcionando como alias.
+- `npm pack --workspace @moderanger/cli --dry-run` incluye `dist` y declara los dos `bin`.

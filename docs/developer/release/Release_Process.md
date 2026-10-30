@@ -64,3 +64,43 @@ git push origin v0.1.0
 - [SemVer](https://semver.org/lang/es/): `vMAJOR.MINOR.PATCH` y pre-releases (`v0.2.0-beta.1`).
 - El `CHANGELOG.md` sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 - Todo cambio visible para el usuario debe quedar anotado en el changelog antes del release.
+
+---
+
+## 4. Publicación de los paquetes npm del CLI
+
+Los paquetes `@moderanger/core` y `@moderanger/cli` son publicables, pero la publicación es un paso manual (requiere sesión de npm con 2FA y permisos sobre el scope `@moderanger`).
+
+**Paso 1: Versiones y verificación**
+```bash
+# Misma versión en packages/core/package.json y packages/compiler/package.json
+npm ci
+npm test
+npm run build
+npm pack --workspace @moderanger/core --dry-run
+npm pack --workspace @moderanger/cli --dry-run
+```
+
+Comprueba que los tarballs incluyen `dist/`, `README.md`, `LICENSE` y los `bin` `moderanger` / `moderanger-mid`.
+
+**Paso 2: Publicar primero el core**
+```bash
+npm login
+npm publish --workspace @moderanger/core --access public
+```
+
+**Paso 3: Publicar el CLI**
+```bash
+npm publish --workspace @moderanger/cli --access public
+```
+
+`@moderanger/cli` depende de la versión exacta de `@moderanger/core`, así que el core debe estar publicado antes.
+
+**Paso 4: Smoke test global**
+```bash
+npm install -g @moderanger/cli
+moderanger version
+moderanger compile cancion.mr -o cancion.mid
+moderanger check cancion.mr
+moderanger-mid --version
+```
