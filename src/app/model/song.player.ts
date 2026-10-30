@@ -104,6 +104,12 @@ export class SongPlayer {
     
     private currentLoopId: LoopId | null = null;
     private currentStopListenerId: ListenerId | null = null;
+    /**
+     * Identifica la reproducción actual. El evento `stop` del Transport puede
+     * llegar después de un Stop + Play (restart): el listener viejo lleva un
+     * token anterior y se ignora, para que no detenga la reproducción nueva.
+     */
+    private playbackToken = 0;
 
     // Public observables - delegated to GlobalStateService
     readonly currentPattern$: Observable<NoteData[]>;
@@ -161,13 +167,13 @@ export class SongPlayer {
     }
 
     stop(): void {
+        // Invalida el listener actual antes de tocar el Transport: su evento
+        // `stop` puede llegar después de un Play nuevo y no debe cancelarlo.
+        this.playbackToken++;
+        this._unregisterStopListener();
         this.audioEngine.cancelTransportEvents();
         this.audioEngine.stopTransport();
-        if (this.currentLoopId) {
-            this.audioEngine.disposeLoop(this.currentLoopId);
-            this.currentLoopId = null;
-        }
-        this._unregisterStopListener();
+        this._disposeCurrentLoop();
         this._restoreVariablesSnapshot();
         this._clearPlayingSources();
         this.schedulerTick = 0;
@@ -178,6 +184,43 @@ export class SongPlayer {
         this.globalState.setBeatCount(0);
         this.globalState.resetRepetition();
         this._metronome.next(0);
+    }
+
+    /**
+     * Para y resuelve cuando el Transport ha emitido `stop`. El evento llega
+     * ~30 ms después de `stopTransport()`; arrancar antes hace que ese mismo
+     * evento pare la reproducción nueva. El timeout es solo una red de
+     * seguridad por si el Transport ya estaba parado y no emite nada.
+     */
+    private _stopAndWaitForTransportStop(): Promise<void> {
+        return new Promise<void>(resolve => {
+            let settled = false;
+            let listenerId: ListenerId | null = null;
+            let fallback: ReturnType<typeof setTimeout> | null = null;
+
+            const finish = () => {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                if (fallback !== null) {
+                    clearTimeout(fallback);
+                }
+                if (listenerId) {
+                    this.audioEngine.offTransportStop(listenerId);
+                }
+                resolve();
+            };
+
+            fallback = setTimeout(finish, 200);
+            listenerId = this.audioEngine.onTransportStop(finish);
+            this.stop();
+            // Si el stub/Transport emitió `stop` de forma síncrona antes de
+            // tener el id, desregistrar ahora.
+            if (settled && listenerId) {
+                this.audioEngine.offTransportStop(listenerId);
+            }
+        });
     }
 
     /**
@@ -203,6 +246,19 @@ export class SongPlayer {
             this.audioEngine.offTransportStop(this.currentStopListenerId);
             this.currentStopListenerId = null;
         }
+    }
+
+    /**
+     * Suelta el loop del scheduler y limpia su id. Imprescindible antes de un
+     * nuevo Play: si el loop anterior queda registrado en el motor, al volver
+     * a arrancar el Transport suenan las dos reproducciones a la vez.
+     */
+    private _disposeCurrentLoop(): void {
+        if (!this.currentLoopId) {
+            return;
+        }
+        this.audioEngine.disposeLoop(this.currentLoopId);
+        this.currentLoopId = null;
     }
 
     // --- Resaltado de la nota-origen que suena ---
@@ -272,19 +328,22 @@ export class SongPlayer {
         this.audioEngine.setTransportBpm(bpm);
     }
 
-    private _handleTransportStop = () => {
-         if (this.globalState.isPlaying) {
-             this.globalState.setIsPlaying(false);
-             this.globalState.clearPlaybackContext();
-             this.globalState.setBeatCount(0);
-             this.globalState.resetRepetition();
-             this._metronome.next(0);
-             this._clearPlayingSources();
-             this._restoreVariablesSnapshot();
-             this.currentLoopId = null;
-             this._unregisterStopListener();
+    private _handleTransportStop(token: number): void {
+         // Un stop del Transport anterior al Play actual es ruido: si no se
+         // filtra, un reinicio en un clic pararía la reproducción recién lanzada.
+         if (token !== this.playbackToken || !this.globalState.isPlaying) {
+             return;
          }
-     };
+         this.globalState.setIsPlaying(false);
+         this.globalState.clearPlaybackContext();
+         this.globalState.setBeatCount(0);
+         this.globalState.resetRepetition();
+         this._metronome.next(0);
+         this._clearPlayingSources();
+         this._restoreVariablesSnapshot();
+         this._disposeCurrentLoop();
+         this._unregisterStopListener();
+    }
 
     async playSong(song: Song): Promise<void> {
         if (!this._initializePlayback(song)) {
@@ -294,6 +353,19 @@ export class SongPlayer {
         const partStates = await this._buildPartExecutionStates(song);
         const partSoundInfo = this._extractNotesFromStates(partStates); 
         await this._schedulePlayback(partSoundInfo); 
+    }
+
+    /**
+     * Play desde cero: si ya hay una reproducción en curso, la para y espera
+     * al evento `stop` del Transport antes de arrancar la nueva. Sin esa
+     * espera, el stop de la reproducción anterior llega tarde y cancela la
+     * recién lanzada.
+     */
+    async playSongFromStart(song: Song): Promise<void> {
+        if (this.globalState.isPlaying) {
+            await this._stopAndWaitForTransportStop();
+        }
+        await this.playSong(song);
     }
 
     async playPart(part: Part, song: Song): Promise<void> {
@@ -376,6 +448,8 @@ export class SongPlayer {
             return false;
         }
 
+        const playbackToken = ++this.playbackToken;
+
         // Snapshot del estado de variables previo al Play: se restaura al
         // parar (o al terminar) para que los comandos/operaciones no se
         // acumulen entre reproducciones.
@@ -397,10 +471,11 @@ export class SongPlayer {
         this.audioEngine.setTransportBpm(song.bpm);
         this.audioEngine.setTransportPosition(0);
 
-        // Hook up the stop listener
-        if (!this.currentStopListenerId) {
-             this.currentStopListenerId = this.audioEngine.onTransportStop(this._handleTransportStop);
-        }
+        // Un listener por reproducción, atado a su token.
+        this._unregisterStopListener();
+        this.currentStopListenerId = this.audioEngine.onTransportStop(
+            () => this._handleTransportStop(playbackToken)
+        );
 
         return true;
     }
@@ -597,14 +672,18 @@ export class SongPlayer {
             this._loopTick(time, partSoundInfo);
         };
 
-        if (this.currentLoopId) {
-            this.audioEngine.disposeLoop(this.currentLoopId);
-        }
-        this.currentLoopId = this.audioEngine.scheduleLoop(loopCallback, SongPlayer.SCHEDULER_INTERVAL);
-        
+        this._disposeCurrentLoop();
+        const loopId = this.audioEngine.scheduleLoop(loopCallback, SongPlayer.SCHEDULER_INTERVAL);
+        this.currentLoopId = loopId;
+
         try {
              await this.audioEngine.startTransport();
-             this.audioEngine.startLoop(this.currentLoopId, 0);
+             // Otro Stop/Play pudo adelantarse mientras `startTransport()`
+             // esperaba a Tone: no arrancar un loop que ya no es el actual.
+             if (this.currentLoopId !== loopId) {
+                 return;
+             }
+             this.audioEngine.startLoop(loopId, 0);
         } catch (e) {
             console.error("[SongPlayer] Error starting transport or loop via AudioEngine:", e);
             this.stop();

@@ -22,8 +22,13 @@
                     <input type="number" id="bpm" class="number-input" style="width:45px !important; max-width:45px !important;"
                            [ngModel]="song.bpm" (ngModelChange)="onBpmChange($event)" min="30" max="240" step="1"
                            pTooltip="Tempo (BPM)" tooltipPosition="top" aria-label="BPM">
-                    <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"></button>
-                    <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"></button>
+                    <!-- Play siempre reproduce desde el principio: si ya está
+                         sonando, reinicia (stop + play interno) sin obligar a
+                         pasar por el botón Stop. -->
+                    <button pButton type="button" icon="pi pi-play" (click)="playSong()" class="p-ml-2"
+                            pTooltip="Play" tooltipPosition="top" aria-label="Play song"></button>
+                    <button pButton type="button" icon="pi pi-stop" (click)="stopSong()" class="p-ml-2"
+                            pTooltip="Stop" tooltipPosition="top" aria-label="Stop song"></button>
                     <!-- Dropdown para Default Duration -->
                     <select 
                         id="defaultDurationSelect" 
@@ -37,7 +42,8 @@
                     <!-- Use metronome$ property of this component -->
                     <app-metronome class="inline-metronome p-ml-2"></app-metronome> 
                     <!-- Vista avanzada de texto .mr (divulgación progresiva) -->
-                    <p-button (click)="toggleMrTextEditor()" label=".mr" icon="pi pi-code" pTooltip="Texto (.mr)" tooltipPosition="top" class="p-ml-2"></p-button>
+                    <button pButton type="button" icon="pi pi-file-o" (click)="toggleMrTextEditor()" class="p-ml-2"
+                            pTooltip="Texto (.mr)" tooltipPosition="top" aria-label="Texto (.mr)"></button>
                     <!-- Guardar/cargar el texto canónico como fichero .mr -->
                     <button pButton type="button" icon="pi pi-download" (click)="saveMrFile()" class="p-ml-2"
                             pTooltip="Guardar .mr (texto canónico)" tooltipPosition="top" aria-label="Guardar .mr"></button>

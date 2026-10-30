@@ -2,9 +2,9 @@
  * Commands/Operations como texto libre (`style/commands-free-text`).
  *
  * jsdom no calcula layout, así que el contrato se fija leyendo el template y
- * las hojas: etiqueta capitalizada con `:`, sin chrome en reposo y con
- * borde/chevron al hover o al editar (focus-within), más las comas dentro de
- * la caja del comando y entre notas del PATTERN.
+ * las hojas: etiqueta capitalizada con `:`, sin chrome en reposo, con
+ * borde/chevron al hover o al editar (focus-within) y sin comas decorativas
+ * entre comandos, operaciones ni notas.
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -57,11 +57,11 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     expect(declaration(ruleBody(styles, '.operation-item:focus-within'), 'border-color')).toBe('#e8e8e8 !important');
   });
 
-  it('las comas viven dentro de la caja del comando y entre notas de cualquier editor', () => {
-    expect(styles).toMatch(/\.command:has\(\+ \.command\)::after/);
-    expect(styles).toMatch(/app-melody-editor \.notes-container > \* \+ \*:not\(\.add-note\)::before/);
-    // Hosts de nota en línea para que la coma quede centrada.
-    expect(styles).toMatch(/app-melody-editor \.notes-container > app-melody-note[\s\S]*?display:\s*inline-flex/);
+  it('no añade comas decorativas entre comandos, operaciones ni notas', () => {
+    expect(styles).not.toMatch(/content:\s*','/);
+    expect(styles).not.toMatch(/\.command:has\(\+ \.command\)::after/);
+    expect(styles).not.toMatch(/\.operation-item:has\(\+ \.operation-item\)::after/);
+    expect(styles).not.toMatch(/notes-container > \* \+ \*:not\(\.add-note\)::before/);
   });
 
   it('compacta commands: gaps, padding, acciones e inputs numéricos al contenido', () => {
@@ -98,11 +98,6 @@ describe('Commands/Operations en texto libre (CSS/template)', () => {
     // Los selects conservan su clamp propio.
     const selectClamp = ruleBody(styles, 'html body .operations-row select.command-type');
     expect(declaration(selectClamp, 'max-width')).toBe('140px !important');
-
-    // La coma comparte la tipografía de la fila.
-    const comma = ruleBody(styles, 'html body .operations-row .operation-item:has(+ .operation-item)::after');
-    expect(declaration(comma, 'font-size')).toBe('12px !important');
-    expect(declaration(comma, 'line-height')).toBe('1 !important');
 
     // Wrapper del `+` a 20px y fuente del componente coherente.
     const addWrapper = ruleBody(styles, 'html body .operations-row .add-wrapper');

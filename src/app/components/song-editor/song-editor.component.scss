@@ -56,6 +56,31 @@
   align-items: center;
 }
 
+/* Toolbar uniforme: nombre, Repeat, BPM, play/stop, duración, metrónomo,
+   texto y guardar/cargar comparten la misma altura (30px). Los botones
+   globales miden 20px, así que el override es local al toolbar. */
+.song-header .song-name-input,
+.song-header .number-input,
+.song-header .default-duration-select,
+.song-header .playback-controls .p-button {
+  height: 30px !important;
+  box-sizing: border-box;
+}
+
+.song-header .playback-controls #repetitions {
+  height: 30px !important;
+}
+
+.song-header .playback-controls .p-button {
+  width: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+}
+
+.song-header .playback-controls .p-button .p-button-icon {
+  font-size: 14px !important;
+}
+
 /* Content section fills remaining space and scrolls */
 .content-section {
   flex-grow: 1; 

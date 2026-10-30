@@ -239,10 +239,18 @@ export class SongEditorComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
     }
 
-    playSong() {
-        // `SongPlayer` aplica `Song.repeats` y `Song.bpm` al iniciar (no hay
-        // copia de sesión que asignar aquí).
-        this.songPlayer.playSong(this.song);
+    /**
+     * Play siempre empieza desde el principio: `SongPlayer.playSongFromStart`
+     * para la reproducción actual (si la hay) y espera al stop del Transport
+     * antes de lanzar la nueva, todo en un solo clic. `SongPlayer` aplica
+     * `Song.repeats` y `Song.bpm` al iniciar (no hay copia de sesión que
+     * asignar aquí).
+     */
+    async playSong(): Promise<void> {
+        await this.songPlayer.playSongFromStart(this.song);
+        // Refleja el nuevo estado ya (sin esperar al siguiente tick del metrónomo).
+        this.isPlaying = this.songPlayer.isPlaying;
+        this.cdr.markForCheck();
     }
 
     stopSong() {
