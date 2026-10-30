@@ -541,6 +541,22 @@ describe('DECORATION: lista de items', () => {
     expect(serializeSong(doc)).toContain('DECORATION $deco');
   });
 
+  it('valida el valor string de DECORATION $variable al cargar', () => {
+    const withVariable = (value: string): string => [
+      'song P', 'version 1', '', 'vars', `  $deco = "${value}"`, '',
+      'part Piano', '  block B', '    notes', '      4n:0',
+      '    commands', '      DECORATION $deco', ''
+    ].join('\n');
+
+    const valid = parseSong(withVariable('0 1 4 5 6 2'));
+    expect(firstBlock(valid.song.parts[0]).commands[0].getVariableName()).toBe('deco');
+
+    const error = expectParseError(withVariable('-0 1 4 5 6 2'));
+    expect(error.line).toBe(12);
+    expect(error.message).toContain('DECORATION $deco no es válido');
+    expect(error.message).toContain("item de DECORATION inválido '-0'");
+  });
+
   it('rechaza grupos con línea:columna', () => {
     const error = expectParseError(songWithDecoration('4t:( 0 2 )'));
 
@@ -553,6 +569,7 @@ describe('DECORATION: lista de items', () => {
   it('rechaza items no enteros', () => {
     expect(expectParseError(songWithDecoration('0 1.5')).message).toContain(`item de DECORATION inválido '1.5'`);
     expect(expectParseError(songWithDecoration('s')).message).toContain(`item de DECORATION inválido 's'`);
+    expect(expectParseError(songWithDecoration('-0 1')).message).toContain(`item de DECORATION inválido '-0'`);
   });
 
   it('exige valor', () => {

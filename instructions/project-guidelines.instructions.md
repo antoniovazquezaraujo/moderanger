@@ -53,7 +53,8 @@ Este documento fija los estándares de código, comandos de build y flujo de tra
 - **Instalar**: `npm ci` (no `npm install` salvo cambio de dependencias).
 - **Tests**: `npm test` (antes de cada PR).
 - **Cobertura**: `npm run test:cov`.
-- **Build**: `npm run build`.
+- **Build**: `npm run build` (app + CLI).
+- **CLI MIDI**: `npm run build:cli` / `npm run midi -- cancion.mr`.
 - **Dev**: `npm start`.
 
 ## Estructura del Proyecto

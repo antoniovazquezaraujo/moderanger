@@ -323,7 +323,7 @@ packages/compiler/src/
   compile-core.ts           # ejecución musical pura
   compile-midi.ts           # orquestación y ticks
   midi-writer.ts            # SMF tipo 1
-  cli/main.js               # argumentos, stdin/stdout, códigos de salida
+  cli/main.ts               # argumentos, stdin/stdout, códigos de salida
 ```
 
 con un `tsconfig.cli.json` que compile a CommonJS en `dist/cli/` y un script:

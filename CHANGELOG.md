@@ -8,7 +8,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Added
 
-- Experimental **`.mr` → MIDI compiler**: `npm run midi -- song.mr` writes a Standard MIDI File type 1 (960 PPQ, one track per part) without a browser. The compiler has a pure core (no Angular/Tone) that follows the player's musical semantics (parts, `use` references, repeats, commands, operations, `PATTERN`, chords and arpeggios). `--json` exposes the compiled event model. WAV rendering is out of scope.
+- Experimental **`.mr` → MIDI compiler**: `npm run midi -- song.mr` writes a Standard MIDI File type 1 (960 PPQ, one track per part) without a browser. The compiler has a pure core (no Angular/Tone) and a precompiled CLI (`npm run build:cli`) that follows the player's musical semantics (parts, `use` references, repeats, commands, operations, `PATTERN`, chords and arpeggios). `--json` exposes the compiled event model. WAV rendering is out of scope.
 - Complete `.mr` language v1: parser, serializer, stable round-trip, `line:column` errors and `.mr` file support (Phase 1).
 - In-app `.mr` text view (Phase 2): live validation, apply/revert and per-part/block source map.
 - Save/load `.mr` from the UI (Phase 3).
@@ -53,6 +53,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Fixed
 
+- `DECORATION $variable` now validates the string value at parse/load time: an invalid item such as `-0` is rejected with `file:line:column` instead of silently disabling the decoration during playback. The web app and the MIDI compiler now fail in the same place.
 - Restarting with **Play** while the song was playing no longer overlaps both playbacks or stops the new one: `_handleTransportStop` cleared `currentLoopId` without disposing the scheduler loop, and the Transport emits its `stop` event ~30 ms later, so a restart launched immediately was cancelled by the previous stop. `stop()` and the natural end now dispose the loop, `playSongFromStart()` waits for the Transport `stop` event before relaunching, each playback carries a token so stale stop events are ignored, and an in-flight `startTransport()` aborts if a newer playback superseded it.
 - `SongPlayer` stop-listener leak: `_handleTransportStop` cleared `currentStopListenerId` without unregistering it (and `Player`'s constructor registered a listener with no consumers per play), so listeners stayed in the engine after every natural end. The listener is now unregistered on `stop()`, on the natural end and on the empty-playback path (idempotent), and the dead `Player` registration is gone: `Play → end → Play` does not accumulate listeners.
 - Commands no longer log the transient `Variable … no longer exists or is inaccessible` warning when loading a `.mr` that replaces the previous document's variables: the check is deferred one tick and re-evaluated against the settled model, so it only warns when the reference is really dangling (variable removed from the panel, unknown `$name`).

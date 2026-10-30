@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { spawnSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
 
 const root = path.resolve(__dirname, '../../../../..');
-const cli = path.resolve(__dirname, '../main.js');
+const cli = path.resolve(__dirname, '../../../dist/cli/main.js');
 
 /** `fs.rmSync` existe en Node 16, pero @types/node 12 aún no lo declara. */
 const removeDirectory = (directory: string): void => {
@@ -24,6 +24,14 @@ const runCli = (args: string[], input?: string) =>
 
 describe('CLI moderanger-mid', () => {
     let dir: string;
+
+    beforeAll(() => {
+        execFileSync('npm', ['run', 'build:cli', '--silent'], {
+            cwd: root,
+            stdio: 'ignore',
+            timeout: 120000
+        });
+    });
 
     beforeEach(() => {
         dir = fs.mkdtempSync(path.join(os.tmpdir(), 'moderanger-mid-'));
@@ -74,5 +82,30 @@ describe('CLI moderanger-mid', () => {
         expect(result.status).toBe(1);
         expect(result.stderr).toContain(`${input}:7:`);
         expect(result.stderr).toContain('error:');
+    });
+
+    it('rechaza un DECORATION con variable string inválida (-0)', () => {
+        const input = path.join(dir, 'decoracion.mr');
+        fs.writeFileSync(input, [
+            'song Decoracion',
+            'version 1',
+            '',
+            'vars',
+            '  $x = "-0 1"',
+            '',
+            'part Piano',
+            '  block Tema',
+            '    notes',
+            '      4n:0',
+            '    commands',
+            '      DECORATION $x',
+            ''
+        ].join('\n'));
+
+        const result = runCli([input, '-o', path.join(dir, 'decoracion.mid')]);
+
+        expect(result.status).toBe(1);
+        expect(result.stderr).toContain('DECORATION $x no es válido');
+        expect(result.stderr).toContain("item de DECORATION inválido '-0'");
     });
 });

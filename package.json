@@ -4,12 +4,15 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build && npm run build:cli",
     "watch": "ng build --watch --configuration development",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "midi": "node packages/compiler/src/cli/main.js"
+    "midi": "npm run build:cli --silent && node packages/compiler/dist/cli/main.js",
+    "build:core": "tsc -p packages/core/tsconfig.build.json",
+    "build:compiler": "tsc -p packages/compiler/tsconfig.build.json",
+    "build:cli": "npm run build:core && npm run build:compiler"
   },
   "private": true,
   "dependencies": {

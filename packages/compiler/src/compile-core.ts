@@ -1,15 +1,18 @@
-import { Block } from '@moderanger/core/block';
-import { BlockReference } from '@moderanger/core/block-reference';
-import { Command } from '@moderanger/core/command';
-import { durationToSeconds } from '@moderanger/core/duration';
-import { NoteData } from '@moderanger/core/note';
-import { BaseOperation } from '@moderanger/core/operation';
-import { Part, PartItem } from '@moderanger/core/part';
-import { Player } from '@moderanger/core/player';
-import { Song } from '@moderanger/core/song';
-import { VariableContext } from '@moderanger/core/variable.context';
-import { NoteGenerationService } from '@moderanger/core/services/note-generation.service';
-import { NoteGenerationUnifiedService } from '@moderanger/core/services/note-generation-unified.service';
+import {
+    BaseOperation,
+    Block,
+    BlockReference,
+    Command,
+    durationToSeconds,
+    NoteData,
+    NoteGenerationService,
+    NoteGenerationUnifiedService,
+    Part,
+    PartItem,
+    Player,
+    Song,
+    VariableContext
+} from '@moderanger/core';
 
 /** Unidad de ejecución musical: comandos/operaciones y, opcionalmente, notas. */
 interface ExecutionUnit {

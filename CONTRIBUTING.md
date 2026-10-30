@@ -21,7 +21,8 @@ npm ci           # install dependencies (use `npm install` only for dependency c
 npm start        # app on http://localhost:4200
 npm test         # Jest suite (core, no browser)
 npm run test:cov # coverage with thresholds
-npm run build    # production build into dist/
+npm run build    # production build into dist/ (app + CLI)
+npm run build:cli # compile packages/core and packages/compiler
 ```
 
 Run a single test: `npm test -- -t "test name"`.

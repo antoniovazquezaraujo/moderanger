@@ -30,10 +30,10 @@ The repository ships a browser-free CLI that compiles a `.mr` song to a Standard
 npm run midi -- cancion.mr                 # writes cancion.mid
 npm run midi -- cancion.mr -o salida.mid
 npm run midi -- cancion.mr --json          # inspect the compiled events
-cat cancion.mr | node packages/compiler/src/cli/main.js - -o salida.mid
+cat cancion.mr | node packages/compiler/dist/cli/main.js - -o salida.mid
 ```
 
-It uses the same playback semantics as the app (parts, references, repeats, commands, operations, patterns, chords and arpeggios). MIDI is not audio: open the `.mid` in a DAW or render it with a synthesizer such as FluidSynth. See [`docs/developer/analysis/compilador-midi-mvp.md`](docs/developer/analysis/compilador-midi-mvp.md) for the current limitations and the follow-up refactor.
+`npm run midi` builds the CLI packages first (`npm run build:cli`). It uses the same playback semantics as the app (parts, references, repeats, commands, operations, patterns, chords and arpeggios). MIDI is not audio: open the `.mid` in a DAW or render it with a synthesizer such as FluidSynth. See [`docs/developer/analysis/compilador-midi-mvp.md`](docs/developer/analysis/compilador-midi-mvp.md) for the current limitations.
 
 ## The `.mr` language
 
