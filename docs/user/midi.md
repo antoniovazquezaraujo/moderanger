@@ -18,7 +18,7 @@ npm run midi -- cancion.mr --json
 You can also read the song from stdin:
 
 ```sh
-cat cancion.mr | node src/cli/main.js - -o salida.mid
+cat cancion.mr | node packages/compiler/src/cli/main.js - -o salida.mid
 ```
 
 The default output is the input file with a `.mid` extension. `--json` writes the compiled event model instead of MIDI, which is useful for checking ticks and notes.
