@@ -49,7 +49,7 @@
     </form>
 
     <div class="variables-list">
-        <div *ngFor="let variable of variables; let i = index" class="variable-item">
+        <div *ngFor="let variable of variables; let i = index; trackBy: trackByVariable" class="variable-item">
             <span class="variable-name">{{variable.name}}</span>
             
             <ng-container [ngSwitch]="variable.type">

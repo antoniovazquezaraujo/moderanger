@@ -104,6 +104,16 @@ export class VariableDeclarationComponent implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * `VariableContext` emite un cambio en cada tecla y el componente
+     * reconstruye `variables`. Sin `trackBy`, Angular destruye y recrea el
+     * `<input>` de la fila y se pierde el foco; el nombre es la clave estable
+     * (las variables no se pueden duplicar).
+     */
+    trackByVariable(_index: number, variable: VariableDeclaration): string {
+        return variable.name;
+    }
+
     private updateVariablesList(): void {
         if (VariableContext) {
             const variables = VariableContext.context;
