@@ -741,6 +741,31 @@ class MrDocumentParser {
     return word.text.slice(1);
   }
 
+  /**
+   * Valida en carga los comandos con valor string que llegan por variable.
+   * Sin esto, un `DECORATION $x` con `$x = "-0 ..."` se aceptaba al parsear
+   * y el error solo aparecía (y se silenciaba) al reproducir.
+   */
+  private validateVariableCommandValue(type: CommandType, variableName: string, line: SourceLine, column: number): void {
+    if (type !== CommandType.DECORATION) {
+      return;
+    }
+    const value = this.document.variables.get(variableName);
+    if (value === undefined) {
+      return;
+    }
+    const text = String(value).trim();
+    if (text === '') {
+      return;
+    }
+    try {
+      canonicalDecoration(text);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw errorAt(line, column, `DECORATION $${variableName} no es válido: ${detail}`);
+    }
+  }
+
   private parseCommandsSection(target: { commands: Command[] }, header: SourceLine): void {
     const contentIndent = header.indent + 2;
     for (;;) {
@@ -776,8 +801,10 @@ class MrDocumentParser {
     }
     // Cualquier comando (incluido PATTERN) admite una variable como valor.
     if (/^\$[A-Za-z_][A-Za-z0-9_]*$/.test(rest)) {
+      const variableName = rest.slice(1);
+      this.validateVariableCommandValue(type, variableName, line, restColumn);
       const variableCommand = new Command({ type });
-      variableCommand.setVariable(rest.slice(1));
+      variableCommand.setVariable(variableName);
       return variableCommand;
     }
     if (type === CommandType.PATTERN) {

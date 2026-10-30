@@ -83,4 +83,29 @@ describe('CLI moderanger-mid', () => {
         expect(result.stderr).toContain(`${input}:7:`);
         expect(result.stderr).toContain('error:');
     });
+
+    it('rechaza un DECORATION con variable string inválida (-0)', () => {
+        const input = path.join(dir, 'decoracion.mr');
+        fs.writeFileSync(input, [
+            'song Decoracion',
+            'version 1',
+            '',
+            'vars',
+            '  $x = "-0 1"',
+            '',
+            'part Piano',
+            '  block Tema',
+            '    notes',
+            '      4n:0',
+            '    commands',
+            '      DECORATION $x',
+            ''
+        ].join('\n'));
+
+        const result = runCli([input, '-o', path.join(dir, 'decoracion.mid')]);
+
+        expect(result.status).toBe(1);
+        expect(result.stderr).toContain('DECORATION $x no es válido');
+        expect(result.stderr).toContain("item de DECORATION inválido '-0'");
+    });
 });
