@@ -127,6 +127,25 @@
   font-size: 0.7rem;
 }
 
+/* Repeticiones inline: no son una acción secundaria, así que viven en la
+   misma fila que el nombre y antes de duplicar/eliminar. */
+.library-repetitions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #555;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.library-repetitions .repetitions-input {
+  width: 32px;
+  height: 20px;
+  padding: 0 1px;
+  text-align: center;
+  font-size: 11px;
+}
+
 /* Acciones al hover/foco, sin saltos de layout (mismo patrón que bloques).
    Siguen al nombre y al pill de usos (sin `margin-left: auto`): no flotan al
    extremo derecho de la fila. */

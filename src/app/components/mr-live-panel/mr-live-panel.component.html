@@ -1,0 +1,33 @@
+<aside class="mr-live-panel" id="mr-live-panel" aria-label="Song text in .mr format">
+    <header class="mr-live-header">
+        <div class="mr-live-heading">
+            <span class="mr-live-eyebrow">Live view</span>
+            <h2>Song text</h2>
+        </div>
+        <div class="mr-live-actions">
+            <button type="button"
+                    class="mr-live-edit"
+                    (click)="requestEdit()"
+                    title="Edit the .mr text">
+                <i class="pi pi-pencil" aria-hidden="true"></i>
+                Edit
+            </button>
+            <button type="button"
+                    class="mr-live-close"
+                    (click)="requestClose()"
+                    aria-label="Hide song text">
+                <i class="pi pi-times" aria-hidden="true"></i>
+            </button>
+        </div>
+    </header>
+
+    <p class="mr-live-hint">
+        Canonical <code>.mr</code> · updates with every change
+    </p>
+
+    <pre class="mr-live-text" *ngIf="error === null">{{ text }}</pre>
+    <div class="mr-live-error" *ngIf="error !== null" role="alert">
+        <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        <p>{{ error }}</p>
+    </div>
+</aside>

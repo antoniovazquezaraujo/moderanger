@@ -306,11 +306,27 @@ describe('BlockLibraryComponent · template', () => {
     expect(controls![1]).toContain('pointer-events: none');
   });
 
-  it('cada definición reutiliza el editor de bloque ocultando su nombre/acciones de raíz', () => {
+  it('cada definición reutiliza el editor de bloque ocultando su cabecera de raíz', () => {
     expect(template).toContain('<app-block');
     expect(template).toContain('[hideLabel]="true"');
     expect(template).toContain('[hideControls]="true"');
+    expect(template).toContain('[hideHeader]="true"');
+    expect(template).toContain('[forceExpanded]="true"');
     expect(template).toContain('[(ngModel)]="definition.label"');
+  });
+
+  it('las repeticiones de la definición viven en su fila, antes de duplicar/eliminar', () => {
+    const header = template.slice(
+      template.indexOf('class="library-entry-header"'),
+      template.indexOf('class="library-entry-body"')
+    );
+    const repeatsIndex = header.indexOf('class="library-repetitions"');
+    const controlsIndex = header.indexOf('class="library-entry-controls"');
+
+    expect(repeatsIndex).toBeGreaterThan(-1);
+    expect(controlsIndex).toBeGreaterThan(repeatsIndex);
+    expect(header).toContain('[(ngModel)]="definition.repeatingTimes"');
+    expect(header).toContain("'Repeats for block ' + definition.label");
   });
 
   it('muestra el contador de usos y el diálogo de borrado', () => {

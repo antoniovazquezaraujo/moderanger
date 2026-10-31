@@ -231,3 +231,22 @@
   color: #6c757d;
   font-size: 0.9rem;
 }
+/* ==========================================================================
+   Workspace: editor + live .mr panel
+   ========================================================================== */
+.workspace {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.workspace > .content-section {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .workspace {
+    flex-direction: column;
+  }
+}

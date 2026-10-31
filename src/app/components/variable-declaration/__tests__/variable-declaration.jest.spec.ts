@@ -146,6 +146,15 @@ describe('VariableDeclarationComponent · variables string', () => {
     expect(template).toContain('trackBy: trackByVariable');
   });
 
+  it('desactiva el autocompletado del nombre para no mostrar sugerencias del navegador', () => {
+    const template = fs.readFileSync(path.resolve(__dirname, '../variable-declaration.component.html'), 'utf8');
+
+    expect(template).toContain('name="variableName"');
+    expect(template).toContain('aria-label="Variable name"');
+    expect(template).toContain('autocomplete="off"');
+    expect(template).toContain('spellcheck="false"');
+  });
+
   it('addVariable crea una variable de texto con el valor indicado', () => {
     const component = new VariableDeclarationComponent(fakeZone(), fakeCdr() as unknown as ChangeDetectorRef);
     component.newVariable = { name: 'motivo', value: '4t:0', type: 'string' };

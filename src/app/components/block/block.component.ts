@@ -81,6 +81,16 @@ export class BlockComponent implements OnInit, OnDestroy {
   /** Oculta las acciones del header (+, ×, copiar) del bloque **raíz**. */
   @Input() hideControls = false;
 
+  /**
+   * Oculta la cabecera del bloque **raíz**. La usa la biblioteca, que gestiona
+   * nombre, repeticiones y acciones en su propia fila para no mostrar una
+   * segunda cabecera plegable dentro de la definición.
+   */
+  @Input() hideHeader = false;
+
+  /** Fuerza el cuerpo del bloque **raíz** visible (biblioteca desplegada). */
+  @Input() forceExpanded = false;
+
   @Output() blockChange = new EventEmitter<Block>();
   @Output() delete = new EventEmitter<void>();
   @Output() onDuplicateBlock: EventEmitter<any> = new EventEmitter();

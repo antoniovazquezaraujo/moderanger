@@ -219,3 +219,12 @@
   margin-left: 4px;
   align-items: center;
 }
+
+/* PLAYMODE compacto: el valor visible son símbolos (○/● + flechas), con el
+   nombre completo en el tooltip y en aria-label. */
+.playmode-select {
+  min-width: 64px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  font-family: 'Segoe UI Symbol', 'Noto Sans Symbols', 'Noto Sans Symbols 2', 'DejaVu Sans', sans-serif;
+}

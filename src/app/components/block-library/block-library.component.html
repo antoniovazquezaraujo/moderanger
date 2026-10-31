@@ -59,6 +59,17 @@
                     <i class="pi pi-link" aria-hidden="true"></i>×{{ usageCount(definition) }}
                 </span>
 
+                <span class="library-repetitions">
+                    <span class="repetitions-label" aria-hidden="true">×</span>
+                    <input type="number"
+                           class="repetitions-input"
+                           [(ngModel)]="definition.repeatingTimes"
+                           min="0" max="99" step="1"
+                           pTooltip="Repeats"
+                           tooltipPosition="top"
+                           [attr.aria-label]="'Repeats for block ' + definition.label">
+                </span>
+
                 <span class="library-entry-controls">
                     <p-button icon="pi pi-copy" pTooltip="Duplicate block" tooltipPosition="top"
                               aria-label="Duplicate block" (click)="duplicateDefinition(definition)"></p-button>
@@ -68,7 +79,8 @@
             </div>
 
             <div class="library-entry-body" *ngIf="isExpanded(definition)">
-                <app-block [block]="definition" [hideLabel]="true" [hideControls]="true"></app-block>
+                <app-block [block]="definition" [hideLabel]="true" [hideControls]="true"
+                           [hideHeader]="true" [forceExpanded]="true"></app-block>
             </div>
         </div>
     </div>

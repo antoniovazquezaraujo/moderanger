@@ -1,0 +1,1237 @@
+/* ==========================================================================
+   Mode Ranger · Warm Studio design layer
+   --------------------------------------------------------------------------
+   This file is loaded after styles.css. It provides the visual language for
+   the app shell, panels, toolbar and PrimeNG controls without rewriting the
+   legacy layout rules. Keep behaviour and component structure untouched.
+   ========================================================================== */
+
+:root {
+  --mr-bg: #f4f1ea;
+  --mr-bg-deep: #ebe5da;
+  --mr-surface: #fffdf8;
+  --mr-surface-soft: #f8f4ec;
+  --mr-surface-strong: #ffffff;
+  --mr-ink: #211d19;
+  --mr-ink-soft: #4f4941;
+  --mr-muted: #7c7469;
+  --mr-border: #e3dccf;
+  --mr-border-strong: #cfc5b5;
+  --mr-accent: #0f766e;
+  --mr-accent-strong: #0b5d57;
+  --mr-accent-solid: #0f766e;
+  --mr-accent-solid-hover: #0b5d57;
+  --mr-accent-soft: #e4f2ef;
+  --mr-accent-ink: #084f4a;
+  --mr-warm: #b45309;
+  --mr-warm-soft: #fdf1df;
+  --mr-danger: #b42318;
+  --mr-danger-soft: #fef3f2;
+  --mr-focus: 0 0 0 3px rgba(15, 118, 110, 0.22);
+  --mr-shadow-sm: 0 1px 2px rgba(33, 29, 25, 0.05), 0 1px 1px rgba(33, 29, 25, 0.03);
+  --mr-shadow-md: 0 10px 30px rgba(33, 29, 25, 0.08), 0 2px 6px rgba(33, 29, 25, 0.04);
+  --mr-radius-sm: 8px;
+  --mr-radius: 12px;
+  --mr-radius-lg: 18px;
+  --mr-font-ui: 'Manrope', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mr-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+
+  /* PrimeNG bridge: one accent and one surface language across components. */
+  --primary-color: var(--mr-accent);
+  --primary-color-text: #ffffff;
+  --surface-ground: var(--mr-bg);
+  --surface-section: var(--mr-surface);
+  --surface-card: var(--mr-surface);
+  --surface-overlay: var(--mr-surface);
+  --surface-border: var(--mr-border);
+  --text-color: var(--mr-ink);
+  --text-color-secondary: var(--mr-muted);
+  --border-radius: var(--mr-radius-sm);
+  --focus-ring: var(--mr-focus);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --mr-bg: #141210;
+  --mr-bg-deep: #0d0c0a;
+  --mr-surface: #1e1a16;
+  --mr-surface-soft: #27221c;
+  --mr-surface-strong: #241f1a;
+  --mr-ink: #f5efe4;
+  --mr-ink-soft: #d8d0c4;
+  --mr-muted: #a79b8c;
+  --mr-border: #3a332b;
+  --mr-border-strong: #5b5145;
+  --mr-accent: #5eead4;
+  --mr-accent-strong: #99f6e4;
+  --mr-accent-solid: #0f766e;
+  --mr-accent-solid-hover: #115e59;
+  --mr-accent-soft: #143d38;
+  --mr-accent-ink: #ccfbf1;
+  --mr-warm: #fbbf24;
+  --mr-warm-soft: #3a2d14;
+  --mr-danger: #fca5a5;
+  --mr-danger-soft: #3a1d1d;
+  --mr-focus: 0 0 0 3px rgba(94, 234, 212, 0.25);
+  --mr-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --mr-shadow-md: 0 16px 44px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --primary-color: var(--mr-accent);
+  --primary-color-text: #081512;
+  --surface-ground: var(--mr-bg);
+  --surface-section: var(--mr-surface);
+  --surface-card: var(--mr-surface);
+  --surface-overlay: var(--mr-surface);
+  --surface-border: var(--mr-border);
+  --text-color: var(--mr-ink);
+  --text-color-secondary: var(--mr-muted);
+}
+
+html,
+body {
+  background: var(--mr-bg);
+  color: var(--mr-ink);
+  font-family: var(--mr-font-ui);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--mr-accent-soft);
+  color: var(--mr-accent-ink);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--mr-border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--mr-border-strong);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   PrimeNG controls
+   -------------------------------------------------------------------------- */
+
+html body .p-component {
+  font-family: var(--mr-font-ui);
+}
+
+html body .p-button {
+  height: 32px !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  border: 1px solid var(--mr-border) !important;
+  border-radius: 9px !important;
+  background: var(--mr-surface) !important;
+  color: var(--mr-ink-soft) !important;
+  box-shadow: none !important;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+
+html body .p-button:not(.p-button-text):not(:disabled):hover {
+  border-color: var(--mr-border-strong) !important;
+  background: var(--mr-surface-soft) !important;
+  color: var(--mr-ink) !important;
+}
+
+html body .p-button.p-button-text {
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+html body .p-button.p-button-text:hover {
+  background: var(--mr-surface-soft) !important;
+}
+
+html body .p-button .pi {
+  font-size: 0.85rem !important;
+  color: inherit !important;
+}
+
+html body .p-button:focus-visible,
+html body .p-inputtext:focus-visible,
+html body input:focus-visible,
+html body select:focus-visible,
+html body textarea:focus-visible {
+  outline: none !important;
+  box-shadow: var(--mr-focus) !important;
+  border-color: var(--mr-accent) !important;
+}
+
+html body .p-button.p-button-danger {
+  color: var(--mr-danger) !important;
+  border-color: #f0c8c3 !important;
+  background: var(--mr-danger-soft) !important;
+}
+
+html body .p-button.p-button-danger:hover {
+  background: #fde8e5 !important;
+  border-color: #e9aaa3 !important;
+}
+
+html body .p-inputtext,
+html body .p-dropdown,
+html body .p-inputnumber-input,
+html body .p-inputtextarea {
+  border: 1px solid var(--mr-border) !important;
+  border-radius: var(--mr-radius-sm) !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+  box-shadow: none !important;
+}
+
+html body .p-dropdown:hover,
+html body .p-inputtext:hover {
+  border-color: var(--mr-border-strong) !important;
+}
+
+html body .p-dropdown-panel,
+html body .p-menu,
+html body .p-overlaypanel {
+  border: 1px solid var(--mr-border) !important;
+  border-radius: var(--mr-radius) !important;
+  box-shadow: var(--mr-shadow-md) !important;
+  background: var(--mr-surface) !important;
+  overflow: hidden;
+}
+
+html body .p-dropdown-item,
+html body .p-menu-item-link {
+  color: var(--mr-ink-soft) !important;
+  font-size: 13px !important;
+}
+
+html body .p-dropdown-item:hover,
+html body .p-menu-item-link:hover {
+  background: var(--mr-accent-soft) !important;
+  color: var(--mr-accent-ink) !important;
+}
+
+html body .p-tooltip .p-tooltip-text {
+  padding: 6px 9px !important;
+  border-radius: 7px !important;
+  background: var(--mr-ink) !important;
+  color: #fffdf8 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  box-shadow: var(--mr-shadow-md) !important;
+}
+
+html body .p-dialog {
+  border: 1px solid var(--mr-border) !important;
+  border-radius: var(--mr-radius-lg) !important;
+  background: var(--mr-surface) !important;
+  box-shadow: var(--mr-shadow-md) !important;
+  overflow: hidden;
+}
+
+html body .p-dialog .p-dialog-header {
+  padding: 20px 24px 16px !important;
+  border-bottom: 1px solid var(--mr-border) !important;
+  background: var(--mr-surface) !important;
+  color: var(--mr-ink) !important;
+  font-family: var(--mr-font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+html body .p-dialog .p-dialog-content {
+  padding: 20px 24px 24px !important;
+  background: var(--mr-surface) !important;
+  color: var(--mr-ink-soft) !important;
+}
+
+html body .p-dialog .p-dialog-header .p-dialog-header-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+
+html body .p-sidebar {
+  background: var(--mr-surface) !important;
+  border-left: 1px solid var(--mr-border) !important;
+  box-shadow: -24px 0 70px rgba(33, 29, 25, 0.16) !important;
+}
+
+html body .p-sidebar .p-sidebar-content {
+  padding: 0 !important;
+}
+
+html body .p-sidebar-mask {
+  background: rgba(33, 29, 25, 0.32) !important;
+  backdrop-filter: blur(2px);
+}
+
+html body .p-tree {
+  border: none !important;
+  background: transparent !important;
+  color: var(--mr-ink) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Song toolbar
+   -------------------------------------------------------------------------- */
+
+html body .song-editor .song-header {
+  margin: 16px 20px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--mr-border);
+  border-radius: var(--mr-radius-lg);
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: var(--mr-shadow-sm);
+  backdrop-filter: blur(14px);
+}
+
+html body .song-editor .song-title-and-controls {
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+html body .song-editor .song-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+}
+
+html body .song-editor .song-eyebrow {
+  padding-left: 8px;
+  color: var(--mr-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+html body .song-editor .song-name-input {
+  width: clamp(180px, 24vw, 340px);
+  height: 38px !important;
+  padding: 0 8px !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--mr-radius-sm) !important;
+  background: transparent !important;
+  color: var(--mr-ink) !important;
+  font-family: var(--mr-font-display) !important;
+  font-size: 1.35rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em;
+  box-shadow: none !important;
+}
+
+html body .song-editor .song-name-input:hover {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html body .song-editor .song-name-input:focus {
+  border-color: var(--mr-accent) !important;
+  background: var(--mr-surface-strong) !important;
+  box-shadow: var(--mr-focus) !important;
+}
+
+html body .song-editor .playback-controls {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px;
+  min-width: 0;
+  margin-left: 0;
+}
+
+html body .song-editor .playback-controls > .p-d-flex {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+html body .song-editor .toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+html body .song-editor .toolbar-label {
+  color: var(--mr-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+html body .song-editor .toolbar-divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 4px;
+  background: var(--mr-border);
+}
+
+html body .song-editor .playback-controls .p-button {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+}
+
+html body .song-editor .playback-controls .p-button[aria-label="Play song"] {
+  border-color: var(--mr-accent-solid) !important;
+  background: var(--mr-accent-solid) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.24) !important;
+}
+
+html body .song-editor .playback-controls .p-button[aria-label="Play song"]:hover {
+  border-color: var(--mr-accent-solid-hover) !important;
+  background: var(--mr-accent-solid-hover) !important;
+  color: #ffffff !important;
+}
+
+html body .song-editor .playback-controls .p-button[aria-label="Play song"] .pi {
+  color: #ffffff !important;
+}
+
+html body .song-editor .playback-controls .p-button[aria-label="Stop song"] {
+  color: var(--mr-muted) !important;
+}
+
+html body .song-editor .playback-controls .p-button.toolbar-help-button {
+  width: auto !important;
+  min-width: 78px !important;
+  margin-left: auto !important;
+  padding: 0 12px !important;
+  gap: 7px;
+  border-color: var(--mr-accent-soft) !important;
+  background: var(--mr-accent-soft) !important;
+  color: var(--mr-accent-ink) !important;
+  font-size: 12px !important;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: visible !important;
+}
+
+html body .song-editor .playback-controls .p-button.toolbar-help-button:hover {
+  border-color: #c8e5df !important;
+  background: #d9ece8 !important;
+}
+
+html body .song-editor .playback-controls .p-button.toolbar-help-button .p-button-label {
+  font-weight: 700;
+}
+
+html body .song-editor #repetitions {
+  width: 48px !important;
+  max-width: 48px !important;
+  height: 36px !important;
+}
+
+html body .song-editor #bpm {
+  width: 62px !important;
+  max-width: 62px !important;
+  height: 36px !important;
+}
+
+html body .song-editor .default-duration-select {
+  height: 36px !important;
+  min-width: 58px;
+  max-width: 82px;
+  padding: 0 9px !important;
+  border: 1px solid var(--mr-border) !important;
+  border-radius: var(--mr-radius-sm) !important;
+  background: var(--mr-surface) !important;
+  color: var(--mr-ink-soft) !important;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+html body .song-editor .default-duration-select:hover {
+  border-color: var(--mr-border-strong) !important;
+}
+
+html body .song-editor app-metronome .metronome {
+  height: 36px;
+  gap: 2px;
+  padding: 0 8px;
+  border: 1px solid var(--mr-border);
+  border-radius: var(--mr-radius-sm);
+  background: var(--mr-surface);
+}
+
+html body .song-editor app-metronome .beat {
+  color: var(--mr-border-strong);
+}
+
+html body .song-editor app-metronome .beat.downbeat {
+  color: var(--mr-muted);
+}
+
+html body .song-editor app-metronome .beat.active {
+  color: var(--mr-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Content and collapsible panels
+   -------------------------------------------------------------------------- */
+
+html body .song-editor .content-section {
+  padding: 16px 20px 28px;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(124, 116, 105, 0.12) 1px, transparent 0) 0 0 / 22px 22px,
+    linear-gradient(180deg, rgba(244, 241, 234, 0) 0%, var(--mr-bg) 120px);
+}
+
+html body app-block-library .blocks-library-panel,
+html body .song-editor .variables-panel,
+html body .song-editor .parts-panel {
+  margin-bottom: 16px;
+  padding: 0;
+  border: 1px solid var(--mr-border);
+  border-radius: var(--mr-radius);
+  background: var(--mr-surface);
+  box-shadow: var(--mr-shadow-sm);
+  overflow: hidden;
+}
+
+html body app-block-library .blocks-library-header,
+html body .song-editor .variables-panel-header,
+html body .song-editor .parts-panel-header {
+  min-height: 52px;
+  padding: 0 16px;
+  gap: 8px;
+  border-bottom: 1px solid transparent;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+html body app-block-library .blocks-library-header:hover,
+html body .song-editor .variables-panel-header:hover,
+html body .song-editor .parts-panel-header:hover {
+  background: var(--mr-surface-soft);
+  border-bottom-color: var(--mr-border);
+}
+
+html body app-block-library .blocks-library-title,
+html body .song-editor .variables-panel-title,
+html body .song-editor .parts-panel-title {
+  color: var(--mr-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+html body app-block-library .blocks-library-count,
+html body .song-editor .parts-panel-count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--mr-accent-soft);
+  color: var(--mr-accent-ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+html body app-block-library .blocks-library-content,
+html body .song-editor .variables-panel-content,
+html body .song-editor .parts-panel-content {
+  margin-left: 0;
+  padding: 16px;
+}
+
+html body app-block-library .blocks-library-empty,
+html body .song-editor .parts-panel-empty {
+  margin: 0;
+  color: var(--mr-muted);
+  font-size: 13px;
+}
+
+html body app-block-library .library-entry {
+  border-top: 1px solid var(--mr-border);
+}
+
+html body app-block-library .library-entry:first-of-type {
+  border-top: none;
+}
+
+html body app-block-library .library-entry-header {
+  min-height: 40px;
+  padding: 2px 0;
+  border-radius: var(--mr-radius-sm);
+}
+
+html body app-block-library .library-entry-header:hover {
+  background: var(--mr-surface-soft);
+}
+
+html body app-block-library .library-block-name {
+  min-width: 8rem;
+  padding: 5px 7px;
+  border-radius: 7px;
+  color: var(--mr-ink);
+  font-size: 12px !important;
+  font-weight: 600;
+}
+
+html body app-block-library .library-block-name:focus {
+  border-color: var(--mr-accent);
+  background: var(--mr-surface-strong);
+  box-shadow: var(--mr-focus);
+}
+
+html body app-block-library .library-usage {
+  border: 1px solid var(--mr-accent-soft);
+  border-radius: 999px;
+  background: var(--mr-accent-soft);
+  color: var(--mr-accent-ink);
+  font-weight: 600;
+}
+
+html body app-block-library .library-repetitions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--mr-muted);
+  font-size: 11px;
+}
+
+html body app-block-library .library-repetitions .repetitions-input {
+  width: 36px !important;
+  height: 28px !important;
+  padding: 0 4px !important;
+  border: 1px solid var(--mr-border) !important;
+  border-radius: 7px !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+  font-size: 11px !important;
+  text-align: center;
+}
+
+html body app-variable-declaration .variables-container {
+  padding: 0;
+}
+
+html body app-variable-declaration .variable-form {
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--mr-border);
+}
+
+html body app-variable-declaration input[type="text"],
+html body app-variable-declaration input[type="number"],
+html body app-variable-declaration select {
+  height: 32px !important;
+  padding: 0 8px !important;
+  border: 1px solid var(--mr-border) !important;
+  border-radius: var(--mr-radius-sm) !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+  font-size: 12px !important;
+}
+
+html body app-variable-declaration input[type="text"]:focus,
+html body app-variable-declaration input[type="number"]:focus,
+html body app-variable-declaration select:focus {
+  border-color: var(--mr-accent) !important;
+  box-shadow: var(--mr-focus) !important;
+}
+
+html body app-variable-declaration .variable-item {
+  gap: 8px;
+  margin-bottom: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--mr-border);
+  border-radius: var(--mr-radius-sm);
+  background: var(--mr-surface-soft);
+}
+
+html body app-variable-declaration .variable-name {
+  min-width: 120px;
+  color: var(--mr-accent-ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+html body app-variable-declaration .string-input {
+  min-width: 220px;
+  max-width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Parts and blocks
+   -------------------------------------------------------------------------- */
+
+html body .parts {
+  gap: 0;
+  padding-bottom: 8px;
+}
+
+html body app-part .part {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--mr-border);
+  border-radius: var(--mr-radius);
+  background: var(--mr-surface);
+  box-shadow: var(--mr-shadow-sm);
+  overflow: hidden;
+}
+
+html body app-part .part-header {
+  min-height: 56px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--mr-border);
+  background: linear-gradient(180deg, var(--mr-surface-strong), var(--mr-surface));
+}
+
+html body app-part .part-info {
+  flex: 0 1 160px;
+  width: auto;
+  min-width: 120px;
+  max-width: 240px;
+  margin-right: 0;
+}
+
+html body app-part .part-name-input {
+  padding: 5px 7px;
+  border-radius: 7px;
+  color: var(--mr-ink);
+  font-family: var(--mr-font-display) !important;
+  font-size: 1.08rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.015em;
+}
+
+html body app-part .part-name-input:hover {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-soft);
+}
+
+html body app-part .part-name-input:focus {
+  border-color: var(--mr-accent) !important;
+  background: var(--mr-surface-strong);
+  box-shadow: var(--mr-focus);
+}
+
+html body app-part .part-content {
+  margin-left: 0;
+  padding: 10px 12px 14px;
+}
+
+html body app-part .part-empty {
+  margin: 2px 0 0;
+  color: var(--mr-muted);
+  font-size: 13px;
+}
+
+html body app-part .part-header .p-button {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+}
+
+html body app-block .block-content {
+  margin-bottom: 4px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+html body app-block .block-content:hover {
+  border-color: var(--mr-border);
+  background: var(--mr-surface-soft);
+}
+
+html body app-block .block-header {
+  min-height: 30px;
+  padding: 4px 0;
+}
+
+html body app-block .block-name-input {
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: var(--mr-ink);
+  font-size: 12px !important;
+  font-weight: 600;
+}
+
+html body app-block .block-name-input:focus {
+  border-color: var(--mr-accent);
+  background: var(--mr-surface-strong);
+  box-shadow: var(--mr-focus);
+}
+
+html body app-block .block-body {
+  margin-top: 3px;
+  padding-top: 5px;
+  border-top: 1px solid var(--mr-border);
+}
+
+html body app-block .block-section {
+  border-top-color: var(--mr-border);
+}
+
+html body app-block .block-section-icon {
+  color: var(--mr-accent);
+}
+
+html body app-block-commands .commands-row,
+html body app-block-commands .operations-row {
+  border-top: 1px solid var(--mr-border);
+  margin-top: 5px;
+  padding-top: 6px;
+}
+
+html body app-block-commands .command,
+html body app-block-commands .operation-item {
+  border-radius: 6px;
+}
+
+html body app-block-commands .command:hover,
+html body app-block-commands .operation-item:hover {
+  background: var(--mr-surface-strong);
+}
+
+html body app-block-reference .reference-chip {
+  border: 1px solid var(--mr-border);
+  border-radius: 999px;
+  background: var(--mr-surface-soft);
+}
+
+html body app-block-reference .reference-header {
+  min-height: 38px;
+}
+
+/* --------------------------------------------------------------------------
+   Empty state and help affordances
+   -------------------------------------------------------------------------- */
+
+html body .song-editor .parts-empty-state {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1px dashed var(--mr-border-strong);
+  border-radius: var(--mr-radius);
+  background:
+    linear-gradient(135deg, rgba(228, 242, 239, 0.7), rgba(255, 253, 248, 0.9)),
+    var(--mr-surface);
+}
+
+html body .song-editor .empty-state-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--mr-accent-soft);
+  color: var(--mr-accent);
+  font-size: 1.1rem;
+}
+
+html body .song-editor .empty-state-copy h3 {
+  margin: 0 0 2px;
+  color: var(--mr-ink);
+  font-family: var(--mr-font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+html body .song-editor .empty-state-copy p {
+  margin: 0;
+  max-width: 48ch;
+  color: var(--mr-muted);
+  font-size: 12px;
+}
+
+html body .song-editor .empty-state-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+html body .song-editor .empty-primary,
+html body .song-editor .empty-secondary {
+  min-height: 34px;
+  padding: 0 13px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+html body .song-editor .empty-primary {
+  border: 1px solid var(--mr-accent-solid);
+  background: var(--mr-accent-solid);
+  color: #ffffff;
+}
+
+html body .song-editor .empty-primary:hover {
+  border-color: var(--mr-accent-solid-hover);
+  background: var(--mr-accent-solid-hover);
+}
+
+html body .song-editor .empty-secondary {
+  border: 1px solid var(--mr-border-strong);
+  background: var(--mr-surface);
+  color: var(--mr-ink-soft);
+}
+
+html body .song-editor .empty-secondary:hover {
+  border-color: var(--mr-accent);
+  color: var(--mr-accent-ink);
+}
+
+@media (max-width: 960px) {
+  html body .song-editor .song-header {
+    margin: 12px 12px 0;
+    padding: 10px 12px;
+  }
+
+  html body .song-editor .content-section {
+    padding: 12px 12px 22px;
+  }
+
+  html body .song-editor .song-title-and-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  html body .song-editor .song-title {
+    width: 100%;
+  }
+
+  html body .song-editor .song-name-input {
+    width: 100%;
+    max-width: none;
+  }
+
+  html body .song-editor .playback-controls {
+    flex: 0 0 auto;
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  html body .song-editor .toolbar-label,
+  html body .song-editor .toolbar-divider {
+    display: none;
+  }
+
+  html body .song-editor .playback-controls {
+    gap: 5px;
+  }
+
+  html body .song-editor .parts-empty-state {
+    grid-template-columns: 1fr;
+  }
+
+  html body .song-editor .empty-state-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* Touch devices cannot hover: keep the contextual actions discoverable. */
+@media (hover: none) {
+  html body app-part .part-header .part-controls,
+  html body .p-tree .block-header .block-controls,
+  html body .p-tree .block-header .repetitions-container,
+  html body app-block-library .library-entry-controls,
+  html body .song-editor .parts-panel-add,
+  html body app-block-library .blocks-library-add {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme surface overrides
+   --------------------------------------------------------------------------
+   The Warm Studio layer uses variables for the new shell, but the legacy
+   editor still has a handful of hard-coded white surfaces. Keep those
+   overrides here, scoped to the dark attribute, so the light theme remains
+   unchanged.
+   -------------------------------------------------------------------------- */
+
+html[data-theme='dark'] .app-topbar {
+  background: rgba(30, 26, 22, 0.84);
+}
+
+html[data-theme='dark'] .song-editor .song-header {
+  background: rgba(30, 26, 22, 0.84);
+}
+
+html[data-theme='dark'] .song-editor .content-section {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(167, 155, 140, 0.16) 1px, transparent 0) 0 0 / 22px 22px,
+    linear-gradient(180deg, rgba(20, 18, 16, 0) 0%, var(--mr-bg) 120px);
+}
+
+html[data-theme='dark'] .app-loading {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(20, 61, 56, 0.8), transparent 42%),
+    radial-gradient(circle at 1px 1px, rgba(167, 155, 140, 0.14) 1px, transparent 0) 0 0 / 22px 22px,
+    var(--mr-bg);
+}
+
+html[data-theme='dark'] body .song-editor .parts-empty-state {
+  background:
+    linear-gradient(135deg, rgba(20, 61, 56, 0.72), rgba(30, 26, 22, 0.94)),
+    var(--mr-surface);
+}
+
+html[data-theme='dark'] .help-header {
+  background:
+    radial-gradient(circle at 92% 12%, rgba(20, 61, 56, 0.9), transparent 35%),
+    var(--mr-surface);
+}
+
+html[data-theme='dark'] .help-demo {
+  border-color: #2a5a52;
+  background:
+    linear-gradient(135deg, rgba(20, 61, 56, 0.82), rgba(30, 26, 22, 0.94)),
+    var(--mr-surface);
+}
+
+html[data-theme='dark'] .p-dropdown-panel,
+html[data-theme='dark'] .p-dropdown-items,
+html[data-theme='dark'] .p-dropdown-item,
+html[data-theme='dark'] .p-dropdown-panel .p-dropdown-items,
+html[data-theme='dark'] .p-dropdown-panel .p-dropdown-item {
+  background: var(--mr-surface) !important;
+  color: var(--mr-ink-soft) !important;
+}
+
+html[data-theme='dark'] .p-dropdown-panel .p-dropdown-item:hover,
+html[data-theme='dark'] .p-dropdown-panel .p-dropdown-item.p-highlight {
+  background: var(--mr-accent-soft) !important;
+  color: var(--mr-accent-ink) !important;
+}
+
+html[data-theme='dark'] input[type='text'],
+html[data-theme='dark'] input[type='number'],
+html[data-theme='dark'] select,
+html[data-theme='dark'] .command-type,
+html[data-theme='dark'] .command-value,
+html[data-theme='dark'] .number-input {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] .commands-row select.command-type,
+html[data-theme='dark'] .operations-row select.command-type,
+html[data-theme='dark'] .commands-row .command-value,
+html[data-theme='dark'] .operations-row .command-value,
+html[data-theme='dark'] .commands-row .number-input,
+html[data-theme='dark'] .operations-row .number-input {
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+  border-color: var(--mr-border) !important;
+}
+
+html[data-theme='dark'] app-block-commands .command,
+html[data-theme='dark'] app-block-commands .operation-item {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] app-block-commands .command:hover,
+html[data-theme='dark'] app-block-commands .command:focus-within,
+html[data-theme='dark'] app-block-commands .operation-item:hover,
+html[data-theme='dark'] app-block-commands .operation-item:focus-within {
+  background: var(--mr-surface-strong) !important;
+}
+
+html[data-theme='dark'] app-block .melody-editor-container,
+html[data-theme='dark'] app-melody-editor .melody-editor,
+html[data-theme='dark'] app-melody-editor .notes-container-wrapper {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] app-melody-editor .note-item:hover,
+html[data-theme='dark'] app-melody-editor .note-item.selected,
+html[data-theme='dark'] app-melody-editor .note-item.playing {
+  border-color: var(--mr-accent) !important;
+  background: var(--mr-accent-soft) !important;
+}
+
+html[data-theme='dark'] app-melody-editor .note-item {
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] app-melody-editor .note-duration {
+  color: var(--mr-muted) !important;
+}
+
+html[data-theme='dark'] app-melody-group .group-container {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface) !important;
+}
+
+html[data-theme='dark'] app-melody-group .group-header {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html[data-theme='dark'] app-block-reference .reference-chip {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html[data-theme='dark'] app-block-reference .reference-repetitions .repetitions-input:focus {
+  background: var(--mr-surface-strong) !important;
+}
+
+html[data-theme='dark'] .mr-textarea {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] .mr-hint code {
+  background: var(--mr-surface-soft) !important;
+  color: var(--mr-accent-ink) !important;
+}
+
+html[data-theme='dark'] app-block-library .library-entry--highlight {
+  background-color: #3a2d14 !important;
+}
+
+html[data-theme='dark'] #repetitions,
+html[data-theme='dark'] #bpm,
+html[data-theme='dark'] #repeatingTimes {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] app-block-library .blocks-library-panel {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface) !important;
+}
+
+html[data-theme='dark'] app-block .block-content {
+  border-color: transparent !important;
+}
+
+html[data-theme='dark'] app-block .block-content:hover {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html[data-theme='dark'] app-block-library .library-entry {
+  border-top-color: var(--mr-border) !important;
+}
+
+html[data-theme='dark'] app-block-library .blocks-library-warning {
+  color: var(--mr-danger) !important;
+}
+
+html[data-theme='dark'] app-melody-editor .group-marker {
+  border-color: var(--mr-border) !important;
+}
+
+html[data-theme='dark'] .parts-splitter::before {
+  background-color: var(--mr-border-strong);
+}
+
+html[data-theme='dark'] app-block-reference .block-reference {
+  border-color: var(--mr-border) !important;
+  border-left-color: var(--mr-accent) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html[data-theme='dark'] app-block-reference .block-reference--orphan {
+  border-left-color: var(--mr-danger) !important;
+  background: var(--mr-danger-soft) !important;
+}
+
+html[data-theme='dark'] app-block-reference .reference-chip {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-accent-soft) !important;
+  color: var(--mr-accent-ink) !important;
+}
+
+html[data-theme='dark'] app-block-commands .commands-row,
+html[data-theme='dark'] app-block-commands .operations-row {
+  border-top-color: var(--mr-border) !important;
+  background: transparent !important;
+}
+
+html[data-theme='dark'] app-block .block-content,
+html[data-theme='dark'] app-block .block-body {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] app-block-library .blocks-library-content,
+html[data-theme='dark'] app-block-library .library-entry-body {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] body .p-tooltip .p-tooltip-text {
+  border: 1px solid var(--mr-border);
+  background: #2f2a24 !important;
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] body .p-tooltip.p-tooltip-top .p-tooltip-arrow {
+  border-top-color: #2f2a24 !important;
+}
+
+html[data-theme='dark'] body .p-tooltip.p-tooltip-bottom .p-tooltip-arrow {
+  border-bottom-color: #2f2a24 !important;
+}
+
+html[data-theme='dark'] body .p-tooltip.p-tooltip-left .p-tooltip-arrow {
+  border-left-color: #2f2a24 !important;
+}
+
+html[data-theme='dark'] body .p-tooltip.p-tooltip-right .p-tooltip-arrow {
+  border-right-color: #2f2a24 !important;
+}

@@ -25,4 +25,33 @@ describe('song-editor · toolbar uniforme', () => {
         expect(template).not.toContain('label=".mr"');
         expect(template).not.toContain('pi pi-code');
     });
+
+    it('la ayuda es visible y abre la guía contextual', () => {
+        expect(template).toContain('icon="pi pi-question-circle"');
+        expect(template).toContain('label="Help"');
+        expect(template).toContain('pTooltip="Help and quick guide"');
+        expect(template).toContain('aria-label="Help and quick guide"');
+        expect(template).toContain('aria-haspopup="dialog"');
+        expect(template).toContain('[attr.aria-expanded]="helpVisible"');
+        expect(template).toContain('<app-help-panel');
+        expect(template).toContain('(loadDemo)="loadDemoSong()"');
+    });
+
+    it('el estado vacío ofrece crear una part o cargar el ejemplo', () => {
+        expect(template).toContain('class="parts-empty-state"');
+        expect(template).toContain('Start with a part');
+        expect(template).toContain('(click)="addPart()"');
+        expect(template).toContain('(click)="loadDemoSong()"');
+        expect(template).toContain('Load example');
+    });
+
+    it('el botón .mr alterna el panel lateral fijo, no el diálogo', () => {
+        expect(template).toContain('(click)="toggleMrTextPanel()"');
+        expect(template).toContain('[attr.aria-expanded]="mrTextPanelVisible"');
+        expect(template).toContain('aria-controls="mr-live-panel"');
+        expect(template).toContain('<app-mr-live-panel');
+        expect(template).toContain('*ngIf="mrTextPanelVisible"');
+        expect(template).toContain('(edit)="openMrTextEditor()"');
+        expect(template).toContain('[(visible)]="mrEditorVisible"');
+    });
 });

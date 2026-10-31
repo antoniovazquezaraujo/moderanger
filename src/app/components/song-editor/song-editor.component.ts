@@ -30,6 +30,7 @@ import {
 } from 'src/app/model/mr';
 import { downloadTextFile, readFileAsText } from 'src/app/model/mr/mr.file.browser';
 import { BlockLibraryComponent } from '../block-library/block-library.component';
+import { createDemoSong } from 'src/app/model/demo-song';
 
 @Component({
     selector: 'app-song-editor',
@@ -47,7 +48,11 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     variablesExpanded: boolean = false;
     /** Panel de Parts plegable (debajo de Variables y Blocks); abierto al inicio. */
     partsExpanded: boolean = true;
-    mrTextVisible: boolean = false;
+    /** Panel lateral de solo lectura con el texto canónico en vivo. */
+    mrTextPanelVisible: boolean = false;
+    /** Diálogo avanzado de edición del `.mr`. */
+    mrEditorVisible: boolean = false;
+    helpVisible: boolean = false;
     isPlaying: boolean = false;
 
     /** Diálogo de errores de guardar/cargar `.mr`. */
@@ -101,8 +106,25 @@ export class SongEditorComponent implements OnInit, OnDestroy {
         this.blockLibraryRef?.focusDefinition(label);
     }
 
-    toggleMrTextEditor(): void {
-        this.mrTextVisible = !this.mrTextVisible;
+    toggleMrTextPanel(): void {
+        this.mrTextPanelVisible = !this.mrTextPanelVisible;
+    }
+
+    openMrTextEditor(): void {
+        this.mrEditorVisible = true;
+    }
+
+    toggleHelp(): void {
+        this.helpVisible = !this.helpVisible;
+    }
+
+    /** Carga una pieza corta válida para que el editor no arranque vacío. */
+    loadDemoSong(): void {
+        this.stopIfPlaying();
+        this.helpVisible = false;
+        this.partsExpanded = true;
+        this.songChange.emit(createDemoSong());
+        this.cdr.markForCheck();
     }
 
     /**
@@ -113,6 +135,7 @@ export class SongEditorComponent implements OnInit, OnDestroy {
      */
     onMrTextApplied(event: MrTextAppliedEvent): void {
         this.stopIfPlaying();
+        this.mrEditorVisible = false;
         this.songChange.emit(event.song);
     }
 

@@ -60,18 +60,29 @@ describe('bloque compacto (template/CSS)', () => {
     expect(commandsTemplate).not.toContain('class="block-section-title"');
   });
 
-  it('las acciones del header se ocultan en reposo y se revelan al hover/foco', () => {
-    const rest = ruleBody(styles, '.p-tree .block-header .repetitions-container');
+  it('las acciones se ocultan en reposo y las repeticiones quedan visibles', () => {
+    const rest = ruleBody(styles, '.p-tree .block-header .block-controls');
     expect(declaration(rest, 'opacity')).toBe('0');
     expect(declaration(rest, 'pointer-events')).toBe('none');
     expect(declaration(rest, 'transition')).toContain('opacity');
 
-    const revealed = ruleBody(styles, '.p-tree .block-header:focus-within .repetitions-container');
+    const revealed = ruleBody(styles, '.p-tree .block-header:focus-within .block-controls');
     expect(declaration(revealed, 'opacity')).toBe('1');
     expect(declaration(revealed, 'pointer-events')).toBe('auto');
 
-    // Siguen en el flujo (sin layout shift): ocupan su espacio con opacidad 0.
-    expect(styles).toMatch(/\.p-tree \.block-header \.block-controls,\s*\n\.p-tree \.block-header \.repetitions-container/);
+    // ×N es un dato editable, no una acción secundaria: no se oculta.
+    expect(ruleBody(styles, '.p-tree .block-header .repetitions-container')).toBe('');
+  });
+
+  it('las repeticiones van antes de duplicar/eliminar en la misma línea', () => {
+    const header = template.slice(template.indexOf('class="block-header"'), template.indexOf('End of block-header'));
+    expect(header.indexOf('repetitions-container')).toBeGreaterThan(-1);
+    expect(header.indexOf('repetitions-container')).toBeLessThan(header.indexOf('block-controls'));
+  });
+
+  it('la biblioteca puede ocultar la cabecera raíz y forzar su cuerpo', () => {
+    expect(template).toContain('*ngIf="!hideHeader || node !== block"');
+    expect(template).toContain('(forceExpanded && node === block) || node.expanded');
   });
 
   it('el header queda de una sola línea compacta', () => {
