@@ -10,6 +10,9 @@ describe('demo song', () => {
         expect(song.parts[0].name).toBe('Piano');
         expect(song.parts[0].items.length).toBeGreaterThan(0);
         expect(song.parts[1].name).toBe('Bass');
+        expect(song.blocks).toHaveLength(1);
+        expect(song.blocks?.[0].label).toBe('Bassline');
+        expect(song.parts[1].items[0].kind).toBe('reference');
     });
 
     it('se puede cargar más de una vez sin compartir estado mutable', () => {

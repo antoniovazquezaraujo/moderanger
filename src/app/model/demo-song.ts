@@ -11,6 +11,19 @@ version 1
 repeats 1
 bpm 96
 
+blocks
+  block Bassline
+    notes
+      2n:-7
+      2n:-5
+      2n:-3
+      2n:-5
+    commands
+      OCT 0
+      PLAYMODE CHORD
+      WIDTH 0
+      GAP 2
+
 part Piano
   block Theme repeats 2
     notes
@@ -36,17 +49,7 @@ part Piano
         PLAYMODE DESCENDING
 
 part Bass
-  block Foundation
-    notes
-      2n:-7
-      2n:-5
-      2n:-3
-      2n:-5
-    commands
-      OCT 0
-      PLAYMODE CHORD
-      WIDTH 0
-      GAP 2
+  use Bassline
 `;
 
 /** Parses the demo song; the corpus test keeps the fixture valid. */

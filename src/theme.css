@@ -1179,3 +1179,36 @@ html[data-theme='dark'] app-melody-editor .group-marker {
 html[data-theme='dark'] .parts-splitter::before {
   background-color: var(--mr-border-strong);
 }
+
+html[data-theme='dark'] app-block-reference .block-reference {
+  border-color: var(--mr-border) !important;
+  border-left-color: var(--mr-accent) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html[data-theme='dark'] app-block-reference .block-reference--orphan {
+  border-left-color: var(--mr-danger) !important;
+  background: var(--mr-danger-soft) !important;
+}
+
+html[data-theme='dark'] app-block-reference .reference-chip {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-accent-soft) !important;
+  color: var(--mr-accent-ink) !important;
+}
+
+html[data-theme='dark'] app-block-commands .commands-row,
+html[data-theme='dark'] app-block-commands .operations-row {
+  border-top-color: var(--mr-border) !important;
+  background: transparent !important;
+}
+
+html[data-theme='dark'] app-block .block-content,
+html[data-theme='dark'] app-block .block-body {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] app-block-library .blocks-library-content,
+html[data-theme='dark'] app-block-library .library-entry-body {
+  background: transparent !important;
+}
