@@ -11,6 +11,12 @@ import { NoteDuration, NoteConverter, MusicElement } from 'src/app/model/melody'
 import { NoteData } from 'src/app/model/note';
 import { MelodyEditorComponent } from '../melody-editor/melody-editor.component';
 import { commandTypeLabel } from './command-type-label';
+import {
+    playModeDescription as playModeDescriptionText,
+    playModeOptions as buildPlayModeOptions,
+    playModeSymbol as playModeSymbolText,
+    PlayModeOption
+} from './play-mode-display';
 import { canonicalDecorationValueOrRaw } from './decoration-value';
 import {
     showCommandColon as commandColonVisible,
@@ -45,6 +51,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
     commandTypeNames: string[] = [];
     commandTypes = CommandType;
     playModeNames: string[];
+    playModeOptions: PlayModeOption[] = [];
     scaleNames: string[];
     availableVariables: VariableOption[] = [];
     private variablesSubscription?: Subscription;
@@ -66,6 +73,7 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
         private songPlayer: SongPlayer
         ) {         
         this.playModeNames = getPlayModeNames();
+        this.playModeOptions = buildPlayModeOptions(this.playModeNames);
         this.scaleNames = Scale.getScaleNames();
     }
 
@@ -466,6 +474,18 @@ export class BlockCommandsComponent implements OnInit, OnChanges, OnDestroy {
             };
         });
         this.cdr.detectChanges();
+    }
+
+    playModeSymbol(name: string): string {
+        return playModeSymbolText(name);
+    }
+
+    playModeDescription(name: string): string {
+        return playModeDescriptionText(name);
+    }
+
+    operationPlayModeDescription(value: string | number): string {
+        return playModeDescriptionText(String(value));
     }
 
     getPlayModeString(command: Command): string {

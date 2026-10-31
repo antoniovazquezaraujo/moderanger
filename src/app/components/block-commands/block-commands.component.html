@@ -27,8 +27,16 @@
                             </select>
                         </ng-container>
                         <ng-template #playModeSelect>
-                            <select class="command-type" [ngModel]="getPlayModeString(command)" (ngModelChange)="setPlayModeFromString($event, command)">
-                                <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+                            <select class="command-type playmode-select"
+                                    [ngModel]="getPlayModeString(command)"
+                                    (ngModelChange)="setPlayModeFromString($event, command)"
+                                    [pTooltip]="playModeDescription(getPlayModeString(command))"
+                                    [title]="playModeDescription(getPlayModeString(command))"
+                                    tooltipPosition="top"
+                                    [attr.aria-label]="'Play mode: ' + playModeDescription(getPlayModeString(command))">
+                                <option *ngFor="let mode of playModeOptions"
+                                        [value]="mode.value"
+                                        [title]="mode.description">{{ mode.symbol }}</option>
                             </select>
                         </ng-template>
                     </ng-container>
@@ -167,10 +175,16 @@
                     </ng-container>
 
                     <ng-container *ngIf="isVariableOfType(operation.variableName, 'playmode')">
-                        <select class="command-type"
+                        <select class="command-type playmode-select"
                             [(ngModel)]="operation.value"
-                            (ngModelChange)="onOperationValueChange(operation, $event)">
-                            <option *ngFor="let mode of playModeNames" [value]="mode">{{mode}}</option>
+                            (ngModelChange)="onOperationValueChange(operation, $event)"
+                            [pTooltip]="operationPlayModeDescription(operation.value)"
+                            [title]="operationPlayModeDescription(operation.value)"
+                            tooltipPosition="top"
+                            [attr.aria-label]="'Play mode: ' + operationPlayModeDescription(operation.value)">
+                            <option *ngFor="let mode of playModeOptions"
+                                    [value]="mode.value"
+                                    [title]="mode.description">{{ mode.symbol }}</option>
                         </select>
                     </ng-container>
                     

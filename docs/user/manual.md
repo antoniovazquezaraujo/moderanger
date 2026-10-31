@@ -382,6 +382,7 @@ Notes:
 
 - `INVERSION` is accepted when reading as an alias of `INV`, but the canonical form (what is saved) is always `INV`.
 - `PLAYMODE SINGLE` plays each note on its own, without chord or arpeggio (useful with `PATTERN`).
+- In the editor, play modes are shown with compact symbols: `○` marks even positions (0, 2, 4…), `●` marks odd positions (1, 3, 5…) and the arrows show each group's direction. Hover the selector for the full description; `.mr` keeps the canonical names.
 - `PATTERN` is **independent from the playmode**: when present, it expands every note before the playmode generates its sound (chord, arpeggio, random...). Without `PATTERN`, nothing changes. Its melody is written on one line (durations, rests and groups allowed).
 - In a numeric command, the `$variable` is resolved at playback time; it must contain a number.
 - `SHIFTSTART`, `SHIFTSIZE` and `SHIFTVALUE` add whole octaves to the chord notes in the window `[SHIFTSTART, SHIFTSTART+SHIFTSIZE)` (0-based, on the final chord order after `INV`). The window is clamped to the chord, `SHIFTSIZE 0` does nothing and a negative `SHIFTVALUE` lowers the affected notes. They shape the generated chord/arpeggio; with `PLAYMODE SINGLE` there is no chord, so they have no effect (same as `WIDTH`/`INV`).
