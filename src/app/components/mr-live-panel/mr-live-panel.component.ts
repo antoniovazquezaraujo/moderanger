@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, DoCheck, EventEmitter, Input, Output } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    Input,
+    NgZone,
+    AfterViewInit,
+    OnDestroy,
+    OnInit,
+    Output
+} from '@angular/core';
 import {
     createDocumentFromContext,
     MrSerializeError,
@@ -20,7 +31,7 @@ import { Song } from 'src/app/model/song';
     styleUrls: ['./mr-live-panel.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MrLivePanelComponent implements DoCheck {
+export class MrLivePanelComponent implements OnInit, AfterViewInit, OnDestroy {
     @Input() song!: Song;
     @Output() close = new EventEmitter<void>();
     @Output() edit = new EventEmitter<void>();
@@ -28,19 +39,59 @@ export class MrLivePanelComponent implements DoCheck {
     text = '';
     error: string | null = null;
 
-    ngDoCheck(): void {
+    private pollId: ReturnType<typeof setInterval> | null = null;
+    private viewReady = false;
+
+    constructor(
+        private readonly zone: NgZone,
+        private readonly cdr: ChangeDetectorRef
+    ) {}
+
+    ngOnInit(): void {
+        this.refresh(false);
+        // The editor mutates nested model objects from many child components;
+        // polling keeps this read-only view live even when OnPush ancestors
+        // are not marked for check by those mutations.
+        this.zone.runOutsideAngular(() => {
+            this.pollId = setInterval(() => this.refresh(), 250);
+        });
+    }
+
+    ngAfterViewInit(): void {
+        this.viewReady = true;
+        this.refresh();
+    }
+
+    ngOnDestroy(): void {
+        if (this.pollId !== null) {
+            clearInterval(this.pollId);
+            this.pollId = null;
+        }
+    }
+
+    refresh(notify = true): void {
         if (!this.song) {
             return;
         }
         try {
             const document = createDocumentFromContext(this.song, songToMrMeta(this.song));
             const next = serializeSong(document);
-            if (next !== this.text) {
+            const error = null;
+            if (next !== this.text || error !== this.error) {
                 this.text = next;
+                this.error = error;
+                if (notify && this.viewReady) {
+                    this.cdr.detectChanges();
+                }
             }
-            this.error = null;
         } catch (error) {
-            this.error = error instanceof MrSerializeError ? error.message : String(error);
+            const message = error instanceof MrSerializeError ? error.message : String(error);
+            if (message !== this.error) {
+                this.error = message;
+                if (notify && this.viewReady) {
+                    this.cdr.detectChanges();
+                }
+            }
         }
     }
 
