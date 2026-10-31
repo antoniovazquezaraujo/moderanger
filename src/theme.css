@@ -1019,7 +1019,7 @@ html[data-theme='dark'] .app-loading {
     var(--mr-bg);
 }
 
-html[data-theme='dark'] .parts-empty-state {
+html[data-theme='dark'] body .song-editor .parts-empty-state {
   background:
     linear-gradient(135deg, rgba(20, 61, 56, 0.72), rgba(30, 26, 22, 0.94)),
     var(--mr-surface);
@@ -1211,4 +1211,26 @@ html[data-theme='dark'] app-block .block-body {
 html[data-theme='dark'] app-block-library .blocks-library-content,
 html[data-theme='dark'] app-block-library .library-entry-body {
   background: transparent !important;
+}
+
+html[data-theme='dark'] body .p-tooltip .p-tooltip-text {
+  border: 1px solid var(--mr-border);
+  background: #2f2a24 !important;
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] body .p-tooltip.p-tooltip-top .p-tooltip-arrow {
+  border-top-color: #2f2a24 !important;
+}
+
+html[data-theme='dark'] body .p-tooltip.p-tooltip-bottom .p-tooltip-arrow {
+  border-bottom-color: #2f2a24 !important;
+}
+
+html[data-theme='dark'] body .p-tooltip.p-tooltip-left .p-tooltip-arrow {
+  border-left-color: #2f2a24 !important;
+}
+
+html[data-theme='dark'] body .p-tooltip.p-tooltip-right .p-tooltip-arrow {
+  border-right-color: #2f2a24 !important;
 }
