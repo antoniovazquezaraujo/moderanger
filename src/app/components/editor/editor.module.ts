@@ -21,6 +21,7 @@ import { MelodyGroupComponent } from '../melody-group/melody-group.component';
 import { MrTextEditorComponent } from '../mr-text-editor/mr-text-editor.component';
 import { MrLivePanelComponent } from '../mr-live-panel/mr-live-panel.component';
 import { HelpPanelComponent } from '../help-panel/help-panel.component';
+import { ExampleLibraryComponent } from '../example-library/example-library.component';
 
 // New specialized melody-editor components
 import { MelodyEditorV2Component } from '../melody-editor/melody-editor-v2.component';
@@ -63,6 +64,7 @@ import { SharedModule } from 'primeng/api';
     MrTextEditorComponent,
     MrLivePanelComponent,
     HelpPanelComponent,
+    ExampleLibraryComponent,
     // New specialized melody-editor components
     MelodyEditorV2Component,
     MelodyDisplayComponent,
@@ -90,6 +92,7 @@ import { SharedModule } from 'primeng/api';
   exports: [
     // Exportar el componente principal que se usa fuera (en AppComponent)
     SongEditorComponent,
+    ExampleLibraryComponent,
     MelodyEditorComponent,
     MelodyEditorV2Component
   ]

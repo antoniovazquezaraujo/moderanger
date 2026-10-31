@@ -38,6 +38,7 @@ Los tokens viven en `src/theme.css` y se cargan después de `styles.css`. La int
 
 - Barra superior con monograma, marca, tagline y enlace a la guía.
 - Pantalla de carga con tarjeta y spinner, en lugar de texto plano.
+- Galería **Examples** en la barra superior con diez canciones `.mr` completas; cada ficha permite cargar o cargar y reproducir.
 - Selector claro/oscuro en la barra superior, persistido en `localStorage` y con arranque sin flash mediante un script inline en `index.html`.
 - El editor ocupa el resto de la altura sin scroll global.
 - El botón `.mr` abre un panel lateral fijo con el texto canónico en vivo; **Edit** abre el editor avanzado existente.

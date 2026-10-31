@@ -11,7 +11,7 @@
    npm start
    ```
 
-2. New here? Open **Help** for a four-step guide, or choose **Load example** to start with a short two-part piece.
+2. New here? Open **Help** for a four-step guide, or **Examples** in the top bar to browse ten complete songs and load or play them instantly.
 3. Create parts and blocks in the GUI. Press **`.mr`** to open the live canonical text panel; use **Edit** there for the advanced text editor.
 4. Press **Play** to listen; **Save** downloads the song as `.mr` and **Load** restores it.
 5. Use the sun/moon button in the top bar to switch between light and dark themes. Your choice is remembered in the browser.

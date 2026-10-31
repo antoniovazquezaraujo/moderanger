@@ -9,6 +9,14 @@
         </div>
 
         <div class="topbar-actions">
+            <button type="button"
+                    class="topbar-button"
+                    (click)="openExamples()"
+                    aria-label="Open example songs">
+                <i class="pi pi-star" aria-hidden="true"></i>
+                <span>Examples</span>
+            </button>
+
             <ng-container *ngIf="theme$ | async as theme">
                 <button type="button"
                         class="theme-toggle"
@@ -45,4 +53,9 @@
     <main class="app-main" *ngIf="isAudioReady">
         <app-song-editor [(song)]="currentSong"></app-song-editor>
     </main>
+
+    <app-example-library
+        [(visible)]="examplesVisible"
+        (loadExample)="onExampleLoad($event)">
+    </app-example-library>
 </div>

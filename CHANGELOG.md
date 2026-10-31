@@ -31,6 +31,7 @@ All notable changes to **Mode Ranger**. Format based on
 - Light/dark theme selector in the top bar. The chosen theme persists in `localStorage`, follows the system preference on first visit and is applied before the first paint to avoid a flash.
 - The `.mr` toolbar button now opens a fixed live panel on the right with the canonical song text, refreshed after every model change. The advanced editor (validate/apply/revert) remains available through **Edit** in that panel.
 - PLAYMODE selectors now use compact symbols (`↑`, `↓`, `○`, `●`, `≋`, `↯`, `•`) with the full canonical name and description in the tooltip/`aria-label`.
+- In-app **example gallery** with ten complete `.mr` songs, including Karmel, a two-part miniature, pattern studies, chord/decoration pieces and a low chord cycle. Each card can load the song or load and play it immediately.
 - Part actions now sit next to the part name instead of being pushed to the right edge of the card.
 - Block repeats stay on the same row as the block name, before duplicate/delete. Reusable block definitions no longer show a second collapsible header just to expose their repeats.
 - Block-reference controls (move, edit, duplicate, remove) now sit immediately after the reference `×N` instead of being pushed to the far right of the row.

@@ -1,0 +1,50 @@
+<p-dialog
+    [visible]="visible"
+    (visibleChange)="onVisibleChange($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '76rem', maxWidth: '94vw' }"
+    styleClass="example-library-dialog"
+    header="Example songs">
+
+    <p class="example-library-intro">
+        Ten complete <code>.mr</code> pieces to explore the language. Load one to edit it,
+        or start it immediately and listen to the possibilities.
+    </p>
+
+    <div class="example-grid">
+        <article class="example-card"
+                 *ngFor="let example of examples; let i = index; trackBy: trackByExample">
+            <header class="example-card-header">
+                <div>
+                    <span class="example-index">Example {{ i + 1 }}</span>
+                    <h3>{{ example.title }}</h3>
+                </div>
+                <span class="example-bpm">{{ example.bpm }} BPM</span>
+            </header>
+
+            <p class="example-description">{{ example.description }}</p>
+
+            <div class="example-tags">
+                <span *ngFor="let tag of example.tags">{{ tag }}</span>
+            </div>
+
+            <footer class="example-actions">
+                <button type="button"
+                        class="example-load"
+                        (click)="requestLoad(example, false)"
+                        [attr.aria-label]="'Load ' + example.title + ' without playing'">
+                    Load
+                </button>
+                <button type="button"
+                        class="example-play"
+                        (click)="requestLoad(example, true)"
+                        [attr.aria-label]="'Load and play ' + example.title">
+                    <i class="pi pi-play" aria-hidden="true"></i>
+                    Load &amp; play
+                </button>
+            </footer>
+        </article>
+    </div>
+</p-dialog>
