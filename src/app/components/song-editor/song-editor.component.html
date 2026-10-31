@@ -64,29 +64,33 @@
 
                 <div class="toolbar-group toolbar-actions">
                     <!-- Vista avanzada de texto .mr (divulgación progresiva) -->
-                    <button pButton type="button" icon="pi pi-file-o" (click)="toggleMrTextEditor()"
+                    <button pButton type="button" icon="pi pi-file-o" (click)="toggleMrTextPanel()"
+                            [attr.aria-expanded]="mrTextPanelVisible"
+                            aria-controls="mr-live-panel"
                             pTooltip="Texto (.mr)" tooltipPosition="top" aria-label="Texto (.mr)"></button>
                     <!-- Guardar/cargar el texto canónico como fichero .mr -->
                     <button pButton type="button" icon="pi pi-download" (click)="saveMrFile()"
                             pTooltip="Guardar .mr (texto canónico)" tooltipPosition="top" aria-label="Guardar .mr"></button>
                     <button pButton type="button" icon="pi pi-upload" (click)="openMrFilePicker()"
                             pTooltip="Cargar .mr" tooltipPosition="top" aria-label="Cargar .mr"></button>
-                    <button pButton type="button" icon="pi pi-question-circle" label="Help"
-                            (click)="toggleHelp()"
-                            class="toolbar-help-button"
-                            pTooltip="Help and quick guide" tooltipPosition="top"
-                            aria-haspopup="dialog"
-                            [attr.aria-expanded]="helpVisible"
-                            aria-label="Help and quick guide"></button>
                     <input #mrFileInput id="mrFileInput" class="mr-file-input" type="file"
                            accept=".mr,text/plain" (change)="onMrFileSelected($event)" aria-hidden="true" tabindex="-1" />
                 </div>
+
+                <button pButton type="button" icon="pi pi-question-circle" label="Help"
+                        (click)="toggleHelp()"
+                        class="toolbar-help-button"
+                        pTooltip="Help and quick guide" tooltipPosition="top"
+                        aria-haspopup="dialog"
+                        [attr.aria-expanded]="helpVisible"
+                        aria-label="Help and quick guide"></button>
             </div>
         </div>
     </div>
 
     <!-- Contenido: panel de Variables (plegable, como una part más, encima
          de la fila) + la canción con sus parts. -->
+    <div class="workspace">
     <div class="content-section">
         <div class="variables-panel">
             <div class="variables-panel-header" (click)="toggleVariablesPanel()">
@@ -144,6 +148,14 @@
         </div>
     </div>
 
+    <app-mr-live-panel
+        *ngIf="mrTextPanelVisible"
+        [song]="song"
+        (close)="mrTextPanelVisible = false"
+        (edit)="openMrTextEditor()">
+    </app-mr-live-panel>
+    </div>
+
     <!-- Guía contextual para orientar al usuario sin salir del editor. -->
     <app-help-panel
         [(visible)]="helpVisible"
@@ -153,7 +165,7 @@
     <!-- Vista avanzada de texto canónico .mr -->
     <app-mr-text-editor
         [song]="song"
-        [(visible)]="mrTextVisible"
+        [(visible)]="mrEditorVisible"
         (applied)="onMrTextApplied($event)">
     </app-mr-text-editor>
 

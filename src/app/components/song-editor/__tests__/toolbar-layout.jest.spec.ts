@@ -44,4 +44,14 @@ describe('song-editor · toolbar uniforme', () => {
         expect(template).toContain('(click)="loadDemoSong()"');
         expect(template).toContain('Load example');
     });
+
+    it('el botón .mr alterna el panel lateral fijo, no el diálogo', () => {
+        expect(template).toContain('(click)="toggleMrTextPanel()"');
+        expect(template).toContain('[attr.aria-expanded]="mrTextPanelVisible"');
+        expect(template).toContain('aria-controls="mr-live-panel"');
+        expect(template).toContain('<app-mr-live-panel');
+        expect(template).toContain('*ngIf="mrTextPanelVisible"');
+        expect(template).toContain('(edit)="openMrTextEditor()"');
+        expect(template).toContain('[(visible)]="mrEditorVisible"');
+    });
 });

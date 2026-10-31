@@ -48,7 +48,10 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     variablesExpanded: boolean = false;
     /** Panel de Parts plegable (debajo de Variables y Blocks); abierto al inicio. */
     partsExpanded: boolean = true;
-    mrTextVisible: boolean = false;
+    /** Panel lateral de solo lectura con el texto canónico en vivo. */
+    mrTextPanelVisible: boolean = false;
+    /** Diálogo avanzado de edición del `.mr`. */
+    mrEditorVisible: boolean = false;
     helpVisible: boolean = false;
     isPlaying: boolean = false;
 
@@ -103,8 +106,12 @@ export class SongEditorComponent implements OnInit, OnDestroy {
         this.blockLibraryRef?.focusDefinition(label);
     }
 
-    toggleMrTextEditor(): void {
-        this.mrTextVisible = !this.mrTextVisible;
+    toggleMrTextPanel(): void {
+        this.mrTextPanelVisible = !this.mrTextPanelVisible;
+    }
+
+    openMrTextEditor(): void {
+        this.mrEditorVisible = true;
     }
 
     toggleHelp(): void {
@@ -128,6 +135,7 @@ export class SongEditorComponent implements OnInit, OnDestroy {
      */
     onMrTextApplied(event: MrTextAppliedEvent): void {
         this.stopIfPlaying();
+        this.mrEditorVisible = false;
         this.songChange.emit(event.song);
     }
 
