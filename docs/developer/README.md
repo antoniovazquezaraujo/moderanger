@@ -37,7 +37,7 @@ Mode Ranger es una app **Angular 13 + TypeScript** con un núcleo desacoplado:
 - ✔️ **[Índice principal](Index.md)**
 - **Análisis y estado**: [`analysis/`](analysis/) — backlog, arquitectura, fases `.mr`, limpieza.
 - **Decisiones**: [`adr/`](adr/) — ADR-001 (texto canónico), ADR-002 (bloques reutilizables) y ADR-003 (compilador MIDI).
-- **Diseño**: [`design/`](design/) — propuesta de sintaxis aprobada y compilador `.mr` → MIDI.
+- **Diseño**: [`design/`](design/) — propuesta de sintaxis aprobada, compilador `.mr` → MIDI y [UI refresh Warm Studio](design/ui-refresh-warm-studio.md).
 - **Auditorías**: [`audits/`](audits/) — `testing-things`, ramas pendientes.
 - **Refactors históricos**: [`refactors/`](refactors/).
 - **Testing**: [`testing/validacion-manual-v1.md`](testing/validacion-manual-v1.md).

@@ -1,0 +1,95 @@
+<p-sidebar
+    [visible]="visible"
+    (visibleChange)="onVisibleChange($event)"
+    position="right"
+    [modal]="true"
+    [showCloseIcon]="false"
+    [dismissible]="true"
+    styleClass="mr-help-sidebar"
+    [style]="{ width: '31rem', maxWidth: '94vw' }">
+
+    <div class="help-panel">
+        <header class="help-header">
+            <div>
+                <span class="help-eyebrow">Quick guide</span>
+                <h2>Make your first song</h2>
+                <p>Mode Ranger turns small musical ideas into a readable <code>.mr</code> score. Start with one part and grow from there.</p>
+            </div>
+            <button type="button"
+                    class="help-close"
+                    aria-label="Close help"
+                    (click)="close()">
+                <i class="pi pi-times" aria-hidden="true"></i>
+            </button>
+        </header>
+
+        <ol class="help-steps">
+            <li>
+                <span class="help-step-number">01</span>
+                <div>
+                    <h3>Create a part</h3>
+                    <p>A part is an instrument or voice. Open <strong>Parts</strong> and use the <strong>+</strong> to add one.</p>
+                </div>
+            </li>
+            <li>
+                <span class="help-step-number">02</span>
+                <div>
+                    <h3>Add a block</h3>
+                    <p>Blocks hold the music. Use the block <strong>+</strong> to create one, then give it a name.</p>
+                </div>
+            </li>
+            <li>
+                <span class="help-step-number">03</span>
+                <div>
+                    <h3>Write notes</h3>
+                    <p>Click the melody strip or press <strong>+</strong>. Scroll over a note to change its value or duration.</p>
+                </div>
+            </li>
+            <li>
+                <span class="help-step-number">04</span>
+                <div>
+                    <h3>Listen and save</h3>
+                    <p>Press <strong>Play</strong> to hear the result. Save the canonical <code>.mr</code> text with the download button.</p>
+                </div>
+            </li>
+        </ol>
+
+        <section class="help-demo" aria-labelledby="help-demo-title">
+            <div>
+                <span class="help-demo-kicker">Shortcut</span>
+                <h3 id="help-demo-title">Start from an example</h3>
+                <p>Load a short two-part piece and explore the editor with real content.</p>
+            </div>
+            <button type="button" class="help-demo-button" (click)="requestDemo()">
+                <i class="pi pi-play" aria-hidden="true"></i>
+                Load example
+            </button>
+        </section>
+
+        <section class="help-notes" aria-labelledby="help-notes-title">
+            <h3 id="help-notes-title">Good to know</h3>
+            <dl>
+                <div>
+                    <dt>Text is canonical</dt>
+                    <dd>The visual editor and the <code>.mr</code> view describe the same song.</dd>
+                </div>
+                <div>
+                    <dt>Reuse music</dt>
+                    <dd>Create a block in <strong>Blocks</strong> and reference it from any part.</dd>
+                </div>
+                <div>
+                    <dt>Keep it local</dt>
+                    <dd>Save and load <code>.mr</code> files whenever you want. Nothing leaves your browser.</dd>
+                </div>
+            </dl>
+        </section>
+
+        <a class="help-manual"
+           href="https://antoniovazquezaraujo.github.io/moderanger/"
+           target="_blank"
+           rel="noopener noreferrer">
+            Read the full manual
+            <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+        </a>
+    </div>
+</p-sidebar>

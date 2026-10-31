@@ -30,6 +30,7 @@ import {
 } from 'src/app/model/mr';
 import { downloadTextFile, readFileAsText } from 'src/app/model/mr/mr.file.browser';
 import { BlockLibraryComponent } from '../block-library/block-library.component';
+import { createDemoSong } from 'src/app/model/demo-song';
 
 @Component({
     selector: 'app-song-editor',
@@ -48,6 +49,7 @@ export class SongEditorComponent implements OnInit, OnDestroy {
     /** Panel de Parts plegable (debajo de Variables y Blocks); abierto al inicio. */
     partsExpanded: boolean = true;
     mrTextVisible: boolean = false;
+    helpVisible: boolean = false;
     isPlaying: boolean = false;
 
     /** Diálogo de errores de guardar/cargar `.mr`. */
@@ -103,6 +105,19 @@ export class SongEditorComponent implements OnInit, OnDestroy {
 
     toggleMrTextEditor(): void {
         this.mrTextVisible = !this.mrTextVisible;
+    }
+
+    toggleHelp(): void {
+        this.helpVisible = !this.helpVisible;
+    }
+
+    /** Carga una pieza corta válida para que el editor no arranque vacío. */
+    loadDemoSong(): void {
+        this.stopIfPlaying();
+        this.helpVisible = false;
+        this.partsExpanded = true;
+        this.songChange.emit(createDemoSong());
+        this.cdr.markForCheck();
     }
 
     /**

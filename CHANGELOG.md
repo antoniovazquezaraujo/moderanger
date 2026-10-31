@@ -27,6 +27,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- **Warm Studio UI refresh**: the app now has a branded shell, a warm paper palette, editorial display type, card-based panels, consistent toolbar controls and a calmer visual hierarchy. The editor adds a contextual **Help** guide, a clearer first-run empty state and a **Load example** song so new users can start with real content.
 - Block-reference controls (move, edit, duplicate, remove) now sit immediately after the reference `×N` instead of being pushed to the far right of the row.
 - Song toolbar controls (name, Repeat, BPM, Play/Stop, default duration, metronome, text view and save/load) now share a **30px height**; the `.mr` text button uses a document icon and keeps its tooltip.
 - Pressing **Play** while the song is already playing now restarts it from the beginning (internally Stop + Play) instead of requiring the Stop button first. The icon stays Play; the dedicated Stop button remains.

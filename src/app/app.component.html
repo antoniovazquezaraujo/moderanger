@@ -1,11 +1,34 @@
-<h1>ModeRanger</h1>
+<div class="app-shell">
+    <header class="app-topbar">
+        <div class="brand" aria-label="Mode Ranger">
+            <span class="brand-mark" aria-hidden="true">MR</span>
+            <span class="brand-copy">
+                <span class="brand-name">Mode Ranger</span>
+                <span class="brand-tagline">Harmony studio</span>
+            </span>
+        </div>
 
-<!-- Mostrar mensaje de carga o nada hasta que esté listo -->
-<div *ngIf="!isAudioReady">
-  Loading audio samples...
-</div>
+        <a class="topbar-link"
+           href="https://antoniovazquezaraujo.github.io/moderanger/"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Open the Mode Ranger user guide">
+            <i class="pi pi-book" aria-hidden="true"></i>
+            <span>User guide</span>
+            <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+        </a>
+    </header>
 
-<!-- Mostrar el editor solo cuando el audio esté listo -->
-<div class="container" *ngIf="isAudioReady">
-    <app-song-editor [(song)]="currentSong"></app-song-editor>
+    <div class="app-loading" *ngIf="!isAudioReady" role="status" aria-live="polite">
+        <div class="loading-card">
+            <span class="loading-orbit" aria-hidden="true"></span>
+            <span class="loading-kicker">Warming up</span>
+            <h2>Preparing the piano</h2>
+            <p>Loading the instrument samples. This only takes a moment.</p>
+        </div>
+    </div>
+
+    <main class="app-main" *ngIf="isAudioReady">
+        <app-song-editor [(song)]="currentSong"></app-song-editor>
+    </main>
 </div>

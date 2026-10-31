@@ -19,6 +19,7 @@ import { MelodyEditorComponent } from '../melody-editor/melody-editor.component'
 import { MelodyNoteComponent } from '../melody-note/melody-note.component';
 import { MelodyGroupComponent } from '../melody-group/melody-group.component';
 import { MrTextEditorComponent } from '../mr-text-editor/mr-text-editor.component';
+import { HelpPanelComponent } from '../help-panel/help-panel.component';
 
 // New specialized melody-editor components
 import { MelodyEditorV2Component } from '../melody-editor/melody-editor-v2.component';
@@ -59,6 +60,7 @@ import { SharedModule } from 'primeng/api';
     MelodyNoteComponent,
     MelodyGroupComponent,
     MrTextEditorComponent,
+    HelpPanelComponent,
     // New specialized melody-editor components
     MelodyEditorV2Component,
     MelodyDisplayComponent,

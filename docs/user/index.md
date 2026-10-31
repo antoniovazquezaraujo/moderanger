@@ -11,8 +11,9 @@
    npm start
    ```
 
-2. Create parts and blocks in the GUI, or press the **`.mr`** button to edit the text directly.
-3. Press **Play** to listen; **Save** downloads the song as `.mr` and **Load** restores it.
+2. New here? Open **Help** for a four-step guide, or choose **Load example** to start with a short two-part piece.
+3. Create parts and blocks in the GUI, or press the **`.mr`** button to edit the text directly.
+4. Press **Play** to listen; **Save** downloads the song as `.mr` and **Load** restores it.
 
 ## In this documentation
 
