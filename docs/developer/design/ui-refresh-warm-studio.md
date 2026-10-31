@@ -38,6 +38,7 @@ Los tokens viven en `src/theme.css` y se cargan después de `styles.css`. La int
 
 - Barra superior con monograma, marca, tagline y enlace a la guía.
 - Pantalla de carga con tarjeta y spinner, en lugar de texto plano.
+- Selector claro/oscuro en la barra superior, persistido en `localStorage` y con arranque sin flash mediante un script inline en `index.html`.
 - El editor ocupa el resto de la altura sin scroll global.
 
 ### Editor
@@ -81,4 +82,4 @@ Los tokens viven en `src/theme.css` y se cargan después de `styles.css`. La int
 - `npm test` en verde.
 - `npm run test:cov` por encima del umbral.
 - `npm run build` en verde.
-- Revisión visual con Firefox headless a 1440 px y 1024 px para editor, guía, estado vacío y pantalla de carga.
+- Revisión visual con Firefox headless a 1440 px y 1024 px para editor, guía, estado vacío, pantalla de carga y temas claro/oscuro.

@@ -19,6 +19,8 @@
   --mr-border-strong: #cfc5b5;
   --mr-accent: #0f766e;
   --mr-accent-strong: #0b5d57;
+  --mr-accent-solid: #0f766e;
+  --mr-accent-solid-hover: #0b5d57;
   --mr-accent-soft: #e4f2ef;
   --mr-accent-ink: #084f4a;
   --mr-warm: #b45309;
@@ -46,6 +48,42 @@
   --text-color-secondary: var(--mr-muted);
   --border-radius: var(--mr-radius-sm);
   --focus-ring: var(--mr-focus);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --mr-bg: #141210;
+  --mr-bg-deep: #0d0c0a;
+  --mr-surface: #1e1a16;
+  --mr-surface-soft: #27221c;
+  --mr-surface-strong: #241f1a;
+  --mr-ink: #f5efe4;
+  --mr-ink-soft: #d8d0c4;
+  --mr-muted: #a79b8c;
+  --mr-border: #3a332b;
+  --mr-border-strong: #5b5145;
+  --mr-accent: #5eead4;
+  --mr-accent-strong: #99f6e4;
+  --mr-accent-solid: #0f766e;
+  --mr-accent-solid-hover: #115e59;
+  --mr-accent-soft: #143d38;
+  --mr-accent-ink: #ccfbf1;
+  --mr-warm: #fbbf24;
+  --mr-warm-soft: #3a2d14;
+  --mr-danger: #fca5a5;
+  --mr-danger-soft: #3a1d1d;
+  --mr-focus: 0 0 0 3px rgba(94, 234, 212, 0.25);
+  --mr-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --mr-shadow-md: 0 16px 44px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --primary-color: var(--mr-accent);
+  --primary-color-text: #081512;
+  --surface-ground: var(--mr-bg);
+  --surface-section: var(--mr-surface);
+  --surface-card: var(--mr-surface);
+  --surface-overlay: var(--mr-surface);
+  --surface-border: var(--mr-border);
+  --text-color: var(--mr-ink);
+  --text-color-secondary: var(--mr-muted);
 }
 
 html,
@@ -368,15 +406,15 @@ html body .song-editor .playback-controls .p-button {
 }
 
 html body .song-editor .playback-controls .p-button[aria-label="Play song"] {
-  border-color: var(--mr-accent) !important;
-  background: var(--mr-accent) !important;
+  border-color: var(--mr-accent-solid) !important;
+  background: var(--mr-accent-solid) !important;
   color: #ffffff !important;
   box-shadow: 0 4px 12px rgba(15, 118, 110, 0.24) !important;
 }
 
 html body .song-editor .playback-controls .p-button[aria-label="Play song"]:hover {
-  border-color: var(--mr-accent-strong) !important;
-  background: var(--mr-accent-strong) !important;
+  border-color: var(--mr-accent-solid-hover) !important;
+  background: var(--mr-accent-solid-hover) !important;
   color: #ffffff !important;
 }
 
@@ -855,14 +893,14 @@ html body .song-editor .empty-secondary {
 }
 
 html body .song-editor .empty-primary {
-  border: 1px solid var(--mr-accent);
-  background: var(--mr-accent);
+  border: 1px solid var(--mr-accent-solid);
+  background: var(--mr-accent-solid);
   color: #ffffff;
 }
 
 html body .song-editor .empty-primary:hover {
-  border-color: var(--mr-accent-strong);
-  background: var(--mr-accent-strong);
+  border-color: var(--mr-accent-solid-hover);
+  background: var(--mr-accent-solid-hover);
 }
 
 html body .song-editor .empty-secondary {
@@ -949,4 +987,195 @@ html body .song-editor .empty-secondary:hover {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme surface overrides
+   --------------------------------------------------------------------------
+   The Warm Studio layer uses variables for the new shell, but the legacy
+   editor still has a handful of hard-coded white surfaces. Keep those
+   overrides here, scoped to the dark attribute, so the light theme remains
+   unchanged.
+   -------------------------------------------------------------------------- */
+
+html[data-theme='dark'] .app-topbar {
+  background: rgba(30, 26, 22, 0.84);
+}
+
+html[data-theme='dark'] .song-editor .song-header {
+  background: rgba(30, 26, 22, 0.84);
+}
+
+html[data-theme='dark'] .song-editor .content-section {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(167, 155, 140, 0.16) 1px, transparent 0) 0 0 / 22px 22px,
+    linear-gradient(180deg, rgba(20, 18, 16, 0) 0%, var(--mr-bg) 120px);
+}
+
+html[data-theme='dark'] .app-loading {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(20, 61, 56, 0.8), transparent 42%),
+    radial-gradient(circle at 1px 1px, rgba(167, 155, 140, 0.14) 1px, transparent 0) 0 0 / 22px 22px,
+    var(--mr-bg);
+}
+
+html[data-theme='dark'] .parts-empty-state {
+  background:
+    linear-gradient(135deg, rgba(20, 61, 56, 0.72), rgba(30, 26, 22, 0.94)),
+    var(--mr-surface);
+}
+
+html[data-theme='dark'] .help-header {
+  background:
+    radial-gradient(circle at 92% 12%, rgba(20, 61, 56, 0.9), transparent 35%),
+    var(--mr-surface);
+}
+
+html[data-theme='dark'] .help-demo {
+  border-color: #2a5a52;
+  background:
+    linear-gradient(135deg, rgba(20, 61, 56, 0.82), rgba(30, 26, 22, 0.94)),
+    var(--mr-surface);
+}
+
+html[data-theme='dark'] .p-dropdown-panel,
+html[data-theme='dark'] .p-dropdown-items,
+html[data-theme='dark'] .p-dropdown-item,
+html[data-theme='dark'] .p-dropdown-panel .p-dropdown-items,
+html[data-theme='dark'] .p-dropdown-panel .p-dropdown-item {
+  background: var(--mr-surface) !important;
+  color: var(--mr-ink-soft) !important;
+}
+
+html[data-theme='dark'] .p-dropdown-panel .p-dropdown-item:hover,
+html[data-theme='dark'] .p-dropdown-panel .p-dropdown-item.p-highlight {
+  background: var(--mr-accent-soft) !important;
+  color: var(--mr-accent-ink) !important;
+}
+
+html[data-theme='dark'] input[type='text'],
+html[data-theme='dark'] input[type='number'],
+html[data-theme='dark'] select,
+html[data-theme='dark'] .command-type,
+html[data-theme='dark'] .command-value,
+html[data-theme='dark'] .number-input {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] .commands-row select.command-type,
+html[data-theme='dark'] .operations-row select.command-type,
+html[data-theme='dark'] .commands-row .command-value,
+html[data-theme='dark'] .operations-row .command-value,
+html[data-theme='dark'] .commands-row .number-input,
+html[data-theme='dark'] .operations-row .number-input {
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+  border-color: var(--mr-border) !important;
+}
+
+html[data-theme='dark'] app-block-commands .command,
+html[data-theme='dark'] app-block-commands .operation-item {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] app-block-commands .command:hover,
+html[data-theme='dark'] app-block-commands .command:focus-within,
+html[data-theme='dark'] app-block-commands .operation-item:hover,
+html[data-theme='dark'] app-block-commands .operation-item:focus-within {
+  background: var(--mr-surface-strong) !important;
+}
+
+html[data-theme='dark'] app-block .melody-editor-container,
+html[data-theme='dark'] app-melody-editor .melody-editor,
+html[data-theme='dark'] app-melody-editor .notes-container-wrapper {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] app-melody-editor .note-item:hover,
+html[data-theme='dark'] app-melody-editor .note-item.selected,
+html[data-theme='dark'] app-melody-editor .note-item.playing {
+  border-color: var(--mr-accent) !important;
+  background: var(--mr-accent-soft) !important;
+}
+
+html[data-theme='dark'] app-melody-editor .note-item {
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] app-melody-editor .note-duration {
+  color: var(--mr-muted) !important;
+}
+
+html[data-theme='dark'] app-melody-group .group-container {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface) !important;
+}
+
+html[data-theme='dark'] app-melody-group .group-header {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html[data-theme='dark'] app-block-reference .reference-chip {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html[data-theme='dark'] app-block-reference .reference-repetitions .repetitions-input:focus {
+  background: var(--mr-surface-strong) !important;
+}
+
+html[data-theme='dark'] .mr-textarea {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] .mr-hint code {
+  background: var(--mr-surface-soft) !important;
+  color: var(--mr-accent-ink) !important;
+}
+
+html[data-theme='dark'] app-block-library .library-entry--highlight {
+  background-color: #3a2d14 !important;
+}
+
+html[data-theme='dark'] #repetitions,
+html[data-theme='dark'] #bpm,
+html[data-theme='dark'] #repeatingTimes {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+}
+
+html[data-theme='dark'] app-block-library .blocks-library-panel {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface) !important;
+}
+
+html[data-theme='dark'] app-block .block-content {
+  border-color: transparent !important;
+}
+
+html[data-theme='dark'] app-block .block-content:hover {
+  border-color: var(--mr-border) !important;
+  background: var(--mr-surface-soft) !important;
+}
+
+html[data-theme='dark'] app-block-library .library-entry {
+  border-top-color: var(--mr-border) !important;
+}
+
+html[data-theme='dark'] app-block-library .blocks-library-warning {
+  color: var(--mr-danger) !important;
+}
+
+html[data-theme='dark'] app-melody-editor .group-marker {
+  border-color: var(--mr-border) !important;
+}
+
+html[data-theme='dark'] .parts-splitter::before {
+  background-color: var(--mr-border-strong);
 }

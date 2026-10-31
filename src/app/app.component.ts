@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { AudioEngineService, InstrumentType } from './services/audio-engine.service';
+import { Theme, ThemeService } from './services/theme.service';
 import { Song } from './model/song';
 
 @Component({
@@ -11,9 +13,14 @@ export class AppComponent implements OnInit {
   title = 'moderanger';
   public currentSong = new Song();
   public isAudioReady = false;
+  public theme$: Observable<Theme>;
  
-  constructor(private audioEngine: AudioEngineService) {
-    // Mantener constructor ligero
+  constructor(private audioEngine: AudioEngineService, private themeService: ThemeService) {
+    this.theme$ = this.themeService.theme$;
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   async ngOnInit(): Promise<void> {
