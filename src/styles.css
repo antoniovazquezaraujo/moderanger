@@ -2336,20 +2336,19 @@ html body app-block-commands .operations-row {
   padding-left: 4px !important;
 }
 
-/* Acciones del header (+ / x / copiar y ×N): ocupan su espacio siempre
+/* Acciones del header (+ / x / copiar): ocupan su espacio siempre
    (0 layout shift al aparecer) pero solo se ven al hover o al enfocar el
-   header; siguen siendo tabulables (opacity, no visibility). */
-.p-tree .block-header .block-controls,
-.p-tree .block-header .repetitions-container {
+   header; siguen siendo tabulables (opacity, no visibility). Las
+   repeticiones (×N) son un dato editable, no una acción secundaria: quedan
+   visibles en la misma línea, antes de duplicar/eliminar. */
+.p-tree .block-header .block-controls {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.12s ease;
 }
 
 .p-tree .block-header:hover .block-controls,
-.p-tree .block-header:focus-within .block-controls,
-.p-tree .block-header:hover .repetitions-container,
-.p-tree .block-header:focus-within .repetitions-container {
+.p-tree .block-header:focus-within .block-controls {
   opacity: 1;
   pointer-events: auto;
 }

@@ -578,6 +578,26 @@ html body app-block-library .library-usage {
   font-weight: 600;
 }
 
+html body app-block-library .library-repetitions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--mr-muted);
+  font-size: 11px;
+}
+
+html body app-block-library .library-repetitions .repetitions-input {
+  width: 36px !important;
+  height: 28px !important;
+  padding: 0 4px !important;
+  border: 1px solid var(--mr-border) !important;
+  border-radius: 7px !important;
+  background: var(--mr-surface-strong) !important;
+  color: var(--mr-ink) !important;
+  font-size: 11px !important;
+  text-align: center;
+}
+
 html body app-variable-declaration .variables-container {
   padding: 0;
 }
@@ -655,9 +675,10 @@ html body app-part .part-header {
 }
 
 html body app-part .part-info {
+  flex: 0 1 160px;
   width: auto;
-  min-width: 96px;
-  flex: 1 1 130px;
+  min-width: 120px;
+  max-width: 240px;
   margin-right: 0;
 }
 

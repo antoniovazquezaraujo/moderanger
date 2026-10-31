@@ -28,6 +28,8 @@ All notable changes to **Mode Ranger**. Format based on
 ### Changed
 
 - **Warm Studio UI refresh**: the app now has a branded shell, a warm paper palette, editorial display type, card-based panels, consistent toolbar controls and a calmer visual hierarchy. The editor adds a contextual **Help** guide, a clearer first-run empty state and a **Load example** song so new users can start with real content.
+- Part actions now sit next to the part name instead of being pushed to the right edge of the card.
+- Block repeats stay on the same row as the block name, before duplicate/delete. Reusable block definitions no longer show a second collapsible header just to expose their repeats.
 - Block-reference controls (move, edit, duplicate, remove) now sit immediately after the reference `×N` instead of being pushed to the far right of the row.
 - Song toolbar controls (name, Repeat, BPM, Play/Stop, default duration, metronome, text view and save/load) now share a **30px height**; the `.mr` text button uses a document icon and keeps its tooltip.
 - Pressing **Play** while the song is already playing now restarts it from the beginning (internally Stop + Play) instead of requiring the Stop button first. The icon stays Play; the dedicated Stop button remains.
@@ -56,6 +58,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Fixed
 
+- The variable-name input no longer offers browser autocomplete suggestions (the recurring `descargarSonidos` tooltip): the form and its controls disable autocomplete and the name field uses a dedicated field name.
 - The text editor for string variables keeps focus while typing: the variables list is now tracked by variable name, so Angular no longer destroys and recreates the `<input>` on every `VariableContext` change.
 - `DECORATION $variable` now validates the string value at parse/load time: an invalid item such as `-0` is rejected with `file:line:column` instead of silently disabling the decoration during playback. The web app and the MIDI compiler now fail in the same place.
 - Restarting with **Play** while the song was playing no longer overlaps both playbacks or stops the new one: `_handleTransportStop` cleared `currentLoopId` without disposing the scheduler loop, and the Transport emits its `stop` event ~30 ms later, so a restart launched immediately was cancelled by the previous stop. `stop()` and the natural end now dispose the loop, `playSongFromStart()` waits for the Transport `stop` event before relaunching, each playback carries a token so stale stop events are ignored, and an in-flight `startTransport()` aborts if a newer playback superseded it.

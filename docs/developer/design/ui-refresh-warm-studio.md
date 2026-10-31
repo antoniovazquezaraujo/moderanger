@@ -47,6 +47,7 @@ Los tokens viven en `src/theme.css` y se cargan después de `styles.css`. La int
 - Paneles Variables, Blocks y Parts como tarjetas con cabecera, contador y contenido.
 - Parts como tarjetas independientes, con nombre editorial y contenido separado.
 - Bloques con hover suave, cuerpo separado y secciones Notes/Commands/Operations más legibles.
+- Repeticiones (`×N`) inline en la misma fila que el nombre, antes de duplicar/eliminar; las definiciones reutilizables ya no muestran una segunda cabecera plegable.
 - Estado vacío de Parts con explicación y dos acciones: **Add a part** y **Load example**.
 
 ### Ayuda
