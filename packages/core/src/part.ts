@@ -1,5 +1,6 @@
 import { Block } from './block';
 import { BlockReference } from './block-reference';
+import type { SongNode } from './song-node';
 import { InstrumentType } from "./instrument-type";
 
 /**
@@ -7,7 +8,7 @@ import { InstrumentType } from "./instrument-type";
  * una definición de la biblioteca `blocks`. La unión se discrimina por `kind`
  * (`'block'` / `'reference'`).
  */
-export type PartItem = Block | BlockReference;
+export type PartItem = SongNode;
 
 export class Part {
     static _id: number = 0;

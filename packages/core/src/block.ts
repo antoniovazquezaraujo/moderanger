@@ -1,6 +1,7 @@
 import { BlockContent } from './block.content';
 import { cloneCommand, Command } from './command';
 import { AssignOperation, BaseOperation, cloneOperation, VaryOperation } from './operation';
+import type { SongNode } from './song-node';
 
 export class Block {
     static _id: number = 0;
@@ -12,7 +13,7 @@ export class Block {
     repeatingTimes: number = 1;
     commands: Command[] = [];
     blockContent: BlockContent = new BlockContent();
-    children: Block[] = [];
+    children: SongNode[] = [];
     operations: BaseOperation[] = [];
 
     constructor() {
@@ -111,7 +112,7 @@ export class Block {
             });
     }
 
-    removeBlock(block: Block) {
+    removeBlock(block: SongNode) {
         const index = this.children.indexOf(block);
         if (index !== -1) {
             this.children.splice(index, 1);

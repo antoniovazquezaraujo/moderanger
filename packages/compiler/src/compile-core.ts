@@ -11,6 +11,7 @@ import {
     PartItem,
     Player,
     Song,
+    SongNode,
     VariableContext
 } from '@moderanger/core';
 
@@ -81,7 +82,7 @@ function buildExecutionUnits(part: Part, song: Song): ExecutionUnit[] {
                 operations: block.operations ?? [],
                 includeNotes: true
             });
-            block.children?.forEach(child => addBlockAndChildren(child));
+            block.children?.forEach(child => addNode(child));
         }
     };
 
@@ -110,16 +111,20 @@ function buildExecutionUnits(part: Part, song: Song): ExecutionUnit[] {
                 operations: [],
                 includeNotes: true
             });
-            definition.children?.forEach(child => addBlockAndChildren(child));
+            definition.children?.forEach(child => addNode(child));
+        }
+    };
+
+    const addNode = (node: SongNode) => {
+        if (node.kind === 'reference') {
+            addReference(node);
+        } else {
+            addBlockAndChildren(node);
         }
     };
 
     (part.items ?? []).forEach((item: PartItem) => {
-        if (item.kind === 'reference') {
-            addReference(item);
-        } else {
-            addBlockAndChildren(item);
-        }
+        addNode(item);
     });
 
     return units;
@@ -191,7 +196,11 @@ export function substituteVariablesInSong(song: Song): void {
                 block.blockContent.notes = value;
             }
         }
-        block.children?.forEach(processBlock);
+        block.children?.forEach(child => {
+            if (child.kind === 'block') {
+                processBlock(child);
+            }
+        });
     };
 
     song.blocks?.forEach(processBlock);

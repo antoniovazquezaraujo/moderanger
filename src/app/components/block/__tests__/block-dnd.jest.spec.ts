@@ -220,7 +220,7 @@ describe('BlockComponent · drag & drop de bloques', () => {
     treeValue.push(moved);
     component.onNodeDrop({ dragNode: moved as BlockNode, dropNode: root as BlockNode });
 
-    expect(root.children.map(child => child.label)).toEqual(['Hijo', 'Movido']);
+    expect((root.children as Block[]).map(child => child.label)).toEqual(['Hijo', 'Movido']);
     expect(component.treeValue).toEqual([root]);
   });
 
@@ -235,7 +235,7 @@ describe('BlockComponent · drag & drop de bloques', () => {
     treeValue.unshift(moved);
     component.onNodeDrop({ dragNode: moved as BlockNode, dropNode: root as BlockNode });
 
-    expect(root.children.map(child => child.label)).toEqual(['Movido', 'Hijo']);
+    expect((root.children as Block[]).map(child => child.label)).toEqual(['Movido', 'Hijo']);
     expect(component.treeValue).toEqual([root]);
   });
 
@@ -253,7 +253,7 @@ describe('BlockComponent · drag & drop de bloques', () => {
     container.children.push(moved);
     component.onNodeDrop({ dragNode: moved as BlockNode, dropNode: child as BlockNode });
 
-    expect(container.children.map(node => node.label)).toEqual(['Hijo', 'Movido']);
+    expect((container.children as Block[]).map(node => node.label)).toEqual(['Hijo', 'Movido']);
     expect(component.treeValue).toEqual([child, moved]);
   });
 

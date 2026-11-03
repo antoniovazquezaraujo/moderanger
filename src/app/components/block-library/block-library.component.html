@@ -75,7 +75,7 @@ parts, con las definiciones y su edición. Mismo lenguaje visual que Variables.
           </div>
           @if (isExpanded(definition)) {
             <div class="library-entry-body">
-              <app-block [block]="definition" [hideLabel]="true" [hideControls]="true"
+              <app-block [block]="definition" [song]="song" (editDefinition)="focusDefinition($event)" [hideLabel]="true" [hideControls]="true"
               [hideHeader]="true" [forceExpanded]="true"></app-block>
             </div>
           }

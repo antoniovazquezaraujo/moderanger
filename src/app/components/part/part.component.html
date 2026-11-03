@@ -55,6 +55,8 @@
         @if (item.kind === 'block') {
           <app-block
             [block]="asBlock(item)"
+            [song]="song"
+            (editDefinition)="onEditDefinition($event)"
             (onDuplicateBlock)="onDuplicateBlock($event)"
             (onRemoveBlock)="onRemoveBlock($event)"
             (onAddChild)="onAddChild($event)">

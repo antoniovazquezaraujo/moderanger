@@ -183,6 +183,27 @@ describe('song-blocks · biblioteca de definiciones (fase 2)', () => {
     expect(nextBlockLabel(song)).toBe('Block 3');
   });
 
+  it('blockUsages, rename y remove recorren referencias anidadas', () => {
+    const song = songWith('Riff', 'Contenedor');
+    const outer = new Block();
+    outer.children = [referenceTo('Riff')];
+    const part = new Part();
+    part.items = [outer];
+    song.parts = [part];
+    const container = song.blocks[1];
+    container.children = [referenceTo('Riff')];
+
+    expect(blockUsages(song, 'Riff')).toHaveLength(1);
+    expect(renameBlockDefinition(song, song.blocks[0], 'Riff', 'Riff 2')).toBe(true);
+    expect((outer.children[0] as BlockReference).targetLabel).toBe('Riff 2');
+    expect((container.children[0] as BlockReference).targetLabel).toBe('Riff 2');
+
+    expect(removeBlockDefinition(song, song.blocks[0])).toBe(2);
+    expect(outer.children).toHaveLength(0);
+    expect(container.children).toHaveLength(0);
+    expect(song.blocks.map(block => block.label)).toEqual(['Contenedor']);
+  });
+
   it('blockUsages devuelve vacío para un label inexistente o un label vacío', () => {
     const song = songWith('Riff');
     const part = new Part();

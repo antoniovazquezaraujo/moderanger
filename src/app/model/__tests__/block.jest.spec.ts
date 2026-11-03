@@ -61,7 +61,7 @@ describe('Block.clone', () => {
     const clone = parent.clone();
 
     expect(clone.children[0]).not.toBe(child);
-    expect(clone.children[0].label).toBe('hijo');
+    expect((clone.children[0] as Block).label).toBe('hijo');
   });
 
   it('clona la duración por defecto y la referencia a variable sin suscribirse', () => {

@@ -201,19 +201,46 @@ h1 { /* Add some style for the header */
   position: relative;
 }
 
-/* `left: 7px` con `width: 2px` deja la línea centrada en la mitad exacta de
-   la franja de indentación (8px desde el borde del `ul`) y su borde derecho
-   (x+9) empalma con el inicio del conector, que arranca a `1px` de la caja
-   extendida del header. */
-.p-tree .p-tree-node-children::before {
+/* PrimeNG 21 reparte la indentación en dos capas: `1rem` de padding-left
+   en la `ul` y otros `0.5rem` de padding-left en el content del hijo. El
+   bloque empieza en `ul + 1rem` (su caja de header se extiende 14px a la
+   izquierda), así que la guía debe quedar pegada a ese borde: el hijo
+   arranca en `ul + 14px` y su trazo de 2px se pinta en `left: -2px` del
+   `p-treenode`. La guía se dibuja por hijo, no en la `ul` completa, para
+   poder cortar la rama en el último nodo y formar una L. */
+.p-tree .p-tree-node-children > p-treenode {
+  position: relative;
+}
+
+.p-tree .p-tree-node-children > p-treenode::before {
   content: '';
   position: absolute;
   top: 0;
-  bottom: 0;
-  left: 7px;
+  bottom: -2px;
+  left: -2px;
   width: 2px;
   background-color: #a3a3a3;
   pointer-events: none;
+  z-index: 1;
+}
+
+/* El primer hijo empieza en el borde superior de la `ul` (padding 2px). */
+.p-tree .p-tree-node-children > p-treenode:first-of-type::before {
+  top: -2px;
+}
+
+/* Último hijo: la vertical termina en su cabecera, formando una L. El
+   tramo del `p-treenode` llega hasta el borde superior del header (1px de
+   borde + 2px de padding del content); el resto hasta el centro lo pinta
+   el propio header (ver más abajo). */
+.p-tree .p-tree-node-children > p-treenode:last-of-type::before {
+  bottom: auto;
+  height: 3px;
+}
+
+.p-tree .p-tree-node-children > p-treenode:first-of-type:last-of-type::before {
+  top: -2px;
+  height: 5px;
 }
 
 /* Ramal del bloque padre: cuando un bloque con asa tiene hijos, la guía de
@@ -230,17 +257,16 @@ h1 { /* Add some style for the header */
   position: relative;
 }
 
-/* Nodos anidados: la caja del header se extiende 14px a la izquierda
-   (margen negativo del conector) y su padding de 14px devuelve el asa a
-   content+6; la guía vive en content+7 → 14 + 1 = 15px desde la caja. */
+/* Nodos anidados: la caja del header empieza 1px a la izquierda del content
+   del hijo; la guía vive en content+12 → 12 - (-1) = 13px desde la caja. */
 .p-tree .p-tree-node-children .p-tree-node-content:has(+ .p-tree-node-children):has(.block-drag-handle) .block-header::after {
-  left: 15px;
+  left: 13px;
 }
 
-/* Raíces de contenedor: su header no lleva extensión; la guía queda a 1px
-   del borde de la caja (que arranca en content+6, como el asa). */
+/* Raíces de contenedor: su header no lleva la extensión de 14px; la guía
+   queda 1px a la izquierda de la caja (que arranca en content+13). */
 .p-tree .p-tree-root-children > p-treenode > li.p-tree-node > .p-tree-node-content:has(+ .p-tree-node-children):has(.block-drag-handle) .block-header::after {
-  left: 1px;
+  left: -1px;
 }
 
 /* Tramo de cabecera: de la altura del asa (centro del header) al borde
@@ -256,13 +282,13 @@ h1 { /* Add some style for the header */
   z-index: 1;
 }
 
-/* Tramo del cuerpo: el body arranca en content+6 → 1px; `top: -1px` salva
-   su `margin-top` y `bottom: -4px` el hueco hasta la `ul` de hijos para que
-   la línea no se corte entre header, Commands/Operations y lista. */
+/* Tramo del cuerpo: el body arranca en content+13 → -1px; `top: -1px`
+   salva su `margin-top` y `bottom: -4px` el hueco hasta la `ul` de hijos
+   para que la línea no se corte entre header, Commands/Operations y lista. */
 .p-tree .p-tree-node-content:has(+ .p-tree-node-children):has(.block-drag-handle) .block-body::before {
   content: '';
   position: absolute;
-  left: 1px;
+  left: -1px;
   top: -1px;
   bottom: -4px;
   width: 2px;
@@ -285,6 +311,59 @@ h1 { /* Add some style for the header */
   background-repeat: no-repeat;
   background-size: 12px 2px;
   background-position: 1px center;
+}
+
+/* Conector de las referencias `use` anidadas: no tienen `.block-header`,
+   así que el ramal se engancha al centro de su cabecera. La tarjeta empieza
+   7px a la derecha del content del hijo (borde de acento); el trazo va de
+   la guía a ese borde, sin invadir el chip. */
+.p-tree .p-tree-node-children app-block-reference .reference-header {
+  position: relative;
+}
+
+.p-tree .p-tree-node-children app-block-reference .reference-header::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  width: 7px;
+  height: 2px;
+  transform: translateY(-50%);
+  background-color: #a3a3a3;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Cierre en L del último hijo: tramo vertical desde el borde superior del
+   header hasta su centro, justo donde engancha el conector horizontal.
+   Los bloques usan el header normal; las referencias, la cabecera de su
+   tarjeta (x = content+30, guía = content+12 → -18px). */
+.p-tree .p-tree-node-children > p-treenode:last-of-type .block-header {
+  position: relative;
+}
+
+.p-tree .p-tree-node-children > p-treenode:last-of-type .block-header::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  bottom: 50%;
+  width: 2px;
+  background-color: #a3a3a3;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.p-tree .p-tree-node-children > p-treenode:last-of-type .reference-header::after {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 0;
+  bottom: 50%;
+  width: 2px;
+  background-color: #a3a3a3;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Drag & drop de bloques: zonas de inserción amplias y visibles.

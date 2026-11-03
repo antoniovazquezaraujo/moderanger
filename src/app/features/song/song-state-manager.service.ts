@@ -168,7 +168,9 @@ export class SongStateManagerService {
       
       // Process child blocks
       for (const child of block.children) {
-        processBlock(child);
+        if (child.kind === 'block') {
+          processBlock(child);
+        }
       }
     };
 

@@ -239,7 +239,7 @@ export class PartComponent implements OnInit {
                 
                 // Si no lo encontramos, buscar recursivamente en cada hijo
                 for (const child of parentBlock.children) {
-                    if (findParentAndAddCopy(child, childBlock)) {
+                    if (child.kind === 'block' && findParentAndAddCopy(child, childBlock)) {
                         return true;
                     }
                 }

@@ -27,6 +27,7 @@ All notable changes to **Mode Ranger**. Format based on
 
 ### Changed
 
+- **Experimental nested reusable references**: `use` can now appear inside inline blocks and inside `blocks` definitions. The model uses `SongNode = Block | BlockReference`, the parser rejects cycles, and the player/compiler expand the nested calls. This is a prototype branch; the user-facing format documentation will follow once the scope is approved.
 - **Deprecation cleanup**: removed the unused `@angular/animations` runtime/provider and migrated the PrimeNG preset from the deprecated `@primeng/themes` to `@primeuix/themes`.
 - **Standalone components**: every component is standalone and `EditorModule` has been removed. `AppComponent` imports `SongEditorComponent` directly; each component declares its own Angular and PrimeNG dependencies.
 - **Application builder**: migrated the Angular build from the webpack browser builder to `@angular/build:application` (esbuild/Vite). The production output now lives under `dist/moderanger/browser`; the release workflow and release docs were updated accordingly.

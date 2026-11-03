@@ -28,6 +28,17 @@ hijos cuando es un contenedor, preservando el comportamiento clásico.
     (onNodeDrop)="onNodeDrop($event)"
     [style]="{'height': 'auto', 'overflow-y': 'auto'}">
     <ng-template let-node pTemplate="default">
+      @if (node.kind === 'reference') {
+        <app-block-reference
+          [reference]="node"
+          [song]="song"
+          (editDefinition)="editDefinition.emit($event)"
+          (removeReference)="removeReference($event)"
+          (duplicateReference)="duplicateReference($event)"
+          (moveUp)="moveReference(node, -1)"
+          (moveDown)="moveReference(node, 1)">
+        </app-block-reference>
+      } @else {
       <div class="block-content">
         <!-- Header: Contains drag handle, toggler, label, repetitions and controls.
         The root header can be hidden when a host (block library) owns it. -->
@@ -99,6 +110,7 @@ hijos cuando es un contenedor, preservando el comportamiento clásico.
             </div>
           }
         </div>
+      }
       </ng-template>
       <!-- Add empty template to hide default toggler icon -->
       <ng-template pTemplate="togglericon"></ng-template>

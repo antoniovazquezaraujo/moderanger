@@ -3,6 +3,7 @@ import { Player } from "./player";
 import { Song } from "./song";
 import { NoteData } from "./note";
 import { Part, PartItem } from "./part";
+import type { SongNode } from "src/app/model/song-node";
 import { Block } from "./block";
 import { BlockReference } from "./block-reference";
 import { PlayMode, arpeggiate } from "./play.mode";
@@ -490,7 +491,11 @@ export class SongPlayer {
                       console.warn(`Variable ${block.blockContent.variableName} not found or not a string for block ${block.id}`);
                   }
              }
-             block.children?.forEach(processBlock);
+             block.children?.forEach(child => {
+                 if (child.kind === 'block') {
+                     processBlock(child);
+                 }
+             });
         };
         // La biblioteca `blocks` alimenta las referencias: sus definiciones
         // también resuelven `notes $var`.
@@ -527,7 +532,7 @@ export class SongPlayer {
                     childLevel,
                     parentBlock
                 });
-                block.children?.forEach(child => addBlockAndChildren(child, childLevel + 1, block));
+                block.children?.forEach(child => addChild(child, childLevel + 1, block));
             }
         };
 
@@ -569,7 +574,15 @@ export class SongPlayer {
                     childLevel
                 });
                 // 6. hijos de la definición.
-                definition.children?.forEach(child => addBlockAndChildren(child, childLevel + 1, definition));
+                definition.children?.forEach(child => addChild(child, childLevel + 1, definition));
+            }
+        };
+
+        const addChild = (child: SongNode, childLevel: number, parentBlock: Block) => {
+            if (child.kind === 'reference') {
+                addReference(child, childLevel);
+            } else {
+                addBlockAndChildren(child, childLevel, parentBlock);
             }
         };
 

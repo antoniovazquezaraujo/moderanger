@@ -18,13 +18,17 @@ import { Tooltip } from 'primeng/tooltip';
 import { Button } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { MelodyEditorWrapperComponent } from '../melody-editor-wrapper/melody-editor-wrapper.component';
+import { BlockReferenceComponent } from '../block-reference/block-reference.component';
+import { BlockReference } from 'src/app/model/block-reference';
+import type { SongNode } from 'src/app/model/song-node';
+import { Song } from 'src/app/model/song';
 
 /**
  * Nodo de `p-tree`: el propio `Block` más el estado de expansión que gestiona
  * PrimeNG. Es estado de UI: no forma parte de `Block` ni se serializa.
  * PrimeNG además muta `parent` al serializar el árbol (`serializeNodes`).
  */
-type BlockTreeNode = Block & { expanded?: boolean; parent?: BlockTreeNode };
+type BlockTreeNode = SongNode & { expanded?: boolean; parent?: BlockTreeNode; droppable?: boolean };
 type ExpandableNode = { expanded?: boolean };
 
 /** Datos que PrimeNG emite en `onNodeDrop`. */
@@ -38,7 +42,7 @@ interface BlockTreeDropEvent {
     selector: 'app-block',
     templateUrl: './block.component.html',
     styleUrls: ['./block.component.scss'],
-    imports: [Bind, Tree, PrimeTemplate, Tooltip, Button, FormsModule, MelodyEditorWrapperComponent, BlockCommandsComponent]
+    imports: [Bind, Tree, PrimeTemplate, Tooltip, Button, FormsModule, MelodyEditorWrapperComponent, BlockCommandsComponent, BlockReferenceComponent]
 })
 export class BlockComponent implements OnInit, OnDestroy {
   private _block!: Block;
@@ -69,7 +73,7 @@ export class BlockComponent implements OnInit, OnDestroy {
    */
   dragging = false;
 
-  @Input() 
+  @Input()
   set block(value: Block) {
     this._block = value;
     this.initializeBlockContent();
@@ -104,6 +108,9 @@ export class BlockComponent implements OnInit, OnDestroy {
   @Output() onDuplicateBlock: EventEmitter<any> = new EventEmitter();
   @Output() onRemoveBlock: EventEmitter<any> = new EventEmitter();
   @Output() onAddChild: EventEmitter<any> = new EventEmitter();
+  @Output() editDefinition = new EventEmitter<string>();
+
+  @Input() song!: Song;
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
@@ -135,7 +142,7 @@ export class BlockComponent implements OnInit, OnDestroy {
    */
   private expandRootWithChildren(): void {
     const node = this._block as BlockTreeNode | undefined;
-    if (node && node.hasOwnContent() && (node.children?.length ?? 0) > 0 && node.expanded === undefined) {
+    if (node && node.kind === 'block' && node.hasOwnContent() && (node.children?.length ?? 0) > 0 && node.expanded === undefined) {
       node.expanded = true;
     }
   }
@@ -148,11 +155,13 @@ export class BlockComponent implements OnInit, OnDestroy {
     this.removeChildFrom(this._block, block);
   }
 
-  removeChildFrom(parent: Block, childToRemove: Block) {
+  removeChildFrom(parent: Block, childToRemove: SongNode) {
     if (parent.children.length > 0) {
       parent.children = parent.children.filter(t => t !== childToRemove);
       for (let child of parent.children) {
-        this.removeChildFrom(child, childToRemove);
+        if (child.kind === 'block') {
+          this.removeChildFrom(child, childToRemove);
+        }
       }
     }  
   }
@@ -210,11 +219,26 @@ export class BlockComponent implements OnInit, OnDestroy {
     if (this.hasOwnContent) {
       const root = this._block as BlockTreeNode;
       if (!this.rootTreeValue || this.rootTreeValue[0] !== root) {
-        this.rootTreeValue = [root];
+        this.rootTreeValue = this.prepareTree([root]);
       }
       return this.rootTreeValue;
     }
-    return this._block?.children ?? [];
+    return this.prepareTree((this._block?.children ?? []) as BlockTreeNode[]);
+  }
+
+  /** Las referencias son hojas: no admiten drops ni hijos. */
+  private prepareTree(nodes: BlockTreeNode[]): BlockTreeNode[] {
+    const visit = (list: BlockTreeNode[]): void => {
+      list.forEach(node => {
+        if (node.kind === 'reference') {
+          node.droppable = false;
+        } else if (node.children) {
+          visit(node.children as BlockTreeNode[]);
+        }
+      });
+    };
+    visit(nodes);
+    return nodes;
   }
 
   /**
@@ -270,7 +294,7 @@ export class BlockComponent implements OnInit, OnDestroy {
   private expandDropTarget(event: BlockTreeDropEvent): void {
     const target = event.dropNode;
     const moved = event.dragNode;
-    if (!target || !moved || !target.children?.includes(moved)) {
+    if (!target || target.kind !== 'block' || !moved || !target.children?.includes(moved)) {
       return;
     }
     target.expanded = true;
@@ -295,12 +319,51 @@ export class BlockComponent implements OnInit, OnDestroy {
     const insertFirst = extraIndex < rootIndex;
     const [moved] = nodes.splice(extraIndex, 1);
     const insertAt = insertFirst ? 0 : this._block.children.length;
-    this._block.children.splice(insertAt, 0, moved as Block);
+    this._block.children.splice(insertAt, 0, moved as SongNode);
   }
 
   /** El bloque raíz visible del árbol no se puede mover: no tiene asa. */
   canDrag(node: BlockTreeNode): boolean {
     return node !== this._block;
+  }
+
+  /** Reordena una referencia hermana dentro del árbol de bloques. */
+  moveReference(reference: BlockReference, offset: number): void {
+    const parent = (reference as BlockTreeNode).parent;
+    const siblings = parent && parent.kind === 'block' ? parent.children : this._block.children;
+    const index = siblings.indexOf(reference);
+    const target = index + offset;
+    if (index === -1 || target < 0 || target >= siblings.length) {
+      return;
+    }
+    siblings.splice(index, 1);
+    siblings.splice(target, 0, reference);
+    this.blockChange.emit(this._block);
+    this.cdr.detectChanges();
+  }
+
+  /** Elimina una referencia hija del árbol de bloques. */
+  removeReference(reference: BlockReference): void {
+    const parent = (reference as BlockTreeNode).parent;
+    const siblings = parent && parent.kind === 'block' ? parent.children : this._block.children;
+    const index = siblings.indexOf(reference);
+    if (index !== -1) {
+      siblings.splice(index, 1);
+      this.blockChange.emit(this._block);
+      this.cdr.detectChanges();
+    }
+  }
+
+  /** Duplica una referencia hija justo detrás de la original. */
+  duplicateReference(reference: BlockReference): void {
+    const parent = (reference as BlockTreeNode).parent;
+    const siblings = parent && parent.kind === 'block' ? parent.children : this._block.children;
+    const index = siblings.indexOf(reference);
+    if (index !== -1) {
+      siblings.splice(index + 1, 0, reference.clone());
+      this.blockChange.emit(this._block);
+      this.cdr.detectChanges();
+    }
   }
 
   updateBlockNotes(notes: string, blockNode: Block): void {

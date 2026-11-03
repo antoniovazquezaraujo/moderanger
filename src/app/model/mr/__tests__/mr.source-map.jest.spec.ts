@@ -130,7 +130,7 @@ part P
 
     expect(sourceMap.filter((entry) => entry.kind === 'block')).toHaveLength(1);
     expect(findSourceEntryForNode(sourceMap, definition)).toBeUndefined();
-    expect(findSourceEntryForNode(sourceMap, definition.children[0])).toBeUndefined();
+    expect(findSourceEntryForNode(sourceMap, definition.children[0] as Block)).toBeUndefined();
   });
 
   it('conserva las entradas de partes/bloques y el blockPath tras una referencia', () => {

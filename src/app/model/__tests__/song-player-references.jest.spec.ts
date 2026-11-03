@@ -267,6 +267,36 @@ describe('SongPlayer · referencias `use` (orden §5.1)', () => {
     player.stop();
   });
 
+  it('expande referencias anidadas dentro de definiciones y bloques inline', async () => {
+    const text = [
+      'song Nested',
+      'version 1',
+      '',
+      'blocks',
+      '  block A',
+      '    notes',
+      '      4n:0',
+      '',
+      '  block B',
+      '    notes',
+      '      4n:1',
+      '',
+      '    use A repeats 2',
+      '',
+      'part P',
+      '  block Outer',
+      '    use B',
+      ''
+    ].join('\n');
+    const document = parseSong(text);
+    const { player, calls } = createRecordingPlayer();
+
+    await player.playPart(document.song.parts[0], document.song);
+
+    expect(calls.map(call => call.label)).toEqual(['B', 'A', 'A']);
+    player.stop();
+  });
+
   it('no emite console.error/warn en una reproducción normal de una referencia', async () => {
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);

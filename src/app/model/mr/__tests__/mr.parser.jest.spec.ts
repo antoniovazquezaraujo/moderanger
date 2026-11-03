@@ -238,10 +238,10 @@ describe('parseSong: partes y bloques', () => {
 
     expect(a.label).toBe('A');
     expect(a.repeatingTimes).toBe(2);
-    expect(a.children.map((child) => child.label)).toEqual(['A1', 'A2']);
+    expect(a.children.filter((child): child is Block => child.kind === 'block').map((child) => child.label)).toEqual(['A1', 'A2']);
     expect(b.label).toBe('B');
     expect(b.repeatingTimes).toBe(0);
-    expect(b.children[0].label).toBe('');
+    expect((b.children[0] as Block).label).toBe('');
   });
 
   it('exige que las partes contengan bloques a 2 espacios', () => {
@@ -649,7 +649,7 @@ part Cuerdas
     expect(riff.operations).toHaveLength(1);
     const coro = song.blocks[1];
     expect(coro.commands).toHaveLength(1);
-    expect(coro.children.map(child => child.label)).toEqual(['Intro']);
+    expect(coro.children.filter((child): child is Block => child.kind === 'block').map(child => child.label)).toEqual(['Intro']);
   });
 
   it('crea referencias como ítems de la parte, con llamada y repeats', () => {
@@ -777,26 +777,54 @@ part P
     expect((part.items[2] as BlockReference).repeatingTimes).toBe(0);
   });
 
-  it('rechaza `use` dentro del cuerpo de un bloque inline', () => {
-    const error = expectParseError(`blocks
+  it('acepta `use` dentro de un bloque inline', () => {
+    const document = parseSong(`blocks
   block Riff
+    notes
+      0
 
 part P
   block B
     use Riff
 `);
-
-    expect(error.message).toContain('referencias anidadas');
+    const block = document.song.parts[0].items[0] as Block;
+    expect(block.children).toHaveLength(1);
+    expect(block.children[0].kind).toBe('reference');
+    expect((block.children[0] as BlockReference).targetLabel).toBe('Riff');
   });
 
-  it('rechaza `use` dentro de un hijo de una definición', () => {
-    const error = expectParseError(`blocks
-  block Padre
-    block Hijo
-      use Padre
-`);
+  it('acepta `use` dentro de una definición y resuelve referencias hacia delante', () => {
+    const document = parseSong(`blocks
+  block B
+    use A
 
-    expect(error.message).toContain('referencias anidadas');
+  block A
+    notes
+      0
+
+part P
+  use B
+`);
+    const a = document.song.blocks.find(block => block.label === 'A')!;
+    const b = document.song.blocks.find(block => block.label === 'B')!;
+    expect(a).toBeDefined();
+    expect(b.children[0].kind).toBe('reference');
+    expect((b.children[0] as BlockReference).targetLabel).toBe('A');
+  });
+
+  it('rechaza ciclos directos e indirectos de definiciones', () => {
+    expect(expectParseError(`blocks
+  block A
+    use A
+`).message).toContain('ciclo de referencias: A -> A');
+
+    expect(expectParseError(`blocks
+  block A
+    use B
+
+  block B
+    use A
+`).message).toContain('ciclo de referencias: A -> B -> A');
   });
 
   it('exige el nombre en `use`', () => {

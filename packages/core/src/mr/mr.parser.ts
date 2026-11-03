@@ -179,6 +179,10 @@ class MrDocumentParser {
   private readonly sourceMap?: MrSourceMapEntry[];
   /** Nombres de las definiciones de `blocks` (unicidad y resolución de `use`). */
   private readonly blockLabels = new Set<string>();
+  /** Referencias pendientes de resolver cuando terminan de parsearse los `blocks`. */
+  private readonly pendingReferences: Array<{ reference: BlockReference; line: SourceLine; column: number }> = [];
+  /** Posición de cada referencia, para errores de ciclo. */
+  private readonly referencePositions = new Map<BlockReference, { line: SourceLine; column: number }>();
 
   constructor(private readonly lines: SourceLine[], sourceMap?: MrSourceMapEntry[]) {
     this.sourceMap = sourceMap;
@@ -231,6 +235,7 @@ class MrDocumentParser {
     // clave en la cabecera se aplican los valores por defecto.
     this.document.song.bpm = this.document.meta.bpm ?? DEFAULT_BPM;
     this.document.song.repeats = this.document.meta.repeats ?? DEFAULT_REPEATS;
+    this.validateReferences();
     return this.document;
   }
 
@@ -576,12 +581,13 @@ class MrDocumentParser {
         this.advance();
         block.children.push(this.parseBlock(line, partIndex, [...blockPath, block.children.length]));
       } else if (word === 'use') {
-        throw this.nestedReferenceError(line);
+        this.advance();
+        block.children.push(this.parseReference(line));
       } else {
         throw errorAt(
           line,
           line.indent + 1,
-          `clave desconocida '${word}' dentro de un bloque; se esperaba 'notes', 'commands', 'operations' o 'block'`
+          `clave desconocida '${word}' dentro de un bloque; se esperaba 'notes', 'commands', 'operations', 'block' o 'use'`
         );
       }
     }
@@ -627,12 +633,9 @@ class MrDocumentParser {
     if (i < words.length) {
       throw errorAt(line, words[i].column, `texto inesperado '${words[i].text}' tras la cabecera de la referencia`);
     }
-    if (!this.blockLabels.has(reference.targetLabel)) {
-      const defined = [...this.blockLabels];
-      const list = defined.length > 0 ? `; definidas: ${defined.join(', ')}` : '; no hay definiciones en blocks';
-      throw errorAt(line, nameWord.column, `no existe la definición '${reference.targetLabel}' en blocks${list}`);
-    }
     this.parseReferenceBody(reference, line.indent + 2);
+    this.pendingReferences.push({ reference, line, column: nameWord.column });
+    this.referencePositions.set(reference, { line, column: nameWord.column });
     return reference;
   }
 
@@ -671,6 +674,109 @@ class MrDocumentParser {
           `clave desconocida '${word}' dentro de una referencia; se esperaba 'commands' o 'operations'`
         );
       }
+    }
+  }
+
+  /**
+   * Resuelve todas las referencias cuando ya se han leído `blocks` y las
+   * partes. Esto permite referencias hacia definiciones posteriores y
+   * detecta ciclos en el grafo de definiciones.
+   */
+  private validateReferences(): void {
+    const definitions = new Map<string, Block>();
+    for (const block of this.document.song.blocks) {
+      definitions.set(block.label, block);
+    }
+
+    for (const pending of this.pendingReferences) {
+      if (definitions.has(pending.reference.targetLabel)) {
+        continue;
+      }
+      const defined = [...definitions.keys()];
+      const list = defined.length > 0 ? `; definidas: ${defined.join(', ')}` : '; no hay definiciones en blocks';
+      throw errorAt(
+        pending.line,
+        pending.column,
+        `no existe la definición '${pending.reference.targetLabel}' en blocks${list}`
+      );
+    }
+
+    const referencesIn = (block: Block): BlockReference[] => {
+      const references: BlockReference[] = [];
+      for (const child of block.children) {
+        if (child.kind === 'reference') {
+          references.push(child);
+        } else {
+          references.push(...referencesIn(child));
+        }
+      }
+      return references;
+    };
+
+    const graph = new Map<string, BlockReference[]>();
+    for (const block of this.document.song.blocks) {
+      graph.set(block.label, referencesIn(block));
+    }
+
+    const state = new Map<string, 0 | 1 | 2>();
+    const stack: string[] = [];
+
+    const visit = (label: string): string[] | null => {
+      state.set(label, 1);
+      stack.push(label);
+      for (const reference of graph.get(label) ?? []) {
+        const target = reference.targetLabel;
+        if (!definitions.has(target)) {
+          continue;
+        }
+        const targetState = state.get(target) ?? 0;
+        if (targetState === 1) {
+          const start = stack.indexOf(target);
+          return [...stack.slice(start), target];
+        }
+        if (targetState === 0) {
+          const cycle = visit(target);
+          if (cycle) {
+            return cycle;
+          }
+        }
+      }
+      stack.pop();
+      state.set(label, 2);
+      return null;
+    };
+
+    for (const block of this.document.song.blocks) {
+      if ((state.get(block.label) ?? 0) !== 0) {
+        continue;
+      }
+      const cycle = visit(block.label);
+      if (!cycle) {
+        continue;
+      }
+      const cycleTargets = new Set(cycle.slice(0, -1));
+      let position: { line: SourceLine; column: number } | undefined;
+      for (const reference of this.pendingReferences.map(item => item.reference)) {
+        if (cycleTargets.has(reference.targetLabel)) {
+          position = this.referencePositions.get(reference);
+          if (position) {
+            break;
+          }
+        }
+      }
+      if (!position) {
+        const firstDefinition = this.document.song.blocks[0];
+        const fallback = this.pendingReferences[0];
+        if (fallback) {
+          position = { line: fallback.line, column: fallback.column };
+        } else if (firstDefinition) {
+          throw new MrParseError(`ciclo de referencias: ${cycle.join(' -> ')}`, { line: 1, column: 1 });
+        }
+      }
+      if (!position) {
+        throw new MrParseError(`ciclo de referencias: ${cycle.join(' -> ')}`, { line: 1, column: 1 });
+      }
+      throw errorAt(position.line, position.column, `ciclo de referencias: ${cycle.join(' -> ')}`);
     }
   }
 

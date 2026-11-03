@@ -47,7 +47,7 @@ function blockSnapshot(block: Block): unknown {
       }
       return { type: operation.constructor.name };
     }),
-    children: block.children.map(blockSnapshot)
+    children: block.children.filter((child): child is Block => child.kind === 'block').map(blockSnapshot)
   };
 }
 
@@ -111,6 +111,33 @@ describe('round-trip: idempotencia sobre el corpus', () => {
       expect(documentSnapshot(reparsed)).toEqual(documentSnapshot(document));
     });
   }
+});
+
+describe('round-trip: referencias anidadas', () => {
+  it('conserva use anidado en definiciones e inline blocks', () => {
+    const text = `song Nested
+version 1
+
+blocks
+  block A
+    notes
+      4n:0
+
+  block B
+    notes
+      4n:1
+
+    use A
+
+part P
+  block Outer
+    notes
+      4n:2
+
+    use B
+`;
+    expect(serializeSong(parseSong(text))).toBe(text);
+  });
 });
 
 describe('round-trip: normalización de entradas no canónicas', () => {

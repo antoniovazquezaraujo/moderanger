@@ -20,6 +20,12 @@ describe('BlockComponent · cabecera gestionada por la biblioteca', () => {
     expect(template).toContain('@if (!hideControls || node !== block) {');
   });
 
+  it('renderiza referencias anidadas con el componente de referencia', () => {
+    expect(template).toContain("node.kind === 'reference'");
+    expect(template).toContain('<app-block-reference');
+    expect(component).toContain('@Input() song!: Song');
+  });
+
   it('conserva el nombre y las acciones cuando no se ocultan (parts)', () => {
     expect(template).toContain('class="header-item block-label"');
     expect(template).toContain('class="header-item block-controls"');

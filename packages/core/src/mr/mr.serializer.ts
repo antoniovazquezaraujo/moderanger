@@ -12,6 +12,7 @@ import { BlockReference } from '../block-reference';
 import { Command, CommandType } from '../command';
 import { AssignOperation, BaseOperation, VaryOperation } from '../operation';
 import { Part } from '../part';
+import type { SongNode } from '../song-node';
 import { getPlayModeNames, PlayMode } from '../play.mode';
 import { Scale } from '../scale';
 import { DEFAULT_BPM, DEFAULT_REPEATS, MAX_BPM, MIN_BPM, MIN_REPEATS } from '../song';
@@ -68,11 +69,7 @@ export function serializeSong(document: SongDocument): string {
       if (itemIndex > 0) {
         lines.push('');
       }
-      if (item.kind === 'reference') {
-        emitReference(lines, item, 1);
-      } else {
-        emitBlock(lines, item, 1);
-      }
+      emitNode(lines, item, 1);
     });
   }
   return `${lines.join('\n')}\n`;
@@ -178,8 +175,16 @@ function emitBlock(lines: string[], block: Block, level: number): void {
       // Línea en blanco antes de un bloque hijo que no abre el cuerpo.
       lines.push('');
     }
-    emitBlock(lines, child, level + 1);
+    emitNode(lines, child, level + 1);
     bodyEmitted = true;
+  }
+}
+
+function emitNode(lines: string[], node: SongNode, level: number): void {
+  if (node.kind === 'reference') {
+    emitReference(lines, node, level);
+  } else {
+    emitBlock(lines, node, level);
   }
 }
 

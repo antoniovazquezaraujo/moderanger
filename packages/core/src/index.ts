@@ -19,6 +19,7 @@ export * from './note';
 export * from './octaved-grade';
 export * from './operation';
 export * from './part';
+export * from './song-node';
 export * from './player';
 export * from './play.mode';
 export * from './play.state';

@@ -1,6 +1,7 @@
 import { Block } from './block';
 import { BlockReference } from './block-reference';
 import { Part, PartItem } from './part';
+import type { SongNode } from './song-node';
 import { Song } from './song';
 
 /**
@@ -36,11 +37,16 @@ export interface BlockUsage {
 export function blockUsages(song: Song, label: string): BlockUsage[] {
   const usages: BlockUsage[] = [];
   (song?.parts ?? []).forEach((part, partIndex) => {
-    (part.items ?? []).forEach((item: PartItem) => {
-      if (item.kind === 'reference' && item.targetLabel === label) {
-        usages.push({ partIndex, part, partName: part.name, reference: item });
+    const visit = (node: PartItem): void => {
+      if (node.kind === 'reference') {
+        if (node.targetLabel === label) {
+          usages.push({ partIndex, part, partName: part.name, reference: node });
+        }
+        return;
       }
-    });
+      node.children.forEach(visit);
+    };
+    (part.items ?? []).forEach(visit);
   });
   return usages;
 }
@@ -67,12 +73,10 @@ export function renameBlockDefinition(song: Song, definition: Block, oldLabel: s
     return false;
   }
   definition.label = newLabel;
-  (song?.parts ?? []).forEach(part => {
-    (part.items ?? []).forEach(item => {
-      if (item.kind === 'reference' && item.targetLabel === oldLabel) {
-        item.targetLabel = newLabel;
-      }
-    });
+  forEachReference(song, reference => {
+    if (reference.targetLabel === oldLabel) {
+      reference.targetLabel = newLabel;
+    }
   });
   return true;
 }
@@ -106,16 +110,40 @@ export function createBlockReference(targetLabel: string): BlockReference {
  * referencias se han eliminado.
  */
 export function removeBlockDefinition(song: Song, definition: Block): number {
-  const usages = blockUsages(song, definition.label);
-  usages.forEach(usage => {
-    const { part } = usage;
-    // `forEach` sobre una copia (`blockUsages`) para no mutar el array en curso.
-    part.removeItem(usage.reference);
-  });
-  const removed = usages.length;
+  let removed = 0;
+  const removeFrom = (nodes: SongNode[]): void => {
+    for (let index = nodes.length - 1; index >= 0; index--) {
+      const node = nodes[index];
+      if (node.kind === 'reference') {
+        if (node.targetLabel === definition.label) {
+          nodes.splice(index, 1);
+          removed++;
+        }
+      } else {
+        removeFrom(node.children);
+      }
+    }
+  };
+  (song.parts ?? []).forEach(part => removeFrom(part.items));
+  (song.blocks ?? []).forEach(block => removeFrom(block.children));
   const index = (song.blocks ?? []).indexOf(definition);
   if (index !== -1) {
     song.blocks.splice(index, 1);
   }
   return removed;
+}
+
+/** Recorre todas las referencias de partes y definiciones. */
+export function forEachReference(song: Song, visit: (reference: BlockReference) => void): void {
+  const walk = (nodes: readonly SongNode[]): void => {
+    nodes.forEach(node => {
+      if (node.kind === 'reference') {
+        visit(node);
+      } else {
+        walk(node.children);
+      }
+    });
+  };
+  (song?.parts ?? []).forEach(part => walk(part.items));
+  (song?.blocks ?? []).forEach(block => walk(block.children));
 }
