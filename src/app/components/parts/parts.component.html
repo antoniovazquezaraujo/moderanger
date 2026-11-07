@@ -11,7 +11,7 @@ caben, la fila hace scroll horizontal. -->
       [style.width.px]="widthFor(i)"
       (onDuplicatePart)="handleDuplicatePart($event)"
       (onRemovePart)="removePart($event)"
-      (editDefinitionEvent)="editDefinitionEvent.emit($event)">
+      (contentEditEvent)="contentEditEvent.emit($event)">
     </app-part>
     @if (!last) {
       <div

@@ -1,5 +1,8 @@
 # Validación manual de la v1 (`.mr` + app)
 
+> **Documento histórico.** Describe el formato v1 y no forma parte del contrato
+> del formato v2. Se conserva como registro de la validación original.
+
 - **Estado:** checklist de aceptación de la v1 congelada (2026-10-03).
 - **Objetivo:** comprobar a mano, sobre la app real, que el lenguaje `.mr`, la GUI, el guardado/carga, el tempo y las variables funcionan como describe la [guía del lenguaje](../../user/manual_es.md).
 - **Basada en:** los E2E de las fases 2 y 3 y de las rondas de pulido/consolidación (`docs/developer/analysis/mr-fase2-vista-texto.md`, `mr-fase3-guardar-cargar.md`, `pulido-bpm-variables.md`, `saneo-bloque-b.md`).

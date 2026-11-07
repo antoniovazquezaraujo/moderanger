@@ -1,23 +1,26 @@
 import {
     BaseOperation,
     Block,
-    BlockReference,
     Command,
     durationToSeconds,
     NoteData,
     NoteGenerationService,
     NoteGenerationUnifiedService,
     Part,
-    PartItem,
     Player,
     Song,
     VariableContext
 } from '@moderanger/core';
 
-/** Unidad de ejecución musical: comandos/operaciones y, opcionalmente, notas. */
+/**
+ * Unidad de ejecución musical: un bloque en una pasada concreta.
+ *
+ * El orden de la pasada es preset → procedure → melody → hijos. Las
+ * repeticiones del bloque envuelven la pasada completa, hijos incluidos.
+ */
 interface ExecutionUnit {
     block: Block;
-    commands: Command[];
+    settings: Command[];
     operations: BaseOperation[];
     includeNotes: boolean;
 }
@@ -41,20 +44,22 @@ const NULL_AUDIO_ENGINE = {
 };
 
 /**
- * Genera los eventos de una parte con la misma secuencia que `SongPlayer`:
- * comandos/operaciones por unidad de ejecución, después las notas del bloque.
+ * Genera los eventos de una parte con la misma secuencia que el player:
+ * ajustes del preset, operaciones del procedure, notas de la melodía y
+ * bloques hijos.
  */
 export function compilePart(part: Part, song: Song, index: number): RawPart {
     const noteGenerator = new NoteGenerationService(new NoteGenerationUnifiedService());
     const player = new Player(index, part.instrumentType, `compiler-${index}`, NULL_AUDIO_ENGINE);
-    const units = buildExecutionUnits(part, song);
+    const units = buildExecutionUnits(part);
     const noteDatas: NoteData[] = [];
 
     units.forEach(unit => {
-        unit.commands.forEach(command => command.execute(player));
+        unit.settings.forEach(setting => setting.execute(player));
         unit.operations.forEach(operation => operation.execute());
-        if (unit.includeNotes && unit.block.blockContent?.notes?.trim()) {
-            noteDatas.push(...noteGenerator.generateNotesForBlock(unit.block, player));
+        const melody = unit.block.melody;
+        if (unit.includeNotes && melody && melody.notes.trim()) {
+            noteDatas.push(...noteGenerator.generateNotesForMelody(melody, player));
         }
     });
 
@@ -62,66 +67,26 @@ export function compilePart(part: Part, song: Song, index: number): RawPart {
 }
 
 /**
- * Construye las unidades de ejecución de una parte.
- *
- * Es la misma expansión que `SongPlayer._buildExecutionUnits`: bloques inline
- * con sus hijos/repeticiones y referencias `use` con el orden definición →
- * llamada → notas → hijos.
+ * Expansión estructural de una parte: por cada pasada de un bloque se ejecuta
+ * preset → procedure → melody → hijos. El árbol es acíclico por construcción
+ * (no hay referencias entre bloques).
  */
-function buildExecutionUnits(part: Part, song: Song): ExecutionUnit[] {
+function buildExecutionUnits(part: Part): ExecutionUnit[] {
     const units: ExecutionUnit[] = [];
-    const library = new Map<string, Block>();
-    (song.blocks ?? []).forEach(block => library.set(block.label, block));
 
     const addBlockAndChildren = (block: Block) => {
         for (let i = 0; i < block.repeatingTimes; i++) {
             units.push({
                 block,
-                commands: block.commands ?? [],
-                operations: block.operations ?? [],
-                includeNotes: true
+                settings: block.preset?.settings ?? [],
+                operations: block.procedure?.operations ?? [],
+                includeNotes: block.melody !== undefined
             });
-            block.children?.forEach(child => addBlockAndChildren(child));
+            block.children.forEach(child => addBlockAndChildren(child));
         }
     };
 
-    const addReference = (reference: BlockReference) => {
-        const definition = library.get(reference.targetLabel);
-        if (!definition) {
-            throw new Error(`la referencia '${reference.targetLabel}' no tiene definición en blocks`);
-        }
-        const passes = reference.repeatingTimes * definition.repeatingTimes;
-        for (let i = 0; i < passes; i++) {
-            units.push({
-                block: definition,
-                commands: definition.commands ?? [],
-                operations: definition.operations ?? [],
-                includeNotes: false
-            });
-            units.push({
-                block: definition,
-                commands: reference.commands ?? [],
-                operations: reference.operations ?? [],
-                includeNotes: false
-            });
-            units.push({
-                block: definition,
-                commands: [],
-                operations: [],
-                includeNotes: true
-            });
-            definition.children?.forEach(child => addBlockAndChildren(child));
-        }
-    };
-
-    (part.items ?? []).forEach((item: PartItem) => {
-        if (item.kind === 'reference') {
-            addReference(item);
-        } else {
-            addBlockAndChildren(item);
-        }
-    });
-
+    part.items.forEach(item => addBlockAndChildren(item));
     return units;
 }
 
@@ -180,26 +145,17 @@ function appendNoteData(noteData: NoteData, start: number, duration: number, eve
 }
 
 /**
- * Sustituye `notes $variable` antes de generar, igual que `SongPlayer`.
- * La mutación es deliberada: el compilador trabaja con una copia parseada.
+ * Sustituye `notes $variable` en las melodías antes de generar, igual que el
+ * player. La mutación es deliberada: el compilador trabaja con una copia
+ * parseada.
  */
 export function substituteVariablesInSong(song: Song): void {
-    const processBlock = (block: Block) => {
-        if (block.blockContent?.isVariable && block.blockContent.variableName) {
-            const value = VariableContext.getValue(block.blockContent.variableName);
+    song.melodies.forEach(melody => {
+        if (melody.content.isVariable && melody.content.variableName) {
+            const value = VariableContext.getValue(melody.content.variableName);
             if (typeof value === 'string') {
-                block.blockContent.notes = value;
+                melody.content.notes = value;
             }
         }
-        block.children?.forEach(processBlock);
-    };
-
-    song.blocks?.forEach(processBlock);
-    song.parts.forEach(part => {
-        part.items?.forEach(item => {
-            if (item.kind === 'block') {
-                processBlock(item);
-            }
-        });
     });
 }

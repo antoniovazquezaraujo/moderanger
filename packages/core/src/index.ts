@@ -5,10 +5,10 @@
  * compilador MIDI.
  */
 export * from './block.content';
-export * from './block-reference';
 export * from './block';
 export * from './command.notes';
 export * from './command';
+export * from './content';
 export * from './duration';
 export * from './event';
 export * from './instrument-type';
@@ -23,7 +23,6 @@ export * from './player';
 export * from './play.mode';
 export * from './play.state';
 export * from './scale';
-export * from './song-blocks';
 export * from './song';
 export * from './variable.context';
 export * from './mr';

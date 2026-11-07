@@ -141,7 +141,7 @@
           </div>
         }
       </div>
-      <app-block-library [song]="song" #blockLibrary></app-block-library>
+      <app-content-library [song]="song" #contentLibrary></app-content-library>
       <div class="parts-panel">
         <div class="parts-panel-header" (click)="togglePartsPanel()">
           <p-button
@@ -169,7 +169,7 @@
               [song]="song"
               (removePartEvent)="removePartFromSong($event)"
               (onDuplicatePartEvent)="duplicatePart($event)"
-              (editDefinitionEvent)="focusBlockDefinition($event)">
+              (contentEditEvent)="focusContent($event)">
             </app-song>
           </div>
         }

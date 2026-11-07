@@ -55,9 +55,9 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
   @Input() showVariableIcon: boolean = true;
   @Input() defaultDuration: NoteDuration = '4n';
   /**
-   * Id del bloque que edita este editor. Si coincide con el bloque que suena,
-   * el editor resalta la nota-origen (`playing`). `undefined` (p. ej. el editor
-   * de PATTERN) desactiva el resaltado.
+   * Id de la melodía que edita este editor. Si coincide con la melodía que
+   * suena, el editor resalta la nota-origen (`playing`). `undefined` (p. ej.
+   * el editor de PATTERN) desactiva el resaltado.
    */
   @Input() playingBlockId?: number;
   @Output() notesChange = new EventEmitter<string>();
@@ -201,7 +201,7 @@ export class MelodyEditorComponent implements OnInit, AfterViewInit, OnDestroy, 
       return [];
     }
     return sources
-      .filter(source => source.blockId === this.playingBlockId)
+      .filter(source => (source.melodyId ?? source.blockId) === this.playingBlockId)
       .map(source => source.sourcePath);
   }
 

@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
 import { PartsComponent } from '../parts/parts.component';
+import type { ContentEditRequest } from '../block-content-links/block-content-links.component';
 
 @Component({
     selector: 'app-song',
@@ -14,8 +15,8 @@ export class SongComponent implements OnInit {
     @Input() song: Song = new Song();
     @Output() removePartEvent = new EventEmitter<Part>();
     @Output() onDuplicatePartEvent = new EventEmitter<Part>();
-    /** Navegación a una definición de la biblioteca (burbujea desde las parts). */
-    @Output() editDefinitionEvent = new EventEmitter<string>();
+    /** Navegación a una definición de contenido (burbujea desde las parts). */
+    @Output() contentEditEvent = new EventEmitter<ContentEditRequest>();
     
     constructor() {
     }

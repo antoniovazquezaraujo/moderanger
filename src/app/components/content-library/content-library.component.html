@@ -1,0 +1,231 @@
+<!--
+Biblioteca global de contenido (melodías, presets y procedimientos). Panel
+plegable encima de las parts, con pestañas y el mismo lenguaje visual que el
+resto de paneles. Cada entrada navega y resalta desde los chips de bloque.
+-->
+<div class="content-library-panel">
+  <div class="content-library-header" (click)="togglePanel()" #panelHeader>
+    <p-button
+      [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+      styleClass="p-button-text p-button-sm content-library-toggler"
+      [attr.aria-expanded]="expanded"
+      aria-label="Toggle content library">
+    </p-button>
+    <span class="content-library-title">Content</span>
+    @if (totalCount) {
+      <span class="content-library-count">{{ totalCount }}</span>
+    }
+    <p-button
+      class="content-library-add"
+      icon="pi pi-plus"
+      [pTooltip]="'Add ' + (activeTab === 'melody' ? 'melody' : activeTab === 'preset' ? 'preset' : 'procedure')"
+      tooltipPosition="top"
+      [attr.aria-label]="'Add ' + activeTab"
+      (click)="$event.stopPropagation(); addEntry()">
+    </p-button>
+  </div>
+
+  @if (expanded) {
+    <div class="content-library-content">
+      <div class="content-library-tabs" role="tablist" aria-label="Content libraries">
+        @for (tab of tabs; track tab.kind) {
+          <button
+            type="button"
+            role="tab"
+            class="content-library-tab"
+            [class.content-library-tab--active]="activeTab === tab.kind"
+            [attr.aria-selected]="activeTab === tab.kind"
+            (click)="selectTab(tab.kind)">
+            {{ tab.label }}
+            <span class="content-library-tab-count">{{ countFor(tab.kind) }}</span>
+          </button>
+        }
+      </div>
+
+      @if (renameWarning) {
+        <p class="content-library-warning" role="alert">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i> {{ renameWarning }}
+        </p>
+      }
+
+      @switch (activeTab) {
+        @case ('melody') {
+          @for (melody of melodies; track trackByEntry($index, melody)) {
+            <div class="library-entry" [class.library-entry--highlight]="isHighlighted(melody)" [class.library-entry--playing]="isPlayingEntry('melody', melody)">
+              <div class="library-entry-header">
+                <p-button
+                  [icon]="isExpanded(melody) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                  styleClass="p-button-text p-button-sm library-entry-toggler"
+                  [attr.aria-expanded]="isExpanded(melody)"
+                  [attr.aria-label]="(isExpanded(melody) ? 'Collapse' : 'Expand') + ' melody ' + melody.label"
+                  (click)="toggleEntry(melody)">
+                </p-button>
+                <input type="text"
+                  class="library-name"
+                  [(ngModel)]="melody.label"
+                  (ngModelChange)="onRenameInput('melody', melody)"
+                  (blur)="onRenameBlur('melody', melody)"
+                  placeholder="Melody name"
+                  aria-label="Melody name">
+                @if (usageCount('melody', melody) > 0) {
+                  <span class="library-usage"
+                    [pTooltip]="usageTooltip('melody', melody)"
+                    tooltipPosition="top">
+                    <i class="pi pi-link" aria-hidden="true"></i>×{{ usageCount('melody', melody) }}
+                  </span>
+                }
+                <span class="library-entry-controls">
+                  <p-button icon="pi pi-copy" pTooltip="Duplicate melody" tooltipPosition="top"
+                    aria-label="Duplicate melody" (click)="duplicateEntry('melody', melody)"></p-button>
+                  <p-button icon="pi pi-times" pTooltip="Delete melody" tooltipPosition="top"
+                    aria-label="Delete melody" (click)="requestDelete('melody', melody)"></p-button>
+                </span>
+              </div>
+              @if (isExpanded(melody)) {
+                <div class="library-entry-body library-entry-body--melody">
+                  <div class="content-melody-row">
+                    <div class="content-duration-row">
+                      <span class="content-duration-label">Default duration</span>
+                      <select class="content-duration-select" [(ngModel)]="melody.defaultDuration" aria-label="Default duration">
+                        <option [ngValue]="undefined">—</option>
+                        @for (duration of availableDurations; track duration) {
+                          <option [ngValue]="duration">{{ duration }}</option>
+                        }
+                      </select>
+                    </div>
+                    <app-melody-editor-wrapper
+                      class="content-melody-editor"
+                      [id]="'library-melody-' + melody.id"
+                      [(ngModel)]="melody.notes"
+                      [blockId]="melody.id"
+                      [showVariableIcon]="true">
+                    </app-melody-editor-wrapper>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+          @if (melodies.length === 0) {
+            <p class="content-library-empty">No melodies yet.</p>
+          }
+        }
+
+        @case ('preset') {
+          @for (preset of presets; track trackByEntry($index, preset)) {
+            <div class="library-entry" [class.library-entry--highlight]="isHighlighted(preset)" [class.library-entry--playing]="isPlayingEntry('preset', preset)">
+              <div class="library-entry-header">
+                <p-button
+                  [icon]="isExpanded(preset) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                  styleClass="p-button-text p-button-sm library-entry-toggler"
+                  [attr.aria-expanded]="isExpanded(preset)"
+                  [attr.aria-label]="(isExpanded(preset) ? 'Collapse' : 'Expand') + ' preset ' + preset.label"
+                  (click)="toggleEntry(preset)">
+                </p-button>
+                <input type="text"
+                  class="library-name"
+                  [(ngModel)]="preset.label"
+                  (ngModelChange)="onRenameInput('preset', preset)"
+                  (blur)="onRenameBlur('preset', preset)"
+                  placeholder="Preset name"
+                  aria-label="Preset name">
+                @if (usageCount('preset', preset) > 0) {
+                  <span class="library-usage"
+                    [pTooltip]="usageTooltip('preset', preset)"
+                    tooltipPosition="top">
+                    <i class="pi pi-link" aria-hidden="true"></i>×{{ usageCount('preset', preset) }}
+                  </span>
+                }
+                <span class="library-entry-controls">
+                  <p-button icon="pi pi-copy" pTooltip="Duplicate preset" tooltipPosition="top"
+                    aria-label="Duplicate preset" (click)="duplicateEntry('preset', preset)"></p-button>
+                  <p-button icon="pi pi-times" pTooltip="Delete preset" tooltipPosition="top"
+                    aria-label="Delete preset" (click)="requestDelete('preset', preset)"></p-button>
+                </span>
+              </div>
+              @if (isExpanded(preset)) {
+                <div class="library-entry-body">
+                  <app-preset-editor [preset]="preset"></app-preset-editor>
+                </div>
+              }
+            </div>
+          }
+          @if (presets.length === 0) {
+            <p class="content-library-empty">No presets yet.</p>
+          }
+        }
+
+        @case ('procedure') {
+          @for (procedure of procedures; track trackByEntry($index, procedure)) {
+            <div class="library-entry" [class.library-entry--highlight]="isHighlighted(procedure)" [class.library-entry--playing]="isPlayingEntry('procedure', procedure)">
+              <div class="library-entry-header">
+                <p-button
+                  [icon]="isExpanded(procedure) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+                  styleClass="p-button-text p-button-sm library-entry-toggler"
+                  [attr.aria-expanded]="isExpanded(procedure)"
+                  [attr.aria-label]="(isExpanded(procedure) ? 'Collapse' : 'Expand') + ' procedure ' + procedure.label"
+                  (click)="toggleEntry(procedure)">
+                </p-button>
+                <input type="text"
+                  class="library-name"
+                  [(ngModel)]="procedure.label"
+                  (ngModelChange)="onRenameInput('procedure', procedure)"
+                  (blur)="onRenameBlur('procedure', procedure)"
+                  placeholder="Procedure name"
+                  aria-label="Procedure name">
+                @if (usageCount('procedure', procedure) > 0) {
+                  <span class="library-usage"
+                    [pTooltip]="usageTooltip('procedure', procedure)"
+                    tooltipPosition="top">
+                    <i class="pi pi-link" aria-hidden="true"></i>×{{ usageCount('procedure', procedure) }}
+                  </span>
+                }
+                <span class="library-entry-controls">
+                  <p-button icon="pi pi-copy" pTooltip="Duplicate procedure" tooltipPosition="top"
+                    aria-label="Duplicate procedure" (click)="duplicateEntry('procedure', procedure)"></p-button>
+                  <p-button icon="pi pi-times" pTooltip="Delete procedure" tooltipPosition="top"
+                    aria-label="Delete procedure" (click)="requestDelete('procedure', procedure)"></p-button>
+                </span>
+              </div>
+              @if (isExpanded(procedure)) {
+                <div class="library-entry-body">
+                  <app-procedure-editor [procedure]="procedure"></app-procedure-editor>
+                </div>
+              }
+            </div>
+          }
+          @if (procedures.length === 0) {
+            <p class="content-library-empty">No procedures yet.</p>
+          }
+        }
+      }
+    </div>
+  }
+</div>
+
+<!-- Borrado en uso: lista los bloques afectados y avisa de que se limpiarán. -->
+<p-dialog
+  header="Delete content"
+  [(visible)]="deleteVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '32rem', maxWidth: '95vw' }"
+  styleClass="library-delete-dialog">
+  @if (deleteCandidate) {
+    <p class="library-delete-intro">
+      The {{ deleteKind === 'melody' ? 'melody' : deleteKind === 'preset' ? 'preset' : 'procedure' }}
+      <strong>&laquo;{{ deleteCandidate.label }}&raquo;</strong> is used by
+      {{ deleteUsages.length }} block{{ deleteUsages.length === 1 ? '' : 's' }}:
+    </p>
+  }
+  <ul class="library-delete-usages">
+    @for (usage of deleteUsages; track trackByUsage($index, usage)) {
+      <li>{{ usageLabel(usage) }}</li>
+    }
+  </ul>
+  <p class="library-delete-hint">Deleting it also clears those references.</p>
+  <div class="library-delete-actions">
+    <p-button label="Cancel" styleClass="p-button-text" (click)="cancelDelete()"></p-button>
+    <p-button label="Delete content and references" styleClass="p-button-danger" (click)="confirmDelete()"></p-button>
+  </div>
+</p-dialog>

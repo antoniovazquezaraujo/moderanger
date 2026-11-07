@@ -1,0 +1,46 @@
+.block-content-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0;
+}
+
+.content-link-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  flex-wrap: wrap;
+}
+
+.content-link-select {
+  min-width: 110px;
+  max-width: 200px;
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  background-color: white;
+  font-size: 12px;
+}
+
+.content-link-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+
+:host ::ng-deep {
+  .p-button {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    margin: 0 1px !important;
+    padding: 0 !important;
+  }
+
+  .p-button .p-button-icon {
+    font-size: 0.75rem !important;
+  }
+}

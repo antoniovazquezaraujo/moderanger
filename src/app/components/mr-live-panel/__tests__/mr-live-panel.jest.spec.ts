@@ -34,17 +34,17 @@ describe('MrLivePanelComponent', () => {
     it('muestra el texto canónico y se refresca con cada cambio del modelo', () => {
         const component = createPanel();
         component.song = new Song();
-        component.song.name = 'First Light';
+        component.song.name = 'Vodka';
 
         component.refresh();
-        expect(component.text).toContain('song "First Light"');
-        expect(component.text).toContain('version 1');
+        expect(component.text).toContain('song Vodka');
+        expect(component.text).toContain('version 2');
 
         component.song.name = 'Second Light';
         component.refresh();
 
         expect(component.text).toContain('song "Second Light"');
-        expect(component.text).not.toContain('song "First Light"');
+        expect(component.text).not.toContain('song Vodka');
     });
 
     it('emite edit y close desde sus acciones', () => {
@@ -63,7 +63,7 @@ describe('MrLivePanelComponent', () => {
         jest.useFakeTimers();
         const component = createPanel();
         component.song = new Song();
-        component.song.name = 'First Light';
+        component.song.name = 'Vodka';
         component.ngOnInit();
 
         component.song.name = 'Second Light';

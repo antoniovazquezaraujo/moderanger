@@ -2,7 +2,7 @@ import { NoteData } from "./note";
 import { PlayMode } from "./play.mode";
 import { Scale, ScaleTypes, Tonality } from "./scale";
 import { Block } from "./block";
-import { Command } from "./command";
+import { Preset } from "./content";
 import { InstrumentType } from "./instrument-type";
 import { PlayState } from "./play.state";
 import { BehaviorSubject, Subject } from "rxjs";
@@ -223,10 +223,17 @@ export class Player {
         return this.scale;
     }
 
-    executeCommands(block: Block): void {
-        console.log(`[Player] Executing commands for block ${block.id} on player for instrument ${this.instrumentId}`);
-        block.commands?.forEach(command => {
-            command.execute(this);
+    executePreset(preset: Preset): void {
+        console.log(`[Player] Executing preset '${preset.label}' on player for instrument ${this.instrumentId}`);
+        preset.settings.forEach(setting => {
+            setting.execute(this);
         });
+    }
+
+    /** Ejecuta el preset del bloque, si lo tiene. */
+    executeBlockPreset(block: Block): void {
+        if (block.preset) {
+            this.executePreset(block.preset);
+        }
     }
 }

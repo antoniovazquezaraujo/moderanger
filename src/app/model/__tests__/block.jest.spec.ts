@@ -1,20 +1,76 @@
 import { Block } from '../block';
+import { Melody, Preset, Procedure } from '../content';
 import { Command, CommandType } from '../command';
 import { AssignOperation, VaryOperation } from '../operation';
 import { VariableContext } from '../variable.context';
 
-describe('Block.clone', () => {
-  beforeEach(() => {
-    VariableContext.context.clear();
+function melody(label = 'Melodía'): Melody {
+  const value = new Melody();
+  value.label = label;
+  value.notes = '4n:1';
+  return value;
+}
+
+function preset(label = 'Preset'): Preset {
+  const value = new Preset();
+  value.label = label;
+  value.settings = [new Command({ type: CommandType.SCALE, value: 'BLACK' })];
+  return value;
+}
+
+function procedure(label = 'Procedure'): Procedure {
+  const value = new Procedure();
+  value.label = label;
+  value.operations = [new VaryOperation('oct', 2), new AssignOperation('scale', 'BLACK')];
+  return value;
+}
+
+describe('Block · estructura y contenido', () => {
+  it('arranca como contenedor sin contenido propio', () => {
+    const block = new Block();
+
+    expect(block.hasOwnContent()).toBe(false);
+    expect(block.melody).toBeUndefined();
+    expect(block.preset).toBeUndefined();
+    expect(block.procedure).toBeUndefined();
+    expect(block.children).toEqual([]);
   });
 
-  it('copia etiquetas, contenido y comandos sin compartir referencias', () => {
+  it('considera contenido propio una etiqueta o cualquiera de las referencias', () => {
+    const labelled = new Block();
+    labelled.label = 'Verse';
+    expect(labelled.hasOwnContent()).toBe(true);
+
+    const withMelody = new Block();
+    withMelody.melody = melody();
+    expect(withMelody.hasOwnContent()).toBe(true);
+
+    const withPreset = new Block();
+    withPreset.preset = preset();
+    expect(withPreset.hasOwnContent()).toBe(true);
+
+    const withProcedure = new Block();
+    withProcedure.procedure = procedure();
+    expect(withProcedure.hasOwnContent()).toBe(true);
+  });
+
+  it('un contenedor con hijos y sin contenido propio no cuenta como contenido', () => {
+    const container = new Block();
+    container.children = [new Block()];
+
+    expect(container.hasOwnContent()).toBe(false);
+  });
+});
+
+describe('Block.clone', () => {
+  it('copia etiquetas y estructura y comparte las referencias de biblioteca', () => {
     const block = new Block();
     block.label = 'A';
     block.pulse = 3;
     block.repeatingTimes = 2;
-    block.blockContent.notes = '4n:1';
-    block.commands = [new Command({ type: CommandType.SCALE, value: 'BLACK' })];
+    block.melody = melody('M');
+    block.preset = preset('P');
+    block.procedure = procedure('Proc');
 
     const clone = block.clone();
 
@@ -22,34 +78,20 @@ describe('Block.clone', () => {
     expect(clone.label).toBe('A');
     expect(clone.pulse).toBe(3);
     expect(clone.repeatingTimes).toBe(2);
-    expect(clone.blockContent).not.toBe(block.blockContent);
-    expect(clone.blockContent.notes).toBe('4n:1');
-    expect(clone.commands[0]).not.toBe(block.commands[0]);
-    expect(clone.commands[0].value).toBe('BLACK');
+    expect(clone.melody).toBe(block.melody);
+    expect(clone.preset).toBe(block.preset);
+    expect(clone.procedure).toBe(block.procedure);
   });
 
-  it('preserva los comandos-variable por nombre', () => {
+  it('usa el resolver para apuntar a las copias de las bibliotecas', () => {
+    const original = melody('M');
+    const replacement = melody('M');
     const block = new Block();
-    block.commands = [new Command({ type: CommandType.PLAYMODE, isVariable: true, value: 'mode' })];
+    block.melody = original;
 
-    const clone = block.clone();
+    const clone = block.clone({ melody: candidate => (candidate === original ? replacement : candidate) });
 
-    expect(clone.commands[0].isVariable).toBe(true);
-    expect(clone.commands[0].getVariableName()).toBe('mode');
-  });
-
-  it('conserva las operaciones VARY y ASSIGN (regresión post-merge)', () => {
-    const block = new Block();
-    block.operations = [new VaryOperation('oct', 2), new AssignOperation('scale', 'BLACK')];
-
-    const clone = block.clone();
-
-    expect(clone.operations[0]).toBeInstanceOf(VaryOperation);
-    expect(clone.operations[0].variableName).toBe('oct');
-    expect(clone.operations[0].value).toBe(2);
-    expect(clone.operations[1]).toBeInstanceOf(AssignOperation);
-    expect(clone.operations[1].value).toBe('BLACK');
-    expect(clone.operations[0]).not.toBe(block.operations[0]);
+    expect(clone.melody).toBe(replacement);
   });
 
   it('clona los hijos de forma recursiva y profunda', () => {
@@ -63,110 +105,41 @@ describe('Block.clone', () => {
     expect(clone.children[0]).not.toBe(child);
     expect(clone.children[0].label).toBe('hijo');
   });
-
-  it('clona la duración por defecto y la referencia a variable sin suscribirse', () => {
-    const block = new Block();
-    block.blockContent.defaultDuration = '8n';
-    block.blockContent.setVariableReference('motif');
-
-    const clone = block.clone();
-
-    expect(clone.blockContent.defaultDuration).toBe('8n');
-    expect(clone.blockContent.isVariable).toBe(true);
-    expect(clone.blockContent.variableName).toBe('motif');
-  });
 });
 
 describe('Block.toJSON', () => {
-  it('serializa las operaciones con su tipo semántico VARY/ASSIGN', () => {
+  it('expone las referencias por su label', () => {
     const block = new Block();
-    block.operations = [new VaryOperation('oct', 1), new AssignOperation('scale', 'BLACK')];
+    block.label = 'A';
+    block.melody = melody('M');
+    block.preset = preset('P');
+    block.procedure = procedure('Proc');
 
-    const json = block.toJSON();
-
-    expect(json.operations).toEqual([
-      { type: 'VARY', variableName: 'oct', value: 1 },
-      { type: 'ASSIGN', variableName: 'scale', value: 'BLACK' }
-    ]);
+    expect(block.toJSON()).toEqual({
+      id: block.id,
+      label: 'A',
+      pulse: 0,
+      repeatingTimes: 1,
+      melody: 'M',
+      preset: 'P',
+      procedure: 'Proc',
+      children: []
+    });
   });
 });
 
-describe('Block.hasOwnContent', () => {
-  it('es false para un bloque contenedor vacío (caso Parte nueva de la GUI)', () => {
-    expect(new Block().hasOwnContent()).toBe(false);
-  });
-
-  it('es false para un contenedor con hijos pero sin contenido propio', () => {
-    const container = new Block();
-    const child = new Block();
-    child.label = 'Hijo';
-    container.children = [child];
-
-    expect(container.hasOwnContent()).toBe(false);
-  });
-
-  it('es true si el bloque tiene label (caso raíz .mr)', () => {
-    const block = new Block();
-    block.label = 'Origen';
-
-    expect(block.hasOwnContent()).toBe(true);
-  });
-
-  it('ignora labels y notas en blanco', () => {
-    const block = new Block();
-    block.label = '   ';
-    block.blockContent.notes = '  \n ';
-
-    expect(block.hasOwnContent()).toBe(false);
-  });
-
-  it('es true si el bloque tiene notas', () => {
-    const block = new Block();
-    block.blockContent.notes = '4n:0 4n:2';
-
-    expect(block.hasOwnContent()).toBe(true);
-  });
-
-  it('es true si el bloque tiene comandos', () => {
-    const block = new Block();
-    block.commands = [new Command({ type: CommandType.SCALE, value: 'BLACK' })];
-
-    expect(block.hasOwnContent()).toBe(true);
-  });
-
-  it('es true si el bloque tiene operaciones', () => {
-    const block = new Block();
-    block.operations = [new VaryOperation('oct', 1)];
-
-    expect(block.hasOwnContent()).toBe(true);
-  });
-
-  it('es true si el bloque solo declara `notes default` (caso .mr)', () => {
-    const block = new Block();
-    block.blockContent.defaultDuration = '8n';
-
-    expect(block.hasOwnContent()).toBe(true);
-  });
-
-  it('ignora una duración por defecto en blanco', () => {
-    const block = new Block();
-    block.blockContent.defaultDuration = '   ';
-
-    expect(block.hasOwnContent()).toBe(false);
-  });
-});
-
-describe('Block.executeBlockOperations', () => {
+describe('Block.executeProcedure', () => {
   beforeEach(() => {
     VariableContext.context.clear();
   });
 
-  it('ejecuta las operaciones en orden aplicando VARY acumulativo', () => {
+  it('ejecuta las operaciones del procedimiento en orden (VARY acumulativo)', () => {
     VariableContext.setValue('oct', 1);
     const block = new Block();
-    block.operations = [new VaryOperation('oct', 1), new VaryOperation('oct', 2)];
+    block.procedure = procedure('Sube');
+    block.procedure.operations = [new VaryOperation('oct', 1), new VaryOperation('oct', 2)];
 
-    block.executeBlockOperations();
+    block.executeProcedure();
 
     expect(VariableContext.getValue('oct')).toBe(4);
   });
@@ -179,13 +152,18 @@ describe('Block.executeBlockOperations', () => {
       throw new Error('boom');
     });
     const block = new Block();
-    block.operations = [failingOperation, new AssignOperation('oct', 9)];
+    block.procedure = procedure('Mixto');
+    block.procedure.operations = [failingOperation, new AssignOperation('oct', 9)];
 
-    block.executeBlockOperations();
+    block.executeProcedure();
 
     expect(error).toHaveBeenCalled();
     expect(VariableContext.getValue('oct')).toBe(9);
     error.mockRestore();
+  });
+
+  it('no falla si el bloque no tiene procedimiento', () => {
+    expect(() => new Block().executeProcedure()).not.toThrow();
   });
 });
 

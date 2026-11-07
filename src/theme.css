@@ -1175,3 +1175,98 @@ html[data-theme='dark'] body .p-tooltip.p-tooltip-left .p-tooltip-arrow {
 html[data-theme='dark'] body .p-tooltip.p-tooltip-right .p-tooltip-arrow {
   border-right-color: #2f2a24 !important;
 }
+
+
+/* --------------------------------------------------------------------------
+   Dark utility buttons (2026-11-06)
+   Los botones secundarios dejan de competir con el papel claro: fondo oscuro,
+   texto/icono blancos y un hover algo más claro.
+   -------------------------------------------------------------------------- */
+html body .song-editor .playback-controls .toolbar-label-button,
+html body .song-editor .playback-controls .p-button[aria-label="Stop song"],
+html body .theme-toggle,
+html body .example-close,
+html body app-part .part-controls .p-button,
+html body .p-tree .block-header .block-controls .p-button,
+html body app-content-library .content-library-add .p-button,
+html body app-content-library .library-entry-controls .p-button,
+html body app-block-content-links .content-link-actions .p-button,
+html body app-preset-editor .add-wrapper .p-button,
+html body app-procedure-editor .add-wrapper .p-button,
+html body app-preset-editor .command-actions .p-button,
+html body app-procedure-editor .command-controls .p-button,
+html body .song-editor .variables-panel-add .p-button,
+html body .song-editor .parts-panel-add .p-button,
+html body .topbar-link {
+  border-color: #1e1e1e !important;
+  background: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+html body .song-editor .playback-controls .toolbar-label-button .pi,
+html body .song-editor .playback-controls .p-button[aria-label="Stop song"] .pi,
+html body .theme-toggle .pi,
+html body .example-close .pi,
+html body app-part .part-controls .p-button .pi,
+html body .p-tree .block-header .block-controls .p-button .pi,
+html body app-content-library .content-library-add .p-button .pi,
+html body app-content-library .library-entry-controls .p-button .pi,
+html body app-block-content-links .content-link-actions .p-button .pi,
+html body app-preset-editor .add-wrapper .p-button .pi,
+html body app-procedure-editor .add-wrapper .p-button .pi,
+html body app-preset-editor .command-actions .p-button .pi,
+html body app-procedure-editor .command-controls .p-button .pi,
+html body .song-editor .variables-panel-add .p-button .pi,
+html body .song-editor .parts-panel-add .p-button .pi,
+html body .topbar-link .pi {
+  color: #ffffff !important;
+}
+
+html body .song-editor .playback-controls .toolbar-label-button:hover,
+html body .song-editor .playback-controls .toolbar-label-button:focus-visible,
+html body .song-editor .playback-controls .p-button[aria-label="Stop song"]:hover,
+html body .theme-toggle:hover,
+html body .theme-toggle:focus-visible,
+html body .example-close:hover,
+html body .example-close:focus-visible,
+html body app-part .part-controls .p-button:hover,
+html body app-part .part-controls .p-button:focus-visible,
+html body .p-tree .block-header .block-controls .p-button:hover,
+html body .p-tree .block-header .block-controls .p-button:focus-visible,
+html body app-content-library .content-library-add .p-button:hover,
+html body app-content-library .content-library-add .p-button:focus-visible,
+html body app-content-library .library-entry-controls .p-button:hover,
+html body app-content-library .library-entry-controls .p-button:focus-visible,
+html body app-block-content-links .content-link-actions .p-button:hover,
+html body app-block-content-links .content-link-actions .p-button:focus-visible,
+html body app-preset-editor .add-wrapper .p-button:hover,
+html body app-preset-editor .add-wrapper .p-button:focus-visible,
+html body app-procedure-editor .add-wrapper .p-button:hover,
+html body app-procedure-editor .add-wrapper .p-button:focus-visible,
+html body app-preset-editor .command-actions .p-button:hover,
+html body app-preset-editor .command-actions .p-button:focus-visible,
+html body app-procedure-editor .command-controls .p-button:hover,
+html body app-procedure-editor .command-controls .p-button:focus-visible,
+html body .song-editor .variables-panel-add .p-button:hover,
+html body .song-editor .variables-panel-add .p-button:focus-visible,
+html body .song-editor .parts-panel-add .p-button:hover,
+html body .song-editor .parts-panel-add .p-button:focus-visible,
+html body .topbar-link:hover,
+html body .topbar-link:focus-visible {
+  border-color: #333333 !important;
+  background: #333333 !important;
+  color: #ffffff !important;
+}
+
+html body .song-editor .playback-controls .toolbar-help-button {
+  border-color: #0f766e !important;
+  background: #0f766e !important;
+  color: #ffffff !important;
+}
+
+html body .song-editor .playback-controls .toolbar-help-button:hover,
+html body .song-editor .playback-controls .toolbar-help-button:focus-visible {
+  border-color: #0b5f59 !important;
+  background: #0b5f59 !important;
+  color: #ffffff !important;
+}

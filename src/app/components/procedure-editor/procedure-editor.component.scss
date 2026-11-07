@@ -1,0 +1,109 @@
+/* Mismas clases y métricas que la fila de Operations de `block-commands`.
+   Los estilos globales (`styles.css`) completan el chrome editable. */
+.block-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.operations-row {
+  background-color: transparent;
+  border-top: none;
+  margin: 0;
+  padding: 1px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-height: 20px;
+}
+
+.operations-container,
+.container-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  align-items: center;
+  padding: 2px;
+  margin: 0;
+  width: 100%;
+}
+
+.operation-item {
+  display: inline-flex;
+  align-items: center;
+  background-color: transparent;
+  padding: 0 2px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  margin: 1px;
+  min-height: 24px;
+  box-sizing: border-box;
+}
+
+.command-type,
+.command-value,
+.number-input {
+  height: 20px;
+  padding: 0 2px;
+  border: 1px solid #ced4da;
+  border-radius: 2px;
+  margin: 0 1px;
+  background-color: white;
+  font-size: 12px;
+  text-align: center;
+}
+
+.command-type {
+  min-width: 44px;
+  max-width: 140px;
+  text-align: left;
+}
+
+.command-value,
+.number-input {
+  width: 32px;
+}
+
+.command-controls,
+.add-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 20px;
+  margin: 1px;
+  padding: 0;
+}
+
+:host ::ng-deep {
+  .p-button {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    margin: 0 1px !important;
+    padding: 0 !important;
+  }
+
+  .p-button .p-button-icon {
+    font-size: 0.75rem !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .operations-container {
+    gap: 2px;
+  }
+
+  .command-value,
+  .number-input {
+    width: 35px;
+  }
+}
+
+.playmode-select {
+  min-width: 64px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  font-family: 'Segoe UI Symbol', 'Noto Sans Symbols', 'Noto Sans Symbols 2', 'DejaVu Sans', sans-serif;
+}

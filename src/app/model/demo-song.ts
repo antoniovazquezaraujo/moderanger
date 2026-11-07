@@ -2,54 +2,165 @@ import { parseSong } from 'src/app/model/mr';
 import { Song } from 'src/app/model/song';
 
 /**
- * Small, valid song used by the "Load example" action and the help panel.
- * It intentionally uses only stable v1 features so it keeps working as the
- * editor evolves.
+ * Demo used by the "Load example" action and the help panel. It uses the
+ * format 2 content libraries (melodies/presets) and structural blocks.
  */
-export const DEMO_SONG_MR = `song "First Light"
-version 1
-repeats 1
-bpm 96
+export const DEMO_SONG_MR = `song "Vodka"
+version 2
+repeats 9
 
-blocks
-  block Bassline
+melodies
+  melody A
     notes
-      2n:-7
-      2n:-5
-      2n:-3
-      2n:-5
-    commands
-      OCT 0
-      PLAYMODE CHORD
-      WIDTH 0
-      GAP 2
+      4n:1
+      4n:-2
+      4n:2
+      4n:0
+
+  melody B
+    notes
+      4n:3
+      4n:1
+      4n:6
+      4n:-1
+
+  melody C
+    notes
+      2n:5
+      2n:4
+      2n:8
+      2n:1
+
+  melody D
+    notes
+      4n:2
+      4n:0
+      4n:5
+      4n:-2
+
+presets
+  preset AH
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 3
+    OCT 2
+
+  preset BH
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 2
+    OCT 0
+
+  preset CH
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 3
+    KEY 4
+    SCALE BLUE
+    OCT 4
+
+  preset DH
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 4
+    GAP 3
+    KEY 5
+    SCALE BLUE
+    OCT 2
+
+  preset AM
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    OCT 3
+
+  preset BM
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 1
+    GAP 0
+    OCT 0
+
+  preset CM
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    KEY 3
+    SCALE BLUE
+    OCT 2
+
+  preset AL
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP -1
+    OCT 4
+
+  preset BL
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 1
+    GAP 2
+    OCT 1
+
+  preset CL
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 2
+    GAP 5
+    KEY 2
+    SCALE BLUE
+    OCT 3
+
+  preset DL
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP -1
+    KEY 3
+    SCALE PENTA
+    OCT 4
 
 part Piano
-  block Theme repeats 2
-    notes
-      4n:0
-      4n:2
-      4n:4
-      4n:2
-    commands
-      SCALE WHITE
-      OCT 3
-      PLAYMODE ASCENDING
-      GAP 1
-      WIDTH 1
+  block A
+    preset AH
+    melody A
 
-    block Answer
-      notes
-        4n:4
-        4n:2
-        4n:0
-        2n:s
-      commands
-        OCT 4
-        PLAYMODE DESCENDING
+  block B
+    preset BH
+    melody B
 
-part Bass
-  use Bassline
+  block C
+    preset CH
+    melody C
+
+  block D
+    preset DH
+    melody D
+
+part Bajo
+  block A
+    preset AM
+    melody A
+
+  block B
+    preset BM
+    melody B
+
+  block C
+    preset CM
+    melody C
+
+part Contrabajo
+  block A
+    preset AL
+    melody A
+
+  block B
+    preset BL
+    melody B
+
+  block C
+    preset CL
+    melody C
+
+  block D
+    preset DL
+    melody D
 `;
 
 /** Parses the demo song; the corpus test keeps the fixture valid. */

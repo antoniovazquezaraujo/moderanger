@@ -4,8 +4,8 @@ Bienvenido a la documentación técnica de **Mode Ranger**. Está pensada para n
 
 ## 🏗️ Arquitectura y diseño
 - [[analysis/MODERANGER-ARCHITECTURE-GUIDE|Guía de arquitectura del proyecto]]
-- [[design/propuesta-sintaxis-mr|Propuesta de sintaxis `.mr` (aprobada)]]
-- [[analysis/sintaxis-mr-implementada|Sintaxis `.mr` implementada y contrato de round-trip]]
+- [[design/propuesta-sintaxis-mr|Propuesta de sintaxis `.mr` v1 (histórica)]]
+- [[analysis/sintaxis-mr-implementada|Sintaxis `.mr` v1 implementada (histórica)]]
 - [[design/propuesta-bibliotecas-contenido|Propuesta: bibliotecas de contenido (melodías, presets y procedures)]]
 - [[design/propuesta-bloques-reutilizables|Propuesta histórica: bloques reutilizables (`blocks` + `use`)]] *(sustituida)*
 - [[design/compilador-mr-a-midi|Propuesta: compilador `.mr` → MIDI (CLI)]]
@@ -21,8 +21,8 @@ Bienvenido a la documentación técnica de **Mode Ranger**. Está pensada para n
 ## ✨ Fases y estado
 - [[analysis/mr-fase2-vista-texto|Fase 2: vista de texto en la app]]
 - [[analysis/mr-fase3-guardar-cargar|Fase 3: guardar/cargar `.mr`]]
-- [[analysis/bloques-reutilizables-implementados|Bloques reutilizables: núcleo implementado (fase 1)]]
-- [[analysis/bloques-reutilizables-gui|Bloques reutilizables: GUI (fase 2)]]
+- [[analysis/bloques-reutilizables-implementados|Bloques reutilizables: núcleo histórico (fase 1)]] *(sustituido)*
+- [[analysis/bloques-reutilizables-gui|Bloques reutilizables: GUI histórica (fase 2)]] *(sustituida)*
 - [[analysis/compilador-midi-mvp|Compilador `.mr` → MIDI: MVP implementado]]
 - [[analysis/scheduler-rejilla-96n|Scheduler: rejilla 96n para tresillos exactos]]
 - [[analysis/duracion-de-grupos|Duración de grupos y `useDefaultDuration`]]

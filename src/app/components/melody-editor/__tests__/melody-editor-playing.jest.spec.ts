@@ -107,14 +107,17 @@ describe('MelodyEditorComponent · resaltado de la nota-origen', () => {
     expect(noteSource).toMatch(/\.note-item\.playing\s*\{[\s\S]*?filter:\s*drop-shadow/);
   });
 
-  it('el bloque y el wrapper propagan el id para el resaltado', () => {
-    const blockTemplate = fs.readFileSync(path.resolve(__dirname, '../../block/block.component.html'), 'utf8');
+  it('la biblioteca y el wrapper propagan el id para el resaltado', () => {
+    const libraryTemplate = fs.readFileSync(
+      path.resolve(__dirname, '../../content-library/content-library.component.html'),
+      'utf8'
+    );
     const wrapperSource = fs.readFileSync(
       path.resolve(__dirname, '../../melody-editor-wrapper/melody-editor-wrapper.component.ts'),
       'utf8'
     );
 
-    expect(blockTemplate).toContain('[blockId]="node.id"');
+    expect(libraryTemplate).toContain('[blockId]="melody.id"');
     expect(wrapperSource).toContain('[playingBlockId]="blockId"');
   });
 });

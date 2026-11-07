@@ -11,6 +11,7 @@ import { AudioEngineService } from 'src/app/services/audio-engine.service';
 import { NoteGenerationService } from 'src/app/services/note-generation.service';
 import { AssignOperation, VaryOperation } from 'src/app/model/operation';
 import { Block } from 'src/app/model/block';
+import { Melody, Procedure } from 'src/app/model/content';
 import { Part } from 'src/app/model/part';
 import { Song } from 'src/app/model/song';
 import { SongPlayer } from 'src/app/model/song.player';
@@ -247,12 +248,16 @@ describe('VariableDeclarationComponent · restauración al parar (snapshot/resto
     const player = createPlayer(stub);
     const part = new Part();
     const firstBlock = part.items[0] as Block;
-    firstBlock.blockContent.notes = '4n:0';
-    firstBlock.operations = [
+    const melody = new Melody();
+    melody.notes = '4n:0';
+    const procedure = new Procedure();
+    procedure.operations = [
       new VaryOperation('oct', 1),
       new AssignOperation('mode', 'CHORD'),
       new AssignOperation('nueva', 5)
     ];
+    firstBlock.melody = melody;
+    firstBlock.procedure = procedure;
 
     // Act: Play (las operaciones mutan el contexto) y Stop (restaura el snapshot).
     await player.playPart(part, new Song());
@@ -280,8 +285,12 @@ describe('VariableDeclarationComponent · restauración al parar (snapshot/resto
     const player = createPlayer(stub);
     const part = new Part();
     const firstBlock = part.items[0] as Block;
-    firstBlock.blockContent.notes = '4n:0';
-    firstBlock.operations = [new VaryOperation('oct', 1), new AssignOperation('mode', 'CHORD')];
+    const melody = new Melody();
+    melody.notes = '4n:0';
+    const procedure = new Procedure();
+    procedure.operations = [new VaryOperation('oct', 1), new AssignOperation('mode', 'CHORD')];
+    firstBlock.melody = melody;
+    firstBlock.procedure = procedure;
     await player.playPart(part, new Song());
 
     // Act: fin natural (el Transport emite 'stop'; no hay clic de Stop).

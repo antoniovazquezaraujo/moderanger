@@ -6,14 +6,14 @@ Estudio de armonía con GUI de componentes (partes, bloques, editor de melodía)
 [![CI](https://github.com/antoniovazquezaraujo/moderanger/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/antoniovazquezaraujo/moderanger/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-0078D4)](https://antoniovazquezaraujo.github.io/moderanger/)
 
-Estado: **lenguaje `.mr` v1** (2026-10-04, `version 1`).
+Estado: **lenguaje `.mr` v2** (2026-11-05, `version 2`). El formato 2 añade bibliotecas globales `melodies`, `presets` y `procedures`; los bloques son estructurales y referencian ese contenido.
 
 ## Quickstart
 
-Requiere **Node 16** (por ejemplo con nvm) y npm 8.
+Requiere **Node 22** (por ejemplo con nvm) y npm 10.
 
 ```sh
-export PATH="$HOME/.nvm/versions/node/v16.20.2/bin:$PATH"   # Node 16 vía nvm
+export PATH="$HOME/.nvm/versions/node/v22.23.3/bin:$PATH"   # Node 22 vía nvm
 
 npm ci        # instala dependencias
 npm start     # arranca la app en http://localhost:4200
@@ -27,15 +27,19 @@ Una canción mínima:
 
 ```mr
 song Semilla
-version 1
+version 2
 
-part Piano
-  block Origen
+melodies
+  melody Origen
     notes
       4n:0
       4n:2
       4n:4
       4n:2
+
+part Piano
+  block Origen
+    melody Origen
 ```
 
 Se edita en la GUI, en la vista avanzada de texto (botón `.mr`) o con cualquier editor; se guarda y se carga como fichero `.mr` (UTF-8/LF, sin ids volátiles, apto para diffs de git). Los ejemplos completos de la guía se validan en cada `npm test`.
@@ -63,7 +67,7 @@ Se edita en la GUI, en la vista avanzada de texto (botón `.mr`) o con cualquier
 |---|---|
 | `src/app/model/mr/` | Parser, serializador, errores, fichero y contrato del `.mr`. |
 | `src/app/model/mr/__tests__/corpus/` | Canciones `.mr` canónicas usadas por los tests. |
-| `src/app/components/` | GUI (song-editor, parts, blocks, melody-editor, vista `.mr`). |
+| `src/app/components/` | GUI (song-editor, parts, blocks, biblioteca de contenido, melody-editor, vista `.mr`). |
 | `docs/user/` | Documentación pública (se publica en GitHub Pages). |
 | `docs/developer/` | Wiki interna: ADR, análisis, auditorías, diseño, release. |
 | `editors/nvim/` | Plugin opt-in de resaltado/indentación para `.mr`. |

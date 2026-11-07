@@ -1,10 +1,10 @@
 /**
- * #13 · Los bloques raíz con contenido que llegan de un `.mr` deben arrancar
- * expandidos en el `p-tree` para que sus hijos sean visibles al aplicar el
- * documento; el colapso manual del usuario se respeta.
+ * #13 · Los bloques raíz con hijos deben arrancar expandidos en el `p-tree`
+ * para que su descendencia sea visible al aplicar el documento; el colapso
+ * manual del usuario se respeta.
  *
- * Se instancia el componente directamente (mock local de `@angular/core`),
- * igual que el resto de specs de componente del proyecto.
+ * Además, `treeValue` es siempre `[block]` (ADR-004): cada bloque es un nodo
+ * real del árbol, aunque no tenga referencias de contenido.
  */
 import { Block } from 'src/app/model/block';
 import type { ChangeDetectorRef } from '@angular/core';
@@ -58,7 +58,6 @@ function createComponent(): BlockComponent {
 function rootWithChild(): Block {
   const root = new Block();
   root.label = 'Origen';
-  root.blockContent.defaultDuration = '8n';
   const child = new Block();
   child.label = 'Hijo';
   root.children = [child];
@@ -66,7 +65,7 @@ function rootWithChild(): Block {
 }
 
 describe('BlockComponent · bloques raíz expandidos (#13)', () => {
-  it('expande el raíz con contenido y hijos y lo pinta como nodo propio', () => {
+  it('expande el raíz con hijos y lo pinta como nodo propio', () => {
     const root = rootWithChild();
     const component = createComponent();
 
@@ -76,26 +75,14 @@ describe('BlockComponent · bloques raíz expandidos (#13)', () => {
     expect((root as BlockNode).expanded).toBe(true);
   });
 
-  it('no toca la expansión de un contenedor sin contenido propio', () => {
-    const container = new Block();
-    const child = new Block();
-    child.label = 'Hijo';
-    container.children = [child];
-    const component = createComponent();
-
-    component.block = container;
-
-    expect(component.treeValue).toEqual([child]);
-    expect((container as BlockNode).expanded).toBeUndefined();
-  });
-
-  it('no expande un raíz con contenido pero sin hijos', () => {
+  it('un bloque sin hijos también es un nodo propio (sin expandir)', () => {
     const root = new Block();
     root.label = 'Solo';
     const component = createComponent();
 
     component.block = root;
 
+    expect(component.treeValue).toEqual([root]);
     expect((root as BlockNode).expanded).toBeUndefined();
   });
 
@@ -108,5 +95,14 @@ describe('BlockComponent · bloques raíz expandidos (#13)', () => {
     component.block = root;
 
     expect((root as BlockNode).expanded).toBe(false);
+  });
+
+  it('mantiene una referencia estable de la lista raíz', () => {
+    const root = rootWithChild();
+    const component = createComponent();
+    component.block = root;
+
+    expect(component.treeValue).toBe(component.treeValue);
+    expect(component.treeValue).toEqual([root]);
   });
 });

@@ -1,0 +1,91 @@
+<div class="block-content-links">
+  <div class="content-link-row">
+    <span class="block-section-icon" pTooltip="Melody" tooltipPosition="top" aria-label="Melody" role="img">&#9835;</span>
+    <select
+      class="content-link-select"
+      [ngModel]="block.melody?.label ?? ''"
+      (ngModelChange)="onMelodySelected($event)"
+      aria-label="Melody">
+      <option value="">No melody</option>
+      @for (melody of melodies; track trackByContent($index, melody)) {
+        <option [value]="melody.label">{{ melody.label }}</option>
+      }
+    </select>
+    <span class="content-link-actions">
+      <p-button
+        icon="pi pi-plus"
+        pTooltip="New melody"
+        tooltipPosition="top"
+        aria-label="New melody"
+        (click)="createMelody()"></p-button>
+      @if (block.melody) {
+        <p-button
+          icon="pi pi-pencil"
+          pTooltip="Edit melody"
+          tooltipPosition="top"
+          aria-label="Edit melody"
+          (click)="editMelody()"></p-button>
+      }
+    </span>
+  </div>
+
+  <div class="content-link-row">
+    <span class="block-section-icon" pTooltip="Preset" tooltipPosition="top" aria-label="Preset" role="img">&#9881;</span>
+    <select
+      class="content-link-select"
+      [ngModel]="block.preset?.label ?? ''"
+      (ngModelChange)="onPresetSelected($event)"
+      aria-label="Preset">
+      <option value="">No preset</option>
+      @for (preset of presets; track trackByContent($index, preset)) {
+        <option [value]="preset.label">{{ preset.label }}</option>
+      }
+    </select>
+    <span class="content-link-actions">
+      <p-button
+        icon="pi pi-plus"
+        pTooltip="New preset"
+        tooltipPosition="top"
+        aria-label="New preset"
+        (click)="createPreset()"></p-button>
+      @if (block.preset) {
+        <p-button
+          icon="pi pi-pencil"
+          pTooltip="Edit preset"
+          tooltipPosition="top"
+          aria-label="Edit preset"
+          (click)="editPreset()"></p-button>
+      }
+    </span>
+  </div>
+
+  <div class="content-link-row">
+    <span class="block-section-icon" pTooltip="Procedure" tooltipPosition="top" aria-label="Procedure" role="img">&#8794;</span>
+    <select
+      class="content-link-select"
+      [ngModel]="block.procedure?.label ?? ''"
+      (ngModelChange)="onProcedureSelected($event)"
+      aria-label="Procedure">
+      <option value="">No procedure</option>
+      @for (procedure of procedures; track trackByContent($index, procedure)) {
+        <option [value]="procedure.label">{{ procedure.label }}</option>
+      }
+    </select>
+    <span class="content-link-actions">
+      <p-button
+        icon="pi pi-plus"
+        pTooltip="New procedure"
+        tooltipPosition="top"
+        aria-label="New procedure"
+        (click)="createProcedure()"></p-button>
+      @if (block.procedure) {
+        <p-button
+          icon="pi pi-pencil"
+          pTooltip="Edit procedure"
+          tooltipPosition="top"
+          aria-label="Edit procedure"
+          (click)="editProcedure()"></p-button>
+      }
+    </span>
+  </div>
+</div>

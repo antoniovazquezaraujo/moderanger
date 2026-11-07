@@ -1,0 +1,328 @@
+:host {
+  display: block;
+}
+
+/* Biblioteca de contenido: mismo lenguaje visual que Variables y Parts. */
+.content-library-panel {
+  border: 1px solid var(--mr-border);
+  border-radius: var(--mr-radius);
+  padding: 0;
+  margin-bottom: 16px;
+  background-color: var(--mr-surface);
+  box-shadow: var(--mr-shadow-sm);
+  overflow: hidden;
+}
+
+.content-library-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 16px;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.content-library-header:hover {
+  border-bottom-color: var(--mr-border);
+  background-color: var(--mr-surface-soft);
+}
+
+.content-library-title {
+  font-weight: bold;
+}
+
+.content-library-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid #2b2b2b;
+  border-radius: 9px;
+  background-color: #2b2b2b;
+  color: #ffffff;
+  font-size: 0.75rem;
+}
+
+/* El "+" aparece al hover/foco con espacio reservado (sin saltos). */
+.content-library-add {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.content-library-header:hover .content-library-add,
+.content-library-header:focus-within .content-library-add {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.content-library-content {
+  margin-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.content-library-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0 6px;
+  border-bottom: none;
+}
+
+.content-library-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: #455a64;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.content-library-tab:hover {
+  background-color: var(--mr-surface-soft);
+}
+
+.content-library-tab--active {
+  border-color: #1e1e1e;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.content-library-tab--active:hover {
+  border-color: #333333;
+  background-color: #333333;
+}
+
+.content-library-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.08);
+  font-size: 0.7rem;
+}
+
+.content-library-tab--active .content-library-tab-count {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.content-library-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  color: #8a2b2b;
+  font-size: 0.85rem;
+}
+
+.content-library-empty {
+  margin: 8px 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.library-entry {
+  border-top: none;
+}
+
+.library-entry--highlight {
+  animation: library-highlight 1.6s ease-out;
+  border-radius: 4px;
+}
+
+/* Entrada que está sonando: se mantiene resaltada aunque esté plegada. */
+.library-entry--playing .library-entry-header {
+  border-radius: 4px;
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+  box-shadow: inset 3px 0 0 #8faebc;
+  transition: background-color 120ms ease;
+}
+
+.library-entry--playing .library-name {
+  color: #f5f5f5;
+}
+
+.library-entry--playing .library-name::placeholder {
+  color: #b8b8b8;
+}
+
+.library-entry--playing .library-usage {
+  border-color: #8faebc;
+  background-color: #333333;
+  color: #ffffff;
+}
+
+.library-entry--playing .library-entry-header .p-button {
+  color: #e8e8e8;
+}
+
+@keyframes library-highlight {
+  0% { background-color: #fff3cd; }
+  100% { background-color: transparent; }
+}
+
+.library-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  flex-wrap: wrap;
+}
+
+.library-entry-toggler {
+  width: 2rem;
+  flex: 0 0 auto;
+}
+
+.library-name {
+  flex: 0 1 12rem;
+  min-width: 6rem;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background-color: transparent;
+  font-weight: bold;
+  transition: border-color 0.2s;
+}
+
+.library-name:focus {
+  outline: none;
+  border-color: #ccc;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.library-usage {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border: 1px solid #2b2b2b;
+  border-radius: 10px;
+  background-color: #2b2b2b;
+  color: #ffffff;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.library-usage .pi {
+  color: #ffffff;
+  font-size: 0.7rem;
+}
+
+.library-entry-controls {
+  display: flex;
+  gap: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.library-entry-header:hover .library-entry-controls,
+.library-entry-header:focus-within .library-entry-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.library-entry-body {
+  margin-left: 0.75rem;
+  padding: 2px 0;
+}
+
+.content-melody-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.content-duration-row {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #555;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.content-melody-editor {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.content-duration-select {
+  height: 24px;
+  padding: 0 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 0.85rem;
+}
+
+.library-entry-body app-melody-editor-wrapper {
+  display: block;
+}
+
+/* La melodía comparte fila con la duración por defecto y no añade altura
+   vacía debajo: el editor se compacta al alto de sus notas. */
+:host ::ng-deep .content-melody-editor {
+  .melody-editor {
+    min-height: 0;
+  }
+
+  .editor-content {
+    padding: 0;
+  }
+
+  .notes-container-wrapper {
+    padding: 0;
+  }
+
+  .notes-container {
+    min-height: 20px;
+    padding: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+}
+
+/* Diálogo de borrado */
+:host ::ng-deep .library-delete-dialog .library-delete-intro {
+  margin: 0 0 0.5rem 0;
+}
+
+:host ::ng-deep .library-delete-dialog .library-delete-usages {
+  margin: 0 0 0.5rem 1rem;
+  padding: 0;
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
+:host ::ng-deep .library-delete-dialog .library-delete-hint {
+  margin: 0 0 0.75rem 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+:host ::ng-deep .library-delete-dialog .library-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

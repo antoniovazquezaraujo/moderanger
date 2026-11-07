@@ -1,0 +1,44 @@
+song Bibliotecas
+version 2
+
+melodies
+  melody Riff
+    notes
+      0
+      3
+      5
+
+  melody "Coro principal"
+    notes
+      0
+      4n:( 4 6 )
+      2
+
+presets
+  preset RiffAjustes
+    OCT 4
+    SCALE WHITE
+
+  preset CoroAjustes
+    PLAYMODE CHORD
+
+  preset Llamada
+    OCT 5
+
+procedures
+  procedure Sube
+    VARY $oct 1
+
+part Piano
+  block Riff repeats 2
+    preset Llamada
+    melody Riff
+
+  block Puente
+    melody "Coro principal"
+
+part Cuerdas
+  block "Coro principal"
+    preset CoroAjustes
+    procedure Sube
+    melody "Coro principal"

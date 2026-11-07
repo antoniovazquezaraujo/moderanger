@@ -26,8 +26,8 @@ describe('HelpPanelComponent', () => {
     it('explica los pasos básicos y ofrece cargar el ejemplo', () => {
         expect(template).toContain('Make your first song');
         expect(template).toContain('Create a part');
-        expect(template).toContain('Add a block');
-        expect(template).toContain('Write notes');
+        expect(template).toContain('Create a block');
+        expect(template).toContain('Add content');
         expect(template).toContain('Load example');
         expect(template).toContain('Read the full manual');
     });

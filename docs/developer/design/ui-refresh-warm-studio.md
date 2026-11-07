@@ -61,7 +61,7 @@ Los tokens viven en `src/theme.css` y se cargan después de `styles.css`. La int
   - botón **Load example**;
   - recordatorios sobre el texto canónico, bloques reutilizables y privacidad local;
   - enlace al manual completo.
-- Canción de ejemplo `First Light` (dos parts, bloques y comandos) validada por test.
+- Canción de ejemplo `Vodka` (tres parts, bloques, presets y melodías) validada por test.
 
 ## 4. Fuera de alcance
 

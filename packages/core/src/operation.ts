@@ -73,7 +73,7 @@ export class AssignOperation extends BaseOperation {
 
 /**
  * Copia independiente de una operación. Compartido por `Block.clone` y
- * `BlockReference.clone`; ante un tipo desconocido cae a `ASSIGN` (mismo
+ * los clones de bibliotecas de contenido; ante un tipo desconocido cae a `ASSIGN` (mismo
  * comportamiento tolerante que el clonado de bloques).
  */
 export function cloneOperation(operation: BaseOperation): BaseOperation {

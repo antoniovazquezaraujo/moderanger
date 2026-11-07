@@ -1,4 +1,5 @@
-import { Block } from "./block";
+import { ContentResolver } from "./block";
+import { Melody, Preset, Procedure } from "./content";
 import { Part } from "./part";
 import { VariableContext, VariableValue } from "./variable.context";
 
@@ -19,13 +20,13 @@ export const MAX_REPEATS = 99;
 
 export class Song {
     name: string = "Untitled Song";
+    /** Biblioteca global de melodías (sección `melodies`). */
+    melodies: Melody[] = [];
+    /** Biblioteca global de presets (sección `presets`). */
+    presets: Preset[] = [];
+    /** Biblioteca global de procedimientos (sección `procedures`). */
+    procedures: Procedure[] = [];
     parts: Part[] = [];
-    /**
-     * Biblioteca de bloques reutilizables (sección `blocks` del `.mr`). Cada
-     * definición tiene nombre obligatorio y único (invariante del parser); las
-     * parts la referencian con `use`. Ver ADR-002.
-     */
-    blocks: Block[] = [];
     /**
      * Tempo canónico de la canción (BPM). Es la fuente de verdad en memoria:
      * el `.mr` lo guarda en su cabecera (`bpm`) y `SongPlayer` lo aplica al
@@ -39,16 +40,33 @@ export class Song {
      */
     repeats: number = DEFAULT_REPEATS;
 
-    constructor() {
+    constructor() { }
 
-    }
-    clone():Song{
+    /**
+     * Copia profunda de la canción. Las bibliotecas se clonan una vez y los
+     * bloques resuelven sus referencias contra las copias, de modo que dos
+     * canciones nunca comparten melodías, presets ni procedimientos.
+     */
+    clone(): Song {
         const clonedSong = new Song();
         clonedSong.name = this.name;
         clonedSong.bpm = this.bpm;
         clonedSong.repeats = this.repeats;
-        clonedSong.parts = this.parts.map(part => part.clone());
-        clonedSong.blocks = this.blocks.map(block => block.clone());
+
+        clonedSong.melodies = this.melodies.map(melody => melody.clone());
+        clonedSong.presets = this.presets.map(preset => preset.clone());
+        clonedSong.procedures = this.procedures.map(procedure => procedure.clone());
+
+        const melodyMap = new Map(this.melodies.map((melody, index) => [melody, clonedSong.melodies[index]]));
+        const presetMap = new Map(this.presets.map((preset, index) => [preset, clonedSong.presets[index]]));
+        const procedureMap = new Map(this.procedures.map((procedure, index) => [procedure, clonedSong.procedures[index]]));
+        const resolver: ContentResolver = {
+            melody: melody => melodyMap.get(melody) ?? melody.clone(),
+            preset: preset => presetMap.get(preset) ?? preset.clone(),
+            procedure: procedure => procedureMap.get(procedure) ?? procedure.clone()
+        };
+
+        clonedSong.parts = this.parts.map(part => part.clone(resolver));
         return clonedSong;
     }
 
@@ -68,8 +86,10 @@ export class Song {
             name: this.name,
             bpm: this.bpm,
             repeats: this.repeats,
-            parts: this.parts.map(part => part.items),
-            blocks: this.blocks
+            melodies: this.melodies,
+            presets: this.presets,
+            procedures: this.procedures,
+            parts: this.parts
         };
     }
 }

@@ -1,0 +1,39 @@
+.scale-preview {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--mr-ink);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.scale-preview-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.scale-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 18px);
+  gap: 1px;
+  width: max-content;
+  padding: 1px;
+  border: 1px solid var(--mr-border-strong);
+  background-color: var(--mr-border-strong);
+}
+
+.scale-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background-color: var(--mr-border);
+  color: var(--mr-ink);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.scale-cell--empty {
+  background-color: var(--mr-surface-strong);
+}

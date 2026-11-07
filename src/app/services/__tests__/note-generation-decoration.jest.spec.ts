@@ -10,7 +10,7 @@
 import { AudioEngineService, InstrumentType } from '../../services/audio-engine.service';
 import { NoteGenerationService } from '../note-generation.service';
 import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
-import { Block } from '../../model/block';
+import { Melody, Preset } from '../../model/content';
 import { Command, CommandType } from '../../model/command';
 import { NoteData } from '../../model/note';
 import { Player } from '../../model/player';
@@ -29,11 +29,18 @@ const createPlayer = (): Player =>
 const createService = (): NoteGenerationService =>
   new NoteGenerationService(new NoteGenerationUnifiedService());
 
-const blockWith = (notes: string, commands: Command[] = []): Block => {
-  const block = new Block();
-  block.blockContent.notes = notes;
-  block.commands = commands;
-  return block;
+const melodyWith = (notes: string): Melody => {
+  const melody = new Melody();
+  melody.label = 'Tema';
+  melody.content.notes = notes;
+  return melody;
+};
+
+const blockWith = (notes: string, commands: Command[] = []): { melody: Melody; preset: Preset } => {
+  const preset = new Preset();
+  preset.label = 'Ajustes';
+  preset.settings = commands;
+  return { melody: melodyWith(notes), preset };
 };
 
 const decoration = (value: string): Command => new Command({ type: CommandType.DECORATION, value });
@@ -47,9 +54,9 @@ const notesOf = (result: NoteData[]): Array<number | undefined> =>
 /** MIDI de un evento generado con los comandos dados (bloque `4n:0`). */
 const generate = (commands: Command[]): NoteData[] => {
   const player = createPlayer();
-  const block = blockWith('4n:0', commands);
-  player.executeCommands(block);
-  return createService().generateNotesForBlock(block, player);
+  const { melody, preset } = blockWith('4n:0', commands);
+  player.executePreset(preset);
+  return createService().generateNotesForMelody(melody, player);
 };
 
 /** Todos los MIDI pertenecen a la escala indicada (octava/tonalidad aparte). */
@@ -68,7 +75,7 @@ describe('NoteGenerationService · DECORATION (adorno del acorde)', () => {
     player.density = 1;
     player.gap = 2;
 
-    const result = createService().generateNotesForBlock(blockWith('4n:0'), player);
+    const result = createService().generateNotesForMelody(melodyWith('4n:0'), player);
 
     expect(result[0].type).toBe('chord');
     expect(result[0].duration).toBe('4n');
@@ -377,23 +384,23 @@ describe('NoteGenerationService · DECORATION (adorno del acorde)', () => {
 
   it('conserva el origen (sourcePath) del evento original', () => {
     const player = createPlayer();
-    const block = blockWith('4n:0 4n:2', [decoration('0')]);
-    player.executeCommands(block);
+    const { melody, preset } = blockWith('4n:0 4n:2', [decoration('0')]);
+    player.executePreset(preset);
 
-    const result = createService().generateNotesForBlock(block, player);
+    const result = createService().generateNotesForMelody(melody, player);
 
     expect(result.map((chord) => chord.sourcePath)).toEqual([[0], [1]]);
   });
 
   it('PATTERN + DECORATION: cada evento expandido hereda el origen original', () => {
     const player = createPlayer();
-    const block = blockWith('4n:0', [
+    const { melody, preset } = blockWith('4n:0', [
       new Command({ type: CommandType.PATTERN, value: '4t:1 4t:2' }),
       decoration('0')
     ]);
-    player.executeCommands(block);
+    player.executePreset(preset);
 
-    const result = createService().generateNotesForBlock(block, player);
+    const result = createService().generateNotesForMelody(melody, player);
 
     expect(result).toHaveLength(2);
     expect(result.map((chord) => chord.sourcePath)).toEqual([[0], [0]]);
@@ -405,7 +412,7 @@ describe('NoteGenerationService · DECORATION (adorno del acorde)', () => {
     player.gap = 2;
     player.currentDecoration = [];
 
-    const result = createService().generateNotesForBlock(blockWith('4n:0'), player);
+    const result = createService().generateNotesForMelody(melodyWith('4n:0'), player);
 
     expect(notesAndDurations(result)).toEqual([[60, '4n'], [63, '4n']]);
   });

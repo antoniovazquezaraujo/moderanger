@@ -1,11 +1,11 @@
 # Mode Ranger
 
-Harmony studio with a component-based GUI (parts, blocks, melody editor) and a canonical text format, **`.mr`**, to save and load songs. The text is the canonical representation of a song; the GUI is its guided view.
+Harmony studio with a component-based GUI (parts, structural blocks, content libraries and a melody editor) and a canonical text format, **`.mr`**, to save and load songs. The text is the canonical representation of a song; the GUI is its guided view.
 
 [![CI](https://github.com/antoniovazquezaraujo/moderanger/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/antoniovazquezaraujo/moderanger/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-0078D4)](https://antoniovazquezaraujo.github.io/moderanger/)
 
-Status: **`.mr` language v1** (2026-10-04, `version 1`).
+Status: **`.mr` language v2** (2026-11-05, `version 2`). Format 2 adds song-level `melodies`, `presets` and `procedures` libraries; blocks are structural and reference that content.
 
 ## Quickstart
 
@@ -46,7 +46,7 @@ node packages/compiler/dist/cli/main.js version
 cat cancion.mr | node packages/compiler/dist/cli/main.js compile - -o salida.mid
 ```
 
-`npm run midi -- cancion.mr` remains a development shortcut (it builds the CLI first). `moderanger-mid` is kept as a compatibility alias for `moderanger compile`. The compiler uses the same playback semantics as the app (parts, references, repeats, commands, operations, patterns, chords and arpeggios). MIDI is not audio: open the `.mid` in a DAW or render it with a synthesizer such as FluidSynth. See [`docs/developer/analysis/compilador-midi-mvp.md`](docs/developer/analysis/compilador-midi-mvp.md) for the current limitations.
+`npm run midi -- cancion.mr` remains a development shortcut (it builds the CLI first). `moderanger-mid` is kept as a compatibility alias for `moderanger compile`. The compiler uses the same playback semantics as the app (parts, structural blocks, content libraries, repeats, settings, operations, patterns, chords and arpeggios). MIDI is not audio: open the `.mid` in a DAW or render it with a synthesizer such as FluidSynth. See [`docs/developer/analysis/compilador-midi-mvp.md`](docs/developer/analysis/compilador-midi-mvp.md) for the current limitations.
 
 ## The `.mr` language
 
@@ -54,15 +54,19 @@ A minimal song:
 
 ```mr
 song Semilla
-version 1
+version 2
 
-part Piano
-  block Origen
+melodies
+  melody Origen
     notes
       4n:0
       4n:2
       4n:4
       4n:2
+
+part Piano
+  block Origen
+    melody Origen
 ```
 
 Edit it in the GUI, in the advanced text view (`.mr` button) or with any editor; songs are saved and loaded as `.mr` files (UTF-8/LF, no volatile ids, git-diff friendly). Every complete example in the manual is validated on each `npm test`.
@@ -92,7 +96,7 @@ Edit it in the GUI, in the advanced text view (`.mr` button) or with any editor;
 | `src/app/model/mr/__tests__/corpus/` | Canonical `.mr` songs used by the tests. |
 | `packages/core/` | Pure model, `.mr` parser/serializer and note generation (no Angular/Tone). |
 | `packages/compiler/src/` | Browser-free `.mr` → MIDI compiler and CLI. |
-| `src/app/components/` | GUI (song editor, parts, blocks, melody editor, `.mr` view). |
+| `src/app/components/` | GUI (song editor, parts, blocks, content library, melody editor, `.mr` view). |
 | `docs/user/` | Public documentation (published to GitHub Pages). |
 | `docs/developer/` | Internal wiki: ADR, analysis, audits, design, release (Spanish). |
 | `editors/nvim/` | Opt-in syntax/indent plugin for `.mr`. |

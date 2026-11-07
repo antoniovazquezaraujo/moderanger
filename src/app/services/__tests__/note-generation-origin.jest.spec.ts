@@ -6,7 +6,7 @@
 import { AudioEngineService, InstrumentType } from '../../services/audio-engine.service';
 import { NoteGenerationService } from '../note-generation.service';
 import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
-import { Block } from '../../model/block';
+import { Melody } from '../../model/content';
 import { NoteData } from '../../model/note';
 import { Player } from '../../model/player';
 import { PlayMode } from '../../model/play.mode';
@@ -23,15 +23,16 @@ const createPlayer = (): Player =>
 const createService = (): NoteGenerationService =>
   new NoteGenerationService(new NoteGenerationUnifiedService());
 
-const blockWith = (notes: string): Block => {
-  const block = new Block();
-  block.blockContent.notes = notes;
-  return block;
+const blockWith = (notes: string): Melody => {
+  const melody = new Melody();
+  melody.label = 'Tema';
+  melody.content.notes = notes;
+  return melody;
 };
 
-const generate = (notes: string, player = createPlayer()): { block: Block; result: NoteData[] } => {
+const generate = (notes: string, player = createPlayer()): { block: Melody; result: NoteData[] } => {
   const block = blockWith(notes);
-  return { block, result: createService().generateNotesForBlock(block, player) };
+  return { block, result: createService().generateNotesForMelody(block, player) };
 };
 
 describe('NoteGenerationService · origen de los eventos (resaltado)', () => {
@@ -41,6 +42,16 @@ describe('NoteGenerationService · origen de los eventos (resaltado)', () => {
     expect(result).toHaveLength(1);
     expect(result[0].sourcePath).toEqual([0]);
     expect(result[0].sourceBlockId).toBe(block.id);
+  });
+
+  it('etiqueta bloque, melodía, preset y procedimiento que originan la nota', () => {
+    const melody = blockWith('4n:0');
+    const result = createService().generateNotesForMelody(melody, createPlayer(), 42, 7, 9);
+
+    expect(result[0].sourceBlockId).toBe(42);
+    expect(result[0].sourceMelodyId).toBe(melody.id);
+    expect(result[0].sourcePresetId).toBe(7);
+    expect(result[0].sourceProcedureId).toBe(9);
   });
 
   it('etiqueta los hijos de un grupo con paths anidados', () => {

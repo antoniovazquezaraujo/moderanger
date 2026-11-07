@@ -1,11 +1,12 @@
 /**
- * Verifica que todos los ejemplos completos ```mr de la documentación de la v1
+ * Verifica que todos los ejemplos completos ```mr de la documentación de la v2
  * son documentos válidos y canónicos.
  *
  * Documentos cubiertos:
  * - `docs/user/manual.md` (English manual: 14 complete examples).
  * - `docs/user/manual_es.md` (manual en español: los mismos ejemplos).
- * - `docs/developer/testing/validacion-manual-v1.md` (fixtures del checklist manual).
+ * - `docs/developer/testing/validacion-manual-v1.md` queda fuera: es un checklist
+ *   histórico de la v1, no parte del contrato del formato v2.
  *
  * Convención de la guía: los bloques ```mr son ficheros completos; los
  * fragmentos y ejemplos inválidos usan ```text. Este test convierte esa
@@ -26,9 +27,8 @@ interface GuardedDoc {
 }
 
 const DOCS: GuardedDoc[] = [
-  { file: 'docs/user/manual.md', title: '# The `.mr` language manual (v1)', minBlocks: 10 },
-  { file: 'docs/user/manual_es.md', title: '# Guía del lenguaje `.mr` (v1)', minBlocks: 10 },
-  { file: 'docs/developer/testing/validacion-manual-v1.md', title: '# Validación manual de la v1', minBlocks: 2 }
+  { file: 'docs/user/manual.md', title: '# The `.mr` language manual (v2)', minBlocks: 10 },
+  { file: 'docs/user/manual_es.md', title: '# Guía del lenguaje `.mr` (v2)', minBlocks: 10 }
 ];
 
 /** Extrae el contenido de los bloques cercados con ```mr (uno por ejemplo). */
@@ -42,7 +42,7 @@ function extractMrBlocks(markdown: string): string[] {
   return blocks;
 }
 
-describe('documentación .mr v1: ejemplos completos', () => {
+describe('documentación .mr v2: ejemplos completos', () => {
   for (const doc of DOCS) {
     describe(doc.file, () => {
       const markdown = fs.readFileSync(path.join(DOCS_DIR, doc.file), 'utf8');

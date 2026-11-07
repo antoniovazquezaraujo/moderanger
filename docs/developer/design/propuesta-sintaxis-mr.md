@@ -1,5 +1,8 @@
 # Propuesta de sintaxis canónica `.mr`
 
+> **Nota (2026-11-05):** el formato v2 (ADR-004) sustituye la estructura de bibliotecas y el contenido inline de bloques. Este documento se conserva como base histórica del lenguaje v1; la referencia vigente es `propuesta-bibliotecas-contenido.md`.
+
+
 - **Estado:** Aprobada (2026-10-03) e implementada en `main` (Fase 1, 2026-10-03). Los ejemplos de este documento siguen la forma canónica implementada.
 - **Fecha:** 2026-10-03
 - **Autor:** ROBER (full-stack TS/Angular)

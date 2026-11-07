@@ -1,40 +1,57 @@
 song "Canon de partículas"
-version 1
+version 2
 repeats 2
 
-part Piano
-  block Tema repeats 2
+melodies
+  melody Tema
     notes
       4n:0
       4n:2
       4n:4
       4n:2
-    commands
-      SCALE WHITE
-      OCT 2
-      GAP 2
-      WIDTH 2
-      PLAYMODE ASCENDING
 
-    block Respuesta
-      notes
-        4n:4
-        4n:2
-        4n:0
-        2n:s
-      commands
-        OCT 1
-        PLAYMODE DESCENDING
+  melody Respuesta
+    notes
+      4n:4
+      4n:2
+      4n:0
+      2n:s
 
-part Piano
-  block Bajo
+  melody Bajo
     notes
       2n:-7
       2n:-5
       2n:-3
       2n:-5
-    commands
-      OCT 0
-      GAP 2
-      WIDTH 0
-      PLAYMODE CHORD
+
+presets
+  preset TemaAjustes
+    SCALE WHITE
+    OCT 2
+    GAP 2
+    WIDTH 2
+    PLAYMODE ASCENDING
+
+  preset RespuestaAjustes
+    OCT 1
+    PLAYMODE DESCENDING
+
+  preset BajoAjustes
+    OCT 0
+    GAP 2
+    WIDTH 0
+    PLAYMODE CHORD
+
+part Piano
+  block Tema repeats 2
+    preset TemaAjustes
+    melody Tema
+
+    block Respuesta
+      preset RespuestaAjustes
+      melody Respuesta
+
+part Piano
+  block Bajo
+    preset BajoAjustes
+    melody Bajo

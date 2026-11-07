@@ -8,6 +8,7 @@ import { AudioEngineService } from '../../services/audio-engine.service';
 import { NoteGenerationService } from '../../services/note-generation.service';
 import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
 import { GlobalStateService } from '../../shared/services/global-state.service';
+import { Melody } from '../content';
 import { Part } from '../part';
 import { Song } from '../song';
 import { SongPlayer } from '../song.player';
@@ -78,11 +79,10 @@ const createPlayer = (stub: EngineStub): SongPlayer =>
 
 const createPart = (notes: string): Part => {
   const part = new Part();
-  const block = part.items[0];
-  if (block.kind !== 'block') {
-    throw new Error('expected an inline block');
-  }
-  block.blockContent.notes = notes;
+  const melody = new Melody();
+  melody.label = 'Tema';
+  melody.content.notes = notes;
+  part.items[0].melody = melody;
   return part;
 };
 

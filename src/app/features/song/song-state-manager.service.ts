@@ -160,13 +160,9 @@ export class SongStateManagerService {
   substituteVariablesInSong(song: Song): void {
     
     const processBlock = (block: Block) => {
-      // Process commands and operations in the block
-      for (const command of block.commands) {
-        // Variable substitution logic would go here
-        // This is extracted from the original SongPlayer
-      }
-      
-      // Process child blocks
+      // La sustitución de variables se resolverá desde los presets y
+      // procedimientos de la biblioteca; de momento el servicio v2 sigue sin
+      // cablear y solo recorre el árbol estructural.
       for (const child of block.children) {
         processBlock(child);
       }
@@ -175,9 +171,7 @@ export class SongStateManagerService {
     // Process all parts
     for (const part of song.parts) {
       for (const item of part.items) {
-        if (item.kind === 'block') {
-          processBlock(item);
-        }
+        processBlock(item);
       }
     }
     

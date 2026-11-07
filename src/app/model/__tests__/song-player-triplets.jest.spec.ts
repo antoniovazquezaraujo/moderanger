@@ -23,6 +23,7 @@ import { NoteGenerationService } from '../../services/note-generation.service';
 import { NoteGenerationUnifiedService } from '../../shared/services/note-generation-unified.service';
 import { GlobalStateService } from '../../shared/services/global-state.service';
 import { Block } from '../block';
+import { Melody } from '../content';
 import { Part } from '../part';
 import { Song } from '../song';
 import { SongPlayer } from '../song.player';
@@ -89,12 +90,19 @@ const createPlayer = (): {
   return { player, harness, globalState };
 };
 
+const melodyWith = (notes: string): Melody => {
+  const melody = new Melody();
+  melody.label = 'Tema';
+  melody.content.notes = notes;
+  return melody;
+};
+
 /** Reproduce las notas de un bloque y devuelve los ticks (96n) de cada onset. */
 const onsetsFor = async (notes: string): Promise<number[]> => {
   const { player, harness } = createPlayer();
   const part = new Part();
   const block = part.items[0] as Block;
-  block.blockContent.notes = notes;
+  block.melody = melodyWith(notes);
 
   await player.playPart(part, new Song());
 
@@ -149,7 +157,7 @@ describe('SongPlayer · tresillos con scheduler a 96n', () => {
     const subscription = player.metronome$.subscribe(beat => metronomeBeats.push(beat));
 
     const part = new Part();
-    (part.items[0] as Block).blockContent.notes = '1n:0';
+    (part.items[0] as Block).melody = melodyWith('1n:0');
     await player.playPart(part, new Song());
 
     const loop = harness.getLoopCallback();

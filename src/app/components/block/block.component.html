@@ -1,108 +1,106 @@
-<!-- <div class ="container">
-<p-inputNumber id="blockRepeatingTimes" placeholder="Repeating" [(ngModel)]="block.repeatingTimes" mode="decimal"
-  [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal"
-  decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary"
-  incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" [size]="5">
-</p-inputNumber>
-<button pButton type="button" icon="pi pi-copy" (click)="duplicateBlock(block)"></button>
-<button pButton type="button" icon="pi pi-plus" (click)="addChild(block)"></button>
-<button pButton type="button" icon="pi pi-times" (click)="removeChild(block)"></button>
-<app-block-commands [block]="block" (removeCommand)="onRemoveCommand($event)"></app-block-commands> -->
-
 <!--
-El bloque raíz de `Part.blocks` puede ser contenido real (`.mr`) o un
-contenedor vacío creado por la GUI. `treeValue` devuelve el propio bloque
-cuando tiene contenido (PrimeNG anida sus hijos vía `children`) y sólo los
-hijos cuando es un contenedor, preservando el comportamiento clásico.
+Árbol de bloques estructurales: cada bloque es un nodo real. Las referencias
+de contenido no son nodos: se muestran como chips en la cabecera y se editan
+en el cuerpo con `app-block-content-links`.
 -->
-@if (treeValue.length > 0) {
-  <p-tree
-    [value]="treeValue"
-    [draggableNodes]="true"
-    [droppableNodes]="true"
-    draggableScope="blocks"
-    droppableScope="blocks"
-    (mousedown)="onTreeMouseDown($event)"
-    (dragstart)="onTreeDragStart($event)"
-    (dragend)="onTreeDragEnd()"
-    (onNodeDrop)="onNodeDrop($event)"
-    [style]="{'height': 'auto', 'overflow-y': 'auto'}">
-    <ng-template let-node pTemplate="default">
-      <div class="block-content">
-        <!-- Header: Contains drag handle, toggler, label, repetitions and controls.
-        The root header can be hidden when a host (block library) owns it. -->
-        @if (!hideHeader || node !== block) {
-          <div class="block-header">
-            <!-- Drag handle: the only point that starts a block drag -->
-            @if (canDrag(node)) {
-              <span
-                class="header-item block-drag-handle"
-                pTooltip="Drag to move block"
-                [tooltipDisabled]="dragging"
-                tooltipPosition="top"
-                aria-hidden="true">
-                <i class="pi pi-bars"></i>
-              </span>
-            }
-            <!-- Remove p-treeToggler -->
-            <!-- Add Toggle Button/Icon - Always visible -->
-            <p-button
-              [icon]="node.expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
-              (click)="toggleNodeExpansion(node)"
-              styleClass="p-button-text p-button-sm block-toggler-button">
-            </p-button>
-            <!-- Remove placeholder span -->
-            @if (!hideLabel || node !== block) {
-              <span class="header-item block-label"><input type="text" [(ngModel)]="node.label" class="block-name-input" placeholder="Block {{node.id}}" [attr.aria-label]="'Block name'"></span>
-            }
-            <span class="header-item repetitions-container">
-              <span class="repetitions-label" style="margin-right: 2px; font-size: 12px;">×</span>
-              <input type="number"
-                id="repeatingTimes"
-                class="repetitions-input"
-                style="width:32px !important; max-width:32px !important;"
-                [(ngModel)]="node.repeatingTimes"
-                min="0" max="99" step="1"
-                pTooltip="Repeats"
-                tooltipPosition="top"
-                [attr.aria-label]="'Repeats for block ' + node.label">
-            </span>
-            @if (!hideControls || node !== block) {
-              <span class="header-item block-controls"><p-button (click)="addChild(node)" icon="pi pi-plus" pTooltip="Add Block" tooltipPosition="top"></p-button><p-button (click)="removeChild(node)" icon="pi pi-times" pTooltip="Remove Block" tooltipPosition="top"></p-button><p-button (click)="duplicateBlock(node)" icon="pi pi-copy" pTooltip="Duplicate Block" tooltipPosition="top"></p-button></span>
-            }
-          </div>
-          } <!-- End of block-header -->
-          <!-- Cuerpo del bloque: Notes + Commands + Operations (solo desplegado) -->
-          @if ((forceExpanded && node === block) || node.expanded) {
-            <div class="block-body">
-              <!-- Notes: el editor de melodía vive ahora en el cuerpo -->
-              <div class="block-section notes-section">
-                <span class="block-section-icon" pTooltip="Notes" tooltipPosition="top" aria-label="Notes" role="img">&#9835;</span>
-                <span class="melody-editor-inline-container">
-                  <div class="melody-editor-container">
-                    <div class="p-field p-col-12">
-                      <app-melody-editor-wrapper
-                        id="melody-{{node.id}}"
-                        [(ngModel)]="node.blockContent.notes"
-                        [blockId]="node.id"
-                        [showVariableIcon]="false"
-                        >
-                      </app-melody-editor-wrapper>
-                    </div>
-                  </div>
-                </span>
-              </div>
-              <app-block-commands
-                [block]="node"
-                >
-              </app-block-commands>
-            </div>
-          }
-        </div>
-      </ng-template>
-      <!-- Add empty template to hide default toggler icon -->
-      <ng-template pTemplate="togglericon"></ng-template>
-    </p-tree>
-    } <!-- Close the conditional container -->
+<p-tree
+  [value]="treeValue"
+  [draggableNodes]="true"
+  [droppableNodes]="true"
+  draggableScope="blocks"
+  droppableScope="blocks"
+  (mousedown)="onTreeMouseDown($event)"
+  (dragstart)="onTreeDragStart($event)"
+  (dragend)="onTreeDragEnd()"
+  (onNodeDrop)="onNodeDrop($event)"
+  [style]="{'height': 'auto', 'overflow-y': 'auto'}">
+  <ng-template let-node pTemplate="default">
+    <div class="block-content" [class.block-content--playing]="isBlockPlaying(node)">
+      <div class="block-header">
+        @if (canDrag(node)) {
+          <span
+            class="header-item block-drag-handle"
+            pTooltip="Drag to move block"
+            [tooltipDisabled]="dragging"
+            tooltipPosition="top"
+            aria-hidden="true">
+            <i class="pi pi-bars"></i>
+          </span>
+        }
+        <p-button
+          [icon]="node.expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"
+          (click)="toggleNodeExpansion(node)"
+          styleClass="p-button-text p-button-sm block-toggler-button">
+        </p-button>
+        <span class="header-item block-label">
+          <input type="text"
+            [(ngModel)]="node.label"
+            class="block-name-input"
+            placeholder="Block {{node.id}}"
+            [attr.aria-label]="'Block name'">
+        </span>
 
-  <!-- </div> -->
+        <!-- Chips informativos de contenido: clic para navegar a la definición. -->
+        @if (node.melody) {
+          <button type="button"
+            class="block-content-chip"
+            [pTooltip]="'Edit melody ' + node.melody.label"
+            tooltipPosition="top"
+            (click)="navigateTo('melody', node.melody.label)">
+            <i class="pi pi-volume-up" aria-hidden="true"></i>
+            <span>{{ node.melody.label }}</span>
+          </button>
+        }
+        @if (node.preset) {
+          <button type="button"
+            class="block-content-chip"
+            [pTooltip]="'Edit preset ' + node.preset.label"
+            tooltipPosition="top"
+            (click)="navigateTo('preset', node.preset.label)">
+            <i class="pi pi-sliders-h" aria-hidden="true"></i>
+            <span>{{ node.preset.label }}</span>
+          </button>
+        }
+        @if (node.procedure) {
+          <button type="button"
+            class="block-content-chip"
+            [pTooltip]="'Edit procedure ' + node.procedure.label"
+            tooltipPosition="top"
+            (click)="navigateTo('procedure', node.procedure.label)">
+            <i class="pi pi-bolt" aria-hidden="true"></i>
+            <span>{{ node.procedure.label }}</span>
+          </button>
+        }
+
+        <span class="header-item repetitions-container">
+          <span class="repetitions-label" style="margin-right: 2px; font-size: 12px;">×</span>
+          <input type="number"
+            id="repeatingTimes"
+            class="repetitions-input"
+            style="width:32px !important; max-width:32px !important;"
+            [(ngModel)]="node.repeatingTimes"
+            min="0" max="99" step="1"
+            pTooltip="Repeats"
+            tooltipPosition="top"
+            [attr.aria-label]="'Repeats for block ' + node.label">
+        </span>
+        <span class="header-item block-controls">
+          <p-button (click)="addChild(node)" icon="pi pi-plus" pTooltip="Add Block" tooltipPosition="top"></p-button>
+          <p-button (click)="removeChild(node)" icon="pi pi-times" pTooltip="Remove Block" tooltipPosition="top"></p-button>
+          <p-button (click)="duplicateBlock(node)" icon="pi pi-copy" pTooltip="Duplicate Block" tooltipPosition="top"></p-button>
+        </span>
+      </div>
+
+      @if (node.expanded) {
+        <div class="block-body">
+          <app-block-content-links
+            [block]="node"
+            [song]="song"
+            (contentEdit)="contentEdit.emit($event)">
+          </app-block-content-links>
+        </div>
+      }
+    </div>
+  </ng-template>
+  <ng-template pTemplate="togglericon"></ng-template>
+</p-tree>

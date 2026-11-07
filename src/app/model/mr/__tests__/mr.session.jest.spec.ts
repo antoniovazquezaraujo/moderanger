@@ -74,7 +74,7 @@ describe('buildMrFileName', () => {
 
 describe('songToMrMeta: la cabecera se deriva del modelo canónico', () => {
   it('omite repeats 1 y bpm 120 por defecto', () => {
-    expect(songToMrMeta(new Song())).toEqual({ version: 1, repeats: undefined, bpm: undefined });
+    expect(songToMrMeta(new Song())).toEqual({ version: 2, repeats: undefined, bpm: undefined });
   });
 
   it('refleja Song.repeats y Song.bpm', () => {
@@ -82,7 +82,7 @@ describe('songToMrMeta: la cabecera se deriva del modelo canónico', () => {
     song.repeats = 2;
     song.bpm = 90;
 
-    expect(songToMrMeta(song)).toEqual({ version: 1, repeats: 2, bpm: 90 });
+    expect(songToMrMeta(song)).toEqual({ version: 2, repeats: 2, bpm: 90 });
   });
 
   it('hace round-trip Song → MrMeta → Song (con el parser)', () => {

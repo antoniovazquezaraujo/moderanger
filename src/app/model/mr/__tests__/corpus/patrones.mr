@@ -1,13 +1,20 @@
 song Patrones
-version 1
+version 2
 
 vars
   $grado = -5
 
-part Ritmos
-  block "Patrón"
+melodies
+  melody "Patrón"
     notes
       4n:0
-    commands
-      PLAYMODE SINGLE
-      PATTERN 4n:( 0 2 ) 8n:s 4t:-1 4t:$grado
+
+presets
+  preset Patron
+    PLAYMODE SINGLE
+    PATTERN 4n:( 0 2 ) 8n:s 4t:-1 4t:$grado
+
+part Ritmos
+  block "Patrón"
+    preset Patron
+    melody "Patrón"

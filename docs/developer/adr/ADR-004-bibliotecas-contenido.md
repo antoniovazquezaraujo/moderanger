@@ -1,6 +1,6 @@
 # ADR-004: Bibliotecas de contenido y bloques estructurales
 
-- **Estado:** Aceptado (2026-11-04). Sustituye a `ADR-002-bloques-reutilizables.md`.
+- **Estado:** Aceptado (2026-11-04); vertical slice implementado en `feature/content-libraries` (2026-11-05). Sustituye a `ADR-002-bloques-reutilizables.md`.
 - **Fecha:** 2026-11-04
 - **Autor:** DANI (coordinación y arquitectura)
 - **Decisores:** el usuario (producto) + DANI (arquitectura)

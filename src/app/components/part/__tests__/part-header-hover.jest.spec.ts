@@ -30,7 +30,7 @@ describe('Part · acciones al hover', () => {
     expect(header).toContain('class="part-info"');
     expect(header).toContain('class="part-controls"');
     // Controles con su comportamiento/tooltips intactos.
-    expect(header).toContain('pTooltip="Add child block"');
+    expect(header).toContain('pTooltip="Add block"');
     expect(header).toContain('pTooltip="Remove part"');
     expect(header).toContain('pTooltip="Duplicate part"');
     expect(header).toContain('pTooltip="Play part"');

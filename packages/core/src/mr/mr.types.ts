@@ -10,7 +10,7 @@ import { Song } from '../song';
 import { VariableValue } from '../variable.context';
 
 /** Versión del formato que implementa este módulo. */
-export const MR_FORMAT_VERSION = 1;
+export const MR_FORMAT_VERSION = 2;
 
 export interface MrMeta {
   /** Versión del formato `.mr` (siempre presente al serializar). */

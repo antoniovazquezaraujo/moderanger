@@ -25,13 +25,17 @@ const runCli = (args: string[], input?: string) =>
 const writeSong = (file: string): void => {
     fs.writeFileSync(file, [
         'song CLI',
-        'version 1',
+        'version 2',
         '',
-        'part Piano',
-        '  block Tema',
+        'melodies',
+        '  melody Tema',
         '    notes',
         '      4n:0',
         '      4n:2',
+        '',
+        'part Piano',
+        '  block Tema',
+        '    melody Tema',
         ''
     ].join('\n'));
 };
@@ -72,12 +76,16 @@ describe('CLI moderanger', () => {
         const input = path.join(dir, 'roto.mr');
         fs.writeFileSync(input, [
             'song Roto',
-            'version 1',
+            'version 2',
+            '',
+            'melodies',
+            '  melody Tema',
+            '    notes',
+            '      4n:( 0 2',
             '',
             'part Piano',
             '  block Tema',
-            '    notes',
-            '      4n:( 0 2',
+            '    melody Tema',
             ''
         ].join('\n'));
 
@@ -92,17 +100,24 @@ describe('CLI moderanger', () => {
         const input = path.join(dir, 'decoracion.mr');
         fs.writeFileSync(input, [
             'song Decoracion',
-            'version 1',
+            'version 2',
             '',
             'vars',
             '  $x = "-0 1"',
             '',
-            'part Piano',
-            '  block Tema',
+            'melodies',
+            '  melody Tema',
             '    notes',
             '      4n:0',
-            '    commands',
-            '      DECORATION $x',
+            '',
+            'presets',
+            '  preset P',
+            '    DECORATION $x',
+            '',
+            'part Piano',
+            '  block Tema',
+            '    preset P',
+            '    melody Tema',
             ''
         ].join('\n'));
 
@@ -126,7 +141,7 @@ describe('CLI moderanger', () => {
 
     it('check devuelve código 1 con un .mr inválido', () => {
         const input = path.join(dir, 'roto.mr');
-        fs.writeFileSync(input, 'song Roto\nversion 1\n\npart Piano\n  block Tema\n    notes\n      4n:( 0 2\n');
+        fs.writeFileSync(input, 'song Roto\nversion 2\n\nmelodies\n  melody Tema\n    notes\n      4n:( 0 2\n');
 
         const result = runCli(['check', input]);
 

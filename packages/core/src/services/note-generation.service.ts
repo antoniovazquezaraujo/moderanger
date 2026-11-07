@@ -1,4 +1,4 @@
-import { Block } from '../block';
+import { Melody } from '../content';
 import { Player } from '../player';
 import { NoteData } from '../note';
 // Import necessary classes for scale degree calculation
@@ -60,20 +60,25 @@ export class NoteGenerationService {
   }
 
   /**
-   * Generates the final NoteData array for a given block based on the player's current state.
-   * @param block The block containing notes/operations.
-   * @param player The player providing musical context (scale, octave, mode, etc.).
-   * @returns An array of NoteData representing the notes to be played for this block.
+   * Genera los `NoteData` reproducibles de una melodía con el estado musical
+   * actual del `Player`. La melodía guarda notas; el preset/contexto decide
+   * cómo se interpretan (escala, octava, playmode, patrones…).
    */
-  generateNotesForBlock(block: Block, player: Player): NoteData[] {
-    console.log(`[NoteGenSvc] === generateNotesForBlock START === Block ID: ${block.id}`);
+  generateNotesForMelody(
+    melody: Melody,
+    player: Player,
+    sourceBlockId?: number,
+    sourcePresetId?: number,
+    sourceProcedureId?: number
+  ): NoteData[] {
+    console.log(`[NoteGenSvc] === generateNotesForMelody START === Melody ID: ${melody.id}`);
     console.log(`[NoteGenSvc] Player state: ${JSON.stringify(player)}`);
     
     let rootNoteDatas: NoteData[] = [];
-    const notesToParse = block.blockContent?.notes || '';
-    // Q6(a): la duración por defecto del bloque (`notes default <dur>` en `.mr`)
-    // sustituye al fallback 16n para las notas raíz sin duración.
-    const fallbackDuration = block.blockContent?.defaultDuration ?? '16n';
+    const notesToParse = melody.notes || '';
+    // Q6(a): la duración por defecto de la melodía (`notes default <dur>` en
+    // `.mr`) sustituye al fallback 16n para las notas raíz sin duración.
+    const fallbackDuration = melody.defaultDuration ?? '16n';
     console.log(`[NoteGenSvc] Notes string to parse: "${notesToParse}"`);
 
     // 1. Parse the string into NoteData[]
@@ -112,7 +117,12 @@ export class NoteGenerationService {
     // los derivados (acordes/arpegios, PATTERN, hijos de grupo) y no se
     // serializa en `.mr`.
     if (notesToParse.trim().length > 0) {
-        this.tagSourcePaths(rootNoteDatas, block.id);
+        this.tagSourcePaths(rootNoteDatas, {
+            blockId: sourceBlockId ?? melody.id,
+            melodyId: melody.id,
+            presetId: sourcePresetId,
+            procedureId: sourceProcedureId
+        });
     }
 
     // --- Skip duration propagation if we just created the default rest --- 
@@ -133,8 +143,8 @@ export class NoteGenerationService {
     }
     
     // <<< Add log before final return >>>
-    console.log(`[NoteGenSvc] === generateNotesForBlock RETURNING === Count: ${finalPlayableNotes.length}, Content: ${JSON.stringify(finalPlayableNotes)}`);
-    console.log(`[NoteGenSvc] === generateNotesForBlock END ===`);
+    console.log(`[NoteGenSvc] === generateNotesForMelody RETURNING === Count: ${finalPlayableNotes.length}, Content: ${JSON.stringify(finalPlayableNotes)}`);
+    console.log(`[NoteGenSvc] === generateNotesForMelody END ===`);
     return finalPlayableNotes;
   }
 
@@ -399,15 +409,22 @@ export class NoteGenerationService {
    * (`[0, 2]` = tercer hijo del primer evento). Es metadato de origen para la
    * UI de resaltado: no viaja al `.mr` ni a la serialización.
    */
-  private tagSourcePaths(noteDatas: NoteData[], blockId: number, parentPath: number[] = []): void {
+  private tagSourcePaths(
+      noteDatas: NoteData[],
+      source: { blockId: number; melodyId: number; presetId?: number; procedureId?: number },
+      parentPath: number[] = []
+  ): void {
       noteDatas.forEach((noteData, index) => {
           const path = [...parentPath, index];
           noteData.sourcePath = path;
-          noteData.sourceBlockId = blockId;
+          noteData.sourceBlockId = source.blockId;
+          noteData.sourceMelodyId = source.melodyId;
+          noteData.sourcePresetId = source.presetId;
+          noteData.sourceProcedureId = source.procedureId;
           if (noteData.type === 'group' && noteData.children) {
-              this.tagSourcePaths(noteData.children, blockId, path);
+              this.tagSourcePaths(noteData.children, source, path);
           } else if ((noteData.type === 'chord' || noteData.type === 'arpeggio') && noteData.noteDatas) {
-              this.tagSourcePaths(noteData.noteDatas, blockId, path);
+              this.tagSourcePaths(noteData.noteDatas, source, path);
           }
       });
   }
@@ -416,6 +433,9 @@ export class NoteGenerationService {
   private stampOrigin(generated: NoteData, origin: NoteData): NoteData {
       generated.sourcePath = origin.sourcePath;
       generated.sourceBlockId = origin.sourceBlockId;
+      generated.sourceMelodyId = origin.sourceMelodyId;
+      generated.sourcePresetId = origin.sourcePresetId;
+      generated.sourceProcedureId = origin.sourceProcedureId;
       return generated;
   }
 

@@ -1,0 +1,46 @@
+<div class="scale-select" (keydown)="onKeydown($event)">
+  <button type="button"
+    cdkOverlayOrigin
+    #origin="cdkOverlayOrigin"
+    class="scale-select-trigger"
+    aria-haspopup="listbox"
+    [attr.aria-expanded]="open"
+    [attr.aria-label]="'Scale: ' + value"
+    (click)="toggle($event)">
+    <span>{{ value }}</span>
+    <i class="pi pi-chevron-down" aria-hidden="true"></i>
+  </button>
+
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="origin"
+    [cdkConnectedOverlayOpen]="open"
+    [cdkConnectedOverlayPositions]="overlayPositions"
+    [cdkConnectedOverlayHasBackdrop]="true"
+    [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+    [cdkConnectedOverlayViewportMargin]="8"
+    (overlayOutsideClick)="close()"
+    (detach)="close()">
+    <div class="scale-select-dropdown" (keydown)="onKeydown($event)">
+      <div class="scale-select-menu" role="listbox" aria-label="Scales">
+        @for (scale of options; track scale) {
+          <button type="button"
+            class="scale-option"
+            role="option"
+            [class.scale-option--selected]="scale === value"
+            [attr.aria-selected]="scale === value"
+            (mouseenter)="hovered = scale"
+            (focus)="hovered = scale"
+            (click)="select(scale, $event)">
+            {{ scale }}
+          </button>
+        }
+      </div>
+      @if (hovered) {
+        <div class="scale-select-preview" role="tooltip">
+          <app-scale-preview [scale]="hovered"></app-scale-preview>
+        </div>
+      }
+    </div>
+  </ng-template>
+</div>

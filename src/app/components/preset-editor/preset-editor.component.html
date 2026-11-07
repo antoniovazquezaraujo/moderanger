@@ -1,0 +1,140 @@
+<div class="block-container">
+  <div class="commands-row">
+    <span class="block-section-icon" pTooltip="Settings" tooltipPosition="top" aria-label="Settings" role="img">&#9881;</span>
+    <div class="container-wrapper commands-container">
+      @for (command of preset.settings; track command) {
+        <div class="command">
+          <select class="command-type"
+            [(ngModel)]="command.type"
+            (ngModelChange)="onCommandTypeChange(command)"
+            [pTooltip]="typeDescription(command.type)"
+            [title]="typeDescription(command.type)"
+            tooltipPosition="top"
+            [attr.aria-label]="'Setting type: ' + typeDescription(command.type)">
+            @for (type of typeOptions(command); track type) {
+              <option [value]="type" [title]="typeDescription(type)">{{typeLabel(type)}}</option>
+            }
+          </select>
+          @if (showCommandColon(command)) {
+            <span class="command-label-sep" aria-hidden="true">:</span>
+          }
+          @switch (command.type) {
+            @case (commandTypes.PLAYMODE) {
+              @if (command.isVariable) {
+                <select class="command-type"
+                  [ngModel]="getSelectedValue(command)"
+                  (ngModelChange)="handleValueInput($event, command)">
+                  <option value="" disabled>Select PlayMode variable</option>
+                  @for (variable of getFilteredVariables(command); track trackByVariable($index, variable)) {
+                    <option [value]="variable.value">{{variable.label}}</option>
+                  }
+                </select>
+              } @else {
+                <select class="command-type playmode-select"
+                  [ngModel]="getPlayModeString(command)"
+                  (ngModelChange)="setPlayModeFromString($event, command)"
+                  [pTooltip]="playModeDescription(getPlayModeString(command))"
+                  [title]="playModeDescription(getPlayModeString(command))"
+                  tooltipPosition="top"
+                  [attr.aria-label]="'Play mode: ' + playModeDescription(getPlayModeString(command))">
+                  @for (mode of playModeOptions; track mode) {
+                    <option [value]="mode.value" [title]="mode.description">{{ mode.symbol }}</option>
+                  }
+                </select>
+              }
+            }
+            @case (commandTypes.SCALE) {
+              @if (command.isVariable) {
+                <select class="command-type"
+                  [ngModel]="getSelectedValue(command)"
+                  (ngModelChange)="handleValueInput($event, command)">
+                  <option value="" disabled>Select Scale variable</option>
+                  @for (variable of getFilteredVariables(command); track trackByVariable($index, variable)) {
+                    <option [value]="variable.value">{{variable.label}}</option>
+                  }
+                </select>
+              } @else {
+                <app-scale-select
+                  [value]="scaleName(command)"
+                  [options]="scaleNames"
+                  (valueChange)="handleScaleSelected($event, command)">
+                </app-scale-select>
+              }
+            }
+            @case (commandTypes.PATTERN) {
+              @if (command.isVariable) {
+                <select class="command-type"
+                  [ngModel]="getSelectedValue(command)"
+                  (ngModelChange)="handleValueInput($event, command)">
+                  <option value="" disabled>Select Pattern variable</option>
+                  @for (variable of getFilteredVariables(command); track trackByVariable($index, variable)) {
+                    <option [value]="variable.value">{{variable.label}}</option>
+                  }
+                </select>
+              } @else {
+                <app-melody-editor
+                  [notes]="getPatternValueAsString(command)"
+                  [defaultDuration]="currentDefaultDuration"
+                  (notesChange)="command.value = $event">
+                </app-melody-editor>
+              }
+            }
+            @case (commandTypes.DECORATION) {
+              @if (command.isVariable) {
+                <select class="command-type"
+                  [ngModel]="getSelectedValue(command)"
+                  (ngModelChange)="handleValueInput($event, command)">
+                  <option value="" disabled>Select Decoration variable</option>
+                  @for (variable of getFilteredVariables(command); track trackByVariable($index, variable)) {
+                    <option [value]="variable.value">{{variable.label}}</option>
+                  }
+                </select>
+              } @else {
+                <app-melody-editor
+                  [notes]="getDecorationValueAsString(command)"
+                  [defaultDuration]="currentDefaultDuration"
+                  (notesChange)="onDecorationValueChange($event, command)">
+                </app-melody-editor>
+              }
+            }
+            @default {
+              @if (command.isVariable) {
+                <select class="command-type"
+                  [ngModel]="getSelectedValue(command)"
+                  (ngModelChange)="handleValueInput($event, command)">
+                  <option value="" disabled>Select number variable</option>
+                  @for (variable of getFilteredVariables(command); track trackByVariable($index, variable)) {
+                    <option [value]="variable.value">{{variable.label}}</option>
+                  }
+                </select>
+              } @else {
+                <input type="number"
+                  class="command-value number-input"
+                  [(ngModel)]="command.value"
+                  (ngModelChange)="handleValueInput($event, command)"
+                  min="-999"
+                  max="999"
+                  step="1">
+              }
+            }
+          }
+          <div class="command-actions">
+            <p-button icon="pi pi-dollar"
+              (click)="showVariableSelector(command, $event)"
+              [pTooltip]="command.isVariable ? 'Convert to direct value (Currently using: ' + (command.getVariableName() || 'none') + ')' : 'Convert to variable'"
+              tooltipPosition="top">
+            </p-button>
+            <p-button icon="pi pi-times"
+              (click)="removeCommand(command)"
+              pTooltip="Remove setting"
+              tooltipPosition="top">
+            </p-button>
+          </div>
+        </div>
+      }
+      <div class="add-wrapper">
+        <p-button class="add-button" (click)="addCommand()" icon="pi pi-plus" pTooltip="Add setting" tooltipPosition="top"></p-button>
+      </div>
+    </div>
+  </div>
+</div>

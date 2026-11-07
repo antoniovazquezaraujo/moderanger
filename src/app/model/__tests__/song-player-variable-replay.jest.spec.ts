@@ -24,7 +24,7 @@ import { NoteGenerationUnifiedService } from '../../shared/services/note-generat
 import { GlobalStateService } from '../../shared/services/global-state.service';
 import { VaryOperation } from '../operation';
 import { Block } from '../block';
-import { BlockReference } from '../block-reference';
+import { Melody, Procedure } from '../content';
 import { Part } from '../part';
 import { Song } from '../song';
 import { SongPlayer } from '../song.player';
@@ -84,11 +84,25 @@ const createPlayer = (stub: EngineStub): SongPlayer =>
     new GlobalStateService()
   );
 
+const melodyWith = (notes: string): Melody => {
+  const melody = new Melody();
+  melody.label = 'Tema';
+  melody.content.notes = notes;
+  return melody;
+};
+
+const procedureWith = (operations: VaryOperation[]): Procedure => {
+  const procedure = new Procedure();
+  procedure.label = 'Proc';
+  procedure.operations = operations;
+  return procedure;
+};
+
 const createPart = (notes: string, operations: VaryOperation[] = []): Part => {
   const part = new Part();
   const block = part.items[0] as Block;
-  block.blockContent.notes = notes;
-  block.operations = operations;
+  block.melody = melodyWith(notes);
+  block.procedure = procedureWith(operations);
   return part;
 };
 
@@ -180,23 +194,19 @@ describe('SongPlayer · replay con operaciones (Play → fin natural → Play)',
     trace('playSong', steps);
   });
 
-  it('variante 3: op en la LLAMADA `use` de una referencia — no acumula', async () => {
+  it('variante 3: op en el procedure de un bloque — no acumula', async () => {
     // Arrange
     const stub = createEngineStub();
     const player = createPlayer(stub);
     const song = new Song();
 
-    const definition = new Block();
-    definition.label = 'def';
-    definition.blockContent.notes = '4n:0';
-    song.blocks = [definition];
-
-    const reference = new BlockReference();
-    reference.targetLabel = 'def';
-    reference.operations = [new VaryOperation('x', 1)];
+    const block = new Block();
+    block.label = 'def';
+    block.melody = melodyWith('4n:0');
+    block.procedure = procedureWith([new VaryOperation('x', 1)]);
 
     const part = new Part();
-    part.items = [reference];
+    part.items = [block];
 
     const steps: Array<[string, unknown]> = [];
     VariableContext.setValue('x', 2);
@@ -225,7 +235,7 @@ describe('SongPlayer · replay con operaciones (Play → fin natural → Play)',
     steps.push(['fin2', VariableContext.getValue('x')]);
     expect(VariableContext.getValue('x')).toBe(2);
 
-    trace('use-call', steps);
+    trace('procedure-call', steps);
   });
 
   it('variante 4: una op al FINAL del tema YA se aplica antes de sonar la 1ª nota', async () => {
@@ -235,10 +245,10 @@ describe('SongPlayer · replay con operaciones (Play → fin natural → Play)',
     const player = createPlayer(stub);
     const part = new Part();
     const first = part.items[0] as Block;
-    first.blockContent.notes = '4n:0';
+    first.melody = melodyWith('4n:0');
     const second = new Block();
-    second.blockContent.notes = '4n:1';
-    second.operations = [new VaryOperation('x', 1)];
+    second.melody = melodyWith('4n:1');
+    second.procedure = procedureWith([new VaryOperation('x', 1)]);
     first.children = [second];
 
     const steps: Array<[string, unknown]> = [];

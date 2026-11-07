@@ -2,7 +2,7 @@
  * Panel de Parts plegable.
  *
  * Las parts dejan de crearse desde el `+` del toolbar: viven en un panel
- * propio, siempre debajo de Variables y Blocks, con su contador y su `+` en
+ * propio, siempre debajo de Variables y Content, con su contador y su `+` en
  * la cabecera. Plegado al inicio para dejar sitio al editor.
  */
 import * as fs from 'fs';
@@ -14,17 +14,17 @@ const styles = fs.readFileSync(path.resolve(__dirname, '../song-editor.component
 const songTemplate = fs.readFileSync(path.resolve(__dirname, '../../song/song.component.html'), 'utf8');
 
 describe('Panel de Parts', () => {
-    it('vive dentro de .content-section, después de Variables y Blocks, y envuelve app-song', () => {
+    it('vive dentro de .content-section, después de Variables y Content, y envuelve app-song', () => {
         const sectionIndex = template.indexOf('class="content-section"');
         const variablesIndex = template.indexOf('class="variables-panel"');
-        const blocksIndex = template.indexOf('<app-block-library');
+        const contentIndex = template.indexOf('<app-content-library');
         const partsIndex = template.indexOf('class="parts-panel"');
         const songIndex = template.indexOf('<app-song');
 
         expect(sectionIndex).toBeGreaterThan(-1);
         expect(variablesIndex).toBeGreaterThan(sectionIndex);
-        expect(blocksIndex).toBeGreaterThan(variablesIndex);
-        expect(partsIndex).toBeGreaterThan(blocksIndex);
+        expect(contentIndex).toBeGreaterThan(variablesIndex);
+        expect(partsIndex).toBeGreaterThan(contentIndex);
         expect(songIndex).toBeGreaterThan(partsIndex);
     });
 
@@ -53,7 +53,7 @@ describe('Panel de Parts', () => {
         expect(addPart![1]).toContain('this.partsExpanded = true');
     });
 
-    it('la caja usa el lenguaje visual de Variables y Blocks', () => {
+    it('la caja usa el lenguaje visual de Variables y Content', () => {
         const body = /\.parts-panel\s*\{([^}]*)\}/.exec(styles);
         expect(body).not.toBeNull();
         expect(body![1]).toContain('border: 1px solid #ddd');

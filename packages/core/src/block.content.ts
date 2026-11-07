@@ -16,7 +16,6 @@ export class BlockContent {
     }
 
     set notes(value: string) {
-        console.log(`[BlockContent] Setter called for notes. Current: "${this._notes}", New: "${value}"`);
         this._notes = value;
     }
 

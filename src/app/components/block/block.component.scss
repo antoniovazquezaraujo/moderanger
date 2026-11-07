@@ -56,6 +56,27 @@
   margin-bottom: 2px;
 }
 
+/* Bloque que está sonando: resalta su cabecera aunque esté plegado. */
+.block-content--playing > .block-header {
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+  border-radius: 4px;
+  box-shadow: inset 3px 0 0 #8faebc;
+  transition: background-color 120ms ease;
+}
+
+.block-content--playing > .block-header .block-name-input {
+  color: #f5f5f5;
+}
+
+.block-content--playing > .block-header .block-name-input::placeholder {
+  color: #b8b8b8;
+}
+
+.block-content--playing > .block-header .p-button {
+  color: #e8e8e8;
+}
+
 .block-header {
   display: flex;
   align-items: center;
@@ -147,6 +168,40 @@ input[type="number"]#repeatingTimes {
   box-sizing: border-box;
   padding: 0 1px;
   font-size: 11px;
+}
+
+/* Chips de contenido en la cabecera: informan de las referencias y navegan a
+   la definición. No son nodos del árbol ni aceptan drops. */
+.block-content-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 160px;
+  margin-right: 4px;
+  padding: 1px 7px;
+  border: 1px solid #1e1e1e;
+  border-radius: 10px;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.block-content-chip:hover,
+.block-content-chip:focus-visible {
+  border-color: #333333;
+  background-color: #333333;
+  color: #ffffff;
+  outline: none;
+}
+
+.block-content-chip .pi {
+  color: #ffffff;
+  font-size: 0.7rem;
 }
 
 .block-body {

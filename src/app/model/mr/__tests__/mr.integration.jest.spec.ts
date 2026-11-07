@@ -19,7 +19,7 @@ beforeEach(() => {
 
 describe('validateSongText', () => {
   it('devuelve el documento cuando el texto es válido', () => {
-    const result = validateSongText('song "X"\nversion 1\npart\n  block\n');
+    const result = validateSongText('song "X"\nversion 2\npart\n  block\n');
 
     expect(result.errors).toEqual([]);
     expect(result.document?.song.name).toBe('X');
@@ -27,14 +27,14 @@ describe('validateSongText', () => {
   });
 
   it('normaliza BOM y CRLF antes de parsear', () => {
-    const result = validateSongText('\uFEFFsong "X"\r\nversion 1\r\n');
+    const result = validateSongText('\uFEFFsong "X"\r\nversion 2\r\n');
 
     expect(result.errors).toEqual([]);
     expect(result.document?.song.name).toBe('X');
   });
 
   it('devuelve MrParseError con línea y columna cuando el texto es inválido', () => {
-    const result = validateSongText('song "X"\nversion 2\n');
+    const result = validateSongText('song "X"\nversion 3\n');
 
     expect(result.document).toBeUndefined();
     expect(result.errors).toHaveLength(1);
@@ -53,17 +53,17 @@ describe('validateSongText', () => {
 
 describe('prepareSongText', () => {
   it('devuelve documento y texto canónico cuando el texto es válido', () => {
-    const result = prepareSongText('# comentario\nsong "X"\r\nversion 1\n');
+    const result = prepareSongText('# comentario\nsong "X"\r\nversion 2\n');
 
     expect(result.errors).toEqual([]);
     expect(result.serializeError).toBeUndefined();
     expect(result.document?.song.name).toBe('X');
-    expect(result.canonical).toBe('song X\nversion 1\n');
+    expect(result.canonical).toBe('song X\nversion 2\n');
     expect(result.canonical).not.toContain('#');
   });
 
   it('no devuelve documento si hay error de sintaxis (con línea/columna)', () => {
-    const result = prepareSongText('song "X"\nversion 2\n');
+    const result = prepareSongText('song "X"\nversion 3\n');
 
     expect(result.document).toBeUndefined();
     expect(result.canonical).toBeUndefined();
@@ -78,7 +78,7 @@ describe('prepareSongText', () => {
     });
 
     try {
-      const result = prepareSongText('song "X"\nversion 1\n');
+      const result = prepareSongText('song "X"\nversion 2\n');
 
       expect(result.document).toBeUndefined();
       expect(result.canonical).toBeUndefined();
@@ -97,13 +97,13 @@ describe('createSongDocument / createDocumentFromContext', () => {
     const song = new Song();
     song.name = 'App';
 
-    const document = createDocumentFromContext(song, { version: 1, repeats: 2 });
+    const document = createDocumentFromContext(song, { version: 2, repeats: 2 });
 
     expect(Array.from(document.variables.entries())).toEqual([
       ['oct', 2],
       ['mode', 'RANDOM']
     ]);
-    expect(document.meta).toEqual({ version: 1, repeats: 2 });
+    expect(document.meta).toEqual({ version: 2, repeats: 2 });
     expect(document.song).toBe(song);
     expect(serializeSong(document)).toContain('$oct = 2');
     expect(serializeSong(document)).toContain('$mode = RANDOM');
@@ -111,7 +111,7 @@ describe('createSongDocument / createDocumentFromContext', () => {
 
   it('no comparte el Map de variables con el llamador', () => {
     const source = new Map<string, number>([['a', 1]]);
-    const document = createSongDocument(new Song(), { version: 1 }, source);
+    const document = createSongDocument(new Song(), { version: 2 }, source);
 
     source.set('b', 2);
     document.variables.set('c', 3);
@@ -123,7 +123,7 @@ describe('createSongDocument / createDocumentFromContext', () => {
   it('refleja las variables del contexto sin tocar VariableContext', () => {
     VariableContext.setValue('x', 1);
 
-    const document = createDocumentFromContext(new Song(), { version: 1 });
+    const document = createDocumentFromContext(new Song(), { version: 2 });
 
     expect(VariableContext.getValue('x')).toBe(1);
     expect(document.variables.get('x')).toBe(1);

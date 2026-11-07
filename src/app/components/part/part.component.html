@@ -9,39 +9,8 @@
     <div class="part-info">
       <input type="text" [(ngModel)]="part.name" class="part-name-input" placeholder="Part {{part.id}}">
     </div>
-    <!-- Añadir referencia: solo un botón; al pulsarlo se despliega el combo
-    de definiciones y al seleccionar una se añade (el combo se oculta).
-    Sin biblioteca queda deshabilitado con pista. -->
-    <div class="part-add-reference">
-      <p-button
-        [icon]="referencePickerOpen ? 'pi pi-times' : 'pi pi-link'"
-        [pTooltip]="definitionOptions.length ? 'Add block reference' : 'Create a block in the library first'"
-        tooltipPosition="top"
-        aria-haspopup="listbox"
-        [attr.aria-expanded]="referencePickerOpen"
-        aria-label="Add block reference"
-        [disabled]="definitionOptions.length === 0"
-        (click)="toggleReferencePicker()">
-      </p-button>
-      @if (referencePickerOpen) {
-        <select #referenceSelect
-          class="add-reference-select"
-          [ngModel]="selectedDefinitionLabel"
-          (ngModelChange)="onReferenceSelected($event)"
-          (blur)="onReferencePickerBlur()"
-          (keydown.escape)="closeReferencePicker()"
-          aria-label="Block reference">
-          <option [ngValue]="null" disabled>Reference…</option>
-          @for (option of definitionOptions; track option) {
-            <option [value]="option.value">{{ option.label }}</option>
-          }
-        </select>
-      }
-    </div>
     <div class="part-controls">
-      @for (block of blocks; track block) {
-        <button pButton type="button" icon="pi pi-plus" (click)="onAddChild(block)" pTooltip="Add child block"></button>
-      }
+      <button pButton type="button" icon="pi pi-plus" (click)="addRootBlock()" pTooltip="Add block"></button>
       <button pButton type="button" icon="pi pi-times" (click)="removePart()" pTooltip="Remove part"></button>
       <button pButton type="button" icon="pi pi-copy" (click)="duplicatePart()" pTooltip="Duplicate part"></button>
       <button pButton type="button" icon="pi pi-play" (click)="playPart()" pTooltip="Play part"></button>
@@ -50,29 +19,17 @@
   </div>
   @if (isExpanded) {
     <div class="part-content">
-      <!-- Ítems en orden real: bloques inline y referencias `use`. -->
-      @for (item of part.items; track trackByItem($index, item)) {
-        @if (item.kind === 'block') {
-          <app-block
-            [block]="asBlock(item)"
-            (onDuplicateBlock)="onDuplicateBlock($event)"
-            (onRemoveBlock)="onRemoveBlock($event)"
-            (onAddChild)="onAddChild($event)">
-          </app-block>
-        }
-        @if (item.kind === 'reference') {
-          <app-block-reference
-            [reference]="asReference(item)"
-            [song]="song"
-            (editDefinition)="onEditDefinition($event)"
-            (removeReference)="removeReference($event)"
-            (duplicateReference)="duplicateReference($event)"
-            (moveUp)="moveItem($event, -1)"
-            (moveDown)="moveItem($event, 1)">
-          </app-block-reference>
-        }
+      @for (block of blocks; track trackByBlock($index, block)) {
+        <app-block
+          [block]="block"
+          [song]="song"
+          (onDuplicateBlock)="onDuplicateBlock($event)"
+          (onRemoveBlock)="onRemoveBlock($event)"
+          (onAddChild)="onAddChild($event)"
+          (contentEdit)="contentEditEvent.emit($event)">
+        </app-block>
       }
-      @if (part.items.length === 0) {
+      @if (blocks.length === 0) {
         <p class="part-empty">No blocks yet.</p>
       }
     </div>

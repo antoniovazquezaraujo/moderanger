@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-11-04
 - **Autor:** DANI (coordinación y arquitectura)
-- **Estado:** dirección aceptada; implementación pendiente. Sustituye la propuesta de bloques reutilizables y las referencias `use` a bloques.
+- **Estado:** dirección aceptada; **vertical slice implementado** en `feature/content-libraries` (2026-11-05). Sustituye la propuesta de bloques reutilizables y las referencias `use` a bloques.
 - **Decisiones relacionadas:** `ADR-004-bibliotecas-contenido.md` (decisión), `ADR-001-texto-canonico-y-sintaxis-mr.md` (texto canónico), `ADR-002-bloques-reutilizables.md` (sustituido).
 - **Alcance:** modelo de dominio, sintaxis `.mr`, semántica de ejecución e impacto en la GUI. Este documento no implementa nada.
 

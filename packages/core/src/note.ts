@@ -17,8 +17,17 @@ export interface NoteData {
      * no lo serializa y la reproducción no lo necesita.
      */
     sourcePath?: number[];
-    /** Bloque del que procede el evento original (metadato interno). */
+    /**
+     * Bloque estructural que está reproduciendo el evento (metadato interno).
+     * Si la melodía se genera fuera de un bloque, cae al id de la melodía.
+     */
     sourceBlockId?: number;
+    /** Melodía de la que procede el evento (metadato interno). */
+    sourceMelodyId?: number;
+    /** Preset aplicado al bloque que reproduce el evento (metadato interno). */
+    sourcePresetId?: number;
+    /** Procedimiento aplicado al bloque que reproduce el evento (metadato interno). */
+    sourceProcedureId?: number;
     children?: NoteData[];
     noteDatas?: NoteData[]; // Para Arpeggios y Acordes
 }
@@ -31,6 +40,9 @@ export class NoteData implements NoteData {
     variable?: string;
     sourcePath?: number[];
     sourceBlockId?: number;
+    sourceMelodyId?: number;
+    sourcePresetId?: number;
+    sourceProcedureId?: number;
     children?: NoteData[];
     noteDatas?: NoteData[]; // Para Arpeggios y Acordes
 

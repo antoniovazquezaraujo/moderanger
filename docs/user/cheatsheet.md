@@ -4,7 +4,7 @@
 
 ```mr
 song "Song name"
-version 1
+version 2
 repeats 2        # song repetitions (1 = omitted)
 bpm 90           # tempo (120 = omitted)
 
@@ -12,38 +12,57 @@ vars
   $oct = 2
   $motif = "4t:0 4t:2"
 
-blocks
-  block Riff
+melodies
+  melody Riff
     notes
       4n:0
       4n:3
 
-part Piano instrument PIANO
-  use Riff repeats 2      # reference to a library block
-    commands
-      OCT $oct
-  block Theme repeats 2
-    notes default 8n     # block default duration
+  melody Theme
+    notes default 8n
       4n:0
       4n:( 0 2 )
       s
-    commands
-      OCT $oct
-      SCALE WHITE
-      PLAYMODE ASCENDING
-    operations
-      VARY $oct 1
-      ASSIGN $scale BLACK
+
+presets
+  preset RiffAjustes
+    OCT $oct
+    SCALE WHITE
+
+  preset ThemeAjustes
+    OCT $oct
+    SCALE WHITE
+    PLAYMODE ASCENDING
+
+procedures
+  procedure Rise
+    VARY $oct 1
+    ASSIGN $scale BLACK
+
+part Piano instrument PIANO
+  block Riff repeats 2
+    preset RiffAjustes
+    melody Riff
+
+  block Theme repeats 2
+    preset ThemeAjustes
+    procedure Rise
+    melody Theme
 
     block Answer
-      notes $motif
+      melody Theme
 ```
 
-## Reusable blocks
+## Content libraries
 
-- `blocks` (after `vars`, before the first `part`) defines a library: `block <name>` with a **mandatory, unique** name; admits `notes`/`commands`/`operations` and child blocks (no `use` inside).
-- `use <name> repeats <n>` in a part references a definition; it is a **direct item** of the part (not nestable) and admits only its own `commands`/`operations` (no `notes`, no children).
-- Per pass: definition `commands` → definition `operations` → call `commands` → call `operations` → definition `notes` → definition child blocks; the call wins on what it sets. Passes = call `repeats` × definition `repeats`.
+- Order: `vars` → `melodies` → `presets` → `procedures` → `part*`. Each library is optional, appears at most once and holds unique names.
+- `melodies`: `melody <name>` plus one `notes` section (`notes`, `notes default <duration>` or `notes $variable`).
+- `presets`: `preset <name>` plus playback settings (`OCT`, `SCALE`, `PLAYMODE`, `PATTERN`, `DECORATION`...).
+- `procedures`: `procedure <name>` plus operations (`VARY`, `ASSIGN`).
+- Libraries are leaves: they contain no blocks and no references to other library entries.
+- A block is structure only: optional `preset`, `procedure` and `melody` references plus child blocks. No inline `notes`/`commands`/`operations`.
+- Per pass: preset settings → procedure operations → melody notes → child blocks. `repeats` repeats the full pass, children included.
+- Format 2 has no `blocks` section and no `use`: blocks are never referenced and there is no reader for `version 1`.
 
 ## Notes
 
@@ -63,9 +82,9 @@ part Piano instrument PIANO
 | `4t` | Quarter-note triplet | ⅔ | 0.333 s |
 | `8t` | Eighth-note triplet | ⅓ | 0.167 s |
 
-## Commands
+## Preset settings
 
-| Command | Purpose | Example |
+| Setting | Purpose | Example |
 |---|---|---|
 | `OCT` | Base octave | `OCT 2` |
 | `SCALE` | Active scale | `SCALE BLACK` |
@@ -79,9 +98,9 @@ part Piano instrument PIANO
 | `DECORATION` | Decoration added to each chord note (offsets in scale degrees) | `DECORATION 4t:0 8t:-2` |
 | `PATTERN_GAP` | Deprecated: pattern decoration gap (no effect) | `PATTERN_GAP 1` |
 
-Numeric commands accept `$variable`.
+Numeric settings accept `$variable`.
 
-## Operations
+## Procedures
 
 - `VARY $variable step` — increment/decrement (numbers) or cycle (scales/playmodes).
 - `ASSIGN $variable value` — assign.

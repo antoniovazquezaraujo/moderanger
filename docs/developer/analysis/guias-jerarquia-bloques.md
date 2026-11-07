@@ -7,6 +7,27 @@
 - **Alcance:** la indentación del árbol no dejaba clara la relación padre→hijo. Se añaden **guías visuales tipo explorador de ficheros** (VS Code): una línea vertical por nivel y un conector horizontal corto hacia cada bloque, en estilo neutro y sin resaltado de rama activa. El trazo se reforzó después (2px, `#a3a3a3`) y, tras el feedback «commands y operations tapan la línea, debe verse como sube hasta el icono», la guía de los hijos sube por delante del bloque padre hasta su asa.
 - **Estado:** 33 suites / 430 tests en verde, `npm run build` exit 0, verificación funcional con captura headless, medición de píxeles y drags sintéticos sin errores de consola.
 
+## 0. Actualización para PrimeNG 21 (2026-11-05)
+
+El rediseño de contenido (`ADR-004`) mantiene el árbol de bloques, pero la app
+usa PrimeNG 21 y el árbol ya no tiene referencias de bloque. Las medidas de las
+secciones siguientes son históricas; el contrato vigente es:
+
+- `.p-tree-node-children` usa `padding-left: 14px` y el content del hijo añade
+  `7px`; la guía se pinta por cada `p-treenode` en `left: -2px`, no como una
+  línea completa de la `ul`.
+- El primer hijo empieza en `top: -2px`; los hijos intermedios solapan 2px con
+  el siguiente.
+- El último hijo remata en **L**: su tramo vertical se corta en la cabecera y
+  el header pinta el resto hasta el centro. No queda línea por debajo.
+- El ramal del bloque padre usa `left: 13px` en nodos anidados y `left: -1px`
+  en raíces de contenedor; el `.block-body` usa `left: -1px`.
+- Las referencias de contenido no son nodos del árbol: son chips de la
+  cabecera y selectores del cuerpo. No hay conector de referencias.
+
+Verificado con Chrome headless a 1440×1000 sobre un bloque con hijos y un
+último hijo con contenido.
+
 ## 1. DOM real de PrimeNG 13.3.3
 
 El árbol es un `p-tree` (`block.component.html`) con un `p-treenode` por bloque. Para el modo no virtual, la estructura real es:

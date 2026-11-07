@@ -79,7 +79,7 @@ The default output is the input file with a `.mid` extension. `--json` writes th
 - One track per part; the first track carries the tempo and time signature.
 - Piano as the General MIDI instrument (program 0).
 - 960 ticks per quarter note by default (`--ppq` changes it).
-- The same musical semantics as the app: parts, reusable `use` references, repeats, commands, operations, `PATTERN`, chords and arpeggios.
+- The same musical semantics as the app: parts, structural blocks, `melodies`/`presets`/`procedures` content libraries, repeats, settings, operations, `PATTERN`, chords and arpeggios.
 
 MIDI is not audio: open the file in a DAW, VLC, MuseScore or render it with a synthesizer such as FluidSynth.
 
@@ -87,7 +87,7 @@ MIDI is not audio: open the file in a DAW, VLC, MuseScore or render it with a sy
 
 - No WAV/MP3 export yet.
 - Fixed velocity (90), 4/4 time signature and piano program in this first version.
-- The v1 language limitations are inherited (for example, string variables used as a single note are not expanded).
+- The current `.mr` language limitations are inherited (for example, string variables used as a single note are not expanded).
 - Notes outside the MIDI range 0–127 are transposed by octaves and reported as warnings.
 
 The internal design and current limitations are documented in [`docs/developer/analysis/compilador-midi-mvp.md`](../developer/analysis/compilador-midi-mvp.md).

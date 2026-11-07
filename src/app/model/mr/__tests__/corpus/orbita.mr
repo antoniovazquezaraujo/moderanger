@@ -1,5 +1,5 @@
 song "Órbita"
-version 1
+version 2
 repeats 3
 
 vars
@@ -8,25 +8,42 @@ vars
   $scale = WHITE
   $motif = "4t:0 4t:2 4t:-1"
 
-part Piano
-  block "Hélice" repeats 4
+melodies
+  melody "Hélice"
     notes
       4n:0
       4n:2
       4n:4
-    commands
-      OCT $oct
-      SCALE $scale
-      PLAYMODE SINGLE
-      PATTERN 4t:0 4t:2 4t:-1
-      PATTERN_GAP 1
-    operations
-      VARY $oct 1
+
+  melody Eco
+    notes $motif
+
+presets
+  preset HeliceAjustes
+    OCT $oct
+    SCALE $scale
+    PLAYMODE SINGLE
+    PATTERN 4t:0 4t:2 4t:-1
+    PATTERN_GAP 1
+
+  preset EcoAjustes
+    OCT 1
+
+procedures
+  procedure SubeOctava
+    VARY $oct 1
+
+  procedure CambiaModo
+    ASSIGN $mode RANDOM
+    ASSIGN $scale BLACK
+
+part Piano
+  block "Hélice" repeats 4
+    preset HeliceAjustes
+    procedure SubeOctava
+    melody "Hélice"
 
     block Eco
-      notes $motif
-      commands
-        OCT 1
-      operations
-        ASSIGN $mode RANDOM
-        ASSIGN $scale BLACK
+      preset EcoAjustes
+      procedure CambiaModo
+      melody Eco

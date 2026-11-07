@@ -17,11 +17,11 @@ export interface ExampleSong {
  */
 export const EXAMPLE_SONGS: readonly ExampleSong[] = [
     {
-        id: 'first-light',
-        title: 'First Light',
-        description: 'A gentle two-part miniature: a singing theme over a reusable bassline.',
-        tags: ['Starter', 'Arpeggios', 'Reusable block'],
-        bpm: 96,
+        id: 'vodka',
+        title: 'Vodka',
+        description: 'A nine-cycle, three-part study built from A/B/C/D melodies and eleven shifting presets.',
+        tags: ['Nine cycles', 'Three parts', 'Odd/even'],
+        bpm: 120,
         mr: DEMO_SONG_MR
     },
     {
@@ -31,80 +31,96 @@ export const EXAMPLE_SONGS: readonly ExampleSong[] = [
         tags: ['Canon', '11 cycles', 'Odd/even'],
         bpm: 120,
         mr: `song Karmel
-version 1
+version 2
 repeats 11
 
-blocks
-  block A
+melodies
+  melody A
     notes
       4n:1
       4n:-2
       4n:4
-    commands
-      PLAYMODE ODD_ASC_EVEN_DESC
-      WIDTH 3
-      SCALE PENTA
-      GAP 9
-      OCT 0
 
-  block B
+  melody B
     notes
       4n:1
       4n:-2
       4n:4
-    commands
-      PLAYMODE ODD_ASC_EVEN_DESC
-      WIDTH 3
-      SCALE WHITE
-      GAP 6
-      OCT 3
 
-  block C
+  melody C
     notes
       4n:1
       4n:-2
       4n:4
-    commands
-      PLAYMODE EVEN_ASC_ODD_DESC
-      WIDTH 4
-      SCALE BLUE
-      GAP 3
-      OCT 2
 
-part
-  block
+presets
+  preset AjustesA
+    PLAYMODE ODD_ASC_EVEN_DESC
+    WIDTH 3
+    SCALE PENTA
+    GAP 9
+    OCT 0
 
-  use A repeats 2
+  preset AjustesB
+    PLAYMODE ODD_ASC_EVEN_DESC
+    WIDTH 3
+    SCALE WHITE
+    GAP 6
+    OCT 3
 
-  use B repeats 2
+  preset AjustesC
+    PLAYMODE EVEN_ASC_ODD_DESC
+    WIDTH 4
+    SCALE BLUE
+    GAP 3
+    OCT 2
 
-  use A repeats 4
-    commands
-      KEY 6
-      SCALE BLUE
+  preset AjustesAKey
+    KEY 6
+    SCALE BLUE
 
-  use C repeats 2
+  preset AjustesBOctDown
+    OCT -1
 
-part
-  block
+  preset AjustesAOctDown
+    OCT -1
 
-  use A repeats 2
-    commands
-      OCT -1
+  preset AjustesCOctDown
+    OCT -1
 
-  use B repeats 2
-    commands
-      OCT -1
+part Piano
+  block A repeats 2
+    preset AjustesA
+    melody A
 
-  use A repeats 4
-    commands
-      KEY 6
-      SCALE BLUE
-      OCT -1
+  block B repeats 2
+    preset AjustesB
+    melody B
 
-  use C repeats 2
-    commands
-      OCT -1
+  block AKey repeats 4
+    preset AjustesAKey
+    melody A
+
+  block C repeats 2
+    preset AjustesC
+    melody C
+
+part Bajo
+  block A repeats 2
+    preset AjustesAOctDown
+    melody A
+
+  block B repeats 2
+    preset AjustesBOctDown
+    melody B
+
+  block AKey repeats 4
+    preset AjustesAKey
+    melody A
+
+  block C repeats 2
+    preset AjustesCOctDown
+    melody C
 `
     },
     {
@@ -114,153 +130,133 @@ part
         tags: ['Chords', 'Decoration', 'Two parts'],
         bpm: 120,
         mr: `song Dodecaedro
-version 1
+version 2
 
-blocks
-  block A
+melodies
+  melody A
     notes
       1n:1
       1n:2
       1n:-3
 
-  block B
+  melody B
     notes
       1n:2
       1n:3
       1n:4
 
-  block C
+  melody C
     notes
       1n:7
       1n:0
       1n:6
 
-part
-  block
+presets
+  preset ChordA
+    PLAYMODE CHORD
+    WIDTH 3
+    DECORATION 4n:3 8t:2
+    INV 1
 
-  use A
-    commands
-      PLAYMODE CHORD
-      WIDTH 3
-      DECORATION 4n:3 8t:2
-      INV 1
+  preset ChordAHigh
+    PLAYMODE CHORD
+    WIDTH 3
+    DECORATION 4n:3 4n:2
+    INV 1
+    OCT 2
+    GAP 6
 
-  use A
-    commands
-      PLAYMODE CHORD
-      WIDTH 3
-      DECORATION 4n:3 4n:2
-      INV 1
-      OCT 2
-      GAP 6
+  preset ArpeggioA
+    PLAYMODE ASCENDING
+    WIDTH 3
+    DECORATION 4n:4 4n:2
+    INV 1
+    OCT 2
+    GAP 7
 
-  use A
-    commands
-      PLAYMODE CHORD
-      WIDTH 1
-      DECORATION 4n:2 4n:1
-      INV 2
-      OCT 2
-      GAP 5
+  preset ArpeggioB
+    PLAYMODE ASCENDING
+    WIDTH 3
+    DECORATION 4n:3 4n:1
+    INV 1
+    OCT 2
+    GAP 7
 
-  use A
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 3
-      DECORATION 4n:4 4n:2
-      INV 1
-      OCT 2
-      GAP 7
+  preset ArpeggioBWide
+    PLAYMODE ASCENDING
+    WIDTH 5
+    DECORATION 4n:2 4n:0
+    INV 2
+    OCT 0
+    GAP 7
 
-  use B
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 3
-      DECORATION 4n:3 4n:1
-      INV 1
-      OCT 2
-      GAP 7
+  preset ArpeggioC
+    PLAYMODE ASCENDING
+    WIDTH 2
+    DECORATION 2n:2 1n:0
+    INV 3
+    OCT 1
+    GAP 2
 
-  use B
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 5
-      DECORATION 4n:2 4n:0
-      INV 2
-      OCT 0
-      GAP 7
+  preset ArpeggioALow
+    PLAYMODE ASCENDING
+    WIDTH 1
+    INV 3
+    OCT -1
 
-  use C
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 2
-      DECORATION 2n:2 1n:0
-      INV 3
-      OCT 1
-      GAP 2
+  preset ArpeggioBLow
+    PLAYMODE ASCENDING
+    WIDTH 1
+    INV 1
+    OCT -1
+    GAP 1
 
-  block
+  preset ArpeggioCLow
+    PLAYMODE ASC_DESC
+    WIDTH 2
+    INV 0
+    OCT 0
+    GAP 4
 
-part
-  block
+part Piano
+  block A
+    preset ChordA
+    melody A
 
-  use A
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 1
-      INV 3
-      OCT -1
+  block AHigh
+    preset ChordAHigh
+    melody A
 
-  use A
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 1
-      INV 1
-      OCT -1
-      GAP 1
+  block ArpeggioA
+    preset ArpeggioA
+    melody A
 
-  use A
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 1
-      INV 1
-      OCT -1
-      GAP 1
+  block ArpeggioB
+    preset ArpeggioB
+    melody B
 
-  use A
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 1
-      INV 1
-      OCT -1
-      GAP 1
+  block ArpeggioBWide
+    preset ArpeggioBWide
+    melody B
 
-  use B
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 1
-      INV 1
-      OCT -1
-      GAP 1
+  block ArpeggioC
+    preset ArpeggioC
+    melody C
 
-  use B
-    commands
-      PLAYMODE ASCENDING
-      WIDTH 1
-      INV 1
-      OCT -1
-      GAP 1
+part Bajo
+  block ArpeggioALow
+    preset ArpeggioALow
+    melody A
 
-  use C
-    commands
-      PLAYMODE ASC_DESC
-      WIDTH 2
-      INV 0
-      OCT 0
-      GAP 4
+  block ArpeggioBLow
+    preset ArpeggioBLow
+    melody B
+
+  block ArpeggioCLow
+    preset ArpeggioCLow
+    melody C
 `
     },
-
     {
         id: 'itemaner',
         title: 'itemaneR',
@@ -268,7 +264,7 @@ part
         tags: ['Canon', '12 cycles', 'Decoration'],
         bpm: 120,
         mr: `song itemaneR
-version 1
+version 2
 repeats 12
 
 vars
@@ -276,82 +272,76 @@ vars
   $b = EVEN_ASC_ODD_DESC
   $x = "3 6 2"
 
-blocks
-  block "Block 1"
+melodies
+  melody "Block 1"
     notes
       1n:1
 
-part
-  block
+presets
+  preset AjustesV
+    DECORATION $v
+    PLAYMODE ASCENDING
+    WIDTH 4
+    OCT -1
+    GAP 3
+    SCALE PENTA
 
-  use "Block 1" repeats 2
-    commands
-      DECORATION $v
-      PLAYMODE ASCENDING
-      WIDTH 4
-      OCT -1
-      GAP 3
-      SCALE PENTA
+  preset AjustesVKey
+    DECORATION $v
+    PLAYMODE ASCENDING
+    WIDTH 4
+    OCT -1
+    GAP 3
+    SCALE PENTA
+    KEY 2
 
-  use "Block 1" repeats 2
-    commands
-      DECORATION $v
-      PLAYMODE ASCENDING
-      WIDTH 4
-      OCT -1
-      GAP 3
-      SCALE PENTA
-      KEY 2
+  preset AjustesX
+    DECORATION $x
+    PLAYMODE ODD_ASC_EVEN_ASC
+    WIDTH 4
+    OCT 3
+    GAP 4
+    SCALE BLACK
+    KEY 6
 
-  use "Block 1" repeats 2
-    commands
-      DECORATION $v
-      PLAYMODE ASCENDING
-      WIDTH 4
-      OCT -1
-      GAP 3
-      SCALE PENTA
-      KEY 2
+  preset AjustesXModo
+    DECORATION $x
+    PLAYMODE $b
+    WIDTH 4
+    OCT 2
+    GAP 4
+    SCALE BLACK
+    KEY 6
 
-  use "Block 1" repeats 2
-    commands
-      DECORATION $v
-      PLAYMODE ODD_ASC_EVEN_ASC
-      WIDTH 4
-      OCT 3
-      GAP 4
-      SCALE BLACK
-      KEY 6
+  preset AjustesXChord
+    DECORATION $x
+    PLAYMODE CHORD
+    WIDTH 5
+    OCT 1
+    GAP 4
+    SCALE PENTA
+    KEY 4
 
-  use "Block 1" repeats 2
-    commands
-      DECORATION $x
-      PLAYMODE ODD_ASC_EVEN_ASC
-      WIDTH 4
-      OCT 2
-      GAP 4
-      SCALE BLACK
-      KEY 6
+part Piano
+  block "Block 1" repeats 2
+    preset AjustesV
+    melody "Block 1"
 
-  use "Block 1" repeats 2
-    commands
-      DECORATION $x
-      PLAYMODE ODD_DESC_EVEN_ASC
-      WIDTH 4
-      OCT -1
-      GAP 7
-      SCALE BLACK
-      KEY 6
+  block "Block 1 alto" repeats 2
+    preset AjustesVKey
+    melody "Block 1"
 
-  use "Block 1" repeats 4
-    commands
-      DECORATION $x
-      PLAYMODE CHORD
-      WIDTH 5
-      OCT 1
-      GAP 4
-      SCALE PENTA
-      KEY 4
+  block "Block 1 medio" repeats 2
+    preset AjustesX
+    melody "Block 1"
+
+  block "Block 1 bajo" repeats 2
+    preset AjustesXModo
+    melody "Block 1"
+
+  block "Block 1 cierre" repeats 4
+    preset AjustesXChord
+    melody "Block 1"
 `
     },
     {
@@ -361,7 +351,7 @@ part
         tags: ['Pattern', 'Variables', 'Operations'],
         bpm: 108,
         mr: `song "Glass Orbit"
-version 1
+version 2
 repeats 2
 bpm 108
 
@@ -370,26 +360,33 @@ vars
   $mode = ASCENDING
   $scale = BLUE
 
-blocks
-  block Orbit
+melodies
+  melody Orbit
     notes
       8n:0
       8n:2
       8n:4
       8n:6
-    commands
-      OCT $oct
-      SCALE $scale
-      PLAYMODE $mode
-      WIDTH 2
-      GAP 3
-      PATTERN 4t:0 4t:-1 4t:2 4t:-2
-    operations
-      VARY $oct 1
-      ASSIGN $mode EVEN_ASC_ODD_DESC
+
+presets
+  preset OrbitAjustes
+    OCT $oct
+    SCALE $scale
+    PLAYMODE $mode
+    WIDTH 2
+    GAP 3
+    PATTERN 4t:0 4t:-1 4t:2 4t:-2
+
+procedures
+  procedure OrbitProcedimiento
+    VARY $oct 1
+    ASSIGN $mode EVEN_ASC_ODD_DESC
 
 part Glass
-  use Orbit repeats 2
+  block Orbit repeats 2
+    preset OrbitAjustes
+    procedure OrbitProcedimiento
+    melody Orbit
 `
     },
     {
@@ -399,114 +396,163 @@ part Glass
         tags: ['Blues', '9 cycles', 'Odd/even'],
         bpm: 120,
         mr: `song "OCR Blues"
-version 1
+version 2
 repeats 9
 
-blocks
-  block A repeats 2
+melodies
+  melody A
     notes
       4n:1
       4n:-2
       4n:2
       4n:0
-    commands
-      PLAYMODE EVEN_ASC_ODD_ASC
-      WIDTH 3
-      GAP 3
 
-  block B repeats 2
+  melody B
     notes
       4n:2
       4n:0
       4n:5
       4n:-2
-    commands
-      PLAYMODE EVEN_ASC_ODD_ASC
-      WIDTH 3
-      GAP 4
 
-  block C repeats 2
+  melody C
     notes
       4n:2
       4n:0
       4n:5
       4n:-2
-    commands
-      PLAYMODE EVEN_ASC_ODD_ASC
-      WIDTH 3
-      GAP 4
-      KEY 2
-      SCALE BLUE
 
-  block D repeats 4
+  melody D
     notes
       4n:2
       4n:0
       4n:5
       4n:-2
-    commands
-      PLAYMODE EVEN_ASC_ODD_ASC
-      WIDTH 3
-      GAP 4
-      KEY 4
-      SCALE BLUE
-      OCT 0
 
-part
-  block
+presets
+  preset AjustesAHigh
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 3
+    OCT 4
 
-  use A
-    commands
-      OCT 4
+  preset AjustesBHigh
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    OCT 4
 
-  use B
-    commands
-      OCT 4
+  preset AjustesCHigh
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    KEY 2
+    SCALE BLUE
+    OCT 4
 
-  use C
-    commands
-      OCT 4
+  preset AjustesDHigh
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    KEY 4
+    SCALE BLUE
+    OCT 2
 
-  use D
-    commands
-      OCT 2
+  preset AjustesAMid
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 3
+    OCT 0
 
-part
-  block
+  preset AjustesBMid
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    OCT 0
 
-  use A
-    commands
-      OCT 0
+  preset AjustesCMid
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    KEY 2
+    SCALE BLUE
+    OCT 0
 
-  use B
-    commands
-      OCT 0
+  preset AjustesALow
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 3
+    OCT -1
 
-  use C
-    commands
-      OCT 0
+  preset AjustesBLow
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    OCT -1
 
-part
-  block
+  preset AjustesCLow
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    KEY 2
+    SCALE BLUE
+    OCT -1
 
-  use A
-    commands
-      OCT -1
+  preset AjustesDLow
+    PLAYMODE EVEN_ASC_ODD_ASC
+    WIDTH 3
+    GAP 4
+    KEY 4
+    SCALE BLUE
+    OCT 4
 
-  use B
-    commands
-      OCT -1
+part Piano
+  block A
+    preset AjustesAHigh
+    melody A
 
-  use C
-    commands
-      OCT -1
+  block B
+    preset AjustesBHigh
+    melody B
 
-  use D
-    commands
-      OCT 4
+  block C
+    preset AjustesCHigh
+    melody C
+
+  block D
+    preset AjustesDHigh
+    melody D
+
+part Bajo
+  block A
+    preset AjustesAMid
+    melody A
+
+  block B
+    preset AjustesBMid
+    melody B
+
+  block C
+    preset AjustesCMid
+    melody C
+
+part Contrabajo
+  block A
+    preset AjustesALow
+    melody A
+
+  block B
+    preset AjustesBLow
+    melody B
+
+  block C
+    preset AjustesCLow
+    melody C
+
+  block D
+    preset AjustesDLow
+    melody D
 `
     },
-
     {
         id: 'clockwork',
         title: 'Clockwork',
@@ -514,12 +560,12 @@ part
         tags: ['Pattern', 'Single notes', 'Odd/even'],
         bpm: 120,
         mr: `song Clockwork
-version 1
+version 2
 repeats 2
 bpm 120
 
-part Piano
-  block Main
+melodies
+  melody Main
     notes default 16n
       0
       2
@@ -527,22 +573,34 @@ part Piano
       6
       4
       2
-    commands
-      SCALE PENTA
-      OCT 3
-      PLAYMODE SINGLE
-      PATTERN 8n:0 8n:2 8n:4 8n:2
 
-  block Echo
+  melody Echo
     notes
       4n:0
       4n:2
-    commands
-      SCALE BLUE
-      OCT 2
-      PLAYMODE ODD_ASC_EVEN_DESC
-      WIDTH 4
-      GAP 2
+
+presets
+  preset MainAjustes
+    SCALE PENTA
+    OCT 3
+    PLAYMODE SINGLE
+    PATTERN 8n:0 8n:2 8n:4 8n:2
+
+  preset EchoAjustes
+    SCALE BLUE
+    OCT 2
+    PLAYMODE ODD_ASC_EVEN_DESC
+    WIDTH 4
+    GAP 2
+
+part Piano
+  block Main
+    preset MainAjustes
+    melody Main
+
+  block Echo
+    preset EchoAjustes
+    melody Echo
 `
     },
     {
@@ -552,40 +610,52 @@ part Piano
         tags: ['Chord', 'Decoration', 'Inversion'],
         bpm: 72,
         mr: `song Nocturne
-version 1
+version 2
 repeats 2
 bpm 72
 
-part Piano
-  block Night
+melodies
+  melody Night
     notes
       2n:0
       2n:-3
       2n:2
       2n:-5
-    commands
-      SCALE BLACK
-      OCT 2
-      PLAYMODE CHORD
-      WIDTH 3
-      GAP 2
-      INV 1
-      SHIFTSTART 1
-      SHIFTSIZE 2
-      SHIFTVALUE 1
-      DECORATION 4t:0 8t:-2
 
-  block Glass
+  melody Glass
     notes
       4n:2
       4n:4
-    commands
-      SCALE BLUE
-      OCT 3
-      PLAYMODE EVEN_ASC_ODD_DESC
-      WIDTH 4
-      GAP 3
-      DECORATION 0 4
+
+presets
+  preset NightAjustes
+    SCALE BLACK
+    OCT 2
+    PLAYMODE CHORD
+    WIDTH 3
+    GAP 2
+    INV 1
+    SHIFTSTART 1
+    SHIFTSIZE 2
+    SHIFTVALUE 1
+    DECORATION 4t:0 8t:-2
+
+  preset GlassAjustes
+    SCALE BLUE
+    OCT 3
+    PLAYMODE EVEN_ASC_ODD_DESC
+    WIDTH 4
+    GAP 3
+    DECORATION 4t:0 4t:4
+
+part Piano
+  block Night
+    preset NightAjustes
+    melody Night
+
+  block Glass
+    preset GlassAjustes
+    melody Glass
 `
     },
     {
@@ -595,7 +665,7 @@ part Piano
         tags: ['Variables', 'Scale shift', 'Key'],
         bpm: 92,
         mr: `song Aurora
-version 1
+version 2
 repeats 1
 bpm 92
 
@@ -604,32 +674,47 @@ vars
   $scale = BLUE
   $oct = 2
 
-blocks
-  block Rise
+melodies
+  melody Rise
     notes
       8n:0
       8n:2
       8n:4
       8n:6
-    commands
-      OCT $oct
-      SCALE $scale
-      PLAYMODE $mode
-      WIDTH 3
-      GAP 2
-    operations
-      VARY $oct 1
-      ASSIGN $mode RANDOM
-      ASSIGN $scale PENTA
+
+presets
+  preset RiseAjustes
+    OCT $oct
+    SCALE $scale
+    PLAYMODE $mode
+    WIDTH 3
+    GAP 2
+
+  preset RiseGlassAjustes
+    OCT 3
+    SCALE $scale
+    PLAYMODE $mode
+    WIDTH 3
+    GAP 2
+    KEY 7
+
+procedures
+  procedure RiseProcedimiento
+    VARY $oct 1
+    ASSIGN $mode RANDOM
+    ASSIGN $scale PENTA
 
 part Aurora
-  use Rise repeats 2
+  block Rise repeats 2
+    preset RiseAjustes
+    procedure RiseProcedimiento
+    melody Rise
 
 part Glass
-  use Rise repeats 2
-    commands
-      KEY 7
-      OCT 3
+  block Rise repeats 2
+    preset RiseGlassAjustes
+    procedure RiseProcedimiento
+    melody Rise
 `
     },
     {
@@ -639,25 +724,32 @@ part Glass
         tags: ['Pattern', 'Decoration', 'Arpeggio'],
         bpm: 100,
         mr: `song Rainfall
-version 1
+version 2
 repeats 2
 bpm 100
 
-part Piano
-  block Rain
+melodies
+  melody Rain
     notes
       8n:0
       8n:2
       8n:-2
       8n:4
-    commands
-      SCALE WHITE
-      OCT 3
-      PLAYMODE EVEN_ASC_ODD_DESC
-      WIDTH 2
-      GAP 3
-      PATTERN 4t:0 4t:-1
-      DECORATION 16n:0 16n:2 16n:-2
+
+presets
+  preset RainAjustes
+    SCALE WHITE
+    OCT 3
+    PLAYMODE EVEN_ASC_ODD_DESC
+    WIDTH 2
+    GAP 3
+    PATTERN 4t:0 4t:-1
+    DECORATION 16n:0 16n:2 16n:-2
+
+part Piano
+  block Rain
+    preset RainAjustes
+    melody Rain
 `
     },
     {
@@ -667,37 +759,169 @@ part Piano
         tags: ['ASC/DESC', 'Inversion', 'Nested block'],
         bpm: 110,
         mr: `song Meridian
-version 1
+version 2
 repeats 2
 bpm 110
 
-part Piano
-  block Line
+melodies
+  melody Line
     notes
       4n:0
       4n:2
       4n:4
       4n:2
-    commands
-      SCALE TONES
-      OCT 2
-      PLAYMODE ASC_DESC
-      WIDTH 4
-      GAP 2
-      INV 2
+
+  melody Answer
+    notes
+      8n:4
+      8n:2
+      8n:0
+      8n:-2
+
+presets
+  preset LineAjustes
+    SCALE TONES
+    OCT 2
+    PLAYMODE ASC_DESC
+    WIDTH 4
+    GAP 2
+    INV 2
+
+  preset AnswerAjustes
+    PLAYMODE DESC_ASC
+    OCT 3
+
+part Piano
+  block Line
+    preset LineAjustes
+    melody Line
 
     block Answer
-      notes
-        8n:4
-        8n:2
-        8n:0
-        8n:-2
-      commands
-        PLAYMODE DESC_ASC
-        OCT 3
+      preset AnswerAjustes
+      melody Answer
 `
     },
+    {
+        id: 'chinese-shoes',
+        title: 'Chinese shoes',
+        description: 'A seven-cycle nested-block study with three melodies, shifting octaves and odd/even arpeggios.',
+        tags: ['Nested blocks', 'Odd/even', 'Seven cycles'],
+        bpm: 120,
+        mr: `song "Chinese shoes"
+version 2
+repeats 7
 
+melodies
+  melody A
+    notes default 1n
+      1
+      6
+      -3
+      4
+      4n:1
+      0
+      4n:2
+      4n:5
+
+  melody B
+    notes
+      4n:1
+      4n:6
+      4n:-3
+      4n:4
+
+  melody C
+    notes
+      4n:2
+      4n:7
+      4n:-2
+      4n:5
+
+presets
+  preset A
+    OCT 0
+    PLAYMODE ASCENDING
+    WIDTH 3
+    INV 1
+    KEY 0
+    SCALE WHITE
+    GAP 1
+
+  preset B
+    OCT 3
+    PLAYMODE EVEN_DESC_ODD_DESC
+    WIDTH 3
+    GAP 1
+    KEY 0
+    INV 0
+
+  preset C
+    OCT 2
+    PLAYMODE EVEN_DESC_ODD_DESC
+    WIDTH 5
+    KEY 0
+    SCALE PENTA
+    GAP 3
+
+  preset D
+    OCT 1
+    PLAYMODE EVEN_DESC_ODD_DESC
+    WIDTH 5
+    KEY 3
+    SCALE PENTA
+    GAP 2
+
+part
+  block repeats 2
+    preset A
+    melody A
+
+    block
+      preset B
+      melody A
+
+      block repeats 2
+        preset C
+        melody B
+
+        block repeats 2
+          preset A
+          melody B
+
+          block
+            preset D
+            melody C
+
+      block
+        preset A
+        melody C
+
+part
+  block repeats 2
+    preset B
+    melody A
+
+    block
+      preset A
+      melody A
+
+      block repeats 2
+        preset A
+        melody B
+
+        block repeats 2
+          preset B
+          melody B
+
+          block
+            preset D
+            melody C
+
+      block
+        preset B
+        melody C
+`
+    }
 ];
 
 export function createExampleSong(example: ExampleSong): Song {

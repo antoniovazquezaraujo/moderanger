@@ -1,37 +1,58 @@
 song Estructura
-version 1
+version 2
 
 vars
   $texto = "línea 1"
   $con_comillas = "dice \"hola\""
   $motivo = "4n:0 4n:-2"
 
-part
-  block "repeats"
+melodies
+  melody "repeats"
     notes default 8n
       0
       2
       s
 
-    block "Hijo directo"
-      notes
-        4n:5
+  melody "Hijo directo"
+    notes
+      4n:5
 
-  block Salta repeats 0
+  melody Salta
     notes
       4t:1
 
-  block "Con instrumento"
+  melody "Con instrumento"
     notes
       4t:2
 
+  melody Padre
+    notes
+      4n:0
+
+presets
+  preset Inversion
+    INV 1
+
+part
+  block "repeats"
+    melody "repeats"
+
+    block "Hijo directo"
+      melody "Hijo directo"
+
+  block Salta repeats 0
+    melody Salta
+
+  block "Con instrumento"
+    melody "Con instrumento"
+
 part Cuerpo
   block
-    commands
-      INV 1
+    preset Inversion
 
 part Anidado
   block Padre
+    melody Padre
+
     block Hijo
-      notes
-        4n:0
+      melody Padre

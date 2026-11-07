@@ -1,0 +1,12 @@
+<div class="scale-preview" role="img" [attr.aria-label]="ariaLabel">
+  <div class="scale-preview-title">{{ scaleName }}</div>
+  <div class="scale-preview-grid">
+    @for (row of cells; track $index) {
+      @for (cell of row; track $index) {
+        <span class="scale-cell" [class.scale-cell--empty]="cell === null" aria-hidden="true">
+          {{ cell ?? '' }}
+        </span>
+      }
+    }
+  </div>
+</div>

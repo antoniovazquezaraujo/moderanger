@@ -4,6 +4,7 @@ import { VariableContext } from 'src/app/model/variable.context';
 import { Song } from 'src/app/model/song';
 import { clampBoundary, KEYBOARD_RESIZE_STEP, MIN_PART_WIDTH } from './parts-layout';
 import { PartComponent } from '../part/part.component';
+import type { ContentEditRequest } from '../block-content-links/block-content-links.component';
 
 /** Distancia al borde del contenedor que activa el auto-scroll durante el arrastre. */
 const AUTO_SCROLL_EDGE = 48;
@@ -22,8 +23,8 @@ export class PartsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() song!: Song;
     @Output() onRemovePart: EventEmitter<Part>;
     @Output() onDuplicatePart: EventEmitter<Part>;
-    /** Navegación a una definición de la biblioteca (burbujea desde las parts). */
-    @Output() editDefinitionEvent = new EventEmitter<string>();
+    /** Navegación a una definición de contenido (burbujea desde las parts). */
+    @Output() contentEditEvent = new EventEmitter<ContentEditRequest>();
 
     /** Ancho mínimo por part; debe coincidir con el `min-width` del CSS. */
     readonly minPartWidth = MIN_PART_WIDTH;

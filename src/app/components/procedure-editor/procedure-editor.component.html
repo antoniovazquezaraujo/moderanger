@@ -1,0 +1,81 @@
+<div class="block-container">
+  <div class="operations-row">
+    <span class="block-section-icon" pTooltip="Operations" tooltipPosition="top" aria-label="Operations" role="img">&#8794;</span>
+    <div class="container-wrapper operations-container">
+      @for (operation of operations; track operation; let i = $index) {
+        <div class="operation-item">
+          <select class="command-type" [(ngModel)]="operation.type" (ngModelChange)="onOperationTypeChange()">
+            @for (type of operationTypeNames; track type) {
+              <option [value]="type">{{typeLabel(type)}}</option>
+            }
+          </select>
+          @if (showOperationColon(operation)) {
+            <span class="command-label-sep" aria-hidden="true">:</span>
+          }
+          <select class="command-type"
+            [(ngModel)]="operation.variableName"
+            (ngModelChange)="onVariableSelected($event)"
+            [attr.data-operation-variable]="operation.variableName">
+            <option value="" disabled>Select variable</option>
+            @for (variable of availableVariables; track trackByVariable($index, variable)) {
+              <option [value]="variable.value">{{variable.label}}</option>
+            }
+          </select>
+          @if (operation.type === 'ASSIGN') {
+            @if (isVariableOfType(operation.variableName, 'scale')) {
+              <select class="command-type"
+                [(ngModel)]="operation.value"
+                (ngModelChange)="onOperationValueChange(operation, $event)">
+                @for (scale of scaleNames; track scale) {
+                  <option [value]="scale">{{scale}}</option>
+                }
+              </select>
+            }
+            @if (isVariableOfType(operation.variableName, 'playmode')) {
+              <select class="command-type playmode-select"
+                [(ngModel)]="operation.value"
+                (ngModelChange)="onOperationValueChange(operation, $event)"
+                [pTooltip]="operationPlayModeDescription(operation.value)"
+                [title]="operationPlayModeDescription(operation.value)"
+                tooltipPosition="top"
+                [attr.aria-label]="'Play mode: ' + operationPlayModeDescription(operation.value)">
+                @for (mode of playModeOptions; track mode) {
+                  <option [value]="mode.value" [title]="mode.description">{{ mode.symbol }}</option>
+                }
+              </select>
+            }
+            @if (isVariableOfType(operation.variableName, 'number')) {
+              <input type="number"
+                class="command-value number-input"
+                [(ngModel)]="operation.value"
+                (ngModelChange)="onOperationValueChange(operation, $event)"
+                min="-999"
+                max="999"
+                step="1">
+            }
+          }
+          @if (operation.type === 'VARY') {
+            <input type="number"
+              class="command-value number-input"
+              [(ngModel)]="operation.value"
+              (ngModelChange)="onOperationValueChange(operation, $event)"
+              placeholder="Step"
+              step="1">
+          }
+          <div class="command-controls">
+            <p-button icon="pi pi-times" (click)="removeOperation(i)"></p-button>
+          </div>
+        </div>
+      }
+      <div class="add-wrapper">
+        <p-button
+          class="add-button"
+          icon="pi pi-plus"
+          pTooltip="Add operation"
+          (click)="addOperation()"
+          tooltipPosition="top">
+        </p-button>
+      </div>
+    </div>
+  </div>
+</div>
